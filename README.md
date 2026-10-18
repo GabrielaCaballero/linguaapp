@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lingua
 
-## Getting Started
-
-First, run the development server:
+A personal, phone-first web app for Italian and German, 15 minutes per language per day.
+**Prototype**: everything is stored on the device; there's no backend yet.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it learns (Dehaene's four pillars + Nation's four strands)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Attention**: one task per screen, short sessions, a gentle nudge at 15 minutes. No hearts, no streaks.
+- **Active engagement**: you answer before you see anything. New items start with a **guess first** pretest
+  (Spanish → Italian, English → German), then come back a few cards later as real recall.
+- **Error feedback**: immediate and neutral, always shows the correct form. Misses come back in the same
+  session and again ~10 minutes later. No penalties.
+- **Consolidation**: SM-2-style spaced repetition (`src/lib/srs.ts`). "Tomorrow" means 4am, after sleep.
+  Reviews are interleaved. A "review after sleep" card appears the next day, and a 45-second speed round builds fluency.
+- **Confidence**: each answer is submitted with Guessing / Think so / Sure. Progress shows accuracy at each
+  confidence level, which exposes the fluency illusion.
+- **Four strands**: each task is tagged input / output / language focus / fluency, and the week's balance is shown.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Layout
 
-## Learn More
+| Path | What |
+| --- | --- |
+| `src/content/it.ts`, `de.ts` | Course content (Italian M0 + M1 starter slice, German A1 starter) |
+| `src/lib/session.ts` | Builds today's queue: due reviews + new items, interleaved |
+| `src/lib/srs.ts` | Scheduler |
+| `src/lib/check.ts` | Answer checking (tolerates accents, typos, missing article: "almost") |
+| `src/lib/store.ts` | On-device storage (localStorage) + backup import |
+| `src/app/*` | Screens: Today, Session, Progress, Milestones, More, Add from class, Ties to Italy |
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Screenshots from the prototype review are in `docs/screenshots/`.
