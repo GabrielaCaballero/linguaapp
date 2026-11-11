@@ -1,25 +1,46 @@
 "use client";
 
-import type { Lang } from "./types";
+// Text-to-speech via the Web Speech API. Audio is a bonus: every call is guarded, and
+// exercises that need audio are skipped when the device has no voice for the language.
+import type { TargetLang } from "@/content/schema";
+import { LOCALE } from "./content";
 
-const LOCALE: Record<Lang, string> = { it: "it-IT", de: "de-DE" };
+function voicesFor(locale: string): SpeechSynthesisVoice[] {
+  try {
+    const all = window.speechSynthesis.getVoices();
+    const exact = all.filter((v) => v.lang.replace("_", "-").toLowerCase() === locale.toLowerCase());
+    return exact.length ? exact : all.filter((v) => v.lang.toLowerCase().startsWith(locale.slice(0, 2)));
+  } catch {
+    return [];
+  }
+}
 
 function pickVoice(locale: string): SpeechSynthesisVoice | undefined {
-  const voices = window.speechSynthesis.getVoices();
-  const exact = voices.filter((v) => v.lang.replace("_", "-") === locale);
-  // Prefer higher-quality voices when the OS offers them.
-  return (
-    exact.find((v) => /premium|enhanced|natural|google/i.test(v.name)) ??
-    exact[0] ??
-    voices.find((v) => v.lang.startsWith(locale.slice(0, 2)))
-  );
+  const v = voicesFor(locale);
+  return v.find((x) => /premium|enhanced|natural|google/i.test(x.name)) ?? v[0];
 }
 
 export function canSpeak(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-export function speak(text: string, lang: Lang, rate = 0.9) {
+/** True when the device has a voice for this language (voices load async on some browsers). */
+export function hasVoice(lang: TargetLang): boolean {
+  return canSpeak() && voicesFor(LOCALE[lang]).length > 0;
+}
+
+/** Resolve once voices are loaded (or after a short timeout). */
+export function voicesReady(timeout = 1200): Promise<void> {
+  if (!canSpeak()) return Promise.resolve();
+  if (window.speechSynthesis.getVoices().length) return Promise.resolve();
+  return new Promise((res) => {
+    const done = () => res();
+    window.speechSynthesis.addEventListener?.("voiceschanged", done, { once: true });
+    setTimeout(done, timeout);
+  });
+}
+
+export function speak(text: string, lang: TargetLang, slow = false) {
   if (!canSpeak()) return;
   try {
     const synth = window.speechSynthesis;
@@ -28,30 +49,9 @@ export function speak(text: string, lang: Lang, rate = 0.9) {
     u.lang = LOCALE[lang];
     const v = pickVoice(u.lang);
     if (v) u.voice = v;
-    u.rate = rate;
+    u.rate = slow ? 0.7 : 0.92;
     synth.speak(u);
   } catch {
-    /* audio is a bonus; never break the session over it */
+    /* never break a lesson over audio */
   }
-}
-
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  onresult: (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void;
-  onerror: () => void;
-  onend: () => void;
-  start: () => void;
-};
-
-/** Optional speech recognition (works in Chrome/Android; unreliable on iOS). */
-export function getRecognizer(lang: Lang): Recognition | null {
-  if (typeof window === "undefined") return null;
-  const W = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
-  const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
-  if (!Ctor) return null;
-  const r = new Ctor();
-  r.lang = LOCALE[lang];
-  r.interimResults = false;
-  return r;
 }

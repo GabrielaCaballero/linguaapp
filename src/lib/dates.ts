@@ -5,8 +5,8 @@ export function toISO(d: Date): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-export function todayISO(): string {
-  return toISO(new Date());
+export function todayISO(now = Date.now()): string {
+  return toISO(new Date(now));
 }
 
 export function fromISO(s: string): Date {
@@ -32,14 +32,22 @@ export function startOfDay(t: number): number {
   return d.getTime();
 }
 
+/** Monday 00:00 of the week containing t. */
+export function startOfWeek(t: number): number {
+  const d = new Date(startOfDay(t));
+  const dow = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dow);
+  return d.getTime();
+}
+
 export function daysBetween(a: Date, b: Date): number {
   return Math.round((startOfDay(b.getTime()) - startOfDay(a.getTime())) / DAY);
 }
 
-export function fmtDate(d: Date, locale = "en-GB"): string {
+export function fmtDate(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function fmtMonth(d: Date, locale = "en-GB"): string {
-  return d.toLocaleDateString(locale, { month: "short", year: "numeric" });
+export function fmtMonth(d: Date, locale: string): string {
+  return d.toLocaleDateString(locale, { month: "long", year: "numeric" });
 }

@@ -1,163 +1,261 @@
-import type { CardState, DB, Item, Lang, Mode, Strand } from "./types";
-import { itemsFor } from "@/content";
+// Session builder + difficulty controller. Spec §4.3.
+// A session is a ~5-minute chunk (≈22 tasks): due reviews (oldest first, ≤15 per chunk, ≤40/day),
+// new items in unit order (guess first, then recalled 3–6 tasks later), interleaved by type,
+// misses requeued once (cap 2). The controller keeps rolling accuracy in the 80–85% band.
+import type { Item, TargetLang } from "@/content/schema";
+import type { CardV2, DB, Mode, ReviewLog } from "./model";
 import { DAY, startOfDay } from "./dates";
+import { retrievability } from "./scheduler";
 
-export type Task = {
+export type Role = "review" | "intro" | "followup" | "requeue" | "practice" | "speed";
+export type SessionKind = "auto" | "review" | "new" | "speed";
+
+export interface Task {
   key: string;
   itemId: string;
-  mode: Mode;
-  strand: Strand;
-  /** false for "guess first" tasks: a pretest, never scored. */
+  role: Role;
   graded: boolean;
-  /** For choice modes: the question shown, options, and the right option. */
-  q?: string;
-  choices?: string[];
-  correctChoice?: string;
-  /** For tiles mode. */
-  tiles?: string[];
-};
+}
 
-export function shuffle<T>(a: T[]): T[] {
-  const x = [...a];
-  for (let i = x.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [x[i], x[j]] = [x[j], x[i]];
+export interface BuildInput {
+  lang: TargetLang;
+  items: Item[]; // visible items for this course, in path order (custom last)
+  cards: Record<string, CardV2>;
+  reviews: ReviewLog[];
+  lastSessionAt?: number;
+  startUnit: number; // 1-based
+  unitIndexOf: (item: Item) => number; // custom → 0
+  now: number;
+  minutes: number;
+  kind: SessionKind;
+  rand?: () => number;
+}
+
+export interface Built {
+  tasks: Task[];
+  welcomeBack: boolean;
+  reviewCount: number;
+  newCount: number;
+  shift: number;
+}
+
+export const MAX_REVIEWS_PER_CHUNK = 15;
+export const MAX_REVIEWS_PER_DAY = 40;
+export const BASE_NEW = 5;
+export const TASKS_PER_MIN = 4.4;
+export const REQUEUE_CAP = 2;
+export const AWAY_DAYS = 7;
+
+/** Rolling accuracy over the last 10 graded tasks for a language (null if fewer than 5). */
+export function rollingAccuracy(reviews: ReviewLog[], lang: TargetLang, n = 10): number | null {
+  const graded = reviews.filter((r) => r.lang === lang && r.mode !== "guess" && r.mode !== "speed").slice(-n);
+  if (graded.length < 5) return null;
+  return graded.filter((r) => r.verdict !== "wrong").length / graded.length;
+}
+
+/** +1 = harder (accuracy > 90%), −1 = easier (< 70%), 0 = in the band. */
+export function controllerShift(acc: number | null): number {
+  if (acc === null) return 0;
+  if (acc > 0.9) return 1;
+  if (acc < 0.7) return -1;
+  return 0;
+}
+
+export function newBudget(shift: number): number {
+  return Math.max(1, BASE_NEW + (shift > 0 ? 1 : shift < 0 ? -2 : 0));
+}
+
+export function buildSession(i: BuildInput): Built {
+  const rand = i.rand ?? Math.random;
+  const target = Math.max(8, Math.round(i.minutes * TASKS_PER_MIN));
+  const today = startOfDay(i.now);
+  const byId = new Map(i.items.map((x) => [x.id, x]));
+  const langCards = Object.values(i.cards).filter((c) => c.lang === i.lang && byId.has(c.id));
+  const welcomeBack = langCards.length > 0 && i.lastSessionAt !== undefined && i.now - i.lastSessionAt >= AWAY_DAYS * DAY;
+  const shift = welcomeBack ? -1 : controllerShift(rollingAccuracy(i.reviews, i.lang));
+
+  let k = 0;
+  const mk = (itemId: string, role: Role, graded = true): Task => ({ key: `${role}-${itemId}-${k++}`, itemId, role, graded });
+
+  if (i.kind === "speed") {
+    const learned = langCards.filter((c) => c.state !== 0 && byId.get(c.id)?.type !== "dialogue" && byId.get(c.id)?.type !== "listening");
+    const pool = shuffle(learned.map((c) => c.id), rand).slice(0, 40);
+    return { tasks: pool.map((id) => mk(id, "speed")), welcomeBack: false, reviewCount: 0, newCount: 0, shift };
   }
-  return x;
+
+  // 1. due reviews, oldest-overdue first, capped per chunk and per day
+  const reviewedToday = new Set(i.reviews.filter((r) => r.lang === i.lang && r.t >= today && r.mode !== "guess").map((r) => r.id)).size;
+  const dailyLeft = Math.max(0, MAX_REVIEWS_PER_DAY - reviewedToday);
+  const due = langCards.filter((c) => c.due <= i.now && c.state !== 0).sort((a, b) => a.due - b.due);
+  // never-rated cards (introduced but the follow-up never happened) count as due too
+  const unrated = langCards.filter((c) => c.state === 0).sort((a, b) => a.introducedAt - b.introducedAt);
+  const reviewCap = i.kind === "new" ? 0 : Math.min(MAX_REVIEWS_PER_CHUNK, dailyLeft);
+  const reviewIds = interleave([...due, ...unrated].map((c) => c.id), byId).slice(0, reviewCap);
+
+  // 2. new items in unit order from the learner's current unit (custom words from class first)
+  let newN = welcomeBack || i.kind === "review" ? 0 : i.kind === "new" ? 8 : newBudget(shift);
+  if (i.kind === "auto" && !welcomeBack && reviewIds.length < 4) newN += 1; // a quiet day: one more new word
+  const fresh = i.items.filter((x) => !i.cards[x.id] && (i.unitIndexOf(x) === 0 || i.unitIndexOf(x) >= i.startUnit));
+  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1));
+  const newIds = interleave(fresh.map((x) => x.id), byId, false).slice(0, newN);
+
+  // 3. assemble: reviews interleaved with intros; each intro's follow-up lands 3–6 tasks later
+  const seq: Task[] = [];
+  const pending: { task: Task; at: number }[] = [];
+  const R = [...reviewIds];
+  const N = [...newIds];
+  let lastType = "";
+  while (R.length || N.length || pending.length) {
+    pending.sort((a, b) => a.at - b.at);
+    if (pending.length && pending[0].at <= seq.length) {
+      seq.push(pending.shift()!.task);
+      continue;
+    }
+    const introTurn = N.length && (R.length === 0 || seq.length % 3 === 1);
+    if (introTurn) {
+      const id = N.shift()!;
+      seq.push(mk(id, "intro", false));
+      pending.push({ task: mk(id, "followup"), at: seq.length + 3 + Math.floor(rand() * 3) });
+      continue;
+    }
+    if (R.length) {
+      let idx = R.findIndex((id) => byId.get(id)?.type !== lastType);
+      if (idx < 0) idx = 0;
+      const id = R.splice(idx, 1)[0];
+      lastType = byId.get(id)?.type ?? "";
+      seq.push(mk(id, "review"));
+      continue;
+    }
+    if (pending.length) seq.push(pending.shift()!.task);
+  }
+
+  // 4. fill up to the chunk size with practice on learned-but-not-due cards (weakest first)
+  if (seq.length < target && i.kind !== "new") {
+    const inSeq = new Set(seq.map((t) => t.itemId));
+    const practice = langCards
+      .filter((c) => !inSeq.has(c.id) && c.state !== 0)
+      .map((c) => ({ id: c.id, r: retrievability(c, i.now) }))
+      .sort((a, b) => a.r - b.r)
+      .slice(0, target - seq.length);
+    for (const p of practice) seq.push(mk(p.id, "practice"));
+  }
+
+  return { tasks: seq, welcomeBack, reviewCount: reviewIds.length, newCount: newIds.length, shift };
 }
 
-const MAX_REVIEWS = 40;
-
-export function plan(db: DB, lang: Lang, now: number) {
-  const items = itemsFor(lang, db);
-  const today = startOfDay(now);
-  const endOfToday = today + DAY;
-  // New = met through a "guess first" task today (seeded basics and class cards don't count).
-  const introducedToday = new Set(db.reviews.filter((r) => r.lang === lang && r.mode === "guess" && r.t >= today).map((r) => r.id)).size;
-  const newBudget = Math.max(0, db.settings.newPerDay - introducedToday);
-  const fresh = mixKinds(items.filter((i) => !db.cards[i.id])).slice(0, newBudget);
-  const reviews = items
-    .filter((i) => db.cards[i.id] && db.cards[i.id].due < endOfToday)
-    .sort((a, b) => db.cards[a.id].due - db.cards[b.id].due)
-    .slice(0, MAX_REVIEWS);
-  const sessionsToday = db.sessions.filter((s) => s.lang === lang && s.t >= today);
-  const secondsToday = sessionsToday.reduce((n, s) => n + s.seconds, 0);
-  const learnedYesterday = items.filter((i) => {
-    const c = db.cards[i.id];
-    return c && c.introducedAt >= today - DAY && c.introducedAt < today && (c.lastReviewed ?? 0) < today;
-  }).length;
-  return { items, fresh, reviews, secondsToday, sessionsToday, learnedYesterday };
-}
-
-/** Keep module order, but within a module rotate kinds (sound, pattern, false friend…) for variety. */
-function mixKinds(items: Item[]): Item[] {
-  const out: Item[] = [];
-  const modules = [...new Set(items.map((i) => i.module))];
-  for (const m of modules) {
-    const groups = new Map<string, Item[]>();
-    for (const i of items.filter((x) => x.module === m)) groups.set(i.kind, [...(groups.get(i.kind) ?? []), i]);
-    const lists = [...groups.values()];
-    for (let k = 0; lists.some((l) => k < l.length); k++) for (const l of lists) if (k < l.length) out.push(l[k]);
+/** Reorder so neighbours differ in item type where possible (keeps relative order otherwise). */
+export function interleave(ids: string[], byId: Map<string, Item>, strict = true): string[] {
+  const left = [...ids];
+  const out: string[] = [];
+  let last = "";
+  while (left.length) {
+    let idx = left.findIndex((id) => byId.get(id)?.type !== last);
+    if (idx < 0 || (!strict && idx > 3)) idx = 0;
+    const id = left.splice(idx, 1)[0];
+    last = byId.get(id)?.type ?? "";
+    out.push(id);
   }
   return out;
 }
 
-export function strandShare(db: DB, lang: Lang, now: number): Record<Strand, number> {
-  const since = now - 7 * DAY;
-  const counts: Record<Strand, number> = { input: 0, output: 0, focus: 0, fluency: 0 };
-  for (const r of db.reviews) if (r.lang === lang && r.t >= since) counts[r.strand]++;
-  return counts;
+/** After a miss: requeue the item 3 tasks later (max 2 times per item per session). */
+export function requeue(tasks: Task[], index: number, counts: Map<string, number>): Task[] {
+  const t = tasks[index];
+  const n = counts.get(t.itemId) ?? 0;
+  if (n >= REQUEUE_CAP) return tasks;
+  counts.set(t.itemId, n + 1);
+  const copy: Task = { ...t, key: `${t.key}-rq${n + 1}`, role: "requeue", graded: true };
+  const at = Math.min(tasks.length, index + 4);
+  return [...tasks.slice(0, at), copy, ...tasks.slice(at)];
 }
 
-const STRAND_OF: Record<Mode, Strand> = { guess: "focus", recognize: "focus", listen: "input", type: "output", tiles: "output" };
+// ── Mode ladder ──────────────────────────────────────────────────────────
 
-function reviewMode(item: Item, card: CardState, inputLow: boolean): Mode {
-  switch (item.kind) {
+const TIERS: Mode[][] = [
+  ["recognize", "pick-spelling", "question"],
+  ["tiles", "article", "listen"],
+  ["recall"],
+];
+
+export function defaultModes(item: Item): Mode[] {
+  switch (item.type) {
     case "sound":
-      return "listen";
-    case "falsefriend":
-      return card.reps % 2 === 0 ? "recognize" : "type";
-    case "pattern":
-      return "type";
+      return ["pick-spelling", "listen", "recall"];
+    case "word":
+      return item.pos === "noun" && item.gender ? ["recognize", "article", "listen", "recall"] : ["recognize", "listen", "recall"];
     case "phrase":
-      return card.reps < 3 ? "tiles" : "type";
-    default:
-      return inputLow || card.reps % 3 === 1 ? "listen" : "type";
+      return item.target.trim().split(/\s+/).length >= 2 ? ["recognize", "listen", "tiles", "recall"] : ["recognize", "listen", "recall"];
+    case "sentence":
+      return ["recognize", "tiles", "listen", "recall"];
+    case "pattern":
+      return item.question ? ["question", "tiles", "recall"] : ["recognize", "tiles", "recall"];
+    case "listening":
+    case "dialogue":
+      return ["question"];
+    case "bridge":
+      return ["recognize"];
   }
 }
 
-function followUpMode(item: Item): Mode {
-  if (item.kind === "sound") return "listen";
-  if (item.kind === "phrase") return "tiles";
-  return "type";
+export interface ModeCtx {
+  canListen: boolean;
+  shift: number; // controller
+  role: Role;
 }
 
-function makeTask(item: Item, mode: Mode, graded: boolean, pool: Item[], n: number): Task {
-  const t: Task = { key: `${item.id}:${mode}:${n}`, itemId: item.id, mode, graded, strand: STRAND_OF[mode] };
-  const others = shuffle(pool.filter((p) => p.id !== item.id));
-  const sameKind = others.filter((o) => o.kind === item.kind);
-  const distract = (field: "answer" | "prompt") =>
-    [...sameKind, ...others].map((o) => o[field]).filter((v, i, a) => v !== item[field] && a.indexOf(v) === i).slice(0, 3);
+/** Mode ladder: recognize → tiles/article/listen → recall. Promote on stability ≥ 3 days. */
+export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): Mode {
+  if (ctx.role === "intro") return "guess";
+  if (ctx.role === "speed") return "speed";
+  let allowed: Mode[] = (item.exercises as Mode[] | undefined)?.filter((m) => m !== "guess" && (m as string) !== "speak") ?? defaultModes(item);
+  if (!allowed.length) allowed = defaultModes(item);
+  if (!ctx.canListen) allowed = allowed.filter((m) => m !== "listen" && m !== "pick-spelling");
+  if (item.type === "sound" && !ctx.canListen && !allowed.length) allowed = ["recall"];
+  if (!allowed.length) allowed = ["recognize"];
+  if (allowed.includes("article") && !articleOf(item)) allowed = allowed.filter((m) => m !== "article");
+  if (allowed.includes("tiles") && item.target.trim().split(/\s+/).length < 2) allowed = allowed.filter((m) => m !== "tiles");
+  if (!allowed.length) allowed = ["recognize"];
 
-  if ((mode === "guess" || mode === "recognize" || (mode === "listen" && item.kind === "sound")) && item.guess) {
-    t.q = item.guess.q;
-    t.choices = shuffle(item.guess.choices);
-    t.correctChoice = item.guess.a;
-  } else if (mode === "guess") {
-    t.q = item.prompt;
-    t.choices = shuffle([item.answer, ...distract("answer")]);
-    t.correctChoice = item.answer;
-  } else if (mode === "listen") {
-    t.q = "What did you hear?";
-    t.choices = shuffle([item.prompt, ...distract("prompt")]);
-    t.correctChoice = item.prompt;
-  } else if (mode === "tiles") {
-    const words = item.answer.split(" ");
-    const extra = shuffle(
-      pool.filter((p) => p.kind === "phrase" && p.id !== item.id).flatMap((p) => p.answer.split(" ")).filter((w) => !words.includes(w)),
-    ).slice(0, 2);
-    t.tiles = shuffle([...words, ...extra]);
+  const s = card?.stability ?? 0;
+  let level = card && card.state !== 0 ? (s >= 3 ? 2 : s >= 1 ? 1 : 0) : 0;
+  if (ctx.role === "followup") level = 0;
+  if (ctx.role === "requeue") level = Math.max(0, level - 1);
+  level = Math.max(0, Math.min(2, level + ctx.shift));
+  const reps = card?.reps ?? 0;
+  for (const d of [0, -1, -2, 1, 2]) {
+    const L = level + d;
+    if (L < 0 || L > 2) continue;
+    const options = TIERS[L].filter((m) => allowed.includes(m));
+    if (options.length) return options[reps % options.length];
   }
-  return t;
+  return allowed[0];
 }
 
-export function buildQueue(db: DB, lang: Lang, now: number): Task[] {
-  const { items, fresh, reviews } = plan(db, lang, now);
-  const share = strandShare(db, lang, now);
-  const total = Object.values(share).reduce((a, b) => a + b, 0);
-  const inputLow = total > 10 && share.input / total < 0.2;
+const IT_ARTICLES = ["il", "lo", "la", "l'", "i", "gli", "le"];
+const DE_ARTICLES = ["der", "die", "das"];
 
-  let n = 0;
-  const reviewTasks = shuffle(reviews).map((i) => makeTask(i, reviewMode(i, db.cards[i.id], inputLow), true, items, n++));
-  const queue: Task[] = [];
-  const guesses: number[] = [];
-  let r = 0;
-  for (const item of fresh) {
-    for (let k = 0; k < 2 && r < reviewTasks.length; k++) queue.push(reviewTasks[r++]);
-    guesses.push(queue.length);
-    queue.push(makeTask(item, "guess", false, items, n++));
+/** The definite article on a noun item ("der Kaffee" → der, "l'amico" → l'), or null. */
+export function articleOf(item: Item): { article: string; rest: string; options: string[] } | null {
+  if (item.pos !== "noun") return null;
+  const t = item.target.trim();
+  if (item.lang === "de") {
+    const m = t.match(/^(der|die|das)\s+(.+)$/i);
+    return m ? { article: m[1].toLowerCase(), rest: m[2], options: DE_ARTICLES } : null;
   }
-  while (r < reviewTasks.length) queue.push(reviewTasks[r++]);
+  const m = t.match(/^(l')(.+)$/i) ?? t.match(/^(il|lo|la|i|gli|le)\s+(.+)$/i);
+  return m ? { article: m[1].toLowerCase(), rest: m[2], options: IT_ARTICLES } : null;
+}
 
-  // Each new item comes back a few cards later as real retrieval (test after the pretest).
-  for (let g = guesses.length - 1; g >= 0; g--) {
-    const item = fresh[g];
-    queue.splice(Math.min(queue.length, guesses[g] + 4), 0, makeTask(item, followUpMode(item), true, items, n++));
+export function shuffle<T>(a: T[], rand: () => number = Math.random): T[] {
+  const x = [...a];
+  for (let j = x.length - 1; j > 0; j--) {
+    const r = Math.floor(rand() * (j + 1));
+    [x[j], x[r]] = [x[r], x[j]];
   }
-  return queue;
+  return x;
 }
 
-/** A missed task is re-inserted a few cards later in the same session (at most twice per item). */
-export function requeue(queue: Task[], index: number, db: DB, item: Item): Task[] {
-  if (queue.filter((t) => t.itemId === item.id && t.graded).length >= 3) return queue;
-  const items = itemsFor(item.lang, db);
-  const mode = queue[index].mode === "guess" ? followUpMode(item) : queue[index].mode;
-  const t = makeTask(item, mode, true, items, queue.length + 1000);
-  const q = [...queue];
-  q.splice(Math.min(q.length, index + 4), 0, t);
-  return q;
-}
-
-export function speedPool(db: DB, lang: Lang): Item[] {
-  return itemsFor(lang, db).filter((i) => (db.cards[i.id]?.reps ?? 0) >= 1 && i.kind !== "sound");
+export function lastSessionAt(db: DB, lang: TargetLang): number | undefined {
+  const s = db.sessions.filter((x) => x.lang === lang);
+  return s.length ? s[s.length - 1].t : undefined;
 }
