@@ -69,7 +69,7 @@ export const unit: Unit = {
     },
     {
       id: "tschuess", legacyId: "de-tschuess", type: "phrase", pos: "phrase", target: "Tschüss", register: "informal",
-      gloss: { es: "Chao / Adiós (informal)", en: "Bye (informal)" },
+      gloss: { es: "Adiós / Nos vemos (informal)", en: "Bye (informal)" },
       accept: [{ text: "Tschüs" }, { text: "Ciao" }],
       variants: [
         { region: "AT", text: "Servus" },

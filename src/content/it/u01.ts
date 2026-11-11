@@ -17,7 +17,7 @@ export const unit: Unit = {
     // ── Sounds ───────────────────────────────────────────────
     {
       id: "s-ci", legacyId: "it-s-ci", type: "sound", target: "ciao",
-      gloss: { es: "hola / chao (informal)", en: "hi / bye (informal)" },
+      gloss: { es: "hola / adiós (informal)", en: "hi / bye (informal)" },
       distractors: ["chiao", "sciao", "giao"],
       note: {
         es: "c + e/i suena como la «ch» de «chico»: ciao ≈ «chao».",
@@ -59,7 +59,7 @@ export const unit: Unit = {
     // ── Greetings ────────────────────────────────────────────
     {
       id: "ciao", type: "phrase", pos: "phrase", target: "Ciao", register: "informal",
-      gloss: { es: "Hola / Chao (informal)", en: "Hi / Bye (informal)" },
+      gloss: { es: "Hola / Adiós (informal)", en: "Hi / Bye (informal)" },
       distractors: ["Buongiorno", "Arrivederci", "Prego"],
       note: {
         es: "Sirve para saludar y para despedirse, solo con quien tratas de «tu».",

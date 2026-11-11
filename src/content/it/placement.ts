@@ -92,7 +92,7 @@ const bank: PlacementItem[] = [
       ],
       answer: 0,
     },
-    seeds: ["it-u06-br-camera"],
+    seeds: ["it-u06-camera"],
   },
   {
     id: "it-p-08", lang: "it", cefr: "A1.1", b: -1.8, skill: "vocab", kind: "mcq", stem: "la sorella",
