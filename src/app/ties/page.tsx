@@ -4,15 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { Page } from "@/components/Shell";
 import { fmtDate, fromISO, todayISO } from "@/lib/dates";
+import { t } from "@/lib/i18n";
 import { update } from "@/lib/store";
 import type { DB, TieType } from "@/lib/types";
 
-const TYPES: { v: TieType; label: string; icon: string }[] = [
-  { v: "trip", label: "Trip to Italy", icon: "✈️" },
-  { v: "course", label: "Course / class", icon: "📚" },
-  { v: "exam", label: "Exam", icon: "📝" },
-  { v: "lavello", label: "Lavello", icon: "🏛️" },
-  { v: "community", label: "Italian community", icon: "🤝" },
+// Ties to Italy is always in Spanish: it belongs to the Italian track.
+const tx = t("it");
+
+const TYPES: { v: TieType; icon: string }[] = [
+  { v: "trip", icon: "✈️" },
+  { v: "course", icon: "📚" },
+  { v: "exam", icon: "📝" },
+  { v: "lavello", icon: "🏛️" },
+  { v: "community", icon: "🤝" },
 ];
 
 function Ties({ db }: { db: DB }) {
@@ -32,47 +36,46 @@ function Ties({ db }: { db: DB }) {
   return (
     <>
       <div className="top">
-        <Link href="/more" className="icon-btn" aria-label="Back" style={{ textDecoration: "none" }}>
+        <Link href="/more" className="icon-btn" aria-label={tx.back} style={{ textDecoration: "none" }}>
           ‹
         </Link>
       </div>
-      <h1 className="h1">Ties to Italy</h1>
+      <h1 className="h1">{tx.tiesH1}</h1>
       <p className="sub">
-        A private log of your connection to Italy — trips, courses, exams, Lavello, community. Keep receipts and
-        certificates separately; this is your index.
+        {tx.tiesSub}
       </p>
 
       <div className="card accent">
         <p>
-          🇮🇹 Italian practice in Lingua: <b style={{ color: "var(--text)" }}>{italianDays} {italianDays === 1 ? "day" : "days"}</b>, {italianMinutes} minutes.
+          {tx.tiesPracticeLabel} <b style={{ color: "var(--text)" }}>{tx.tiesPractice(italianDays, italianMinutes)}</b>
         </p>
       </div>
 
       <div className="field">
-        <label htmlFor="d">Date</label>
+        <label htmlFor="d">{tx.date}</label>
         <input id="d" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
       <div className="field">
-        <label htmlFor="t">Type</label>
+        <label htmlFor="t">{tx.type}</label>
         <select id="t" value={type} onChange={(e) => setType(e.target.value as TieType)}>
           {TYPES.map((t) => (
             <option key={t.v} value={t.v}>
-              {t.icon} {t.label}
+              {t.icon} {tx.tieTypes[t.v]}
             </option>
           ))}
         </select>
       </div>
       <div className="field">
-        <label htmlFor="n">Note</label>
-        <textarea id="n" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Enrolled in A2 course, Dante Alighieri Zürich" />
+        <label htmlFor="n">{tx.note}</label>
+        <textarea id="n" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tx.tiesPlaceholder} />
       </div>
       <button className="btn" onClick={add} disabled={!note.trim()}>
-        Add entry
+        {tx.addEntry}
       </button>
 
-      <div className="section-title">Log ({list.length})</div>
+      <div className="section-title">{tx.log(list.length)}</div>
       {list.length === 0 ? (
-        <p className="small muted">No entries yet.</p>
+        <p className="small muted">{tx.noEntries}</p>
       ) : (
         <div className="list">
           {list.map((t) => {
@@ -81,15 +84,15 @@ function Ties({ db }: { db: DB }) {
               <div key={t.id} style={{ alignItems: "flex-start" }}>
                 <div>
                   <div className="small muted">
-                    {fmtDate(fromISO(t.date))} · {meta.icon} {meta.label}
+                    {fmtDate(fromISO(t.date), tx.locale)} · {meta.icon} {tx.tieTypes[meta.v]}
                   </div>
                   <div style={{ marginTop: 2 }}>{t.note}</div>
                 </div>
                 <button
                   className="link"
-                  onClick={() => confirm("Delete this entry?") && update((d) => ({ ...d, ties: d.ties.filter((x) => x.id !== t.id) }))}
+                  onClick={() => confirm(tx.confirmDeleteEntry) && update((d) => ({ ...d, ties: d.ties.filter((x) => x.id !== t.id) }))}
                 >
-                  Delete
+                  {tx.del}
                 </button>
               </div>
             );

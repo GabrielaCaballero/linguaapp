@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Page, SpeakButton } from "@/components/Shell";
+import { t } from "@/lib/i18n";
 import { newCard } from "@/lib/srs";
 import { update } from "@/lib/store";
 import type { DB, Item, Lang } from "@/lib/types";
@@ -14,7 +15,8 @@ function AddFromClass({ db }: { db: DB }) {
   const [note, setNote] = useState("");
   const [toast, setToast] = useState("");
   const mine = db.custom.filter((i) => i.lang === lang).sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
-  const bridge = lang === "de" ? "English" : "Español";
+  const bridge = lang === "de" ? "English" : "español";
+  const tx = t(lang);
 
   function add() {
     if (!answer.trim() || !prompt.trim()) return;
@@ -34,7 +36,7 @@ function AddFromClass({ db }: { db: DB }) {
     setAnswer("");
     setPrompt("");
     setNote("");
-    setToast("Added — it'll show up in today's session");
+    setToast(tx.added);
     setTimeout(() => setToast(""), 2200);
   }
 
@@ -49,10 +51,10 @@ function AddFromClass({ db }: { db: DB }) {
   return (
     <>
       <div className="top">
-        <Link href="/more" className="icon-btn" aria-label="Back" style={{ textDecoration: "none" }}>
+        <Link href="/more" className="icon-btn" aria-label={tx.back} style={{ textDecoration: "none" }}>
           ‹
         </Link>
-        <div className="seg" role="group" aria-label="Language">
+        <div className="seg" role="group" aria-label={tx.language}>
           <button aria-pressed={lang === "de"} onClick={() => setLang("de")}>
             🇩🇪 Deutsch
           </button>
@@ -61,28 +63,28 @@ function AddFromClass({ db }: { db: DB }) {
           </button>
         </div>
       </div>
-      <h1 className="h1">Add from my class</h1>
-      <p className="sub">Type what you learned today. It becomes a review card and comes back on a spaced schedule.</p>
+      <h1 className="h1">{tx.addH1}</h1>
+      <p className="sub">{tx.addSub}</p>
 
       <div className="field">
         <label htmlFor="a">{lang === "de" ? "German" : "Italiano"}</label>
         <input id="a" value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder={lang === "de" ? "z.B. die Wohnung" : "es. la casa"} autoCapitalize="off" />
       </div>
       <div className="field">
-        <label htmlFor="p">Meaning ({bridge})</label>
+        <label htmlFor="p">{tx.meaning(bridge)}</label>
         <input id="p" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={lang === "de" ? "e.g. the apartment" : "ej. la casa"} />
       </div>
       <div className="field">
-        <label htmlFor="n">Note (optional)</label>
-        <input id="n" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Gender, plural, example sentence…" />
+        <label htmlFor="n">{tx.noteOptional}</label>
+        <input id="n" value={note} onChange={(e) => setNote(e.target.value)} placeholder={tx.notePlaceholder} />
       </div>
       <button className="btn" onClick={add} disabled={!answer.trim() || !prompt.trim()}>
-        Add card
+        {tx.addCard}
       </button>
 
-      <div className="section-title">My cards ({mine.length})</div>
+      <div className="section-title">{tx.myCards(mine.length)}</div>
       {mine.length === 0 ? (
-        <p className="small muted">Nothing yet. Tip: add 5–10 items right after each class while it&apos;s fresh.</p>
+        <p className="small muted">{tx.noCards}</p>
       ) : (
         <div className="list">
           {mine.map((i) => (
@@ -94,8 +96,8 @@ function AddFromClass({ db }: { db: DB }) {
                   <div className="small muted">{i.prompt}</div>
                 </div>
               </div>
-              <button className="link" onClick={() => remove(i.id)} aria-label={`Delete ${i.answer}`}>
-                Delete
+              <button className="link" onClick={() => remove(i.id)} aria-label={tx.deleteCard(i.answer)}>
+                {tx.del}
               </button>
             </div>
           ))}

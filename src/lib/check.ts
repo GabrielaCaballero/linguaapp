@@ -58,9 +58,3 @@ export function check(input: string, item: Item): Verdict {
   }
   return { ok: false };
 }
-
-export const ALMOST_TEXT = {
-  accent: "Almost — watch the accent.",
-  typo: "Almost — small typo.",
-  article: "Almost — remember the article.",
-} as const;

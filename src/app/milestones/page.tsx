@@ -3,16 +3,19 @@
 import { LangSwitch, Page } from "@/components/Shell";
 import { itemsFor } from "@/content";
 import { daysBetween, fmtDate, fromISO } from "@/lib/dates";
+import { t, uiFor } from "@/lib/i18n";
 import { milestones, type Milestone } from "@/lib/milestones";
 import { isKnown } from "@/lib/srs";
 import type { DB } from "@/lib/types";
 
 function Row({ m, db, now }: { m: Milestone; db: DB; now: Date }) {
+  const tx = t(db.settings.lang);
   const state = now > m.end ? "past" : now >= m.start ? "now" : "next";
   const days = daysBetween(now, m.end);
   const lang = m.lang === "both" ? db.settings.lang : m.lang;
   const modItems = m.module ? itemsFor(lang, db).filter((i) => i.module === m.module) : [];
   const known = modItems.filter((i) => isKnown(db.cards[i.id])).length;
+  const fmt = (d: Date) => fmtDate(d, tx.locale);
 
   return (
     <div className={`card ms ${state}`} style={{ paddingLeft: 40 }}>
@@ -20,13 +23,13 @@ function Row({ m, db, now }: { m: Milestone; db: DB; now: Date }) {
         <div>
           <div style={{ fontWeight: 600 }}>{m.title}</div>
           <div className="small muted" style={{ marginTop: 2 }}>
-            {m.when} · {m.fixed ? fmtDate(m.end) : `${fmtDate(m.start)} – ${fmtDate(m.end)}`}
+            {m.when} · {m.fixed ? fmt(m.end) : `${fmt(m.start)} – ${fmt(m.end)}`}
           </div>
         </div>
         <div className="countdown" style={{ textAlign: "right" }}>
-          {state === "past" ? "✓" : `${days} d`}
+          {state === "past" ? "✓" : tx.d(days)}
           <div className="small muted" style={{ fontWeight: 400 }}>
-            {state === "now" ? "left" : state === "next" ? "to go" : ""}
+            {state === "now" ? tx.left : state === "next" ? tx.toGo : ""}
           </div>
         </div>
       </div>
@@ -36,20 +39,30 @@ function Row({ m, db, now }: { m: Milestone; db: DB; now: Date }) {
             <i style={{ width: `${(known / Math.max(1, modItems.length)) * 100}%` }} />
           </div>
           <div className="small muted" style={{ marginTop: 4 }}>
-            {known} / {modItems.length} items known{m.module === "M1" && " · starter slice"}
+            {tx.itemsKnown(known, modItems.length)}
+            {m.module === "M1" && tx.starterSlice}
           </div>
         </>
       )}
-      {!m.module && !m.fixed && <div className="small muted" style={{ marginTop: 8 }}>Content not built yet in the prototype.</div>}
-      {m.note && <div className="small" style={{ marginTop: 8 }}>{m.note}</div>}
+      {!m.module && !m.fixed && (
+        <div className="small muted" style={{ marginTop: 8 }}>
+          {tx.notBuilt}
+        </div>
+      )}
+      {m.note && (
+        <div className="small" style={{ marginTop: 8 }}>
+          {m.note}
+        </div>
+      )}
     </div>
   );
 }
 
 function Milestones({ db }: { db: DB }) {
   const lang = db.settings.lang;
+  const tx = t(lang);
   const now = new Date();
-  const all = milestones(db.settings.startDate);
+  const all = milestones(db.settings.startDate, uiFor(lang));
   const list = all.filter((m) => m.lang === lang || m.lang === "both").sort((a, b) => a.end.getTime() - b.end.getTime());
   const exam = all.find((m) => m.id === "it-exam")!;
   const m4 = all.find((m) => m.id === "it-m4")!;
@@ -58,14 +71,13 @@ function Milestones({ db }: { db: DB }) {
   return (
     <>
       <div className="top">
-        <div className="brand">Milestones</div>
+        <div className="brand">{tx.milestonesTitle}</div>
         <LangSwitch lang={lang} compact />
       </div>
-      <p className="sub">Plan started {fmtDate(fromISO(db.settings.startDate))}. Change it in More → Settings.</p>
+      <p className="sub">{tx.planStarted(fmtDate(fromISO(db.settings.startDate), tx.locale))}</p>
       {squeeze && (
         <div className="banner" style={{ display: "block", lineHeight: 1.45 }}>
-          ⚠️ The April 2027 exam falls before M4 ends ({fmtDate(m4.end)}). Either compress M2–M4 or aim for a later exam
-          session.
+          {tx.examSqueeze(fmtDate(m4.end, tx.locale))}
         </div>
       )}
       {list.map((m) => (

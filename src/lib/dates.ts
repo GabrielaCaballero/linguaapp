@@ -36,10 +36,10 @@ export function daysBetween(a: Date, b: Date): number {
   return Math.round((startOfDay(b.getTime()) - startOfDay(a.getTime())) / DAY);
 }
 
-export function fmtDate(d: Date): string {
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+export function fmtDate(d: Date, locale = "en-GB"): string {
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function fmtMonth(d: Date): string {
-  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+export function fmtMonth(d: Date, locale = "en-GB"): string {
+  return d.toLocaleDateString(locale, { month: "short", year: "numeric" });
 }

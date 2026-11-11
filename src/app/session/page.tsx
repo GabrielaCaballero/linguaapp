@@ -4,18 +4,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Page, SpeakButton } from "@/components/Shell";
 import { itemById } from "@/content";
-import { ALMOST_TEXT, check, type Verdict } from "@/lib/check";
+import { check, type Verdict } from "@/lib/check";
+import { t } from "@/lib/i18n";
 import { buildQueue, requeue, shuffle, speedPool, type Task } from "@/lib/session";
 import { getRecognizer, speak } from "@/lib/speech";
 import { gradeFrom, newCard, schedule } from "@/lib/srs";
 import { getDB, update } from "@/lib/store";
 import type { CardState, Confidence, DB, Item, Lang, ReviewLog } from "@/lib/types";
 
-const TARGET: Record<Lang, string> = { it: "Italian", de: "German" };
-const CONF: { v: Confidence; icon: string; label: string }[] = [
-  { v: 1, icon: "🤷", label: "Guessing" },
-  { v: 2, icon: "🤔", label: "Think so" },
-  { v: 3, icon: "💪", label: "Sure" },
+const CONF: { v: Confidence; icon: string }[] = [
+  { v: 1, icon: "🤷" },
+  { v: 2, icon: "🤔" },
+  { v: 3, icon: "💪" },
 ];
 
 type Result = {
@@ -35,6 +35,7 @@ function mmss(s: number) {
 function Session({ db }: { db: DB }) {
   const router = useRouter();
   const lang = db.settings.lang;
+  const tx = t(lang);
   const items = useMemo(() => itemById(db), [db]);
   const [queue, setQueue] = useState<Task[]>(() => buildQueue(getDB(), lang, Date.now()));
   const [idx, setIdx] = useState(0);
@@ -177,7 +178,7 @@ function Session({ db }: { db: DB }) {
   return (
     <>
       <div className="s-top">
-        <button className="icon-btn" aria-label="Close session" onClick={exit}>
+        <button className="icon-btn" aria-label={tx.closeSession} onClick={exit}>
           ✕
         </button>
         <div className="bar">
@@ -188,13 +189,13 @@ function Session({ db }: { db: DB }) {
 
       {overTime && (
         <div className="banner">
-          <span>{db.settings.minutesPerLang} min reached. Short sessions stick better.</span>
+          <span>{tx.minReached(db.settings.minutesPerLang)}</span>
           <span className="row">
             <button className="btn small" onClick={finish}>
-              Finish
+              {tx.finish}
             </button>
             <button className="link" onClick={() => setDismissedTime(true)}>
-              Keep going
+              {tx.keepGoing}
             </button>
           </span>
         </div>
@@ -240,7 +241,7 @@ function Session({ db }: { db: DB }) {
           <div className="dock">
           {phase === "answer" && task.graded && (
             <>
-              <div className="conf-label">How sure are you? (tap to check)</div>
+              <div className="conf-label">{tx.howSure}</div>
               <div className="conf">
                 {CONF.map((c) => (
                   <button
@@ -249,20 +250,20 @@ function Session({ db }: { db: DB }) {
                     onClick={() => submit(c.v)}
                   >
                     <span>{c.icon}</span>
-                    {c.label}
+                    {tx.conf[c.v]}
                   </button>
                 ))}
               </div>
               {(task.mode === "type" || task.mode === "tiles") && (
                 <button className="link" style={{ alignSelf: "center" }} onClick={() => submit(1)}>
-                  I don&apos;t know — show me
+                  {tx.dontKnow}
                 </button>
               )}
             </>
           )}
           {phase === "feedback" && (
             <button className="btn" onClick={advance} autoFocus>
-              Continue
+              {tx.continue}
             </button>
           )}
           </div>
@@ -291,37 +292,38 @@ function TaskView(props: {
   setBuilt: (b: number[]) => void;
 }) {
   const { task, item, lang, locked } = props;
+  const tx = t(lang);
   const isSound = item.kind === "sound";
 
   let eyebrow = "";
   let prompt = "";
   let hint = "";
   if (task.mode === "guess") {
-    eyebrow = "Guess first · no wrong answers yet";
+    eyebrow = tx.guessEyebrow;
     if (isSound) {
-      prompt = "Which spelling?";
-      hint = "Listen, then pick. Guessing before you're taught helps it stick.";
+      prompt = tx.whichSpelling;
+      hint = tx.listenPick;
     } else if (item.kind === "falsefriend") {
       prompt = task.q!;
-      hint = lang === "it" ? "Parece español… ¿o no?" : "Looks like English… or does it?";
+      hint = tx.ffHint[lang];
     } else if (item.kind === "pattern") {
       prompt = task.q!;
-      hint = lang === "it" ? "Usá lo que sabés del español." : "Use what you know from English.";
+      hint = tx.patternHint[lang];
     } else {
       prompt = item.prompt;
-      hint = `Which one do you think it is in ${TARGET[lang]}?`;
+      hint = tx.whichInTarget(tx.target[lang]);
     }
   } else if (task.mode === "type") {
-    eyebrow = `Recall · type it in ${TARGET[lang]}`;
+    eyebrow = tx.recallType(tx.target[lang]);
     prompt = item.prompt;
   } else if (task.mode === "tiles") {
-    eyebrow = "Recall · build the sentence";
+    eyebrow = tx.recallTiles;
     prompt = item.prompt;
   } else if (task.mode === "listen") {
-    eyebrow = "Listen";
-    prompt = isSound ? "Which spelling did you hear?" : "What does it mean?";
+    eyebrow = tx.listen;
+    prompt = isSound ? tx.whichHeard : tx.whatMeans;
   } else if (task.mode === "recognize") {
-    eyebrow = "False friend · what does it mean?";
+    eyebrow = tx.ffEyebrow;
     prompt = item.answer;
   }
 
@@ -331,7 +333,7 @@ function TaskView(props: {
     <>
       <div className="eyebrow">{eyebrow}</div>
       {showPlay && (
-        <button className={`big-listen ${locked ? "small" : ""}`} aria-label="Play audio" onClick={() => speak(item.answer, lang, 0.85)}>
+        <button className={`big-listen ${locked ? "small" : ""}`} aria-label={tx.playAudio} onClick={() => speak(item.answer, lang, 0.85)}>
           ▶
         </button>
       )}
@@ -417,7 +419,7 @@ function TypeInput({ lang, locked, typed, setTyped }: { lang: Lang; locked: bool
         placeholder={lang === "it" ? "Scrivi qui…" : "Hier schreiben…"}
       />
       {hasMic && !locked && (
-        <button className="icon-btn" aria-label="Say it" onClick={dictate} style={{ width: 52, height: 52 }}>
+        <button className="icon-btn" aria-label={t(lang).sayIt} onClick={dictate} style={{ width: 52, height: 52 }}>
           {listening ? "…" : "🎤"}
         </button>
       )}
@@ -426,25 +428,26 @@ function TypeInput({ lang, locked, typed, setTyped }: { lang: Lang; locked: bool
 }
 
 function Feedback({ task, item, lang, result, onOverride }: { task: Task; item: Item; lang: Lang; result: Result; onOverride: () => void }) {
+  const tx = t(lang);
   const v = result.verdict;
   const guess = !task.graded;
   const cls = guess ? "guess" : !v.ok ? "miss" : v.almost ? "almost" : "ok";
   const head = guess
     ? v.ok
-      ? "Good guess!"
-      : "Here it is"
+      ? tx.goodGuess
+      : tx.hereItIs
     : !v.ok
-      ? "Here's the answer"
+      ? tx.hereAnswer
       : v.almost
-        ? ALMOST_TEXT[v.reason]
-        : "✓ Right";
+        ? tx.almost[v.reason]
+        : tx.right;
   const showMeaning = task.mode === "listen" || task.mode === "recognize" || task.mode === "guess";
 
   let calib = "";
-  if (guess) calib = "You'll be asked to recall it in a few cards.";
-  else if (!v.ok && result.confidence === 3) calib = "You felt sure — that's the fluency illusion. It comes back in a few cards.";
-  else if (!v.ok) calib = "It comes back in a few cards, and again later today.";
-  else if (result.confidence === 1) calib = "Right while guessing — it'll come back sooner to firm it up.";
+  if (guess) calib = tx.calibGuess;
+  else if (!v.ok && result.confidence === 3) calib = tx.calibSureMiss;
+  else if (!v.ok) calib = tx.calibMiss;
+  else if (result.confidence === 1) calib = tx.calibLuckyGuess;
 
   return (
     <div className={`fb ${cls}`}>
@@ -456,15 +459,19 @@ function Feedback({ task, item, lang, result, onOverride }: { task: Task; item: 
       {showMeaning && item.kind !== "sound" && <div className="yours">= {item.prompt}</div>}
       {!v.ok && result.given && !guess && (
         <div className="yours">
-          You: <s>{result.given}</s>
+          {tx.you}: <s>{result.given}</s>
         </div>
       )}
-      {v.ok && v.almost && <div className="yours">You: {result.given}</div>}
+      {v.ok && v.almost && (
+        <div className="yours">
+          {tx.you}: {result.given}
+        </div>
+      )}
       {item.note && <div className="note">{item.note}</div>}
       {calib && <div className="calib">{calib}</div>}
       {!guess && !v.ok && result.given && (task.mode === "type" || task.mode === "tiles") && (
         <button className="link" onClick={onOverride}>
-          My answer was right — count it
+          {tx.countIt}
         </button>
       )}
     </div>
@@ -505,21 +512,20 @@ function SpeedRound({ pool, lang, onDone }: { pool: Item[]; lang: Lang; onDone: 
     }, 250);
   }
 
+  const tx = t(lang);
+
   if (!started)
     return (
       <div className="task">
-        <div className="eyebrow">Fluency</div>
-        <h1 className="prompt">⚡ Speed round</h1>
-        <p className="hint">
-          {SECONDS} seconds of things you already know. Go fast — the goal is effortless recall, not new learning. Nothing
-          here affects your schedule.
-        </p>
+        <div className="eyebrow">{tx.fluency}</div>
+        <h1 className="prompt">{tx.speedRound}</h1>
+        <p className="hint">{tx.speedIntro(SECONDS)}</p>
         <div className="spacer" />
         <button className="btn" onClick={() => setStarted(true)}>
-          Go
+          {tx.go}
         </button>
         <button className="link" style={{ alignSelf: "center" }} onClick={() => onDone(0)}>
-          Skip
+          {tx.skip}
         </button>
       </div>
     );
@@ -527,16 +533,12 @@ function SpeedRound({ pool, lang, onDone }: { pool: Item[]; lang: Lang; onDone: 
   if (left === 0)
     return (
       <div className="task">
-        <div className="eyebrow">Fluency</div>
-        <h1 className="prompt">
-          {score.right} in {SECONDS}s
-        </h1>
-        <p className="hint">
-          That&apos;s {Math.round((score.right / SECONDS) * 60)} per minute. Watch this number climb over the weeks.
-        </p>
+        <div className="eyebrow">{tx.fluency}</div>
+        <h1 className="prompt">{tx.inSeconds(score.right, SECONDS)}</h1>
+        <p className="hint">{tx.perMinute(Math.round((score.right / SECONDS) * 60))}</p>
         <div className="spacer" />
         <button className="btn" onClick={() => onDone(score.n)}>
-          Finish
+          {tx.finish}
         </button>
       </div>
     );
@@ -544,7 +546,7 @@ function SpeedRound({ pool, lang, onDone }: { pool: Item[]; lang: Lang; onDone: 
   return (
     <div className="task">
       <div className="row between">
-        <div className="eyebrow">⚡ Speed round</div>
+        <div className="eyebrow">{tx.speedRound}</div>
         <div className="countdown">{left}s</div>
       </div>
       <div className={`fb ${flash === "ok" ? "ok" : flash === "miss" ? "miss" : ""}`} style={{ textAlign: "center", padding: "36px 18px", margin: "18px 0" }}>
@@ -575,37 +577,38 @@ function makeQ(pool: Item[], avoid?: string) {
 }
 
 function Done({ stats, elapsed, lang, onHome }: { stats: Stats; elapsed: number; lang: Lang; onHome: () => void }) {
+  const tx = t(lang);
   const acc = stats.graded ? Math.round((stats.correct / stats.graded) * 100) : null;
   return (
     <div className="task">
-      <div className="eyebrow">Session done</div>
+      <div className="eyebrow">{tx.sessionDone}</div>
       <h1 className="prompt">{lang === "it" ? "Bravissima! 🎉" : "Super gemacht! 🎉"}</h1>
-      <p className="hint">Sleep does the next part: what you practised today gets consolidated tonight.</p>
+      <p className="hint">{tx.sleepNext}</p>
       <div className="stats">
         <div className="stat">
           <b>{Math.max(1, Math.round(elapsed / 60))}</b>
-          <span>minutes</span>
+          <span>{tx.minutes}</span>
         </div>
         <div className="stat">
           <b>{stats.tasks}</b>
-          <span>tasks</span>
+          <span>{tx.tasks}</span>
         </div>
         <div className="stat">
           <b>{acc === null ? "—" : `${acc}%`}</b>
-          <span>recalled</span>
+          <span>{tx.recalled}</span>
         </div>
       </div>
       {stats.sure > 0 && (
         <div className="card" style={{ marginTop: 12 }}>
           <p>
-            When you said <b>Sure</b>, you were right {stats.sureRight} of {stats.sure} times.
-            {stats.sureRight < stats.sure && " Those misses are the most useful ones — they're scheduled to come back first."}
+            {tx.sureSummary(stats.sureRight, stats.sure)}
+            {stats.sureRight < stats.sure && tx.sureMissNote}
           </p>
         </div>
       )}
       <div className="spacer" />
       <button className="btn" onClick={onHome}>
-        Back to today
+        {tx.backToToday}
       </button>
     </div>
   );

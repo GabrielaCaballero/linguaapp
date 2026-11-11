@@ -1,26 +1,28 @@
-import type { Strand } from "@/lib/types";
+import type { Lang, Strand } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
-export const STRAND_INFO: Record<Strand, { label: string; color: string; what: string }> = {
-  input: { label: "Input", color: "#5b8def", what: "listening for meaning" },
-  output: { label: "Output", color: "#d9734e", what: "producing: typing, building sentences" },
-  focus: { label: "Language focus", color: "#9a7bd1", what: "patterns, sounds, false friends" },
-  fluency: { label: "Fluency", color: "#3fa36b", what: "fast recall of what you know" },
+export const STRAND_COLOR: Record<Strand, string> = {
+  input: "#5b8def",
+  output: "#d9734e",
+  focus: "#9a7bd1",
+  fluency: "#3fa36b",
 };
 
-export function StrandBar({ counts }: { counts: Record<Strand, number> }) {
+export const STRANDS = Object.keys(STRAND_COLOR) as Strand[];
+
+export function StrandBar({ counts, lang }: { counts: Record<Strand, number>; lang: Lang }) {
+  const tx = t(lang);
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const keys = Object.keys(STRAND_INFO) as Strand[];
   return (
     <div>
-      <div className="strands" role="img" aria-label="Balance of the four strands this week">
-        {total > 0 &&
-          keys.map((k) => <i key={k} style={{ width: `${(counts[k] / total) * 100}%`, background: STRAND_INFO[k].color }} />)}
+      <div className="strands" role="img" aria-label={tx.strandsAria}>
+        {total > 0 && STRANDS.map((k) => <i key={k} style={{ width: `${(counts[k] / total) * 100}%`, background: STRAND_COLOR[k] }} />)}
       </div>
       <div className="legend">
-        {keys.map((k) => (
+        {STRANDS.map((k) => (
           <span key={k}>
-            <i style={{ background: STRAND_INFO[k].color }} />
-            {STRAND_INFO[k].label} {total ? Math.round((counts[k] / total) * 100) : 0}%
+            <i style={{ background: STRAND_COLOR[k] }} />
+            {tx.strands[k].label} {total ? Math.round((counts[k] / total) * 100) : 0}%
           </span>
         ))}
       </div>
