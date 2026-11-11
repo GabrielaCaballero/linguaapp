@@ -38,6 +38,7 @@ export function practiceDaysThisWeek(db: DB, now: number): number {
 
 export interface DayCell {
   day: number;
+  before: boolean;
   minutes: number;
   target: number;
   future: boolean;
@@ -50,7 +51,7 @@ export function weekStrip(db: DB, now: number): DayCell[] {
   const today = startOfDay(now);
   return Array.from({ length: 7 }, (_, k) => {
     const d = startOfDay(w + k * DAY + DAY / 2);
-    return { day: d, minutes: minutesBetween(db, d, d + DAY), target, future: d > today, today: d === today };
+    return { day: d, minutes: minutesBetween(db, d, d + DAY), target, future: d > today, today: d === today, before: d < startOfDay(db.profile.createdAt) };
   });
 }
 
@@ -141,9 +142,13 @@ export function calibration(db: DB, lang?: TargetLang) {
   return out;
 }
 
+/** Average minutes per calendar day over the last `days` days (today included), never before the course started. */
 export function avgMinutes(db: DB, lang: TargetLang, now: number, days = 14): number {
-  const to = startOfDay(now);
-  return minutesBetween(db, to - days * DAY, to, lang) / days;
+  const end = startOfDay(now) + DAY;
+  const started = startOfDay(db.profile.courses[lang]?.addedAt ?? now);
+  const from = Math.max(end - days * DAY, started);
+  const n = Math.max(1, Math.round((end - from) / DAY));
+  return minutesBetween(db, from, end, lang) / n;
 }
 
 export interface WeeklyCheck {

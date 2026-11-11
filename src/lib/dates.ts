@@ -51,3 +51,6 @@ export function fmtDate(d: Date, locale: string): string {
 export function fmtMonth(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, { month: "long", year: "numeric" });
 }
+
+/** Wall-clock time for event handlers (kept out of render). */
+export const clock = () => Date.now();
