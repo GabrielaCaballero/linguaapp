@@ -143,6 +143,13 @@ export const unit: Unit = {
       tags: ["forms"],
     },
     {
+      id: "maggio", legacyId: "it-maggio", type: "word", pos: "other", target: "maggio",
+      gloss: { es: "mayo", en: "May" },
+      distractors: ["marzo", "maggiore", "magio"],
+      note: { es: "Los meses van en minúscula: gennaio, aprile, maggio.", en: "Months are lowercase in Italian: gennaio, aprile, maggio." },
+      tags: ["dates"],
+    },
+    {
       id: "primo-maggio", legacyId: "it-primomaggio", type: "phrase", pos: "phrase", target: "il primo maggio",
       gloss: { es: "el 1 de mayo", en: "the 1st of May" },
       accept: [{ text: "il 1° maggio" }, { text: "il primo di maggio" }],

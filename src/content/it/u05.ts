@@ -237,5 +237,28 @@ export const unit: Unit = {
       note: { es: "j → gli: hijo → figlio, ajo → aglio, mujer → moglie (esposa)." },
       exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
     },
+    {
+      id: "br-tempo", legacyId: "it-p-ie", type: "bridge", onlyFor: "es", target: "tempo",
+      gloss: { es: "tiempo", en: "time / weather" },
+      distractors: ["tiempo", "tiempe", "tembo"],
+      note: { es: "ie → e: tiempo → tempo, fiesta → festa, siete → sette." },
+      exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
+    },
+    {
+      id: "br-guardare", legacyId: "it-f-guardare", type: "bridge", onlyFor: "es", target: "guardare",
+      gloss: { es: "mirar", en: "to look at / watch" },
+      question: {
+        prompt: { es: "«guardare» significa…", en: "'guardare' means…" },
+        options: [
+          { es: "mirar", en: "to look at" },
+          { es: "guardar", en: "to keep" },
+          { es: "esperar", en: "to wait" },
+          { es: "cuidar", en: "to look after" },
+        ],
+        answer: 0,
+      },
+      note: { es: "guardare = mirar (guardare la TV). Guardar algo es «mettere via»." },
+      exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
   ]),
 };

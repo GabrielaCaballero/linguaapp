@@ -23,10 +23,14 @@ export const unit: Unit = {
       note: { es: "Al contar: eins; delante de un sustantivo: ein/eine (ein Kaffee).", en: "Counting: eins; before a noun: ein/eine (ein Kaffee)." },
     }),
     num("zwei", "zwei", "dos (2)", "two (2)", ["drei", "zwölf", "zwie"], {
+      legacyId: "de-p-zwei",
       accept: [{ text: "zwo" }],
       note: { es: "Por teléfono se oye «zwo», para no confundirlo con «drei».", en: "On the phone you'll hear 'zwo', so it isn't confused with 'drei'." },
     }),
-    num("drei", "drei", "tres (3)", "three (3)", ["zwei", "dreißig", "drai"]),
+    num("drei", "drei", "tres (3)", "three (3)", ["zwei", "dreißig", "drai"], {
+      legacyId: "de-p-drei",
+      note: { en: "English th often = German d: three → drei, thank → danken, thing → Ding." },
+    }),
     num("vier", "vier", "cuatro (4)", "four (4)", ["für", "fier", "vierzig"], {
       note: { es: "La v suena «f»: vier ≈ «fir».", en: "v sounds like f: vier ≈ 'fear'." },
     }),

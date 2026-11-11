@@ -313,5 +313,28 @@ export const unit: Unit = {
       note: { es: "ll- inicial → chi/pi/fi: llave → chiave, lleno → pieno, llamar → chiamare." },
       exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
     },
+    {
+      id: "br-informazione", legacyId: "it-p-zione2", type: "bridge", onlyFor: "es", target: "informazione",
+      gloss: { es: "información", en: "information" },
+      distractors: ["informacione", "informaziona", "informazzione"],
+      note: { es: "-ción → -zione, y todas son femeninas: l'informazione, la stazione." },
+      exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
+    },
+    {
+      id: "br-topo", legacyId: "it-f-topo", type: "bridge", onlyFor: "es", target: "il topo",
+      gloss: { es: "el ratón", en: "the mouse" },
+      question: {
+        prompt: { es: "«il topo» significa…", en: "'il topo' means…" },
+        options: [
+          { es: "el ratón", en: "the mouse" },
+          { es: "el topo (animal)", en: "the mole" },
+          { es: "el tope", en: "the limit" },
+          { es: "la tapa", en: "the lid" },
+        ],
+        answer: 0,
+      },
+      note: { es: "topo = ratón. El topo (animal) es «la talpa»." },
+      exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
   ]),
 };

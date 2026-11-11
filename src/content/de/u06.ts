@@ -248,5 +248,37 @@ export const unit: Unit = {
       },
       exercises: ["question", "listen"], tags: ["listening", "home"],
     },
+    {
+      id: "br-rock", legacyId: "de-f-rock", type: "bridge", onlyFor: "en", target: "der Rock",
+      gloss: { es: "la falda (pollera)", en: "the skirt" },
+      question: {
+        prompt: { es: "«der Rock» significa…", en: "'der Rock' means…" },
+        options: [
+          { es: "la falda", en: "skirt" },
+          { es: "la roca", en: "rock (stone)" },
+          { es: "el rock (música)", en: "rock music" },
+          { es: "el cohete", en: "rocket" },
+        ],
+        answer: 0,
+      },
+      note: { en: "A stone is 'der Stein'; rock music is 'die Rockmusik'." },
+      exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+    {
+      id: "br-art", legacyId: "de-f-art", type: "bridge", onlyFor: "en", target: "die Art",
+      gloss: { es: "el tipo, la clase", en: "type / kind" },
+      question: {
+        prompt: { es: "«die Art» significa…", en: "'die Art' means…" },
+        options: [
+          { es: "el tipo, la clase", en: "type / kind" },
+          { es: "el arte", en: "art" },
+          { es: "el artista", en: "artist" },
+          { es: "la artesanía", en: "craft" },
+        ],
+        answer: 0,
+      },
+      note: { en: "Art (painting etc.) is 'die Kunst'." },
+      exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
   ]),
 };

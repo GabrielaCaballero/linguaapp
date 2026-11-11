@@ -317,5 +317,19 @@ export const unit: Unit = {
       note: { es: "imbarazzato/a = avergonzado/a. Embarazada se dice «incinta»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
     },
+    {
+      id: "br-universita", legacyId: "it-p-ta2", type: "bridge", onlyFor: "es", target: "università",
+      gloss: { es: "universidad", en: "university" },
+      distractors: ["universitade", "universidà", "universitá"],
+      note: { es: "-dad → -tà: universidad → università. Se escribe con acento grave: à (no á)." },
+      exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
+    },
+    {
+      id: "br-possibile", legacyId: "it-p-bile", type: "bridge", onlyFor: "es", target: "possibile",
+      gloss: { es: "posible", en: "possible" },
+      distractors: ["posible", "possible", "posibile"],
+      note: { es: "-ble → -bile, con doble s: posible → possibile, increíble → incredibile." },
+      exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
+    },
   ]),
 };
