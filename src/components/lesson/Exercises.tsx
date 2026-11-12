@@ -5,7 +5,7 @@ import type { BaseLang, Item, Lexicon, TargetLang } from "@/content/schema";
 import type { Confidence, Mode, Verdict } from "@/lib/model";
 import type { Dict } from "@/lib/i18n";
 import { check, type CheckResult } from "@/lib/check";
-import { gl, per, LANG_NAME } from "@/lib/content";
+import { gl, per } from "@/lib/content";
 import { speak } from "@/lib/speech";
 import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
@@ -305,7 +305,7 @@ function Recall(p: ExProps) {
   };
   return (
     <>
-      <Prompt eyebrow={`${t.translate} ${LANG_NAME[item.lang]}`}>
+      <Prompt eyebrow={`${t.translate} ${t.langName[item.lang]}`}>
         <div className="title">{gl(item.gloss, base)}</div>
         {item.register && <span className="pill" style={{ alignSelf: "flex-start" }}>{item.register}</span>}
         {item.pos === "noun" && item.lang === "de" && <span className="caption">der / die / das + …</span>}

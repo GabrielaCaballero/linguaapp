@@ -49,16 +49,18 @@ export function Feedback({
   const btn = useRef<HTMLButtonElement>(null);
   const [more, setMore] = useState(false);
   useEffect(() => {
-    btn.current?.focus({ preventScroll: true });
+    // Focus Continue a beat later so the Enter that submitted the answer can't also press it.
+    const focusId = setTimeout(() => btn.current?.focus({ preventScroll: true }), 250);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         e.preventDefault();
         onContinue();
       }
     };
-    const id = setTimeout(() => window.addEventListener("keydown", onKey), 150);
+    const id = setTimeout(() => window.addEventListener("keydown", onKey), 300);
     return () => {
       clearTimeout(id);
+      clearTimeout(focusId);
       window.removeEventListener("keydown", onKey);
     };
   }, [onContinue]);
