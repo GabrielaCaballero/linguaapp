@@ -32,7 +32,7 @@ export const unit: Unit = {
       gloss: { es: "español/a", en: "Spanish" },
       forms: { m: "spagnolo", f: "spagnola", mpl: "spagnoli", fpl: "spagnole" },
       accept: [{ text: "spagnola" }],
-      distractors: ["spagnuolo", "Spagna", "portoghese"],
+      distractors: ["spagnoli", "Spagna", "portoghese"],
       note: { es: "gn suena como ñ: spagnolo ≈ «spañolo».", en: "gn sounds like 'ny' in 'canyon': spagnolo." },
       tags: ["nationality"],
     },

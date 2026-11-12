@@ -81,7 +81,7 @@ export const unit: Unit = {
     {
       id: "gross", type: "word", pos: "adj", target: "groß",
       gloss: { es: "grande", en: "big / large" },
-      distractors: ["grob", "Gras", "klein"],
+      distractors: ["grob", "grau", "klein"],
       tags: ["describe", "goethe-a1"],
     },
     {
@@ -105,26 +105,26 @@ export const unit: Unit = {
     {
       id: "hell", type: "word", pos: "adj", target: "hell",
       gloss: { es: "luminoso/a, claro/a", en: "bright / light" },
-      distractors: ["hallo", "Held", "dunkel"],
+      distractors: ["hallo", "schnell", "dunkel"],
       note: { es: "Lo contrario: dunkel (oscuro).", en: "False friend: hell = bright. Hell is 'die Hölle'." },
       tags: ["describe", "false-friend", "goethe-a1"],
     },
     {
       id: "dunkel", type: "word", pos: "adj", target: "dunkel",
       gloss: { es: "oscuro/a", en: "dark" },
-      distractors: ["Dunst", "dünn", "hell"],
+      distractors: ["dumm", "dünn", "hell"],
       tags: ["describe", "goethe-a1"],
     },
     {
       id: "teuer", type: "word", pos: "adj", target: "teuer",
       gloss: { es: "caro/a", en: "expensive" },
-      distractors: ["treu", "Tür", "billig"],
+      distractors: ["treu", "neu", "billig"],
       tags: ["describe", "money", "goethe-a1"],
     },
     {
       id: "billig", type: "word", pos: "adj", target: "billig",
       gloss: { es: "barato/a", en: "cheap" },
-      distractors: ["bitte", "Bild", "teuer"],
+      distractors: ["bitte", "bissig", "teuer"],
       note: { es: "Más neutro y positivo: günstig.", en: "More neutral (and positive): günstig." },
       tags: ["describe", "money", "goethe-a1"],
     },

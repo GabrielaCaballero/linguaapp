@@ -43,7 +43,7 @@ export const unit: Unit = {
     num("neun", "neun", "nueve (9)", "nine (9)", ["neu", "nein", "neunzig"], {
       note: { es: "eu suena «oi»: neun ≈ «noin».", en: "eu sounds like 'oy': neun ≈ 'noyn'." },
     }),
-    num("zehn", "zehn", "diez (10)", "ten (10)", ["Zahn", "zwanzig", "sehen"]),
+    num("zehn", "zehn", "diez (10)", "ten (10)", ["zehnte", "zwanzig", "sehen"]),
     num("elf", "elf", "once (11)", "eleven (11)", ["eins", "zwölf", "elfte"]),
     num("zwoelf", "zwölf", "doce (12)", "twelve (12)", ["zwanzig", "zwei", "zwölfte"]),
     {
@@ -84,7 +84,7 @@ export const unit: Unit = {
     num("dreissig", "dreißig", "treinta (30)", "thirty (30)", ["dreizig", "dreizehn", "dreißigste"], {
       note: { es: "Es la única decena con ß; las demás terminan en -zig: vierzig.", en: "The only tens word with ß; the others end in -zig: vierzig." },
     }),
-    num("hundert", "hundert", "cien (100)", "a hundred (100)", ["tausend", "Hund", "hunderte"], {
+    num("hundert", "hundert", "cien (100)", "a hundred (100)", ["tausend", "hundertste", "hunderte"], {
       accept: [{ text: "einhundert" }],
     }),
 
@@ -147,7 +147,7 @@ export const unit: Unit = {
     {
       id: "buchstabieren", type: "word", pos: "verb", target: "buchstabieren",
       gloss: { es: "deletrear", en: "to spell (out)" },
-      distractors: ["Buchstaben", "bestellen", "studieren"],
+      distractors: ["buchstäblich", "bestellen", "studieren"],
       example: {
         target: "Können Sie das bitte buchstabieren?",
         gloss: { es: "¿Puede deletrearlo, por favor?", en: "Could you spell that, please?" },

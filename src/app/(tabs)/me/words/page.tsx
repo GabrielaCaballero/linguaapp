@@ -33,7 +33,7 @@ export default function WordsPage() {
 
   return (
     <main className="screen">
-      <BackHeader title={t.wordsTitle} href="/me" />
+      <BackHeader title={t.wordsTitle} backLabel={t.back} href="/me" />
       <section className="card stack" style={{ marginTop: 8 }}>
         <div className="h2" style={{ fontSize: "1.0625rem" }}>{t.addWords}</div>
         <div className="caption">{t.addWordsSub}</div>
@@ -58,7 +58,7 @@ export default function WordsPage() {
             <span className="pill">{strength(c.stability, c.state)}</span>
             {voice && <Speaker text={i!.spoken} lang={lang} label={t.listen} />}
             {i!.unit === "custom" && (
-              <button className="icon-btn" aria-label="Delete" onClick={() => removeCustomWord(c.id)}><Icon name="trash" size={18} /></button>
+              <button className="icon-btn" aria-label={t.deleteWord} onClick={() => removeCustomWord(c.id)}><Icon name="trash" size={18} /></button>
             )}
           </div>
         ))}

@@ -1,15 +1,145 @@
 [
- {"id":"P0-1","sev":"P0","title":"Second lesson shows previous lesson state","status":"open","evals":["engine: lesson re-entry","e2e-cuj: P0-1 lesson re-entry ×2","e2e-cuj: CUJ-4 starting German right after Italian"]},
- {"id":"P0-2","sev":"P0","title":"Placement ≥A1.2 → Unit 6 and whole course seeded","status":"open","evals":["engine: placement → unit mapping and seeding","engine: Ana repro","e2e-cuj: Start lower one unit"]},
- {"id":"P1-1","sev":"P1","title":"'5 min' lesson lasts 1–2 min; ring never fills","status":"open","evals":["engine: chunk size tracks minutes","e2e-cuj: '5 min' lesson ≥18 graded tasks"]},
- {"id":"P1-2","sev":"P1","title":"Default goals 'Very demanding'","status":"open","evals":["e2e-cuj: CUJ-12 total ≤30 min/day","engine: dailyMinutes sane"]},
- {"id":"P1-3","sev":"P1","title":"'To fix' disagrees between Results and Today; misses not first","status":"open","evals":["engine: misses come first","e2e-cuj: CUJ-5 next day N to fix = Results count"]},
- {"id":"P1-4","sev":"P1","title":"Weekly check after a break: 2034 projection, layout","status":"open","evals":["engine: weekly check ×3","e2e-cuj: CUJ-8"]},
- {"id":"P1-5","sev":"P1","title":"Goal sheet overlap, 90 clamp honesty, 30→35 rounding","status":"open","evals":["engine: raw >90 kept","engine: alternative saves as 30","e2e-cuj: CUJ-7"]},
- {"id":"P1-6","sev":"P1","title":"Umlaut note names the wrong letter","status":"open","evals":["checker: de-um-01/02/04/05 wantHas"]},
- {"id":"P1-7","sev":"P1","title":"No register / Spanish-transfer feedback","status":"open","evals":["checker: it-reg-*, de-reg-*, it-es-01"]},
- {"id":"P1-8","sev":"P1","title":"Beginner first minute thin (audio-only first task)","status":"open","evals":["engine: first task carries meaning","e2e-cuj: CUJ-2"]},
- {"id":"P1-9","sev":"P1","title":"Flat results; speed round with nothing due; '1 words'","status":"open","evals":["engine: speed round empty","ux-static: singular counts"]},
- {"id":"P1-10","sev":"P1","title":"Offline unverified; lazy chunks not cached","status":"open","evals":["ux-static: sw caches lazily loaded chunks","e2e-ux: CUJ-10 offline"]},
- {"id":"P1-11","sev":"P1","title":"Goals promise levels the content can't deliver","status":"open","evals":["manual: goal picker shows 'more units coming' for A2/B1"]}
+ {
+  "id": "P0-1",
+  "sev": "P0",
+  "title": "Second lesson shows previous lesson state",
+  "status": "closed",
+  "evals": [
+   "engine: lesson re-entry",
+   "e2e-cuj: P0-1 lesson re-entry ×2",
+   "e2e-cuj: CUJ-4 starting German right after Italian"
+  ],
+  "verified": "All re-entry evals pass (finish→start, quit→start, IT→DE) on the production build."
+ },
+ {
+  "id": "P0-2",
+  "sev": "P0",
+  "title": "Placement ≥A1.2 → Unit 6 and whole course seeded",
+  "status": "closed",
+  "evals": [
+   "engine: placement → unit mapping and seeding",
+   "engine: Ana repro",
+   "e2e-cuj: Start lower one unit"
+  ],
+  "verified": "Unit mapping monotonic, all units reachable, start unit never seeded, <85% seeded at any θ, Ana repro ≤A1.2; e2e Start lower steps one unit."
+ },
+ {
+  "id": "P1-1",
+  "sev": "P1",
+  "title": "'5 min' lesson lasts 1–2 min; ring never fills",
+  "status": "closed",
+  "evals": [
+   "engine: chunk size tracks minutes",
+   "e2e-cuj: '5 min' lesson ≥18 graded tasks"
+  ],
+  "verified": "Lesson keeps adding chunks until the minutes pass; e2e ≥18 graded tasks; misses still waiting for a retry now get it when time is up (QA fix)."
+ },
+ {
+  "id": "P1-2",
+  "sev": "P1",
+  "title": "Default goals 'Very demanding'",
+  "status": "closed",
+  "evals": [
+   "e2e-cuj: CUJ-12 total ≤30 min/day",
+   "engine: dailyMinutes sane"
+  ],
+  "verified": "v1 upgrade defaults total ≤30 min/day (e2e)."
+ },
+ {
+  "id": "P1-3",
+  "sev": "P1",
+  "title": "'To fix' disagrees between Results and Today; misses not first",
+  "status": "closed",
+  "evals": [
+   "engine: misses come first",
+   "e2e-cuj: CUJ-5 next day N to fix = Results count"
+  ],
+  "verified": "Priority misses open the next session (engine); Results toFix count == next-day Today card (e2e)."
+ },
+ {
+  "id": "P1-4",
+  "sev": "P1",
+  "title": "Weekly check after a break: 2034 projection, layout",
+  "status": "closed",
+  "evals": [
+   "engine: weekly check ×3",
+   "e2e-cuj: CUJ-8"
+  ],
+  "verified": "Weekly check suppressed after a ≥7-day break and with a 0 average (engine); welcome back first (e2e). Card layout not re-screenshotted."
+ },
+ {
+  "id": "P1-5",
+  "sev": "P1",
+  "title": "Goal sheet overlap, 90 clamp honesty, 30→35 rounding",
+  "status": "closed",
+  "evals": [
+   "engine: raw >90 kept",
+   "engine: alternative saves as 30",
+   "e2e-cuj: CUJ-7"
+  ],
+  "verified": "Raw >90 kept, 30-min alternative saves as 30 (engine); nothing on the goal sheet is covered (e2e overlap check)."
+ },
+ {
+  "id": "P1-6",
+  "sev": "P1",
+  "title": "Umlaut note names the wrong letter",
+  "status": "closed",
+  "evals": [
+   "checker: de-um-01/02/04/05 wantHas"
+  ],
+  "verified": "Checker detail names ü/ö/ä (checker de-um-*)."
+ },
+ {
+  "id": "P1-7",
+  "sev": "P1",
+  "title": "No register / Spanish-transfer feedback",
+  "status": "closed",
+  "evals": [
+   "checker: it-reg-*, de-reg-*, it-es-01"
+  ],
+  "verified": "Register reason for du/Sie and tu/Lei incl. verb forms (Parli/Parla, Scusa/Scusi — QA fix), chao→ciao."
+ },
+ {
+  "id": "P1-8",
+  "sev": "P1",
+  "title": "Beginner first minute thin (audio-only first task)",
+  "status": "closed",
+  "evals": [
+   "engine: first task carries meaning",
+   "e2e-cuj: CUJ-2"
+  ],
+  "verified": "First task carries meaning (engine, e2e)."
+ },
+ {
+  "id": "P1-9",
+  "sev": "P1",
+  "title": "Flat results; speed round with nothing due; '1 words'",
+  "status": "closed",
+  "evals": [
+   "engine: speed round empty",
+   "ux-static: singular counts"
+  ],
+  "verified": "Speed round/Review only disabled with nothing to do (e2e), no '1 words' (ux-static). Celebration beyond goal-reached confetti not added (judge suggestion, not a spec criterion)."
+ },
+ {
+  "id": "P1-10",
+  "sev": "P1",
+  "title": "Offline unverified; lazy chunks not cached",
+  "status": "closed",
+  "evals": [
+   "ux-static: sw caches lazily loaded chunks",
+   "e2e-ux: CUJ-10 offline"
+  ],
+  "verified": "SW caches loaded chunks; e2e cold-starts offline in Chromium and completes tasks. Real-phone airplane test remains a manual check."
+ },
+ {
+  "id": "P1-11",
+  "sev": "P1",
+  "title": "Goals promise levels the content can't deliver",
+  "status": "closed",
+  "evals": [
+   "manual: goal picker shows 'more units coming' for A2/B1"
+  ],
+  "verified": "A2/B1 show 'more units coming' in the goal picker (e2e)."
+ }
 ]

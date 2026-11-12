@@ -92,7 +92,7 @@ export function TabBar({ t }: { t: Dict }) {
   ];
   return (
     <div className="tabbar">
-      <nav aria-label="Main">
+      <nav aria-label={t.mainNav}>
         {tabs.map((x) => (
           <Link key={x.href} href={x.href} className="tab" aria-current={x.on ? "page" : undefined}>
             <span className="tab-ic">
@@ -156,10 +156,10 @@ export function WeekDots({ n, goal }: { n: number; goal: number }) {
   );
 }
 
-export function BackHeader({ title, href, right }: { title: string; href: string; right?: ReactNode }) {
+export function BackHeader({ title, href, right, backLabel }: { title: string; href: string; right?: ReactNode; backLabel: string }) {
   return (
     <div className="row between" style={{ minHeight: 48, marginLeft: -12 }}>
-      <Link href={href} className="icon-btn" aria-label="Back">
+      <Link href={href} className="icon-btn" aria-label={backLabel}>
         <Icon name="back" />
       </Link>
       <h1 className="h2" style={{ flex: 1 }}>

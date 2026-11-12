@@ -27,7 +27,7 @@ The bar is met when all three hold:
 | **content** | `tests/evals/content/schema.eval.ts` | 46 | Deterministic rules from spec §3.3 and the linguist style guide: ids, both glosses, `spoken` with no digits, ≥3 distinct distractors, no distractor that is an accepted answer, article matches gender, German capitals and ß, Italian accent forms, contractions, no voseo, notes ≤2 sentences, register twins marked, no duplicate recall prompts, MCQ validity, placement bank shape (30, 6/band, skill mix, b within ±0.4), lexicon size, no banned strings. |
 | **content-audit** | `tests/evals/content/audit.ts` + `audit-hashes.json` | 391 (all unit and placement items, both languages) | **Rubric graded by me as a native-level linguist.** Criteria: translation, gender/article, accents, gloss_es, gloss_en, distractors, answer_key. Failures are listed with a note in `audit.ts`. Each item is pinned to a content hash, so an edited item fails as **STALE** until it is re-read and re-pinned (`AUDIT_WRITE=1`). |
 | **ux-static** | `tests/evals/ux/static.eval.ts` | ≈330 | Deterministic source checks. Every i18n key exists in both languages, is translated, and has no English inside Spanish (or the reverse). No "1 words". No hard-coded text or aria-labels in TSX. No owner strings. Reduced motion, dark tokens and 44 px CSS. Service-worker wiring. |
-| **e2e-cuj** | `tests/evals/e2e/cuj.spec.ts` | 16 | Playwright on Chromium in a 390×844 mobile emulation, against a production build (`NEXT_DIST_DIR=.next-qa`, port 3500). A scripted learner drives the real UI using the app's own i18n strings, answers from the real content (an oracle), and controls time with `page.clock` / stored-timestamp shifts. Covers CUJ-1, 2, 3, 4, 5, 7, 8 and 12 across the personas, plus the P0-1, P0-2, P1-1, P1-2 and P1-3 regressions. |
+| **e2e-cuj** | `tests/evals/e2e/cuj.spec.ts` | 15 | Playwright on Chromium in a 390×844 mobile emulation, against a production build (`NEXT_DIST_DIR=.next-qa`, port 3500). A scripted learner drives the real UI using the app's own i18n strings, answers from the real content (an oracle), and controls time with `page.clock` / stored-timestamp shifts. Covers CUJ-1, 2, 3, 4, 5, 7, 8 and 12 across the personas, plus the P0-1, P0-2, P1-1, P1-2 and P1-3 regressions. |
 | **e2e-ux** | `tests/evals/e2e/ux.spec.ts` | 19 | Measured in the browser on every main screen, in es and en: all targets ≥44 px, no horizontal scroll at 375 px, WCAG AA contrast, no console errors, no other-language strings, `lang` on target words. Also dark mode, reduced motion, ✓/✕ + words (not colour alone), CUJ-11 backup round trip + bad file, and CUJ-10 offline cold start with the service worker. |
 
 Personas map onto the specs as follows. Ana (P1) is the es UI with two languages (CUJ-1/4/8). Mateo (P2) is es→it from zero (CUJ-1/3/8). Emma (P3) is en→de, never studied (CUJ-2/7). Priya (P4) is en→it, beginner mid-test, offline (CUJ-1/10). CUJ-6 (checker correctness) lives entirely in the checker category. CUJ-9 (AI tutor) is in engine with a mocked provider. CUJ-13 is in e2e-ux.
@@ -66,6 +66,8 @@ Unit-level evals (vitest), first run:
 | content-audit | 377 / 391 | 96.4 |
 | ux-static | 323 / 332 | 97.3 |
 
+Full baseline including the browser (`npm run eval`, iteration 0): **1164 / 1221 = 95.3 %**, e2e-cuj 6/15, e2e-ux 6/19, 13 open P0/P1.
+
 Baseline failures: Italian accent-meaning words (e/è, sì, dà, là, né) are treated as minimal pairs (wrong) instead of almost + note. There's no register feedback for Italian verb forms (Parli/Parla, stai/sta, Scusa/Scusi). German verb-ending errors (wohnt, sprechen) pass as typos. *Quando* is accepted as a typo of *quanto*. There are 9 German give-away distractors (capitalised nouns among adjectives/verbs/numerals). 5 aria-labels are hard-coded in English. There's a "1 words" string. Three eval-side mistakes were found and logged in 31-eval-log.md. The e2e baseline is in 31-eval-log.md, iteration 0.
 
 ## 7. Manual checks (not automatable here)
@@ -74,4 +76,17 @@ These go on a real phone before release: iOS Safari install, a real airplane-mod
 
 ## 8. Final scoreboard
 
-_Filled in at the end of phase 2. See below._
+After iteration 1 (`npm run eval`, production build on :3500):
+
+| Category | Pass / total | % |
+|---|---|---|
+| checker | 255 / 255 | 100 |
+| content | 46 / 46 | 100 |
+| content-audit | 391 / 391 | 100 |
+| e2e-cuj | 15 / 15 | 100 |
+| e2e-ux | 19 / 19 | 100 |
+| engine | 163 / 163 | 100 |
+| ux-static | 336 / 336 | 100 |
+| **Overall** | **1225 / 1225** | **100 %** |
+
+Open P0/P1: **0**. **Bar met in 1 iteration.** Details, eval-case changes (E1–E8) and remaining manual risks are in `31-eval-log.md`.

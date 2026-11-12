@@ -184,7 +184,12 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
     setTaskStart(Date.now());
     const elapsed = (Date.now() - startedAt) / 1000;
     const timeUp = !speed && elapsed >= settings.sessionMinutes * 60;
-    if (timeUp) return finish();
+    if (timeUp) {
+      // Time's up, but a miss still waiting for its in-session retry gets it (CUJ-5).
+      const j = tasks.findIndex((x, k) => k > idx && x.role === "requeue");
+      if (j > idx) return setIdx(j);
+      return finish();
+    }
     if (idx + 1 < tasks.length) return setIdx((i) => i + 1);
     // Out of tasks before the time is up: keep the "5 minutes" honest with another chunk.
     if (!speed && extensions.current < 8) {

@@ -78,9 +78,10 @@ export async function doPlacement(page: Page, appLang: BaseLang, lang: TargetLan
   const bank = courses[lang].placement;
   let n = 0;
   for (let guard = 0; guard < 20; guard++) {
-    const q = page.locator(".prompt-eyebrow");
-    if (!(await q.isVisible().catch(() => false))) break;
-    if (!(await page.locator(".opt").first().isVisible().catch(() => false))) break;
+    // after each answer a short "got it" card replaces the options: wait for the next item or the result
+    const result = page.getByText(t.startLower);
+    await page.locator(".opt").first().or(result).first().waitFor({ timeout: 15_000 });
+    if (await result.isVisible().catch(() => false)) break;
     n++;
     if (beginnerAt && n === beginnerAt) {
       await btn(page, t.imBeginner).click();
@@ -103,6 +104,12 @@ export async function doPlacement(page: Page, appLang: BaseLang, lang: TargetLan
 }
 
 export interface LessonStats { tasks: number; graded: number; right: number; misses: string[]; sawResults: boolean; firstEyebrow?: string; prompts: string[] }
+
+/** Text of the first match, or "" immediately when there is none (no auto-wait). */
+async function txt(page: Page, sel: string): Promise<string> {
+  const l = page.locator(sel).first();
+  return (await l.count()) ? ((await l.textContent().catch(() => "")) ?? "").trim() : "";
+}
 
 function findByGloss(text: string, lang: TargetLang, base: BaseLang): Item | undefined {
   const s = text.trim();
@@ -132,11 +139,12 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
       await fb.getByRole("button", { name: t.continue }).click();
       continue;
     }
-    const eyebrow = (await page.locator(".prompt-eyebrow").first().innerText().catch(() => "")).trim();
+    const eyebrow = await txt(page, ".prompt-eyebrow");
     if (!eyebrow) {
       await page.waitForTimeout(150);
       continue;
     }
+    if (process.env.QA_DEBUG) console.log("STEP", step, eyebrow, page.url().slice(-30));
     if (st.tasks === 0) st.firstEyebrow = eyebrow;
     st.tasks++;
     st.prompts.push(eyebrow);
@@ -151,7 +159,7 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     const want = Math.random() < (o.accuracy ?? 0.85);
     const input = page.locator("input.input.big");
     if (await input.isVisible().catch(() => false)) {
-      const gloss = await page.locator(".prompt .title").first().innerText().catch(() => "");
+      const gloss = await txt(page, ".prompt .title");
       const item = findByGloss(gloss, o.lang, o.base);
       const text = missLeft > 0 ? "zzz" : item && want ? item.target : "zzz";
       if (text === "zzz") st.misses.push(gloss);
@@ -162,7 +170,7 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     }
     const tiles = page.locator(".tiles-bank .tile");
     if (await tiles.first().isVisible().catch(() => false)) {
-      const gloss = await page.locator(".prompt .title").first().innerText().catch(() => "");
+      const gloss = await txt(page, ".prompt .title");
       const item = findByGloss(gloss, o.lang, o.base);
       const words = item ? item.target.replace(/[.!?¿¡,]/g, "").split(/\s+/) : [];
       const bank = (await tiles.allInnerTexts()).map((s) => s.trim());
@@ -181,7 +189,7 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     const opts = page.locator(".opt:not([disabled])");
     if (await opts.first().isVisible().catch(() => false)) {
       const texts = (await opts.allInnerTexts()).map((s) => s.replace(/^\d\s*/, "").trim());
-      const word = (await page.locator(".prompt-word [lang]").first().innerText().catch(() => "")).trim();
+      const word = await txt(page, ".prompt-word [lang]");
       const item = ITEMS.find((i) => i.lang === o.lang && i.target === word);
       let k = item ? texts.findIndex((x) => x === item.gloss[o.base]) : -1;
       if (!want && k >= 0) k = (k + 1) % texts.length;

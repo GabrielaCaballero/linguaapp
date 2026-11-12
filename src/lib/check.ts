@@ -164,9 +164,13 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
     if (g.replace(/ß/g, "ss") === w.replace(/ß/g, "ss")) return { v: "ok", note: "ss" };
     if (deFold(g) === deFold(w)) return { v: "ok", note: "translit" };
   }
-  if (isMinimalPair(bareTok(g), bareTok(w), lex)) return { v: "wrong", reason: "minimal-pair" };
+  // e/è, si/sì, da/dà …: a missing accent that changes meaning is "almost" with a specific note
+  // (spec §4.8), even though the pair is listed in the lexicon's minimal pairs.
   if (lang === "it" && IT_ACCENT_MEANING.has([stripMarks(w), w].join("|")) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
   if (lang === "it" && IT_ACCENT_MEANING.has([stripMarks(g), g].join("|")) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
+  if (isMinimalPair(bareTok(g), bareTok(w), lex)) return { v: "wrong", reason: "minimal-pair" };
+  // "dov e" for "dov'è": the apostrophe dropped, the elided token otherwise right
+  if (lang === "it" && want.endsWith("'") && g === w.slice(0, -1)) return { v: "almost", reason: "elision" };
   if (closed(want, lex) || closed(got, lex)) {
     // Elided article/preposition typed in full or vice versa: "lo amico" is not this case (count differs).
     return { v: "wrong", reason: "closed-class" };
@@ -185,6 +189,8 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   if (lang === "de") {
     if (deStrip(g) === deStrip(w)) return { v: "almost", reason: "umlaut" };
   }
+  // German verb/adjective endings (wohne/wohnt, spreche/sprechen) are grammar, never a typo.
+  if (lang === "de" && endingOnly(deFold(g), deFold(w))) return { v: "wrong", reason: "wrong" };
   const base = lang === "de" ? deFold(w) : stripMarks(w);
   const len = [...bareTok(w)].length;
   const allowed = len >= 10 ? 2 : len >= 5 ? 1 : 0;
@@ -193,6 +199,16 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
     if (d <= allowed) return { v: "almost", reason: "typo" };
   }
   return { v: "wrong", reason: "wrong" };
+}
+
+const DE_ENDINGS = new Set(["", "e", "t", "st", "en", "n", "et", "est", "es", "em", "er"]);
+/** Same stem, only the inflectional ending differs. */
+function endingOnly(g: string, w: string): boolean {
+  if (g === w) return false;
+  let k = 0;
+  while (k < g.length && k < w.length && g[k] === w[k]) k++;
+  if (k < 3) return false;
+  return DE_ENDINGS.has(g.slice(k)) && DE_ENDINGS.has(w.slice(k));
 }
 
 function compareSeq(got: string[], want: string[], lang: TargetLang, lex: Lexicon, item: Item): CheckResult | null {
@@ -298,9 +314,13 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
     }
   }
   const b0 = best as CheckResult | null;
-  if (!b0 || b0.verdict === "wrong") {
+  if (!b0 || b0.verdict !== "correct") {
+    // tu/Lei, du/Sie: the wrong register is a wrong answer with a specific note, even when the
+    // forms are a letter apart (Scusa/Scusi, Parli/Parla).
     const reg = registerMismatch(answer, item);
     if (reg) return { verdict: "wrong", reason: "register", score: 0, detail: { got: reg.got, want: reg.want } };
+  }
+  if (!b0 || b0.verdict === "wrong") {
     if (lang === "it") {
       const want = new Set(tokens(item.target.toLowerCase()));
       for (const g of tokens(a)) {
@@ -322,8 +342,14 @@ function hasLoweredNoun(answer: string, target: string, item: Item): boolean {
   return tt.some((t, k) => isUpper(t) && at[k] !== undefined && !isUpper(at[k]) && (k > 0 || item.pos === "noun"));
 }
 
-const INFORMAL: Record<TargetLang, string[]> = { de: ["du", "dich", "dir", "dein", "deine", "deinen", "deinem", "bist", "hast"], it: ["tu", "ti", "te", "tuo", "tua", "sei", "hai", "stai"] };
-const FORMAL: Record<TargetLang, string[]> = { de: ["Sie", "Ihnen", "Ihr", "Ihre"], it: ["Lei", "Le", "Suo", "Sua"] };
+const INFORMAL: Record<TargetLang, string[]> = {
+  de: ["du", "dich", "dir", "dein", "deine", "deinen", "deinem", "bist", "hast", "kommst", "wohnst", "sprichst", "heißt", "heisst"],
+  it: ["tu", "ti", "te", "tuo", "tua", "sei", "hai", "stai", "chiami", "parli", "puoi", "vieni", "abiti", "scusa"],
+};
+const FORMAL: Record<TargetLang, string[]> = {
+  de: ["Sie", "Ihnen", "Ihr", "Ihre"],
+  it: ["Lei", "Le", "Suo", "Sua", "sta", "chiama", "parla", "può", "viene", "abita", "scusi"],
+};
 const IT_SPANISH_SPELLING: Record<string, string> = { chao: "ciao", mucho: "molto", gracias: "grazie", bueno: "buono", buena: "buona" };
 
 /** du/tu where the item is formal (or Sie/Lei where it is informal). */
@@ -336,8 +362,10 @@ function registerMismatch(answer: string, item: Item): { got: string; want: stri
     const hit = got.find((g) => INFORMAL[lang].includes(g.toLowerCase()) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
     if (hit) return { got: hit, want: lang === "de" ? "Sie" : "Lei" };
   } else {
-    // case matters: German "sie" (she/they) is not formal; Italian "lei" lowercase is "she"
-    const hit = got.find((g) => FORMAL[lang].includes(g) && !want.includes(g));
+    // Capitalised pronouns compare case-sensitively (German "sie" = she/they, Italian "lei" = she,
+    // "le" = the); lowercase verb forms (sta, parla, scusi) compare case-insensitively.
+    const same = (f: string, g: string) => (f[0] === f[0].toLowerCase() ? f === g.toLowerCase() : f === g);
+    const hit = got.find((g) => FORMAL[lang].some((f) => same(f, g)) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
     if (hit) return { got: hit, want: lang === "de" ? "du" : "tu" };
   }
   return null;

@@ -193,7 +193,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .switch input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .seg { display: flex; padding: 3px; background: var(--surface-2); border-radius: var(--r-pill); gap: 2px; }
-.seg button { flex: 1; min-height: 38px; border: 0; background: transparent; border-radius: var(--r-pill); font-size: var(--t-label); font-weight: 600; color: var(--text-2); padding: 0 var(--s3); }
+.seg button { flex: 1; min-height: 44px; border: 0; background: transparent; border-radius: var(--r-pill); font-size: var(--t-label); font-weight: 600; color: var(--text-2); padding: 0 var(--s3); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
 
 .input {

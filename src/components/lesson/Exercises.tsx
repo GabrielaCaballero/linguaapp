@@ -327,7 +327,7 @@ function Recall(p: ExProps) {
           aria-label={t.typeAnswer}
         />
         {!locked && (
-          <div className="accent-bar" aria-label="Accents">
+          <div className="accent-bar" aria-label={t.accentKeys}>
             {ACCENTS[item.lang].map((c) => (
               <button key={c} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => insert(c)} lang={item.lang}>
                 {c}

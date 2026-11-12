@@ -49,7 +49,7 @@ export default function SettingsPage() {
 
   return (
     <main className="screen">
-      <BackHeader title={t.settings} href="/me" />
+      <BackHeader title={t.settings} backLabel={t.back} href="/me" />
 
       <div className="group-title">{t.sCourses}</div>
       <div className="group">

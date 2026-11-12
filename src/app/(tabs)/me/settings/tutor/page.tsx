@@ -32,7 +32,7 @@ export default function TutorPage() {
 
   return (
     <main className="screen">
-      <BackHeader title={t.tutorTitle} href="/me/settings" />
+      <BackHeader title={t.tutorTitle} backLabel={t.back} href="/me/settings" />
       <div className="stack" style={{ marginTop: 8, gap: 16 }}>
         <div className="row" style={{ alignItems: "flex-start" }}>
           <span className="accent"><Icon name="sparkle" size={28} /></span>

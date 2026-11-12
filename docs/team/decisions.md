@@ -73,3 +73,12 @@ Format: date · who · decision · why
 - 2026-11-12 · engine (fix round) · A lesson keeps adding chunks (up to 8) until the chosen minutes have really passed; Results offers "One more round"; misses of the session/yesterday open the next lesson · "5 min" must mean 5 minutes and the ring must be fillable (judge P1-1, P1-3).
 - 2026-11-12 · engine (fix round) · Default goal = Steady 15 min/day, capped so all languages total ≤ 30 by default; >90 min shows "90+"; goals above A1 say "more units coming" · Judge P1-2/P1-5/P1-11: no "Very demanding" default, honest numbers, honest course scope.
 - 2026-11-12 · engine (fix round) · No weekly check after a ≥ 7-day break or with a 0 average; projections beyond 2 years read "more than 2 years away" · Judge P1-4 (Feb 2034).
+
+## 2026-11-12 · QA eval round: content fixes from the linguist audit (31-eval-log.md)
+- de: 9 give-away distractors replaced. A capitalised noun among the options for a lowercase target gives the answer away in German: zehn (Zahn→zehnte), hundert (Hund→hundertste), buchstabieren (Buchstaben→buchstäblich), essen (Essig→vergessen), groß (Gras→grau), hell (Held→schnell), dunkel (Dunst→dumm), teuer (Tür→neu), billig (Bild→bissig).
+- de-u01-wie-gehts: the en gloss now ends "(informal)". It was ambiguous with "Wie geht es Ihnen? = How are you? (formal)".
+- de-p-30: the key was a word-for-word copy of "Filiale am Marktplatz". It is now paraphrased ("At another branch of the library, in the town centre").
+- it-u02-spagnolo: distractor «spagnuolo» (an old-fashioned but correct spelling) → «spagnoli».
+- it-u04-tramezzino: en gloss "the triangle sandwich" → "the tramezzino (crustless sandwich)".
+- it-p-27: distractor «avrà» is grammatical after *penso che* in speech → «abbiamo».
+- it lexicon: minimal pairs quanto/quando and venti/vento added, so a typo can't turn "how much" into "when".

@@ -351,7 +351,7 @@ const bank: PlacementItem[] = [
     mcq: {
       prompt: { es: "¿Dónde se pueden pedir libros hasta fines de mayo?", en: "Where can you borrow books until the end of May?" },
       options: [
-        { es: "En la sucursal de la plaza del mercado", en: "At the branch on the market square" },
+        { es: "En otra sede de la biblioteca, en el centro", en: "At another branch of the library, in the town centre" },
         { es: "En la biblioteca central", en: "At the main library" },
         { es: "En ningún lugar", en: "Nowhere" },
         { es: "Solo por internet", en: "Only online" },

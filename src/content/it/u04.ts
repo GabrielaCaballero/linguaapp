@@ -81,7 +81,7 @@ export const unit: Unit = {
     },
     {
       id: "tramezzino", type: "word", pos: "noun", target: "il tramezzino", gender: "m", plural: "i tramezzini",
-      gloss: { es: "el sándwich triangular (de miga)", en: "the triangle sandwich" },
+      gloss: { es: "el sándwich triangular (de miga)", en: "the tramezzino (crustless sandwich)" },
       distractors: ["il panino", "il tramezzo", "la tramezzina"],
       tags: ["bar", "food"],
     },

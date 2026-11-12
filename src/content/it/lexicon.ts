@@ -34,5 +34,6 @@ export const lexicon: Lexicon = {
     ["camino", "cammino"], ["rosa", "rossa"], ["eco", "ecco"], ["tuta", "tutta"],
     ["e", "è"], ["si", "sì"], ["da", "dà"], ["la", "là"], ["li", "lì"], ["ne", "né"],
     ["papa", "papà"], ["te", "tè"],
+    ["quanto", "quando"], ["venti", "vento"],
   ],
 };

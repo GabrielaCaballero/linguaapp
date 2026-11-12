@@ -196,7 +196,7 @@ export const unit: Unit = {
     // ── How are you ──────────────────────────────────────────
     {
       id: "wie-gehts", type: "phrase", pos: "phrase", target: "Wie geht's?", register: "informal",
-      gloss: { es: "¿Qué tal? / ¿Cómo estás?", en: "How are you? / How's it going?" },
+      gloss: { es: "¿Qué tal? / ¿Cómo estás?", en: "How are you? / How's it going? (informal)" },
       accept: [{ text: "Wie geht es dir?" }, { text: "Wie gehts?" }],
       distractors: ["Wie heißt du?", "Wie bitte?", "Wo gehst du?"],
       note: { es: "Literalmente «¿cómo va?». Respuesta: «Gut, danke!».", en: "Literally 'how goes it?'. Answer: 'Gut, danke!'" },

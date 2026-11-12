@@ -335,7 +335,7 @@ function Flow() {
             ))}
           </div>
           {anchor && (
-            <input type="time" className="input" style={{ marginTop: 16, maxWidth: 160 }} value={anchor.time} onChange={(e) => setAnchorDraft({ ...anchor, time: e.target.value })} aria-label="Time" />
+            <input type="time" className="input" style={{ marginTop: 16, maxWidth: 160 }} value={anchor.time} onChange={(e) => setAnchorDraft({ ...anchor, time: e.target.value })} aria-label={t.timeLabel} />
           )}
           <div className="bottom-bar">
             <button

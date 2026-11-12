@@ -319,7 +319,7 @@ const bank: PlacementItem[] = [
     id: "it-p-27", lang: "it", cefr: "B1", b: 1.5, skill: "grammar", kind: "cloze", stem: "Penso che Marco ___ ragione.",
     mcq: {
       prompt: { es: "Completa la frase (italiano estándar).", en: "Complete the sentence (standard Italian)." },
-      options: ["abbia", "avrà", "avesse avuto", "avere"],
+      options: ["abbia", "abbiamo", "avesse avuto", "avere"],
       answer: 0,
     },
   },

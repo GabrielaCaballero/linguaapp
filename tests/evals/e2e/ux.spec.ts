@@ -16,7 +16,9 @@ async function smallTargets(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const out: string[] = [];
     for (const el of document.querySelectorAll<HTMLElement>("button, a[href], input:not([type=hidden]), select, [role=button]")) {
-      const r = el.getBoundingClientRect();
+      // a control inside a <label> is tapped through its label: measure the label (WCAG 2.5.8)
+      const box = el.tagName === "INPUT" && el.closest("label") ? el.closest("label")! : el;
+      const r = box.getBoundingClientRect();
       const st = getComputedStyle(el);
       if (!r.width || !r.height || st.visibility === "hidden" || el.closest("[aria-hidden=true]")) continue;
       if (el.closest(".accent-bar")) continue; // accent keys: 40px allowed by UX doc (keyboard row)
@@ -28,7 +30,11 @@ async function smallTargets(page: Page): Promise<string[]> {
 
 async function lowContrast(page: Page): Promise<string[]> {
   return page.evaluate(() => {
-    const parse = (c: string) => (c.match(/[\d.]+/g) ?? []).map(Number);
+    // rgb()/rgba() are 0–255; CSS color(srgb …) (from color-mix) is 0–1
+    const parse = (c: string) => {
+      const n = (c.match(/[\d.]+/g) ?? []).map(Number);
+      return c.startsWith("color(") ? [...n.slice(0, 3).map((x) => x * 255), ...n.slice(3)] : n;
+    };
     const lum = ([r, g, b]: number[]) => {
       const f = (v: number) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
       return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);

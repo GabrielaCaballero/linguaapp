@@ -69,6 +69,12 @@ test.describe("CUJ-2 absolute beginner", () => {
     const eyebrow = await page.locator(".prompt-eyebrow").first().innerText();
     expect(eyebrow).toContain(T.en.newWord);
     expect(eyebrow).not.toContain(T.en.tapWhatYouHear);
+    // P1-9: with nothing learned yet, Review only and Speed round are not offered as live buttons
+    await quitLesson(page, "en");
+    await page.waitForURL((u) => !u.pathname.startsWith("/lesson"));
+    await page.getByRole("button", { name: T.en.moreOptions }).click();
+    await expect(page.getByRole("button", { name: T.en.reviewOnly })).toBeDisabled();
+    await expect(page.getByRole("button", { name: T.en.speedRound })).toBeDisabled();
     const db = await readDB(page);
     expect(db.profile.courses.de.placement).toBeFalsy();
     expect(Object.keys(db.cards).filter((k) => db.cards[k].seeded)).toHaveLength(0);
@@ -230,7 +236,23 @@ test.describe("CUJ-7 change goal", () => {
     await page.locator(".choice-card", { hasText: T.en.levelA2 }).click();
     await page.getByRole("button", { name: T.en.months(3) }).click();
     await expect(page.getByText(T.en.feas.demanding).first()).toBeVisible();
+    // P1-11: levels beyond the shipped content say so
+    await expect(page.getByText(T.en.moreUnitsSoon).first()).toBeVisible();
     await expect(page.getByText(T.en.altTitle)).toBeVisible();
+    // P1-5: nothing on the goal sheet is covered by another element (judge saw the card overlap the chips)
+    const covered = await page.evaluate(() => {
+      const out: string[] = [];
+      const root = document.querySelector("[role=dialog]") ?? document.body;
+      for (const el of root.querySelectorAll<HTMLElement>("button, .label, .h2, .caption")) {
+        el.scrollIntoView({ block: "center" });
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        if (hit && !el.contains(hit) && !hit.contains(el)) out.push((el.innerText || "").slice(0, 30));
+      }
+      return out;
+    });
+    expect(covered).toEqual([]);
     await page.getByRole("button", { name: T.en.setGoal }).or(page.getByRole("button", { name: T.en.save })).first().click();
     expect(Date.now() - start).toBeLessThan(60_000);
     const db = await readDB(page);
@@ -255,6 +277,8 @@ test.describe("CUJ-12 v1 owner upgrade", () => {
     expect(total).toBeLessThanOrEqual(30); // P1-2: no 85 min/day default
     expect(await page.evaluate(() => !!localStorage.getItem("lingua:v1-backup"))).toBe(true);
     await page.goto("/");
-    await expect(page.getByText(/Milestones|Hitos|Ties/)).toHaveCount(0);
+    await expect(page.getByText(/Milestones|Hitos/)).toHaveCount(0);
+    // the old Ties log is offered once as a download card (spec §4.11), nowhere else
+    await expect(page.getByText(T.es.tiesTitle)).toHaveCount(1);
   });
 });

@@ -19,6 +19,7 @@ export default defineConfig({
     viewport: { width: 390, height: 844 },
     baseURL: `http://localhost:${PORT}`,
     serviceWorkers: "block",
+    actionTimeout: 10_000,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

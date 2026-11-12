@@ -86,7 +86,7 @@ export const unit: Unit = {
       id: "essen", legacyId: "de-p-essen", type: "word", pos: "verb", target: "essen",
       gloss: { es: "comer", en: "to eat" },
       forms: { ich: "esse", du: "isst", "er/sie/es": "isst", Sie: "essen" },
-      distractors: ["trinken", "messen", "Essig"],
+      distractors: ["trinken", "messen", "vergessen"],
       note: { es: "Irregular: du isst, er isst.", en: "Irregular: du isst, er isst. English t → German ss: eat → essen." },
       tags: ["verb", "food", "goethe-a1"],
     },
