@@ -90,7 +90,10 @@ export function nextItem(bank: PlacementItem[], s: PlacementState): PlacementIte
 
 /** Record an answer. "I don't know" = correct:false. es→it false friends weigh ×1.5. */
 export function answer(s: PlacementState, item: PlacementItem, correct: boolean, base: BaseLang, bankSize = Infinity): PlacementState {
-  const weight = item.falseFriend && item.lang === "it" && base === "es" ? 1.5 : 1;
+  // es→it: false friends count more, cognate-friendly reading counts less (Spanish speakers
+  // read Italian far above their real level).
+  const esIt = item.lang === "it" && base === "es";
+  const weight = esIt && item.falseFriend ? 1.5 : esIt && item.skill === "reading" ? 0.6 : 1;
   const responses = [...s.responses, { id: item.id, b: item.b, correct, weight, skill: item.skill }];
   const { theta, se } = eap(s.mu, responses);
   const n = responses.length;
@@ -117,20 +120,52 @@ export function band(theta: number): Cefr {
 const ORDER: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
 export const cefrRank = (c: Cefr) => ORDER.indexOf(c);
 
-/** Start unit = the first unit whose cefr ≥ placed band. Beyond the slice → last unit, flagged. */
-export function startUnit(units: Unit[], placed: Cefr): { index: number; beyond: boolean } {
+const BAND_LO: Record<Cefr, number> = { A0: -3, "A1.1": -2, "A1.2": -1, A2: 0, B1: 1 };
+
+/**
+ * A Rasch-scale difficulty per unit. Units sharing a CEFR band are spread evenly across it, in
+ * path order. Content tags are coarse (units 2–6 are all "A1.1"), so the highest band in the
+ * slice is stretched over the next band too: its last units sit near the A1.2 ceiling.
+ */
+export function unitDifficulty(units: Unit[]): Map<number, number> {
   const sorted = [...units].sort((a, b) => a.index - b.index);
-  const u = sorted.find((x) => cefrRank(x.cefr) >= cefrRank(placed));
+  const top = sorted.reduce((m, u) => Math.max(m, cefrRank(u.cefr)), 0);
+  const out = new Map<number, number>();
+  for (const c of ORDER) {
+    const group = sorted.filter((u) => u.cefr === c);
+    if (!group.length) continue;
+    const lo = BAND_LO[c];
+    const hi = cefrRank(c) === top && c !== "B1" ? lo + 2 : lo + 1;
+    group.forEach((u, k) => out.set(u.index, lo + ((k + 0.5) * (hi - lo)) / group.length));
+  }
+  return out;
+}
+
+/**
+ * Start unit = the first unit the learner has probably NOT mastered, judged conservatively
+ * from the lower edge of the estimate (θ − SE): mastered means θ − SE ≥ b(unit) + 0.3.
+ * Beyond the slice → the last unit, flagged.
+ */
+export function startUnit(units: Unit[], theta: number, se = 0): { index: number; beyond: boolean } {
+  const sorted = [...units].sort((a, b) => a.index - b.index);
+  const b = unitDifficulty(sorted);
+  const low = theta - se;
+  const u = sorted.find((x) => low < (b.get(x.index) ?? 0) + 0.3);
   if (u) return { index: u.index, beyond: false };
   return { index: sorted[sorted.length - 1]?.index ?? 1, beyond: true };
 }
 
-/** Items to seed as "probably known": every unit item in bands below the placed one, plus explicit seeds. */
-export function seeds(units: Unit[], placed: Cefr, bank: PlacementItem[], s: PlacementState): string[] {
+/**
+ * Items to seed as "probably known": only units strictly before the start unit (never the
+ * start unit or later), plus a placement item's explicit seeds when they fall in those units.
+ */
+export function seeds(units: Unit[], startIndex: number, bank: PlacementItem[], s: PlacementState): string[] {
+  const before = units.filter((u) => u.index < startIndex);
+  const allowed = new Set(before.flatMap((u) => u.items.map((i) => i.id)));
   const out = new Set<string>();
-  for (const u of units) if (cefrRank(u.cefr) < cefrRank(placed)) for (const i of u.items) if (i.type !== "bridge") out.add(i.id);
+  for (const u of before) for (const i of u.items) if (i.type !== "bridge") out.add(i.id);
   const right = new Set(s.responses.filter((r) => r.correct).map((r) => r.id));
-  for (const it of bank) if (right.has(it.id)) for (const id of it.seeds ?? []) out.add(id);
+  for (const it of bank) if (right.has(it.id)) for (const id of it.seeds ?? []) if (allowed.has(id)) out.add(id);
   return [...out];
 }
 

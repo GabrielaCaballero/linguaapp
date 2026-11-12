@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { BaseLang, TargetLang } from "@/content/schema";
 import type { Anchor, Experience, Goal } from "@/lib/model";
 import { getDB, legacy, replaceDB, useDB } from "@/lib/store";
@@ -9,6 +9,7 @@ import { dict } from "@/lib/i18n";
 import { LANG_NAME } from "@/lib/content";
 import { priorMean } from "@/lib/placement";
 import { clock } from "@/lib/dates";
+import { lessonHref } from "@/lib/nav";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse } from "@/lib/actions";
 import { parseBackup } from "@/lib/backup";
 import { hasVoice, voicesReady } from "@/lib/speech";
@@ -22,9 +23,19 @@ interface Step { id: StepId; lang?: TargetLang }
 interface LangDraft { explainIn: BaseLang; exp?: Experience; canDo: (number | null)[]; outcome?: PlacementOutcome; goal?: Goal }
 
 export default function Onboarding() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <OnboardingRoute />
+    </Suspense>
+  );
+}
+
+/** Keyed on the URL nonce so "Add a language" always starts a fresh flow. */
+function OnboardingRoute() {
   const db = useDB();
+  const sp = useSearchParams();
   if (!db) return <Loading />;
-  return <Flow />;
+  return <Flow key={sp.toString()} />;
 }
 
 function Flow() {
@@ -300,6 +311,7 @@ function Flow() {
             initial={d?.goal ?? initial.profile.courses[lang!]?.goal}
             t={t}
             onSave={onGoal}
+            otherMinutes={(["it", "de"] as TargetLang[]).filter((l) => l !== lang).reduce((n, l) => n + (drafts[l]?.goal?.minutesPerDay ?? (langs.includes(l) ? 0 : initial.profile.courses[l]?.goal?.minutesPerDay ?? 0)), 0)}
           />
         </>
       );
@@ -330,7 +342,7 @@ function Flow() {
               className="btn btn-primary"
               onClick={() => {
                 commit();
-                router.replace("/lesson?kind=auto");
+                router.replace(lessonHref("auto"));
               }}
             >
               {t.startFirst}

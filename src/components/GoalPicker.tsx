@@ -11,16 +11,20 @@ import { Icon } from "./icons";
 import { Ring, Sheet } from "./ui";
 
 /** Goal step: pick a goal type, see the live commitment card (min/day + label + date), save. */
-export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial, t, onSave, cta }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void; cta?: string }) {
+/** Content currently covers up to this level; goals beyond it are honest about "more units coming". */
+const COURSE_TOP: GoalLevel = "A1";
+
+export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial, t, onSave, cta, otherMinutes = 0 }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void; cta?: string; otherMinutes?: number }) {
   const [now] = useState(() => Date.now());
   const locale = localeOf(appLang);
-  const [kind, setKind] = useState<GoalKind>(initial?.kind ?? "level");
+  const [kind, setKind] = useState<GoalKind>(initial?.kind ?? "steady");
   const reachable = (["A1.1", "A1", "A2", "B1"] as GoalLevel[]).filter((l) => HOURS[l] > CURRENT_HOURS[current]);
   const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B1" };
   const [target, setTarget] = useState<GoalLevel>(initial?.target && reachable.includes(initial.target) ? initial.target : reachable.includes(DEFAULT[current]) ? DEFAULT[current] : reachable[0] ?? "B1");
   const [months, setMonths] = useState<number | null>(initial?.by ? null : 6);
   const [date, setDate] = useState<string>(initial?.by ?? toISO(addMonths(new Date(now), 6)));
-  const [steadyMin, setSteadyMin] = useState<number>(initial?.kind === "steady" ? initial.minutesPerDay : 10);
+  // Sane default: a steady 15 min/day, keeping all languages together at ≤ 30 min/day.
+  const [steadyMin, setSteadyMin] = useState<number>(initial?.kind === "steady" ? initial.minutesPerDay : Math.max(5, Math.min(15, Math.floor((30 - otherMinutes) / 5) * 5)));
   const [classes, setClasses] = useState<number>(initial?.classHours ?? 0);
   const [showClasses, setShowClasses] = useState((initial?.classHours ?? 0) > 0);
   const [info, setInfo] = useState(false);
@@ -34,6 +38,9 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const steadyDate = projectedDate({ base, lang, current, target: target ?? stTarget, minPerDay: steadyMin, now, daysPerWeek, classHoursPerWeek: classes });
 
   const minutes = kind === "maintain" ? 5 : kind === "steady" ? steadyMin : plan.minPerDay;
+  const over = (kind === "level" || kind === "trip") && plan.rawMinPerDay > 90;
+  const shownMin = over ? "90+" : String(minutes);
+  const beyondCourse = (kind === "level" || kind === "steady") && HOURS[target] > HOURS[COURSE_TOP];
   const label = kind === "maintain" ? "relaxed" : kind === "steady" ? (steadyMin <= 15 ? "relaxed" : steadyMin <= 30 ? "steady" : steadyMin <= 45 ? "ambitious" : "demanding") : plan.label;
   const amber = (kind === "level" || kind === "trip") && plan.label === "demanding";
   const levelName: Record<GoalLevel, string> = { "A1.1": t.levelA11, A1: t.levelA1, A2: t.levelA2, B1: t.levelB1 };
@@ -79,7 +86,10 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
             {reachable.map((l) => (
               <button key={l} className="choice-card" style={{ minHeight: 56, padding: "10px 16px" }} aria-pressed={target === l} onClick={() => setTarget(l)}>
                 <span className="pill" style={{ minWidth: 48, justifyContent: "center" }}>{l}</span>
-                <span className="label">{levelName[l]}</span>
+                <span className="label grow">
+                  {levelName[l]}
+                  {HOURS[l] > HOURS[COURSE_TOP] && <span className="caption" style={{ display: "block" }}>{t.moreUnitsSoon}</span>}
+                </span>
                 <span className="check"><Icon name="check" size={16} strokeWidth={3} /></span>
               </button>
             ))}
@@ -107,7 +117,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
           <div className="stack" style={{ gap: 8 }}>
             <div className="label">{t.howMuch}</div>
             <div className="chips">
-              {[5, 10, 20, 30].map((m) => (
+              {[5, 10, 15, 20, 30].map((m) => (
                 <button key={m} className="chip" aria-pressed={steadyMin === m} onClick={() => setSteadyMin(m)}>
                   {t.minutesShort(m)}
                 </button>
@@ -146,15 +156,12 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
             )}
           </div>
         )}
-        <p className="caption" style={{ margin: 0 }}>{t.estimate}</p>
-      </div>
-      <div className="bottom-bar goal-bar">
         <div className={`commit${amber ? " amber" : ""}`} aria-live="polite">
           <Ring value={Math.min(1, minutes / 60)} size={64} stroke={8}>
-            <span className="caption tabular" style={{ fontWeight: 700, color: "var(--text)" }}>{minutes}</span>
+            <span className="caption tabular" style={{ fontWeight: 700, color: "var(--text)" }}>{shownMin}</span>
           </Ring>
           <div className="grow">
-            <div className="h2">{t.goalCardMin(minutes)}</div>
+            <div className="h2">{over ? t.goalCardMinOver : t.goalCardMin(minutes)}</div>
             <div className="label muted">
               {kind === "maintain"
                 ? t.goalCardMaintain
@@ -169,8 +176,12 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
               </button>
             </div>
             {plan.alreadyThere && (kind === "level" || kind === "trip") && <div className="caption">{t.alreadyThere}</div>}
+            {beyondCourse && <div className="caption">{t.beyondCourse}</div>}
           </div>
         </div>
+        <p className="caption" style={{ margin: 0 }}>{t.estimate}</p>
+      </div>
+      <div className="bottom-bar">
         <button className="btn btn-primary" onClick={save}>{cta ?? t.setGoal}</button>
       </div>
       <Sheet open={info} onClose={() => setInfo(false)} label={t.assumptionsTitle}>

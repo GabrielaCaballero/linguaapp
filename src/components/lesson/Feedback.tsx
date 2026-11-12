@@ -69,7 +69,8 @@ export function Feedback({
   const cls = v === "correct" ? "ok" : v === "almost" ? "almost" : "miss";
   const head = v === "correct" ? t.correct : v === "almost" ? t.almost : t.notQuite;
   const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
-  const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](check.detail?.want ?? item.target) : undefined;
+  const noteArg = check?.reason === "umlaut" ? umlautPair(check.detail?.got ?? "", check.detail?.want ?? item.target) : check?.detail?.want ?? item.target;
+  const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](noteArg) : undefined;
   const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) : undefined);
   const full = per(item.note, base);
   const btnCls = v === "correct" ? "btn-ok" : v === "almost" ? "btn-almost" : "btn-primary";
@@ -148,4 +149,11 @@ export function Feedback({
       </div>
     </div>
   );
+}
+
+/** "ü ≠ u · Tschüss": the actual umlaut the learner dropped. */
+function umlautPair(got: string, want: string): string {
+  const plain: Record<string, string> = { ä: "a", ö: "o", ü: "u", Ä: "A", Ö: "O", Ü: "U" };
+  for (const c of want) if (plain[c] && !got.includes(c)) return `${c} ≠ ${plain[c]} · ${want}`;
+  return want;
 }

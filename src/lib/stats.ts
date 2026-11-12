@@ -167,7 +167,11 @@ export function weeklyCheck(db: DB, lang: TargetLang, now: number): WeeklyCheck 
   if (now - g.setAt < 7 * DAY) return null;
   const key = `checkin-${lang}-${startOfWeek(now)}`;
   if (db.profile.seen?.[key]) return null;
+  // Coming back from a break (≥ 7 days) is a "welcome back", not a verdict on the pace.
+  const last = db.sessions.filter((s) => s.lang === lang).at(-1)?.t;
+  if (last === undefined || now - last >= 7 * DAY) return null;
   const avg = Math.round(avgMinutes(db, lang, now) * 7 / (db.profile.settings.daysPerWeek || 5));
+  if (avg < 1) return null;
   const current = c.placement?.cefr ?? "A0";
   const base = c.explainIn;
   const daysPerWeek = db.profile.settings.daysPerWeek;

@@ -24,9 +24,10 @@ export interface SessionSummary {
   correct: number;
   typedMiss: boolean;
   welcomeBack: boolean;
+  confUsed: number;
 }
 
-export function Results({ t, summary, onDone }: { t: Dict; summary: SessionSummary; onDone: () => void }) {
+export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: SessionSummary; onDone: () => void; onMore?: () => void }) {
   const db = useDB() ?? getDB();
   const [now] = useState(() => Date.now());
   const mins = todayMinutes(db, now, summary.lang);
@@ -35,7 +36,7 @@ export function Results({ t, summary, onDone }: { t: Dict; summary: SessionSumma
   const before = Math.max(0, mins - summary.seconds / 60);
   const tomorrowEnd = startOfDay(now) + 2 * DAY;
   const tomorrow = dueCount(db, summary.lang, tomorrowEnd);
-  const insight = summary.sureWrong > 0 ? t.insightSureWrong(summary.sureWrong) : summary.guessRight > 0 ? t.insightGuessRight(summary.guessRight) : summary.graded >= 5 && summary.correct / summary.graded > 0.8 ? t.insightCalibrated : t.insightSpacing;
+  const insight = summary.sureWrong > 0 ? t.insightSureWrong(summary.sureWrong) : summary.guessRight > 0 ? t.insightGuessRight(summary.guessRight) : summary.confUsed >= 3 && summary.graded >= 5 && summary.correct / summary.graded > 0.8 ? t.insightCalibrated : summary.toFix.length > 0 ? t.insightToFix(summary.toFix.length) : t.insightSpacing;
   const offerSounds = !db.profile.settings.sounds && !db.profile.seen?.soundsOffer;
   const offerTutor = summary.typedMiss && !getConfig() && !db.profile.seen?.tutorOffer;
 
@@ -75,9 +76,14 @@ export function Results({ t, summary, onDone }: { t: Dict; summary: SessionSumma
         )}
       </div>
       <div className="bottom-bar">
-        <button className="btn btn-primary" onClick={onDone} autoFocus>
+        <button className={`btn ${reached || !onMore ? "btn-primary" : "btn-secondary"}`} onClick={onDone} autoFocus>
           {t.continue}
         </button>
+        {onMore && !reached && (
+          <button className="btn btn-primary" onClick={onMore}>
+            {t.oneMore(db.profile.settings.sessionMinutes)}
+          </button>
+        )}
       </div>
     </main>
   );

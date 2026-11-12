@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDB } from "@/lib/store";
-import { gl, itemById, LANG_NAME } from "@/lib/content";
+import { gl, itemById } from "@/lib/content";
 import { addCustomWord, removeCustomWord } from "@/lib/actions";
 import { courseLangs } from "@/lib/stats";
 import { hasVoice } from "@/lib/speech";
@@ -37,7 +37,7 @@ export default function WordsPage() {
       <section className="card stack" style={{ marginTop: 8 }}>
         <div className="h2" style={{ fontSize: "1.0625rem" }}>{t.addWords}</div>
         <div className="caption">{t.addWordsSub}</div>
-        <input className="input" placeholder={t.wordTarget(LANG_NAME[lang])} value={target} onChange={(e) => setTarget(e.target.value)} lang={lang} autoCapitalize="off" autoCorrect="off" spellCheck={false} aria-label={t.wordTarget(LANG_NAME[lang])} />
+        <input className="input" placeholder={t.wordTarget(t.langName[lang])} value={target} onChange={(e) => setTarget(e.target.value)} lang={lang} autoCapitalize="off" autoCorrect="off" spellCheck={false} aria-label={t.wordTarget(t.langName[lang])} />
         <input className="input" placeholder={t.wordMeaning} value={meaning} onChange={(e) => setMeaning(e.target.value)} aria-label={t.wordMeaning} />
         <button className="btn btn-primary" disabled={!target.trim() || !meaning.trim()} onClick={() => { addCustomWord(lang, target, meaning); setTarget(""); setMeaning(""); setToast(t.added); }}>
           <Icon name="plus" size={20} /> {t.addWord}

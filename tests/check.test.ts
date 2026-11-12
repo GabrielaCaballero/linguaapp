@@ -110,6 +110,12 @@ const cases: Case[] = [
   ["hallo lowercase correct", byId("de-u01-hallo"), "hallo", "correct"],
   ["Entschuldigung typo x2", make("de", "Entschuldigung"), "Entschuldigun", "almost", "typo"],
   ["short word typo not allowed", make("de", "Brot"), "Brod", "wrong"],
+  // register (judge P1-7) and Spanish transfer
+  ["du for Sie → register note", byId("de-u01-sie"), "Wie heisst du?", "wrong", "register"],
+  ["tu for Lei → register note", make("it", "Lei è italiana?", { register: "formal" }), "tu sei italiana?", "wrong", "register"],
+  ["Sie for du (informal item) → register", make("de", "Wie heißt du?", { register: "informal" }), "Wie heißen Sie?", "wrong", "register"],
+  ["lowercase sie (she) is not a register error", make("de", "Wie heißt du?", { register: "informal" }), "wie heißt sie", "wrong", "closed-class"],
+  ["chao → Spanish spelling note", it_("it-u01-ciao"), "chao", "wrong", "spanish"],
 ];
 
 describe("checker golden set", () => {
@@ -139,5 +145,15 @@ describe("checker golden set", () => {
     const r = check("citta", byId("it-u01-citta"), { lexicon: itCourse.lexicon, base: "es" });
     expect(r.score).toBeGreaterThan(0);
     expect(r.score).toBeLessThan(1);
+  });
+});
+
+import { isCognate } from "@/components/lesson/Exercises";
+describe("transparent cognates skip guess-first", () => {
+  it("italiano ↔ italiano/a is a cognate; spagnolo ↔ español is not", () => {
+    const mk = (target: string, es: string): Item => ({ id: "x", lang: "it", unit: "it-u01", type: "word", cefr: "A0", target, gloss: { es, en: es }, spoken: target, tags: [] });
+    expect(isCognate(mk("italiano", "italiano/a"), "es")).toBe(true);
+    expect(isCognate(mk("spagnolo", "español/a"), "es")).toBe(false);
+    expect(isCognate(mk("il caffè", "el café"), "es")).toBe(true);
   });
 });

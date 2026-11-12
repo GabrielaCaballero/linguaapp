@@ -29,6 +29,10 @@ export interface BuildInput {
   minutes: number;
   kind: SessionKind;
   rand?: () => number;
+  /** Yesterday's misses: always first in the next session. */
+  priority?: string[];
+  /** Items already practised in this sitting (extension chunks skip them). */
+  exclude?: Set<string>;
 }
 
 export interface Built {
@@ -90,7 +94,10 @@ export function buildSession(i: BuildInput): Built {
   // never-rated cards (introduced but the follow-up never happened) count as due too
   const unrated = langCards.filter((c) => c.state === 0).sort((a, b) => a.introducedAt - b.introducedAt);
   const reviewCap = i.kind === "new" ? 0 : Math.min(MAX_REVIEWS_PER_CHUNK, dailyLeft);
-  const reviewIds = interleave([...due, ...unrated].map((c) => c.id), byId).slice(0, reviewCap);
+  const excl = i.exclude ?? new Set<string>();
+  const prio = (i.priority ?? []).filter((id) => i.cards[id] && byId.has(id) && !excl.has(id)).slice(0, MAX_REVIEWS_PER_CHUNK);
+  const prioSet = new Set(prio);
+  const reviewIds = [...prio, ...interleave([...due, ...unrated].map((c) => c.id).filter((id) => !prioSet.has(id) && !excl.has(id)), byId)].slice(0, Math.max(reviewCap, i.kind === "new" ? 0 : prio.length));
 
   // 2. new items in unit order from the learner's current unit (custom words from class first)
   let newN = welcomeBack || i.kind === "review" ? 0 : i.kind === "new" ? 8 : newBudget(shift);
@@ -98,6 +105,11 @@ export function buildSession(i: BuildInput): Built {
   const fresh = i.items.filter((x) => !i.cards[x.id] && (i.unitIndexOf(x) === 0 || i.unitIndexOf(x) >= i.startUnit));
   fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1));
   const newIds = interleave(fresh.map((x) => x.id), byId, false).slice(0, newN);
+  // Start with meaning, not an audio-only spelling guess.
+  if (newIds.length > 1 && byId.get(newIds[0])?.type === "sound") {
+    const k = newIds.findIndex((id) => byId.get(id)?.type !== "sound");
+    if (k > 0) newIds.unshift(newIds.splice(k, 1)[0]);
+  }
 
   // 3. assemble: reviews interleaved with intros; each intro's follow-up lands 3–6 tasks later
   const seq: Task[] = [];
@@ -133,7 +145,7 @@ export function buildSession(i: BuildInput): Built {
   if (seq.length < target && i.kind !== "new") {
     const inSeq = new Set(seq.map((t) => t.itemId));
     const practice = langCards
-      .filter((c) => !inSeq.has(c.id) && c.state !== 0)
+      .filter((c) => !inSeq.has(c.id) && !excl.has(c.id) && c.state !== 0)
       .map((c) => ({ id: c.id, r: retrievability(c, i.now) }))
       .sort((a, b) => a.r - b.r)
       .slice(0, target - seq.length);

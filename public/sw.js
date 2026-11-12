@@ -42,6 +42,22 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// The page sends the static chunks it has loaded (incl. lazily loaded ones) so they are
+// available on an offline cold start even if the install pass didn't see them.
+self.addEventListener("message", (event) => {
+  const d = event.data;
+  if (!d || d.type !== "cache-urls" || !Array.isArray(d.urls)) return;
+  event.waitUntil(
+    caches.open(STATIC).then((cache) =>
+      Promise.all(
+        d.urls
+          .filter((u) => typeof u === "string" && new URL(u, self.location.origin).origin === self.location.origin && new URL(u, self.location.origin).pathname.startsWith("/_next/static/"))
+          .map((u) => cache.match(u).then((hit) => hit || fetch(u).then((r) => r.ok && cache.put(u, r)).catch(() => {}))),
+      ),
+    ),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;

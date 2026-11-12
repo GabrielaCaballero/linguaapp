@@ -29,7 +29,14 @@ export function Boot() {
     window.addEventListener("online", sync);
     window.addEventListener("offline", sync);
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      const reg = () => navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => {});
+      const sendLoaded = () =>
+        navigator.serviceWorker.ready
+          .then((r) => r.active?.postMessage({ type: "cache-urls", urls: performance.getEntriesByType("resource").map((e) => e.name) }))
+          .catch(() => {});
+      const reg = () => {
+        navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then(sendLoaded, () => {});
+        setTimeout(sendLoaded, 8000);
+      };
       if (document.readyState === "complete") reg();
       else window.addEventListener("load", reg, { once: true });
     }

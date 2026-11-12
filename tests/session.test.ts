@@ -155,3 +155,21 @@ describe("mode ladder", () => {
     expect(articleOf(deCourse.units[1].items[0])?.article).toBe("der");
   });
 });
+
+describe("beginner start (judge P1-8)", () => {
+  it("a session never opens with an audio-only sound item when a meaning item exists", () => {
+    const b = buildSession(input());
+    const first = b.tasks.find((t) => t.role === "intro")!;
+    expect(items.find((x) => x.id === first.itemId)!.type).not.toBe("sound");
+  });
+  it("yesterday's misses come first", () => {
+    const cards = { "it-u01-ciao": dueCard("it-u01-ciao", 1), "it-u01-grazie": dueCard("it-u01-grazie", 5) };
+    const b = buildSession(input({ cards, priority: ["it-u01-ciao"] }));
+    expect(b.tasks[0].itemId).toBe("it-u01-ciao");
+  });
+  it("extension chunks skip items already practised", () => {
+    const cards = { "it-u01-ciao": dueCard("it-u01-ciao", 1) };
+    const b = buildSession(input({ cards, exclude: new Set(["it-u01-ciao"]) }));
+    expect(b.tasks.some((t) => t.itemId === "it-u01-ciao")).toBe(false);
+  });
+});

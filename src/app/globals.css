@@ -319,7 +319,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 
 .conf { display: flex; align-items: center; gap: var(--s2); }
 .conf .caption { margin-right: auto; }
-.conf .chip { min-height: 36px; padding: 0 var(--s3); font-size: var(--t-caption); }
+.conf .chip { min-height: 44px; padding: 0 var(--s3); font-size: var(--t-caption); }
 
 .teach { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s5); display: flex; flex-direction: column; gap: var(--s3); animation: rise var(--d-med) var(--ease-out); }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }

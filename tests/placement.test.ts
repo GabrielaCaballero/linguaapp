@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { answer, band, beginner, nextItem, p, priorMean, seeds, start, startUnit, MAX_ITEMS, MIN_ITEMS, type PlacementState } from "@/lib/placement";
+import { answer, band, beginner, nextItem, p, priorMean, seeds, start, startUnit, unitDifficulty, MAX_ITEMS, MIN_ITEMS, type PlacementState } from "@/lib/placement";
+import { courses } from "@/content";
 import { itCourse } from "./fixtures/mini-course";
 import type { PlacementItem } from "@/content/schema";
 
@@ -109,17 +110,49 @@ describe("placement engine", () => {
     expect(band(1.2)).toBe("B1");
   });
 
-  it("start unit = first unit with cefr ≥ band; beyond the slice is flagged", () => {
-    expect(startUnit(itCourse.units, "A0")).toEqual({ index: 1, beyond: false });
-    expect(startUnit(itCourse.units, "A1.1")).toEqual({ index: 2, beyond: false });
-    expect(startUnit(itCourse.units, "B1").beyond).toBe(true);
+  it("fixture: start unit from θ, conservative with SE", () => {
+    expect(startUnit(itCourse.units, -3, 0.5)).toEqual({ index: 1, beyond: false });
+    expect(startUnit(itCourse.units, -1.6, 0.4).index).toBe(2);
+    expect(startUnit(itCourse.units, 2, 0.4).beyond).toBe(true);
   });
 
-  it("seeds every unit item in lower bands", () => {
+  it("seeds only units strictly before the start unit (bridges excluded)", () => {
     const s = start(0);
-    const ids = seeds(itCourse.units, "A1.1", itCourse.placement, s);
+    const ids = seeds(itCourse.units, 2, itCourse.placement, s);
     expect(ids).toContain("it-u01-ciao");
     expect(ids).not.toContain("it-u02-caffe");
-    expect(ids).not.toContain("it-u01-burro"); // bridges are tips, not seeded
+    expect(ids).not.toContain("it-u01-burro");
   });
+});
+
+// P0-2 (judge): with the REAL content (units 2–6 all tagged A1.1), placement above A1.1 must
+// not jump to Unit 6 and seed the whole course.
+describe("placement → units with the real content", () => {
+  for (const lang of ["it", "de"] as const) {
+    const us = courses[lang].units;
+    const last = Math.max(...us.map((u) => u.index));
+    it(`${lang}: unit difficulties rise along the path`, () => {
+      const b = unitDifficulty(us);
+      const xs = [...us].sort((a, c) => a.index - c.index).map((u) => b.get(u.index)!);
+      for (let k = 1; k < xs.length; k++) expect(xs[k]).toBeGreaterThan(xs[k - 1]);
+    });
+    it(`${lang}: an A1.2 learner (θ −0.5, SE 0.5) starts mid-course, not at the last unit`, () => {
+      const su = startUnit(us, -0.5, 0.5);
+      expect(su.index).toBeGreaterThan(1);
+      expect(su.index).toBeLessThan(last);
+      const ids = seeds(us, su.index, courses[lang].placement, start(-0.5));
+      const startItems = us.find((u) => u.index === su.index)!.items.map((i) => i.id);
+      for (const id of startItems) expect(ids).not.toContain(id);
+      const total = us.reduce((n, u) => n + u.items.length, 0);
+      expect(ids.length).toBeLessThan(total * 0.75);
+    });
+    it(`${lang}: an A1.1 learner starts at unit 2 or 3`, () => {
+      expect([2, 3]).toContain(startUnit(us, -1.6, 0.5).index);
+    });
+    it(`${lang}: every unit is reachable by some θ`, () => {
+      const reached = new Set<number>();
+      for (let th = -4; th <= 3; th += 0.05) reached.add(startUnit(us, th, 0.45).index);
+      for (const u of us) expect(reached.has(u.index)).toBe(true);
+    });
+  }
 });

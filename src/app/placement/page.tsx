@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
 import { useDB } from "@/lib/store";
 import { priorMean } from "@/lib/placement";
@@ -12,20 +12,28 @@ import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/compone
 
 /** Retake placement for an existing course (from Settings). */
 export default function PlacementPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <PlacementRoute />
+    </Suspense>
+  );
+}
+
+function PlacementRoute() {
+  const sp = useSearchParams();
+  return <Retake key={sp.toString()} lang={sp.get("lang") === "de" ? "de" : "it"} />;
+}
+
+function Retake({ lang }: { lang: TargetLang }) {
   const db = useDB();
   const t = useT(db);
   const router = useRouter();
-  const [lang, setLang] = useState<TargetLang | null>(null);
   const [voices, setVoices] = useState(false);
   const [outcome, setOutcome] = useState<PlacementOutcome | null>(null);
   useEffect(() => {
-    const l = new URLSearchParams(window.location.search).get("lang");
-    voicesReady().then(() => {
-      setVoices(true);
-      setLang(l === "de" ? "de" : "it");
-    });
+    voicesReady().then(() => setVoices(true));
   }, []);
-  if (!db || !lang) return <Loading />;
+  if (!db) return <Loading />;
   const c = db.profile.courses[lang];
   if (!c) {
     router.replace("/");

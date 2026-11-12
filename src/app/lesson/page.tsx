@@ -1,12 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Item, TargetLang } from "@/content/schema";
 import type { CardV2, Confidence, Mode, Verdict } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
 import { itemById, itemsFor, lexicon, units } from "@/lib/content";
 import { buildSession, chooseMode, lastSessionAt, requeue, type Built, type SessionKind, type Task } from "@/lib/session";
+import { toFix } from "@/lib/stats";
+import { startOfDay } from "@/lib/dates";
+import { lessonHref } from "@/lib/nav";
 import { endSession, introduce, recordAnswer, regrade, sessionStart } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { feel } from "@/lib/feel";
@@ -32,35 +35,45 @@ interface FB {
 const SPEED_SECONDS = 60;
 
 export default function LessonPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <LessonRoute />
+    </Suspense>
+  );
+}
+
+/** Keyed on the URL (which carries a per-visit nonce): every visit is a fresh session. */
+function LessonRoute() {
+  const sp = useSearchParams();
+  return <LessonEntry key={sp.toString()} kindParam={sp.get("kind")} unitParam={sp.get("unit")} />;
+}
+
+function LessonEntry({ kindParam, unitParam }: { kindParam: string | null; unitParam: string | null }) {
   const db = useDB();
   const t = useT(db);
   const router = useRouter();
-  const [params, setParams] = useState<{ kind: SessionKind; unit?: number } | null>(null);
   const [canListen, setCanListen] = useState<boolean | null>(null);
+  const kind: SessionKind = kindParam === "review" || kindParam === "new" || kindParam === "speed" ? kindParam : "auto";
+  const u = Number(unitParam);
 
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search);
-    const k = q.get("kind");
-    const kind: SessionKind = k === "review" || k === "new" || k === "speed" ? k : "auto";
-    const u = Number(q.get("unit"));
     let alive = true;
     voicesReady().then(() => {
       if (!alive) return;
       const d = getDB();
       setCanListen(hasVoice(d.profile.activeLang) && d.profile.settings.listening);
-      setParams({ kind, unit: u > 0 ? u : undefined });
     });
     return () => {
       alive = false;
     };
   }, []);
 
-  if (!db || !params || canListen === null) return <Loading />;
+  if (!db || canListen === null) return <Loading />;
   if (!db.profile.courses[db.profile.activeLang]) {
     router.replace("/");
     return <Loading />;
   }
-  return <Player kind={params.kind} unit={params.unit} canListen={canListen} t={t} />;
+  return <Player kind={kind} unit={u > 0 ? u : undefined} canListen={canListen} t={t} />;
 }
 
 function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number; canListen: boolean; t: ReturnType<typeof useT> }) {
@@ -72,10 +85,11 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   const settings = db.profile.settings;
   const lex = lexicon(lang);
 
-  const [built] = useState<Built>(() => {
+  const make = (exclude?: Set<string>): Built => {
     const d = getDB();
     const items = itemsFor(lang, d, base).filter((i) => settings.bridgeTips || i.type !== "bridge");
     const idx = new Map(units(lang).map((u) => [u.id, u.index]));
+    const now = Date.now();
     return buildSession({
       lang,
       items,
@@ -84,11 +98,14 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       lastSessionAt: lastSessionAt(d, lang),
       startUnit: unit ?? course.unit ?? 1,
       unitIndexOf: (i) => idx.get(i.unit) ?? 0,
-      now: Date.now(),
+      now,
       minutes: settings.sessionMinutes,
       kind,
+      priority: exclude ? undefined : [...new Set([...d.sessions.filter((x) => x.lang === lang && x.t >= startOfDay(now)).flatMap((x) => x.toFix), ...toFix(d, lang, now)])],
+      exclude,
     });
-  });
+  };
+  const [built] = useState<Built>(() => make());
   const pool = useMemo(() => itemsFor(lang, getDB(), base), [lang, base]);
 
   const [tasks, setTasks] = useState<Task[]>(built.tasks);
@@ -104,8 +121,9 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   const [speedLeft, setSpeedLeft] = useState(SPEED_SECONDS);
   const [hist, setHist] = useState<boolean[]>([]);
   const counts = useRef(new Map<string, number>());
-  const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false });
+  const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 });
   const finished = useRef(false);
+  const extensions = useRef(0);
   const speed = kind === "speed";
 
   useEffect(() => {
@@ -119,7 +137,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
     const seconds = Math.round((Date.now() - startedAt) / 1000);
     endSession({ lang, seconds, tasks: idx + 1, graded: s.graded, correct: s.correct, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], startedAt });
     feel("finish", getDB().profile.settings);
-    setSummary({ lang, seconds, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], sureWrong: s.sureWrong, guessRight: s.guessRight, graded: s.graded, correct: s.correct, typedMiss: s.typedMiss, welcomeBack: built.welcomeBack });
+    setSummary({ lang, seconds, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], sureWrong: s.sureWrong, guessRight: s.guessRight, graded: s.graded, correct: s.correct, typedMiss: s.typedMiss, welcomeBack: built.welcomeBack, confUsed: s.confUsed });
   }, [lang, idx, startedAt, built.welcomeBack]);
 
   // speed round timer
@@ -166,25 +184,38 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
     setTaskStart(Date.now());
     const elapsed = (Date.now() - startedAt) / 1000;
     const timeUp = !speed && elapsed >= settings.sessionMinutes * 60;
-    if (idx + 1 >= tasks.length || timeUp) finish();
-    else setIdx((i) => i + 1);
-  }, [idx, tasks.length, finish, speed, settings.sessionMinutes, startedAt]);
+    if (timeUp) return finish();
+    if (idx + 1 < tasks.length) return setIdx((i) => i + 1);
+    // Out of tasks before the time is up: keep the "5 minutes" honest with another chunk.
+    if (!speed && extensions.current < 8) {
+      extensions.current++;
+      const more = make(new Set(tasks.map((x) => x.itemId))).tasks;
+      if (more.length) {
+        setTasks((ts) => [...ts, ...more.map((m) => ({ ...m, key: `x${extensions.current}-${m.key}` }))]);
+        setIdx((i) => i + 1);
+        return;
+      }
+    }
+    finish();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, tasks, finish, speed, settings.sessionMinutes, startedAt]);
 
-  if (summary) return <Results t={t} summary={summary} onDone={() => router.replace("/")} />;
+  if (summary) return <Results t={t} summary={summary} onDone={() => router.replace("/")} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
   if (!task || !item || !mode) return <Loading />;
 
   const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string }) => {
     if (fb) return;
     const prevCard = getDB().cards[item.id];
     const typed = mode === "recall" || mode === "tiles";
-    const { before, after } = recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed });
+    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed });
     const s = stats.current;
     s.graded++;
+    if (conf) s.confUsed++;
     setHist((h) => [...h, r.verdict !== "wrong"]);
     if (r.verdict !== "wrong") {
       s.correct++;
-      if (task.role !== "followup" && after > before) s.stronger.add(item.id);
-      s.toFix.delete(item.id);
+      // "Got stronger": a correct recall of a word you already had (reviews, seeds, practice).
+      if (task.role !== "followup" && prevCard && prevCard.state !== 0 && !s.toFix.has(item.id)) s.stronger.add(item.id);
       if (conf === "guess") s.guessRight++;
       setCombo((c) => c + 1);
     } else {

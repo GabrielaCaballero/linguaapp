@@ -221,7 +221,6 @@ function ChoiceExercise(p: ExProps) {
     prompt = (
       <Prompt eyebrow={t.whatMeans}>
         <TargetWord item={item} canListen={canListen} t={t} auto={p.speed ? false : canListen} />
-        {item.register && <span className="pill" style={{ alignSelf: "flex-start" }}>{item.register}</span>}
       </Prompt>
     );
   }
@@ -383,7 +382,6 @@ function Tiles(p: ExProps) {
 
 /** Guess first: an ungraded MCQ before teaching, then a teaching card replaces the options. */
 export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDone }: { item: Item; base: BaseLang; pool: Item[]; t: Dict; canListen: boolean; taskKey: string; onReveal: () => void; onDone: () => void }) {
-  const [picked, setPicked] = useState<number | null>(null);
   const spec = useMemo(() => {
     if (item.type === "sound") {
       const o = targetOptions(item, pool, taskKey);
@@ -397,6 +395,13 @@ export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDon
     const o = meaningOptions(item, pool, base, taskKey);
     return { ...o, labels: o.options as ReactNode[], lang: undefined, kind: "meaning" as const };
   }, [item, pool, base, taskKey]);
+  // Transparent cognates (italiano ↔ italiano/a) skip the guess: a quick "same as …" card.
+  const cognate = spec.kind === "meaning" && isCognate(item, base);
+  const [picked, setPicked] = useState<number | null>(() => (cognate ? spec.answer : null));
+  useEffect(() => {
+    if (cognate) onReveal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cognate]);
   const revealed = picked !== null;
   const pick = (k: number) => {
     if (revealed) return;
@@ -406,7 +411,7 @@ export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDon
   const note = per(item.note, base);
   return (
     <>
-      <Prompt eyebrow={`${t.newWord} · ${t.guessFirst}`}>
+      <Prompt eyebrow={cognate ? `${t.newWord} · ${t.sameAs[base]}` : spec.kind === "sound" ? `${t.newWord} · ${t.tapWhatYouHear}` : `${t.newWord} · ${t.guessFirst}`}>
         {spec.kind === "sound" ? (
           <div className="listen-row">
             <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
@@ -420,6 +425,7 @@ export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDon
         ) : (
           <TargetWord item={item} canListen={canListen} t={t} auto={canListen} />
         )}
+        {!revealed && spec.kind === "sound" && <div className="h2">{gl(item.gloss, base)}</div>}
         {!revealed && spec.kind === "sound" && !canListen && <div className="title" lang={item.lang}>{item.target}</div>}
       </Prompt>
       <div className="answer-area">
@@ -428,8 +434,8 @@ export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDon
         ) : (
           <div className="teach" role="status">
             <div className="row" style={{ gap: 8 }}>
-              <span className={picked === spec.answer ? "accent" : "muted"} style={{ fontWeight: 700 }}>
-                {picked === spec.answer ? `✓ ${t.correct}` : `→ ${t.correctAnswer}`}
+              <span className={picked === spec.answer ? "" : "muted"} style={{ fontWeight: 700, color: picked === spec.answer ? "var(--ok)" : undefined }}>
+                {cognate ? `≈ ${t.sameAs[base]}` : picked === spec.answer ? `✓ ${t.correct}` : `→ ${t.correctAnswer}`}
               </span>
             </div>
             <div className="row" style={{ gap: 10 }}>
@@ -452,4 +458,18 @@ export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDon
       </div>
     </>
   );
+}
+
+function fold(s: string): string {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/ß/g, "ss");
+}
+
+/** Target and meaning are (nearly) the same word: "italiano" ↔ "italiano/a", "Hotel" ↔ "hotel". */
+export function isCognate(item: Item, base: BaseLang): boolean {
+  if (item.type !== "word" && item.type !== "phrase") return false;
+  const target = fold(item.target).replace(/^(il|lo|la|l'|i|gli|le|un|una|der|die|das|ein|eine)\s+/, "").replace(/[^a-z ]/g, "").trim();
+  const glosses = fold(gl(item.gloss, base)).split(/[/,;()]| o | or /).map((g) => g.replace(/^(el|la|los|las|un|una|the|a|an|to)\s+/, "").replace(/[^a-z ]/g, "").trim());
+  if (target.length < 4) return false;
+  const single = (x: string) => x.replace(/([a-z])\1/g, "$1");
+  return glosses.some((g) => g.length >= 4 && (g === target || single(g) === single(target) || (Math.abs(g.length - target.length) <= 1 && g.slice(0, -1) === target.slice(0, -1))));
 }

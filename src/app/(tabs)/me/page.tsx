@@ -10,6 +10,7 @@ import { avgMinutes, calibration, courseLangs, rememberedAfterWeek, targetFor, t
 import { fmtMonth, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
 import { saveGoal, setActiveLang } from "@/lib/actions";
+import { onboardingHref } from "@/lib/nav";
 import { Loading, Ring, Seal, Sheet, Toast, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { GoalPicker } from "@/components/GoalPicker";
@@ -22,7 +23,7 @@ export default function MePage() {
   const [editGoal, setEditGoal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   useEffect(() => {
-    if (db && !db.profile.onboarded) router.replace("/onboarding");
+    if (db && !db.profile.onboarded) router.replace(onboardingHref());
   }, [db, router]);
   if (!db || !db.profile.onboarded) return <Loading />;
   const langs = courseLangs(db);
@@ -195,6 +196,7 @@ export default function MePage() {
           initial={g}
           t={t}
           cta={t.save}
+          otherMinutes={langs.filter((l) => l !== lang).reduce((n, l) => n + targetFor(db, l), 0)}
           onSave={(goal) => {
             saveGoal(lang, goal);
             setEditGoal(false);

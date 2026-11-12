@@ -25,7 +25,7 @@ export function feasibility(minPerDay: number): Feasibility {
   return "demanding";
 }
 
-const roundUp5 = (x: number) => Math.ceil(x / 5) * 5;
+const roundUp5 = (x: number) => Math.ceil(x / 5 - 1e-6) * 5;
 const clamp = (x: number) => Math.max(MIN_CLAMP, Math.min(MAX_CLAMP, x));
 
 export interface PlanInput {

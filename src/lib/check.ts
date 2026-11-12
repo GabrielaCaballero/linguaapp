@@ -22,6 +22,8 @@ export type Reason =
   | "minimal-pair"
   | "closed-class"
   | "order"
+  | "register" // du for Sie, tu for Lei (item tagged formal/informal)
+  | "spanish" // Spanish spelling of an Italian word (chao → ciao)
   | "known-error"
   | "empty"
   | "wrong";
@@ -295,6 +297,18 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
       if (sorted(gotToks) === sorted(wantToks) && (!best || best.verdict === "wrong")) best = { verdict: "wrong", reason: "order", score: 0 };
     }
   }
+  const b0 = best as CheckResult | null;
+  if (!b0 || b0.verdict === "wrong") {
+    const reg = registerMismatch(answer, item);
+    if (reg) return { verdict: "wrong", reason: "register", score: 0, detail: { got: reg.got, want: reg.want } };
+    if (lang === "it") {
+      const want = new Set(tokens(item.target.toLowerCase()));
+      for (const g of tokens(a)) {
+        const fix = IT_SPANISH_SPELLING[g];
+        if (fix && want.has(fix)) return { verdict: "wrong", reason: "spanish", score: 0, detail: { got: g, want: fix } };
+      }
+    }
+  }
   if (best) return best;
   return { verdict: "wrong", reason: "wrong", score: 0 };
 }
@@ -306,6 +320,27 @@ function hasLoweredNoun(answer: string, target: string, item: Item): boolean {
   const tt = tokens(target);
   const isUpper = (t: string) => !!t && t[0] !== t[0].toLowerCase();
   return tt.some((t, k) => isUpper(t) && at[k] !== undefined && !isUpper(at[k]) && (k > 0 || item.pos === "noun"));
+}
+
+const INFORMAL: Record<TargetLang, string[]> = { de: ["du", "dich", "dir", "dein", "deine", "deinen", "deinem", "bist", "hast"], it: ["tu", "ti", "te", "tuo", "tua", "sei", "hai", "stai"] };
+const FORMAL: Record<TargetLang, string[]> = { de: ["Sie", "Ihnen", "Ihr", "Ihre"], it: ["Lei", "Le", "Suo", "Sua"] };
+const IT_SPANISH_SPELLING: Record<string, string> = { chao: "ciao", mucho: "molto", gracias: "grazie", bueno: "buono", buena: "buona" };
+
+/** du/tu where the item is formal (or Sie/Lei where it is informal). */
+function registerMismatch(answer: string, item: Item): { got: string; want: string } | null {
+  if (!item.register) return null;
+  const got = tokens(answer).map(bareTok);
+  const want = tokens(item.target).map(bareTok);
+  const lang = item.lang;
+  if (item.register === "formal") {
+    const hit = got.find((g) => INFORMAL[lang].includes(g.toLowerCase()) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
+    if (hit) return { got: hit, want: lang === "de" ? "Sie" : "Lei" };
+  } else {
+    // case matters: German "sie" (she/they) is not formal; Italian "lei" lowercase is "she"
+    const hit = got.find((g) => FORMAL[lang].includes(g) && !want.includes(g));
+    if (hit) return { got: hit, want: lang === "de" ? "du" : "tu" };
+  }
+  return null;
 }
 
 /** Normalise an answer for caches and comparisons. */

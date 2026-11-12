@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { BaseLang, Cefr, PlacementItem, TargetLang } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { course, gl, units } from "@/lib/content";
-import { answer as answerP, band, beginner, nextItem, oneStep, seeds, start, startUnit, type PlacementState } from "@/lib/placement";
+import { answer as answerP, band, beginner, nextItem, seeds, start, startUnit, type PlacementState } from "@/lib/placement";
 import { norm } from "@/lib/check";
 import { Speaker } from "./lesson/Exercises";
 import { Icon } from "./icons";
@@ -21,10 +21,13 @@ export interface PlacementOutcome {
 
 const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
 
-export function outcomeFor(lang: TargetLang, s: PlacementState, cefr: Cefr): PlacementOutcome {
+/** Outcome from the estimate; `unitOverride` comes from "Start lower/higher" (one unit per tap). */
+export function outcomeFor(lang: TargetLang, s: PlacementState, unitOverride?: number): PlacementOutcome {
   const us = units(lang);
-  const su = startUnit(us, cefr);
-  return { state: s, cefr, unit: su.index, beyond: su.beyond, seedIds: seeds(us, cefr, course(lang).placement, s) };
+  const su = startUnit(us, s.theta, s.se);
+  const unit = unitOverride ?? su.index;
+  const beyond = unitOverride === undefined ? su.beyond : false;
+  return { state: s, cefr: s.beginner ? "A0" : band(s.theta), unit, beyond, seedIds: seeds(us, unit, course(lang).placement, s) };
 }
 
 /** The adaptive check. Neutral feedback ("Got it"), a level meter, "I don't know" and "I'm a beginner". */
@@ -44,14 +47,14 @@ export function PlacementTest({ lang, base, mu, t, canListen, onDone, onClose }:
     setTimeout(() => {
       setAck(false);
       setTyped("");
-      if (ns.done) onDone(outcomeFor(lang, ns, band(ns.theta)));
+      if (ns.done) onDone(outcomeFor(lang, ns));
       else setS(ns);
     }, 420);
   };
 
   const quit = () => {
     const b = beginner(s);
-    onDone(outcomeFor(lang, b, "A0"));
+    onDone(outcomeFor(lang, b, 1));
   };
 
   const pos = Math.max(0, Math.min(1, (s.theta + 3.5) / 6));
@@ -141,10 +144,8 @@ function PlacementStem({ item, canListen, t }: { item: PlacementItem; canListen:
 export function PlacementResult({ lang, base, outcome, t, onChange, onContinue }: { lang: TargetLang; base: BaseLang; outcome: PlacementOutcome; t: Dict; onChange: (o: PlacementOutcome) => void; onContinue: () => void }) {
   const u = units(lang).find((x) => x.index === outcome.unit)!;
   const known = outcome.seedIds.length;
-  const shiftBand = (dir: -1 | 1) => {
-    const c = oneStep(outcome.cefr, dir);
-    onChange(outcomeFor(lang, outcome.state, c));
-  };
+  const max = Math.max(...units(lang).map((x) => x.index));
+  const shiftUnit = (dir: -1 | 1) => onChange(outcomeFor(lang, outcome.state, Math.max(1, Math.min(max, outcome.unit + dir))));
   return (
     <>
       <div className="grow stack" style={{ justifyContent: "center", textAlign: "center", alignItems: "center", gap: 16 }}>
@@ -154,8 +155,8 @@ export function PlacementResult({ lang, base, outcome, t, onChange, onContinue }
         {known > 0 && <p className="muted" style={{ margin: 0 }}>{t.resultKnown(known)}</p>}
         {outcome.beyond && <p className="card-soft label" style={{ margin: 0 }}>{t.resultBeyond}</p>}
         <div className="row" style={{ justifyContent: "center" }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => shiftBand(-1)} disabled={outcome.cefr === "A0"}>{t.startLower}</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => shiftBand(1)} disabled={outcome.cefr === "B1"}>{t.startHigher}</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => shiftUnit(-1)} disabled={outcome.unit <= 1}>{t.startLower}</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => shiftUnit(1)} disabled={outcome.unit >= max}>{t.startHigher}</button>
         </div>
       </div>
       <div className="bottom-bar">

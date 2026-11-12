@@ -8,13 +8,14 @@ import { useNow } from "@/lib/hooks";
 import { Icon } from "@/components/icons";
 import { Ring, Seal, Sheet, Toast, WeekDots, Loading, useT } from "@/components/ui";
 import { LANG_NAME, units } from "@/lib/content";
-import { courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
+import { dueCount, courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
 import { lastSessionAt, AWAY_DAYS } from "@/lib/session";
 import { DAY, fmtMonth, startOfWeek } from "@/lib/dates";
 import { checkinChoice, dropLegacyTies, saveGoal, setActiveLang } from "@/lib/actions";
 import { downloadText, exportBackup } from "@/lib/backup";
 import { localeOf } from "@/lib/i18n";
 import { update } from "@/lib/store";
+import { lessonHref, onboardingHref } from "@/lib/nav";
 
 export default function Today() {
   const db = useDB();
@@ -27,7 +28,7 @@ export default function Today() {
 
   const needsOnboarding = !!db && (!db.profile.onboarded || (db.profile.pendingGoal?.length ?? 0) > 0);
   useEffect(() => {
-    if (needsOnboarding) router.replace("/onboarding");
+    if (needsOnboarding) router.replace(onboardingHref());
   }, [needsOnboarding, router]);
 
   if (!db || needsOnboarding) return <Loading />;
@@ -50,7 +51,14 @@ export default function Today() {
   const last = lastSessionAt(db, lang);
   const away = last !== undefined && now - last >= AWAY_DAYS * DAY && Object.values(db.cards).some((c) => c.lang === lang);
 
-  const start = (kind: string) => router.push(`/lesson?kind=${kind}`);
+  const dueNow = dueCount(db, lang, now);
+  const learned = Object.values(db.cards).filter((c) => c.lang === lang && c.state !== 0).length;
+  // Close sheets before leaving: this page stays alive (cacheComponents <Activity>).
+  const start = (kind: string) => {
+    setMenu(false);
+    setSwitcher(false);
+    router.push(lessonHref(kind));
+  };
 
   // ≤ 1 card, in priority order
   let card: React.ReactNode = null;
@@ -74,19 +82,19 @@ export default function Today() {
   } else if (wc) {
     const key = `checkin-${lang}-${startOfWeek(now)}`;
     const g = course.goal!;
-    const fmt = (x: number) => (isFinite(x) ? fmtMonth(new Date(x), locale) : "—");
+    const fmt = (x: number) => (!isFinite(x) ? "—" : x - now > 2 * 365 * DAY ? t.over2y : fmtMonth(new Date(x), locale));
     card = (
       <div className="card stack">
         <div className="h2" style={{ fontSize: "1.0625rem" }}>{t.weeklyTitle}</div>
         <div className="label muted">{t.weeklyBody(wc.avg, fmt(wc.projected), fmt(wc.goalDate))}</div>
         <div className="stack" style={{ gap: 8 }}>
           <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => checkinChoice(lang, "keep-date", key)}>{t.keepDate(g.minutesPerDay)}</button>
-          {isFinite(wc.projected) && (
+          {isFinite(wc.projected) && wc.projected - now <= 2 * 365 * DAY && (
             <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => { saveGoal(lang, { ...g, by: new Date(wc.projected).toISOString().slice(0, 10), setAt: g.setAt }); checkinChoice(lang, "move-date", key); }}>
               {t.moveDate(fmt(wc.projected))}
             </button>
           )}
-          <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => { saveGoal(lang, { ...g, kind: "steady", minutesPerDay: Math.max(5, wc.avg), setAt: g.setAt }); checkinChoice(lang, "keep-pace", key); }}>{t.keepPace}</button>
+          <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => { saveGoal(lang, { ...g, kind: "steady", minutesPerDay: Math.max(5, wc.avg), setAt: g.setAt }); checkinChoice(lang, "keep-pace", key); }}>{t.keepPace(Math.max(5, wc.avg))}</button>
         </div>
       </div>
     );
@@ -134,7 +142,7 @@ export default function Today() {
       </section>
 
       <section className="grow" style={{ display: "grid", placeItems: "center", padding: "24px 0" }}>
-        <Ring value={target ? mins / target : 0} size={208} gold={done} label={t.todayOf(Math.round(mins), target)}>
+        <Ring value={target ? mins / target : 0} size={card ? 168 : 208} gold={done} label={t.todayOf(Math.round(mins), target)}>
           <span style={{ fontSize: 44, lineHeight: 1 }} aria-hidden="true">{unit.icon}</span>
           <span className="stat" style={{ fontSize: 28, marginTop: 8 }}>
             {Math.round(mins)}<span className="muted" style={{ fontSize: 17, fontWeight: 600 }}>/{target} {t.min}</span>
@@ -174,13 +182,16 @@ export default function Today() {
       <Sheet open={menu} onClose={() => setMenu(false)} label={t.moreOptions}>
         <div className="group">
           {[
-            { k: "review", label: t.reviewOnly, icon: "refresh" },
-            { k: "new", label: t.newOnly, icon: "plus" },
-            { k: "speed", label: t.speedRound, icon: "bolt" },
+            { k: "review", label: t.reviewOnly, icon: "refresh", off: dueNow === 0 },
+            { k: "new", label: t.newOnly, icon: "plus", off: false },
+            { k: "speed", label: t.speedRound, icon: "bolt", off: learned < 4 },
           ].map((o) => (
-            <button key={o.k} className="cell" onClick={() => start(o.k)}>
+            <button key={o.k} className="cell" onClick={() => start(o.k)} disabled={o.off} style={{ opacity: o.off ? 0.5 : 1 }}>
               <Icon name={o.icon} size={20} className="accent" />
-              <span className="grow">{o.label}</span>
+              <span className="grow">
+                {o.label}
+                {o.off && <div className="cell-sub">{t.nothingToReview}</div>}
+              </span>
               <Icon name="chevron" size={18} className="muted" />
             </button>
           ))}
@@ -201,7 +212,7 @@ export default function Today() {
             </button>
           ))}
           {langs.length < 2 && (
-            <button className="cell" onClick={() => router.push("/onboarding")}>
+            <button className="cell" onClick={() => { setSwitcher(false); router.push(onboardingHref()); }}>
               <span className="icon-btn" style={{ background: "var(--surface-2)" }}><Icon name="plus" size={20} /></span>
               <span className="grow" style={{ fontWeight: 600 }}>{t.addLanguage}</span>
             </button>

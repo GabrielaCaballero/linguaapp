@@ -10,7 +10,8 @@ import { LANG_NAME } from "@/lib/content";
 import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
 import { downloadText, exportBackup, parseBackup, type BackupPreview } from "@/lib/backup";
 import { getConfig, subscribeConfig } from "@/lib/llm/provider";
-import { courseLangs } from "@/lib/stats";
+import { courseLangs, targetFor } from "@/lib/stats";
+import { onboardingHref, placementHref } from "@/lib/nav";
 import { BackHeader, Loading, Seal, Seg, Sheet, Switch, Toast, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { GoalPicker } from "@/components/GoalPicker";
@@ -36,6 +37,7 @@ export default function SettingsPage() {
   const exportNow = () => {
     downloadText(`lingua-backup-${new Date().toISOString().slice(0, 10)}.json`, exportBackup(getDB()));
     update((d) => ({ ...d, profile: { ...d.profile, lastBackupAt: Date.now() } }));
+    setToast(t.exported);
   };
   const onFile = async (f: File) => {
     try {
@@ -68,13 +70,13 @@ export default function SettingsPage() {
               </div>
               <div className="row" style={{ gap: 8 }}>
                 <button className="btn btn-secondary btn-sm" onClick={() => setGoalFor(l)}>{t.sGoal}</button>
-                <button className="btn btn-secondary btn-sm" onClick={() => router.push(`/placement?lang=${l}`)}>{t.sRetake}</button>
+                <button className="btn btn-secondary btn-sm" onClick={() => router.push(placementHref(l))}>{t.sRetake}</button>
               </div>
             </div>
           );
         })}
         {langs.length < 2 && (
-          <button className="cell" onClick={() => router.push("/onboarding")}>
+          <button className="cell" onClick={() => router.push(onboardingHref())}>
             <Icon name="plus" size={20} className="accent" />
             <span className="grow">{t.addLanguage}</span>
           </button>
@@ -165,7 +167,7 @@ export default function SettingsPage() {
           <h2 className="h2">{t.sReset}</h2>
           <p className="muted" style={{ margin: 0 }}>{t.resetType(t.resetWord)}</p>
           <input className="input" value={resetText} onChange={(e) => setResetText(e.target.value)} autoCapitalize="characters" aria-label={t.resetWord} />
-          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={() => { resetDB(); setReset(false); router.replace("/onboarding"); }}>
+          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={() => { resetDB(); setReset(false); router.replace(onboardingHref()); }}>
             {t.sReset}
           </button>
           <button className="btn btn-ghost" onClick={() => setReset(false)}>{t.cancel}</button>
@@ -176,7 +178,7 @@ export default function SettingsPage() {
         {removing && (
           <div className="stack">
             <h2 className="h2">{t.sRemoveConfirm(LANG_NAME[removing])}</h2>
-            <button className="btn btn-primary" style={{ background: "var(--miss)", boxShadow: "none" }} onClick={() => { removeCourse(removing); setRemoving(null); if (langs.length <= 1) router.replace("/onboarding"); }}>{t.sRemove}</button>
+            <button className="btn btn-primary" style={{ background: "var(--miss)", boxShadow: "none" }} onClick={() => { removeCourse(removing); setRemoving(null); if (langs.length <= 1) router.replace(onboardingHref()); }}>{t.sRemove}</button>
             <button className="btn btn-ghost" onClick={() => setRemoving(null)}>{t.cancel}</button>
           </div>
         )}
@@ -186,7 +188,7 @@ export default function SettingsPage() {
         {goalFor && (
           <>
             <h2 className="title" style={{ marginBottom: 16 }}>{t.goalTitle(t.langName[goalFor])}</h2>
-            <GoalPicker lang={goalFor} base={db.profile.courses[goalFor]!.explainIn} appLang={db.profile.appLang} current={db.profile.courses[goalFor]!.placement?.cefr ?? "A0"} daysPerWeek={s.daysPerWeek} initial={db.profile.courses[goalFor]!.goal} t={t} cta={t.save} onSave={(g) => { saveGoal(goalFor, g); setGoalFor(null); }} />
+            <GoalPicker lang={goalFor} base={db.profile.courses[goalFor]!.explainIn} appLang={db.profile.appLang} current={db.profile.courses[goalFor]!.placement?.cefr ?? "A0"} daysPerWeek={s.daysPerWeek} initial={db.profile.courses[goalFor]!.goal} t={t} cta={t.save} otherMinutes={langs.filter((l) => l !== goalFor).reduce((n, l) => n + targetFor(db, l), 0)} onSave={(g) => { saveGoal(goalFor, g); setGoalFor(null); }} />
           </>
         )}
       </Sheet>

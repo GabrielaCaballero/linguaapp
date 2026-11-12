@@ -8,6 +8,7 @@ import { courseLangs, currentUnit, unitProgress } from "@/lib/stats";
 import { Loading, Ring, Seal, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { setActiveLang } from "@/lib/actions";
+import { lessonHref, onboardingHref } from "@/lib/nav";
 
 export default function PathPage() {
   const db = useDB();
@@ -16,7 +17,7 @@ export default function PathPage() {
   const curRef = useRef<HTMLDivElement>(null);
   const ready = !!db?.profile.onboarded;
   useEffect(() => {
-    if (db && !db.profile.onboarded) router.replace("/onboarding");
+    if (db && !db.profile.onboarded) router.replace(onboardingHref());
   }, [db, router]);
   useEffect(() => {
     if (ready) curRef.current?.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
@@ -75,7 +76,7 @@ export default function PathPage() {
                 )}
                 <div className="row between" style={{ marginTop: 12 }}>
                   <span className="caption">{t.learnedOf(p.learned, p.total)}</span>
-                  <button className={`btn ${isCur ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => router.push(`/lesson?kind=auto&unit=${u.index}`)}>
+                  <button className={`btn ${isCur ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => router.push(lessonHref("auto", u.index))}>
                     {t.practiseUnit}
                   </button>
                 </div>
