@@ -6,7 +6,7 @@ _Engine/UI builder · 2026-11-12 · branch `v2-redesign`. Spec: 10-spec.md §4�
 
 ```bash
 npm install
-npx vitest run                     # 169 tests (checker golden set, FSRS, placement sim, goals, session, migration, backup, LLM guardrails, content rules)
+npx vitest run                     # 161 tests (checker golden set, FSRS, placement sim, goals, session, migration, backup, LLM guardrails, content rules)
 npx tsc --noEmit && npx eslint
 NEXT_DIST_DIR=.next-v2 npx next dev -p 3300     # dev
 NEXT_DIST_DIR=.next-v2 npm run build && NEXT_DIST_DIR=.next-v2 npx next start -p 3300
