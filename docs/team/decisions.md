@@ -82,3 +82,13 @@ Format: date · who · decision · why
 - it-u04-tramezzino: en gloss "the triangle sandwich" → "the tramezzino (crustless sandwich)".
 - it-p-27: distractor «avrà» is grammatical after *penso che* in speech → «abbiamo».
 - it lexicon: minimal pairs quanto/quando and venti/vento added, so a typo can't turn "how much" into "when".
+
+## Accounts (accepted 2026-11-12 by owner; built on branch accounts-sync)
+- 2026-11-12 · lead · Reverse "No account in v2": add an optional account so friends get their own profile synced across devices; guest mode stays the default and never needs an account · Owner wants to share with friends (see 40/41/42-accounts-*.md).
+- 2026-11-12 · lead · Supabase (EU region) for sign-in + Postgres with row-level security, called from the browser only · One free vendor, no server code, keeps the static/Capacitor path open.
+- 2026-11-12 · lead · Sign-in with a 6-digit email code, no passwords, no magic link · On iOS a link opens Safari, whose storage is separate from the installed app.
+- 2026-11-12 · lead · Invite-only v1 = owner adds friends in the Supabase dashboard (sign-ups closed); in-app /i/CODE invite links deferred to v1.1 · Zero code for access control, and the friend list is small.
+- 2026-11-12 · lead · One state document per user with rev + a lossless mergeDB (reviews never dropped); the AI key never syncs · Simple, and two devices can't erase each other's progress.
+- 2026-11-12 · lead · No in-app social in v1, only a "Share my week" card; opt-in study buddies maybe in v1.1 · Consistent with no leagues / no comparison.
+- 2026-11-12 · lead · "Reset everything" while signed in also deletes the synced copy · Otherwise the next sync would bring the reset progress straight back.
+- 2026-11-12 · lead · Deferred from 41-product-ux: the one-time "Save your progress" offer on the first results screen, /i/CODE invite links, Google sign-in, "Share my week" card · Ship the core sync first; add after the owner's friends have used it.

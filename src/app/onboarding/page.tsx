@@ -9,7 +9,8 @@ import { dict } from "@/lib/i18n";
 import { LANG_NAME } from "@/lib/content";
 import { priorMean } from "@/lib/placement";
 import { clock } from "@/lib/dates";
-import { lessonHref } from "@/lib/nav";
+import { accountHref, lessonHref } from "@/lib/nav";
+import { isSyncConfigured } from "@/lib/sync/client";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse } from "@/lib/actions";
 import { parseBackup } from "@/lib/backup";
 import { hasVoice, voicesReady } from "@/lib/speech";
@@ -57,6 +58,7 @@ function Flow() {
   const [voices, setVoices] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const t = dict(appLang);
+  const syncOn = isSyncConfigured();
 
   useEffect(() => {
     voicesReady().then(() => setVoices(true));
@@ -159,10 +161,11 @@ function Flow() {
               <Seal lang="de" size={84} />
             </div>
             <h1 className="hero" style={{ fontSize: "2.25rem" }}>{t.welcomeTitle}</h1>
-            <p className="muted" style={{ marginTop: 12 }}>{t.welcomeSub}</p>
+            <p className="muted" style={{ marginTop: 12 }}>{syncOn ? t.welcomeSubSync : t.welcomeSub}</p>
           </div>
           <div className="bottom-bar">
             <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
+            {syncOn && <button className="btn btn-ghost" onClick={() => router.push(accountHref("welcome"))}>{t.haveAccount}</button>}
             <button className="btn btn-ghost" onClick={() => fileRef.current?.click()}>{t.haveBackup}</button>
             <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && importFile(e.target.files[0])} />
           </div>

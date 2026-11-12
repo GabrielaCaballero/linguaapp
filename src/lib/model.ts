@@ -74,6 +74,8 @@ export interface Profile {
   lastBackupAt?: number;
   /** Things shown once (tips, offers). */
   seen?: Record<string, number>;
+  /** Last time anything in the profile changed (cross-device sync: newest profile wins). */
+  updatedAt?: number;
 }
 
 /** FSRS card, serialised with epoch-ms dates. */
@@ -145,6 +147,9 @@ export type AppEvent =
   | { t: number; type: "placement_done"; lang: TargetLang; cefr: Cefr; items: number }
   | { t: number; type: "checkin_choice"; lang: TargetLang; choice: string }
   | { t: number; type: "alt_candidate"; itemId: string; text: string };
+
+export const MAX_REVIEWS = 20_000;
+export const MAX_EVENTS = 10_000;
 
 export interface DB {
   version: 2;

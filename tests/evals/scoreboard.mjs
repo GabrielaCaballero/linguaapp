@@ -15,6 +15,8 @@ const tsconfig = fs.readFileSync(path.join(ROOT, "tsconfig.json"), "utf8");
 
 const cat = (file) => {
   const f = file.replace(/\\/g, "/");
+  if (f.includes("/sync/")) return "sync";
+  if (f.includes("account.spec")) return "e2e-sync";
   if (f.includes("/checker/")) return "checker";
   if (f.includes("/engine/")) return "engine";
   if (f.includes("audit.eval")) return "content-audit";

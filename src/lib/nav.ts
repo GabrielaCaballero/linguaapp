@@ -13,3 +13,6 @@ export function onboardingHref(): string {
 export function placementHref(lang: string): string {
   return `/placement?lang=${lang}&n=${nonce()}`;
 }
+export function accountHref(from: "welcome" | "settings" = "settings"): string {
+  return `/account?from=${from}&n=${nonce()}`;
+}
