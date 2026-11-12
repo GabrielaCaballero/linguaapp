@@ -1,0 +1,28 @@
+// Content-quality audit, graded by the QA lead acting as a native-level linguist (Italian,
+// German; glosses in neutral Latin-American Spanish and international English).
+//
+// Scope of the review per item: target (spelling, accents, ß, elision), gender/article/plural,
+// gloss.es and gloss.en (accuracy + naturalness, register marking), accept/errors/variants
+// (linguistically right?), distractors (wrong but plausible, no give-aways, none arguably correct).
+// Placement items: stem, options and key (one unambiguous answer, no word-for-word give-away).
+// Notes, patterns' tables and dialogue turns are NOT in scope of this pass.
+//
+// Every unit item and every placement item of both courses was read (all > 60/language).
+// Items not listed in FAILS passed every criterion. The audit is pinned to a content hash
+// (audit-hashes.json): an item that changed after grading fails as STALE until re-graded.
+export type Criterion = "translation" | "gender_article" | "accents" | "gloss_es" | "gloss_en" | "distractors" | "answer_key";
+
+export interface Finding {
+  fail: Criterion[];
+  note: string;
+}
+
+export const AUDITOR = "QA lead (eval phase), 2026-11-12";
+
+// Iteration 1: all 14 findings below were fixed in content and the items re-read and re-pinned
+// (see 31-eval-log.md and decisions.md). Kept here as history:
+// it-u02-spagnolo (distractor «spagnuolo» arguably correct) · it-u04-tramezzino (unnatural en gloss)
+// it-p-27 (distractor «avrà» grammatical) · de-u01-wie-gehts (en gloss lacked "informal")
+// de-u03-zehn/hundert/buchstabieren, de-u05-essen, de-u06-gross/hell/dunkel/teuer/billig
+// (capitalised-noun give-away distractors) · de-p-30 (word-for-word answer key).
+export const FAILS: Record<string, Finding> = {};

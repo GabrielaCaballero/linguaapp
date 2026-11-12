@@ -1,0 +1,316 @@
+// Checker eval table. Every expected verdict comes from the SPEC (10-spec §4.8, CUJ-6), the
+// linguist's rules (06-linguist §5) and the Judge's findings (20-judge-report) — never from
+// what the current code happens to return. Each row names the pitfall it guards.
+//
+// verdict: one verdict, or a list when the spec allows either (e.g. ["almost","wrong"] = "must not be correct").
+// reason:  only asserted where the spec/judge names the reason the learner should see.
+import type { Item } from "@/content/schema";
+import { I, W } from "../lib/fixtures";
+
+export type V = "correct" | "almost" | "wrong";
+export interface Case {
+  id: string;
+  item: Item;
+  input: string;
+  verdict: V | V[];
+  reason?: string;
+  /** Secondary note on a correct answer (capital / ss / translit). */
+  note?: string;
+  /** detail.want must contain this substring (the feedback must name the right letter/word). */
+  wantHas?: string;
+  /** Content feedback text must be present (accept-almost / known errors). */
+  feedback?: boolean;
+  tag: string;
+}
+
+const NOT_CORRECT: V[] = ["almost", "wrong"];
+
+const it: Case[] = [
+  // ── normalisation: case, spaces, punctuation, quotes, ¿¡ ─────────────────────────
+  { id: "it-norm-01", item: I("it-u01-ciao"), input: "ciao", verdict: "correct", tag: "normalise" },
+  { id: "it-norm-02", item: I("it-u01-ciao"), input: "CIAO", verdict: "correct", tag: "normalise" },
+  { id: "it-norm-03", item: I("it-u01-ciao"), input: "Ciao!", verdict: "correct", tag: "punctuation" },
+  { id: "it-norm-04", item: I("it-u01-ciao"), input: "  ciao  ", verdict: "correct", tag: "normalise" },
+  { id: "it-norm-05", item: I("it-u01-grazie-mille"), input: "grazie   mille", verdict: "correct", tag: "normalise" },
+  { id: "it-norm-06", item: I("it-u01-grazie-mille"), input: "Grazie mille.", verdict: "correct", tag: "punctuation" },
+  { id: "it-norm-07", item: I("it-u06-dove-stazione"), input: "¿Dov'è la stazione?", verdict: "correct", tag: "punctuation" },
+  { id: "it-norm-08", item: I("it-u06-dove-stazione"), input: "Dov’è la stazione?", verdict: "correct", tag: "curly-quote" },
+  { id: "it-norm-09", item: I("it-u04-quant-e"), input: "quant’è", verdict: "correct", tag: "curly-quote" },
+  { id: "it-norm-10", item: I("it-u01-bene-grazie"), input: "bene, grazie. e tu?", verdict: "correct", tag: "punctuation" },
+  { id: "it-norm-11", item: I("it-u01-bene-grazie"), input: "Bene grazie e tu", verdict: "correct", tag: "punctuation" },
+  { id: "it-norm-12", item: I("it-u04-il-conto"), input: "il conto per favore", verdict: "correct", tag: "punctuation" },
+  // ── empty input ─────────────────────────────────────────────────────────────
+  { id: "it-empty-01", item: I("it-u01-ciao"), input: "", verdict: "wrong", reason: "empty", tag: "empty" },
+  { id: "it-empty-02", item: I("it-u01-ciao"), input: "    ", verdict: "wrong", reason: "empty", tag: "empty" },
+  { id: "it-empty-03", item: I("it-u01-ciao"), input: "?!", verdict: "wrong", reason: "empty", tag: "empty" },
+  // ── accepted alternatives ─────────────────────────────────────────────────────
+  { id: "it-alt-01", item: I("it-u01-grazie-mille"), input: "Molte grazie", verdict: "correct", tag: "accept" },
+  { id: "it-alt-02", item: I("it-u01-grazie-mille"), input: "grazie tante", verdict: "correct", tag: "accept" },
+  { id: "it-alt-03", item: I("it-u01-buongiorno"), input: "Buon giorno", verdict: "correct", tag: "accept" },
+  { id: "it-alt-04", item: I("it-u02-abito-a-roma"), input: "Vivo a Roma.", verdict: "correct", tag: "accept" },
+  { id: "it-alt-05", item: I("it-u01-mi-chiamo"), input: "Sono Anna", verdict: "correct", tag: "accept" },
+  { id: "it-alt-06", item: I("it-u03-ho-anni"), input: "Ho trenta anni.", verdict: "correct", tag: "accept" },
+  { id: "it-alt-07", item: I("it-u03-primo-maggio"), input: "il 1° maggio", verdict: "correct", tag: "accept" },
+  { id: "it-alt-08", item: I("it-u04-vorrei"), input: "Voglio un caffè.", verdict: "almost", feedback: true, tag: "accept-almost" },
+  { id: "it-alt-09", item: I("it-u02-puo-ripetere"), input: "Puoi ripetere, per favore?", verdict: "almost", tag: "accept-almost/register" },
+  // ── both gender forms of the learner's own sentences ──────────────────────────────
+  { id: "it-gender-01", item: I("it-u02-spagnolo"), input: "spagnola", verdict: "correct", tag: "both-genders" },
+  { id: "it-gender-02", item: I("it-u02-sono-spagnolo"), input: "Sono spagnola.", verdict: "correct", tag: "both-genders" },
+  { id: "it-gender-03", item: I("it-u05-sei-sposato"), input: "Sei sposata?", verdict: "correct", tag: "both-genders" },
+  { id: "it-gender-04", item: I("it-u06-piccolo"), input: "piccola", verdict: "correct", tag: "both-genders" },
+  { id: "it-gender-05", item: I("it-u02-br-imbarazzato"), input: "imbarazzata", verdict: "correct", tag: "both-genders" },
+  { id: "it-gender-06", item: I("it-u02-inglese"), input: "inglesa", verdict: "wrong", tag: "spanish-transfer" },
+  // ── accents (almost) ───────────────────────────────────────────────────────────
+  { id: "it-acc-01", item: I("it-u06-citta"), input: "la citta", verdict: "almost", reason: "accent", tag: "accent (CUJ-6)" },
+  { id: "it-acc-02", item: I("it-u06-citta"), input: "la cittá", verdict: "almost", reason: "accent", tag: "accent wrong direction" },
+  { id: "it-acc-03", item: I("it-u04-caffe"), input: "il caffe", verdict: "almost", reason: "accent", tag: "accent" },
+  { id: "it-acc-04", item: I("it-u04-caffe"), input: "il caffé", verdict: "almost", reason: "accent", tag: "accent wrong direction" },
+  { id: "it-acc-05", item: W("it", "perché"), input: "perche", verdict: "almost", reason: "accent", tag: "accent" },
+  { id: "it-acc-06", item: W("it", "perché"), input: "perchè", verdict: "almost", reason: "accent", tag: "grave vs acute" },
+  { id: "it-acc-07", item: W("it", "università"), input: "universita", verdict: "almost", reason: "accent", tag: "accent" },
+  { id: "it-acc-08", item: I("it-u02-puo-ripetere"), input: "Puo ripetere, per favore?", verdict: "almost", reason: "accent", tag: "accent" },
+  { id: "it-acc-09", item: W("it", "ventitré"), input: "ventitre", verdict: "almost", reason: "accent", tag: "accent" },
+  // ── accents that change meaning (specific note) ───────────────────────────────────
+  { id: "it-accm-01", item: I("it-u01-si"), input: "si", verdict: "almost", reason: "accent-meaning", tag: "si/sì" },
+  { id: "it-accm-02", item: W("it", "Lei è italiana."), input: "Lei e italiana", verdict: "almost", reason: "accent-meaning", tag: "e/è" },
+  { id: "it-accm-03", item: I("it-u03-che-giorno"), input: "Che giorno e oggi?", verdict: "almost", reason: "accent-meaning", tag: "e/è" },
+  { id: "it-accm-04", item: W("it", "Non è caro."), input: "Non e caro", verdict: "almost", reason: "accent-meaning", tag: "e/è" },
+  { id: "it-accm-05", item: W("it", "Mi dà un caffè?"), input: "Mi da un caffè?", verdict: "almost", reason: "accent-meaning", tag: "da/dà" },
+  { id: "it-accm-06", item: W("it", "né caldo né freddo"), input: "ne caldo ne freddo", verdict: "almost", reason: "accent-meaning", tag: "ne/né" },
+  { id: "it-accm-07", item: W("it", "Il libro è là."), input: "Il libro è la.", verdict: "almost", reason: "accent-meaning", tag: "la/là" },
+  // ── double consonants & minimal pairs ─────────────────────────────────────────
+  { id: "it-dbl-01", item: I("it-u05-nonno"), input: "il nono", verdict: "wrong", tag: "nonno/nono (CUJ-6)" },
+  { id: "it-dbl-02", item: I("it-u03-s-nn"), input: "nono", verdict: "wrong", tag: "nonno/nono sound item (CUJ-6)" },
+  { id: "it-dbl-03", item: W("it", "nonno"), input: "nono", verdict: "wrong", tag: "minimal pair never bridged" },
+  { id: "it-dbl-04", item: W("it", "fatto"), input: "fato", verdict: "wrong", tag: "minimal pair fato/fatto" },
+  { id: "it-dbl-05", item: I("it-u03-sette"), input: "sete", verdict: "wrong", tag: "minimal pair sete/sette" },
+  { id: "it-dbl-06", item: I("it-u06-casa"), input: "la cassa", verdict: "wrong", tag: "minimal pair casa/cassa" },
+  { id: "it-dbl-07", item: W("it", "il cappello"), input: "il capello", verdict: "wrong", tag: "minimal pair capello/cappello" },
+  { id: "it-dbl-08", item: W("it", "la penna"), input: "la pena", verdict: "wrong", tag: "minimal pair pena/penna" },
+  { id: "it-dbl-09", item: I("it-u03-s-ll"), input: "pala", verdict: "wrong", tag: "double in sound item = wrong" },
+  { id: "it-dbl-10", item: I("it-u01-s-gh"), input: "spagheti", verdict: "wrong", tag: "double in sound item = wrong" },
+  { id: "it-dbl-11", item: W("it", "mamma"), input: "mama", verdict: "almost", reason: "double", tag: "double (content word)" },
+  { id: "it-dbl-12", item: I("it-u03-quattro"), input: "quatro", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-13", item: I("it-u06-piazza"), input: "la piaza", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-14", item: I("it-u04-cappuccino"), input: "il capuccino", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-15", item: I("it-u05-fratello"), input: "il fratelo", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-16", item: I("it-u04-zucchero"), input: "lo zuchero", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-17", item: I("it-u01-arrivederci"), input: "arivederci", verdict: "almost", reason: "double", tag: "double (judge)" },
+  { id: "it-dbl-18", item: I("it-u04-birra"), input: "la bira", verdict: "almost", reason: "double", tag: "double" },
+  { id: "it-dbl-19", item: I("it-u01-buonanotte"), input: "buonanote", verdict: "almost", reason: "double", tag: "double inside compound" },
+  // ── articles lo/gli/il/l' and other closed-class words ───────────────────────────
+  { id: "it-art-01", item: I("it-u05-zio"), input: "la zio", verdict: "wrong", tag: "la zio (CUJ-6)" },
+  { id: "it-art-02", item: I("it-u05-zio"), input: "il zio", verdict: "wrong", tag: "lo before z" },
+  { id: "it-art-03", item: I("it-u05-zio"), input: "lo zio", verdict: "correct", tag: "lo before z" },
+  { id: "it-art-04", item: I("it-u05-zio"), input: "zio", verdict: "almost", reason: "article-missing", tag: "missing article (it = almost)" },
+  { id: "it-art-05", item: I("it-u04-spritz"), input: "il spritz", verdict: "wrong", tag: "lo before s+consonant" },
+  { id: "it-art-06", item: I("it-u04-zucchero"), input: "il zucchero", verdict: "wrong", tag: "lo before z" },
+  { id: "it-art-07", item: I("it-u06-appartamento"), input: "la appartamento", verdict: "wrong", tag: "article gender/elision" },
+  { id: "it-art-08", item: I("it-u05-nonno"), input: "i nonno", verdict: "wrong", tag: "article number" },
+  { id: "it-art-09", item: I("it-u05-nonna"), input: "il nonna", verdict: "wrong", tag: "article gender" },
+  { id: "it-art-10", item: I("it-u04-latte"), input: "la latte", verdict: "wrong", feedback: true, tag: "Spanish gender transfer (la leche)" },
+  { id: "it-art-11", item: I("it-u05-genitori"), input: "il genitori", verdict: "wrong", tag: "plural article" },
+  { id: "it-art-12", item: W("it", "gli studenti"), input: "i studenti", verdict: "wrong", tag: "gli before s+consonant" },
+  { id: "it-art-13", item: W("it", "gli amici"), input: "li amici", verdict: "wrong", tag: "gli before vowel" },
+  { id: "it-art-14", item: I("it-u04-vorrei"), input: "Vorrei una caffè.", verdict: "wrong", tag: "indefinite article gender" },
+  { id: "it-art-15", item: I("it-u04-vorrei"), input: "Vorrei uno caffè.", verdict: "wrong", tag: "un/uno" },
+  { id: "it-art-16", item: I("it-u05-mio-fratello"), input: "Il mio fratello abita a Milano.", verdict: "wrong", tag: "no article with singular kin + possessive" },
+  { id: "it-art-17", item: I("it-u05-famiglia-di"), input: "Mia famiglia è di Napoli.", verdict: NOT_CORRECT, tag: "la mia famiglia needs article" },
+  { id: "it-art-18", item: I("it-u06-citta"), input: "la città", verdict: "correct", tag: "exact with accent" },
+  // ── prepositions & auxiliaries (closed class = exact) ─────────────────────────────
+  { id: "it-cc-01", item: I("it-u02-sono-di"), input: "Sono da Napoli.", verdict: "wrong", feedback: true, tag: "di vs da" },
+  { id: "it-cc-02", item: I("it-u02-abito-a-roma"), input: "Abito in Roma.", verdict: "wrong", feedback: true, tag: "a + city" },
+  { id: "it-cc-03", item: I("it-u06-biglietto"), input: "Un biglietto a Roma, per favore.", verdict: "wrong", tag: "per + destination" },
+  { id: "it-cc-04", item: I("it-u03-ho-anni"), input: "Sono trent'anni.", verdict: "wrong", feedback: true, tag: "avere for age" },
+  { id: "it-cc-05", item: I("it-u03-quanti-anni"), input: "Quanti anni sei?", verdict: "wrong", tag: "avere for age" },
+  { id: "it-cc-06", item: W("it", "Sono andato al bar."), input: "Ho andato al bar.", verdict: "wrong", tag: "essere/avere (ho andato)" },
+  { id: "it-cc-07", item: W("it", "Sono andato al bar."), input: "Sono andato all bar.", verdict: "wrong", tag: "no typo allowance on closed class" },
+  { id: "it-cc-08", item: I("it-u01-mi-chiamo"), input: "Mi chiami Anna.", verdict: "wrong", tag: "verb person" },
+  { id: "it-cc-09", item: I("it-u02-non-capisco"), input: "No capisco.", verdict: "wrong", tag: "non vs no (Spanish transfer)" },
+  { id: "it-cc-10", item: I("it-u01-bene-grazie"), input: "Buono, grazie. E tu?", verdict: "wrong", tag: "bene vs buono" },
+  { id: "it-cc-11", item: I("it-u03-primo-maggio"), input: "il uno maggio", verdict: "wrong", tag: "ordinal for 1st" },
+  // ── contractions (uncontracted = wrong in Italian) ──────────────────────────────
+  { id: "it-con-01", item: W("it", "Vado al bar."), input: "Vado a il bar.", verdict: "wrong", reason: "contraction", tag: "a il → al" },
+  { id: "it-con-02", item: W("it", "il libro del nonno"), input: "il libro di il nonno", verdict: "wrong", reason: "contraction", tag: "di il → del" },
+  { id: "it-con-03", item: W("it", "Abito nella casa rossa."), input: "Abito in la casa rossa.", verdict: "wrong", reason: "contraction", tag: "in la → nella" },
+  { id: "it-con-04", item: W("it", "sul tavolo"), input: "su il tavolo", verdict: "wrong", reason: "contraction", tag: "su il → sul" },
+  // ── elision ─────────────────────────────────────────────────────────────────
+  { id: "it-eli-01", item: W("it", "l'amico"), input: "l amico", verdict: "almost", reason: "elision", tag: "elision" },
+  { id: "it-eli-02", item: W("it", "l'amico"), input: "lamico", verdict: "almost", reason: "elision", tag: "elision" },
+  { id: "it-eli-03", item: W("it", "l'amico"), input: "lo amico", verdict: "wrong", tag: "lo before vowel is an article error" },
+  { id: "it-eli-04", item: I("it-u04-acqua"), input: "l acqua", verdict: "almost", reason: "elision", tag: "elision" },
+  { id: "it-eli-05", item: I("it-u02-di-dove-e"), input: "Di dove è?", verdict: "almost", tag: "dove è (accept almost)" },
+  { id: "it-eli-06", item: I("it-u06-dove-stazione"), input: "Dove è la stazione?", verdict: "almost", tag: "dove è" },
+  { id: "it-eli-07", item: I("it-u06-dove-stazione"), input: "dov e la stazione", verdict: "almost", tag: "elision + accent" },
+  { id: "it-eli-08", item: I("it-u03-ho-anni"), input: "Ho trent anni", verdict: "almost", reason: "elision", tag: "elision" },
+  { id: "it-eli-09", item: W("it", "un'amica"), input: "un amica", verdict: "almost", reason: "elision", tag: "un' + feminine" },
+  { id: "it-eli-10", item: W("it", "un amico"), input: "un'amico", verdict: NOT_CORRECT, tag: "no apostrophe for masculine un" },
+  { id: "it-eli-11", item: I("it-u02-parlo-un-po"), input: "Parlo spagnolo e un pò di italiano.", verdict: "wrong", feedback: true, tag: "po' not pò" },
+  { id: "it-eli-12", item: I("it-u02-parlo-un-po"), input: "Parlo spagnolo e un po di italiano", verdict: "almost", tag: "missing truncation apostrophe" },
+  // ── typos only on content words ─────────────────────────────────────────────────
+  { id: "it-typo-01", item: I("it-u01-buongiorno"), input: "buongiormo", verdict: "almost", reason: "typo", tag: "typo ≥5 letters" },
+  { id: "it-typo-02", item: I("it-u02-parlare"), input: "parlere", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "it-typo-03", item: I("it-u06-stazione"), input: "la stazone", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "it-typo-04", item: I("it-u06-appartamento"), input: "l'appartamendo", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "it-typo-05", item: W("it", "informazione"), input: "imformazone", verdict: "almost", reason: "typo", tag: "2 typos in ≥10 letters" },
+  { id: "it-typo-06", item: W("it", "informazione"), input: "imfornazone", verdict: "wrong", tag: "3 edits = wrong" },
+  { id: "it-typo-07", item: I("it-u03-tre"), input: "tra", verdict: "wrong", tag: "no typo on short words" },
+  { id: "it-typo-08", item: I("it-u03-sei"), input: "sie", verdict: "wrong", tag: "no typo on short words" },
+  { id: "it-typo-09", item: I("it-u04-quanto-costa"), input: "Quando costa?", verdict: "wrong", tag: "real-word confusion quanto/quando" },
+  // ── word order ───────────────────────────────────────────────────────────────
+  { id: "it-ord-01", item: W("it", "Sono andato al bar."), input: "Al bar sono andato.", verdict: "wrong", tag: "word order (not listed)" },
+  { id: "it-ord-02", item: I("it-u06-dove-stazione"), input: "Dove la stazione è?", verdict: "wrong", tag: "word order" },
+  // ── register tu/Lei (Judge P1-7) ────────────────────────────────────────────────
+  { id: "it-reg-01", item: I("it-u01-come-sta"), input: "Come stai?", verdict: "wrong", reason: "register", tag: "tu for Lei" },
+  { id: "it-reg-02", item: I("it-u02-parla-inglese"), input: "Parli inglese?", verdict: "wrong", reason: "register", tag: "tu for Lei" },
+  { id: "it-reg-03", item: I("it-u01-come-stai"), input: "Come sta?", verdict: "wrong", reason: "register", tag: "Lei for tu" },
+  { id: "it-reg-04", item: I("it-u01-come-ti-chiami"), input: "Come si chiama?", verdict: "wrong", reason: "register", tag: "Lei for tu" },
+  { id: "it-reg-05", item: I("it-u01-scusi"), input: "Scusa", verdict: "wrong", reason: "register", tag: "tu for Lei" },
+  // ── Spanish transfer (Judge P1-7) ───────────────────────────────────────────────
+  { id: "it-es-01", item: I("it-u01-ciao"), input: "chao", verdict: "wrong", reason: "spanish", tag: "chao → ciao" },
+  { id: "it-es-02", item: I("it-u01-grazie"), input: "gracias", verdict: "wrong", tag: "Spanish word" },
+  { id: "it-es-03", item: I("it-u02-spagnolo"), input: "español", verdict: "wrong", tag: "Spanish word" },
+  { id: "it-es-04", item: I("it-u01-arrivederci"), input: "adiós", verdict: "wrong", tag: "Spanish word" },
+];
+
+const de: Case[] = [
+  // ── normalisation ───────────────────────────────────────────────────────────
+  { id: "de-norm-01", item: I("de-u01-hallo"), input: "hallo", verdict: "correct", tag: "normalise" },
+  { id: "de-norm-02", item: I("de-u01-hallo"), input: "Hallo!", verdict: "correct", tag: "punctuation" },
+  { id: "de-norm-03", item: I("de-u01-wie-bitte"), input: "Wie bitte??", verdict: "correct", tag: "punctuation" },
+  { id: "de-norm-04", item: I("de-u01-gut-danke"), input: "Gut danke und dir", verdict: "correct", tag: "punctuation" },
+  { id: "de-norm-05", item: I("de-u01-wie-gehts"), input: "Wie geht’s?", verdict: "correct", tag: "curly-quote" },
+  { id: "de-empty-01", item: I("de-u01-hallo"), input: "", verdict: "wrong", reason: "empty", tag: "empty" },
+  { id: "de-empty-02", item: I("de-u01-hallo"), input: "...", verdict: "wrong", reason: "empty", tag: "empty" },
+  // ── ß / ss (correct) ───────────────────────────────────────────────────────────
+  { id: "de-ss-01", item: I("de-u01-ich-heisse"), input: "Ich heisse Anna", verdict: "correct", tag: "heisse (CUJ-6)" },
+  { id: "de-ss-02", item: W("de", "heiße", { pos: "verb" }), input: "heisse", verdict: "correct", note: "ss", tag: "ss for ß" },
+  { id: "de-ss-03", item: I("de-u06-s-st-sp"), input: "Strasse", verdict: "correct", tag: "ss for ß" },
+  { id: "de-ss-04", item: I("de-u03-dreissig"), input: "dreissig", verdict: "correct", tag: "ss for ß" },
+  { id: "de-ss-05", item: I("de-u06-gross"), input: "gross", verdict: "correct", tag: "ss for ß" },
+  { id: "de-ss-06", item: I("de-u01-wie-heissen-sie"), input: "Wie heissen Sie?", verdict: "correct", tag: "ss for ß" },
+  { id: "de-ss-07", item: I("de-u01-guten-tag"), input: "Grüss Gott", verdict: "correct", tag: "regional variant + ss" },
+  { id: "de-ss-08", item: W("de", "Ich weiß es nicht."), input: "Ich weiss es nicht", verdict: "correct", tag: "ss for ß" },
+  // ── ae/oe/ue transliteration (correct) ───────────────────────────────────────────
+  { id: "de-tr-01", item: I("de-u01-s-oe"), input: "schoen", verdict: "correct", tag: "oe for ö" },
+  { id: "de-tr-02", item: I("de-u06-kueche"), input: "die Kueche", verdict: "correct", tag: "ue for ü" },
+  { id: "de-tr-03", item: I("de-u01-tschuess"), input: "Tschuess", verdict: "correct", tag: "ue for ü" },
+  { id: "de-tr-04", item: I("de-u02-oesterreich"), input: "Oesterreich", verdict: "correct", tag: "Oe for Ö" },
+  { id: "de-tr-05", item: I("de-u03-fuenf"), input: "fuenf", verdict: "correct", tag: "ue for ü" },
+  { id: "de-tr-06", item: I("de-u05-ich-moechte"), input: "Ich moechte einen Tee, bitte", verdict: "correct", tag: "oe for ö" },
+  { id: "de-tr-07", item: I("de-u04-maedchen"), input: "das Maedchen", verdict: "correct", tag: "ae for ä" },
+  // ── missing umlaut (almost; wrong across a minimal pair) ────────────────────────────
+  { id: "de-um-01", item: I("de-u01-tschuess"), input: "tschuss", verdict: "almost", reason: "umlaut", wantHas: "ü", tag: "umlaut names the right letter (P1-6)" },
+  { id: "de-um-02", item: I("de-u06-kueche"), input: "die Kuche", verdict: "almost", reason: "umlaut", wantHas: "ü", tag: "umlaut" },
+  { id: "de-um-03", item: I("de-u03-fuenf"), input: "funf", verdict: "almost", reason: "umlaut", tag: "umlaut" },
+  { id: "de-um-04", item: I("de-u03-zwoelf"), input: "zwolf", verdict: "almost", reason: "umlaut", wantHas: "ö", tag: "umlaut" },
+  { id: "de-um-05", item: I("de-u05-kaese"), input: "der Kase", verdict: "almost", reason: "umlaut", wantHas: "ä", tag: "umlaut" },
+  { id: "de-um-06", item: I("de-u04-maedchen"), input: "das Madchen", verdict: "almost", reason: "umlaut", tag: "umlaut" },
+  { id: "de-um-07", item: I("de-u05-ich-moechte"), input: "Ich mochte einen Tee, bitte.", verdict: "almost", reason: "umlaut", tag: "umlaut" },
+  { id: "de-um-08", item: I("de-u01-s-oe"), input: "schon", verdict: "wrong", tag: "schon/schön minimal pair (CUJ-6)" },
+  { id: "de-um-09", item: W("de", "schön", { pos: "adj" }), input: "schon", verdict: "wrong", tag: "schon/schön minimal pair" },
+  { id: "de-um-10", item: W("de", "zählen", { pos: "verb" }), input: "zahlen", verdict: "wrong", tag: "zahlen/zählen minimal pair" },
+  { id: "de-um-11", item: I("de-u04-ich-habe-schwester"), input: "Ich habe eine Schwester und zwei Bruder.", verdict: "wrong", tag: "Bruder/Brüder minimal pair" },
+  { id: "de-um-12", item: W("de", "die Mütter", { pos: "noun", gender: "f" }), input: "die Mutter", verdict: "wrong", tag: "Mutter/Mütter minimal pair" },
+  { id: "de-um-13", item: W("de", "Ich habe den Apfel."), input: "Ich habe den Äpfel.", verdict: "wrong", tag: "Apfel/Äpfel minimal pair" },
+  // ── noun capitals (lowercase = correct with a note) ──────────────────────────────
+  { id: "de-cap-01", item: I("de-u05-kaffee"), input: "der kaffee", verdict: "correct", note: "capital", tag: "lowercase noun (CUJ-6)" },
+  { id: "de-cap-02", item: I("de-u04-mutter"), input: "die mutter", verdict: "correct", note: "capital", tag: "lowercase noun" },
+  { id: "de-cap-03", item: I("de-u06-klein-aber-hell"), input: "die wohnung ist klein, aber hell", verdict: "correct", note: "capital", tag: "lowercase noun in sentence" },
+  { id: "de-cap-04", item: I("de-u04-das-ist-meine-mutter"), input: "das ist meine mutter", verdict: "correct", note: "capital", tag: "lowercase noun" },
+  { id: "de-cap-05", item: I("de-u06-bahnhof"), input: "der bahnhof", verdict: "correct", note: "capital", tag: "lowercase noun" },
+  { id: "de-cap-06", item: I("de-u02-ich-komme"), input: "ich komme aus spanien", verdict: "correct", tag: "lowercase proper noun" },
+  { id: "de-cap-07", item: I("de-u01-ja"), input: "ja", verdict: "correct", tag: "case" },
+  { id: "de-cap-08", item: I("de-u01-wie-heissen-sie"), input: "wie heißen sie?", verdict: "correct", tag: "lowercase Sie on a phone keyboard" },
+  // ── articles & gender ───────────────────────────────────────────────────────────
+  { id: "de-art-01", item: I("de-u05-kaffee"), input: "die Kaffee", verdict: "wrong", tag: "wrong gender" },
+  { id: "de-art-02", item: I("de-u05-kaffee"), input: "Kaffee", verdict: "wrong", reason: "article-missing", tag: "missing article (de = wrong)" },
+  { id: "de-art-03", item: I("de-u04-maedchen"), input: "die Mädchen", verdict: "wrong", tag: "das Mädchen (neuter)" },
+  { id: "de-art-04", item: I("de-u06-bett"), input: "der Bett", verdict: "wrong", tag: "wrong gender" },
+  { id: "de-art-05", item: I("de-u05-milch"), input: "der Milch", verdict: "wrong", tag: "wrong gender" },
+  { id: "de-art-06", item: I("de-u01-gute-nacht"), input: "Guten Nacht", verdict: "wrong", feedback: true, tag: "Nacht is feminine (judge)" },
+  { id: "de-art-07", item: I("de-u01-gute-nacht"), input: "gute nacht", verdict: "correct", tag: "case" },
+  { id: "de-art-08", item: I("de-u05-einen-kaffee"), input: "Ein Kaffee, bitte.", verdict: "almost", feedback: true, tag: "ein Kaffee = almost with note (CUJ-6)" },
+  { id: "de-art-09", item: I("de-u05-einen-kaffee"), input: "Eine Kaffee, bitte.", verdict: "wrong", tag: "wrong article" },
+  { id: "de-art-10", item: I("de-u05-einen-kaffee"), input: "Einem Kaffee, bitte", verdict: "wrong", tag: "einen/einem" },
+  { id: "de-art-11", item: I("de-u05-ich-moechte"), input: "Ich möchte ein Tee, bitte.", verdict: "wrong", feedback: true, tag: "accusative einen" },
+  { id: "de-art-12", item: I("de-u04-das-ist-meine-mutter"), input: "Das ist mein Mutter.", verdict: "wrong", tag: "possessive ending" },
+  { id: "de-art-13", item: I("de-u02-die-schweiz"), input: "Schweiz", verdict: "almost", tag: "die Schweiz (accept almost)" },
+  { id: "de-art-14", item: I("de-u02-die-schweiz"), input: "der Schweiz", verdict: "wrong", tag: "wrong article" },
+  { id: "de-art-15", item: I("de-u04-mann"), input: "der Man", verdict: "wrong", tag: "Mann/man minimal pair" },
+  // ── cases den/dem, einen/einem, ihn/ihm ─────────────────────────────────────────
+  { id: "de-case-01", item: W("de", "Ich fahre mit dem Bus."), input: "Ich fahre mit den Bus.", verdict: "wrong", tag: "dative after mit" },
+  { id: "de-case-02", item: W("de", "Ich sehe den Mann."), input: "Ich sehe dem Mann.", verdict: "wrong", tag: "accusative" },
+  { id: "de-case-03", item: W("de", "Ich helfe dem Kind."), input: "Ich helfe den Kind", verdict: "wrong", tag: "dative after helfen" },
+  { id: "de-case-04", item: W("de", "Ich habe einen Bruder."), input: "Ich habe ein Bruder.", verdict: "wrong", tag: "accusative masculine" },
+  { id: "de-case-05", item: W("de", "Ich habe einen Bruder."), input: "Ich habe einem Bruder.", verdict: "wrong", tag: "einen/einem" },
+  { id: "de-case-06", item: W("de", "Ich habe einen Bruder."), input: "Ich habe einne Bruder.", verdict: "wrong", tag: "no typo allowance on closed class" },
+  { id: "de-case-07", item: W("de", "Ich kenne ihn."), input: "Ich kenne ihm.", verdict: "wrong", tag: "ihn/ihm" },
+  { id: "de-case-08", item: W("de", "Ich wohne in der Stadt."), input: "Ich wohne in die Stadt.", verdict: "wrong", tag: "two-way preposition" },
+  { id: "de-case-09", item: W("de", "Ich bin im Park."), input: "Ich bin in den Park.", verdict: "wrong", tag: "two-way preposition" },
+  // ── contractions (uncontracted = almost in German) ──────────────────────────────
+  { id: "de-con-01", item: W("de", "Er geht ins Kino."), input: "Er geht in das Kino.", verdict: "almost", reason: "contraction", tag: "ins" },
+  { id: "de-con-02", item: W("de", "Ich bin im Park."), input: "Ich bin in dem Park.", verdict: "almost", reason: "contraction", tag: "im" },
+  { id: "de-con-03", item: W("de", "Wir gehen zum Bahnhof."), input: "Wir gehen zu dem Bahnhof.", verdict: "almost", reason: "contraction", tag: "zum" },
+  // ── separable verbs & word order ─────────────────────────────────────────────────
+  { id: "de-sep-01", item: W("de", "Ich stehe um sieben Uhr auf."), input: "Ich aufstehe um sieben Uhr.", verdict: "wrong", tag: "separable verb" },
+  { id: "de-sep-02", item: W("de", "Ich rufe dich morgen an."), input: "Ich anrufe dich morgen.", verdict: "wrong", tag: "separable verb" },
+  { id: "de-sep-03", item: W("de", "Ich rufe dich morgen an."), input: "Ich rufe dich an morgen.", verdict: "wrong", tag: "separable prefix position" },
+  { id: "de-sep-04", item: W("de", "Ich stehe um sieben Uhr auf."), input: "ich stehe um sieben uhr auf", verdict: "correct", tag: "separable verb, lowercase" },
+  { id: "de-ord-01", item: W("de", "Heute gehe ich ins Kino."), input: "Heute ich gehe ins Kino.", verdict: "wrong", tag: "V2" },
+  { id: "de-ord-02", item: W("de", "Ich bleibe zu Hause, weil ich müde bin."), input: "Ich bleibe zu Hause, weil ich bin müde.", verdict: "wrong", tag: "verb-final after weil" },
+  { id: "de-ord-03", item: I("de-u01-verstehe-nicht"), input: "Ich nicht verstehe das.", verdict: "wrong", tag: "word order (known error)" },
+  { id: "de-ord-04", item: I("de-u01-verstehe-nicht"), input: "Das verstehe ich nicht.", verdict: "correct", tag: "order listed in accept" },
+  { id: "de-ord-05", item: I("de-u01-verstehe-nicht"), input: "Ich verstehe nicht", verdict: "correct", tag: "accept" },
+  { id: "de-ord-06", item: I("de-u06-nicht-teuer"), input: "Das Zimmer nicht ist teuer.", verdict: "wrong", tag: "word order" },
+  // ── subject pronouns, verb endings (grammar = wrong, never "typo") ─────────────────
+  { id: "de-vb-01", item: I("de-u02-ich-komme"), input: "Komme aus Spanien.", verdict: "wrong", tag: "missing subject (Spanish transfer)" },
+  { id: "de-vb-02", item: I("de-u02-ich-komme"), input: "Ich komme von Spanien.", verdict: "wrong", feedback: true, tag: "aus vs von" },
+  { id: "de-vb-03", item: I("de-u01-ich-heisse"), input: "Ich heißt Anna.", verdict: "wrong", tag: "verb ending" },
+  { id: "de-vb-04", item: I("de-u02-sprichst-du"), input: "Sprechst du Deutsch?", verdict: "wrong", tag: "stem change" },
+  { id: "de-vb-05", item: I("de-u03-wie-alt"), input: "Wie alt hast du?", verdict: "wrong", tag: "sein for age" },
+  { id: "de-vb-06", item: I("de-u03-ich-bin-jahre"), input: "Ich habe dreißig Jahre.", verdict: "wrong", tag: "Spanish transfer (tengo años)" },
+  { id: "de-vb-07", item: I("de-u05-das-macht"), input: "Das macht vier Euros fünfzig.", verdict: "wrong", tag: "Euro plural" },
+  { id: "de-vb-08", item: I("de-u02-ich-wohne"), input: "Ich wohnt in Berlin.", verdict: "wrong", tag: "verb ending is grammar, not a typo" },
+  { id: "de-vb-09", item: I("de-u02-ich-spreche"), input: "Ich sprechen Spanisch und Englisch.", verdict: "wrong", tag: "verb ending is grammar, not a typo" },
+  { id: "de-vb-10", item: I("de-u06-nicht-teuer"), input: "Das Zimmer ist kein teuer.", verdict: "wrong", feedback: true, tag: "nicht vs kein" },
+  { id: "de-vb-11", item: I("de-u06-klein-aber-hell"), input: "Die Wohnung ist kleine, aber helle.", verdict: "wrong", tag: "predicate adjective doesn't inflect" },
+  // ── register du/Sie (Judge P1-7) ─────────────────────────────────────────────────
+  { id: "de-reg-01", item: I("de-u01-wie-heissen-sie"), input: "Wie heißt du?", verdict: "wrong", reason: "register", tag: "du for Sie" },
+  { id: "de-reg-02", item: I("de-u01-wie-heissen-sie"), input: "Wie heisst du?", verdict: "wrong", reason: "register", tag: "du for Sie (judge repro)" },
+  { id: "de-reg-03", item: I("de-u01-wie-heisst-du"), input: "Wie heißen Sie?", verdict: "wrong", reason: "register", tag: "Sie for du" },
+  { id: "de-reg-04", item: I("de-u02-sprechen-sie"), input: "Sprichst du Englisch?", verdict: "wrong", reason: "register", tag: "du for Sie" },
+  { id: "de-reg-05", item: I("de-u01-wie-geht-es-ihnen"), input: "Wie geht es dir?", verdict: "wrong", reason: "register", tag: "du for Sie" },
+  { id: "de-reg-06", item: I("de-u03-ihre-nummer"), input: "Wie ist deine Telefonnummer?", verdict: "wrong", reason: "register", tag: "du for Sie" },
+  { id: "de-reg-07", item: I("de-u02-woher-kommen-sie"), input: "Woher kommst du?", verdict: "wrong", reason: "register", tag: "du for Sie" },
+  // ── alternatives & regional variants ───────────────────────────────────────────
+  { id: "de-alt-01", item: I("de-u01-tschuess"), input: "Tschüs", verdict: "correct", tag: "accept" },
+  { id: "de-alt-02", item: I("de-u01-tschuess"), input: "Servus", verdict: "correct", tag: "regional variant" },
+  { id: "de-alt-03", item: I("de-u01-guten-tag"), input: "Grüezi", verdict: "correct", tag: "regional variant" },
+  { id: "de-alt-04", item: I("de-u01-guten-tag"), input: "Moin", verdict: "correct", tag: "regional variant" },
+  { id: "de-alt-05", item: I("de-u01-danke"), input: "Danke schön", verdict: "correct", tag: "accept" },
+  { id: "de-alt-06", item: I("de-u01-danke"), input: "vielen dank", verdict: "correct", tag: "accept + case" },
+  { id: "de-alt-07", item: I("de-u05-wie-viel-kostet"), input: "Wieviel kostet das?", verdict: "almost", feedback: true, tag: "pre-1996 spelling = almost" },
+  { id: "de-alt-08", item: I("de-u05-wie-viel-kostet"), input: "Was kostet das?", verdict: "correct", tag: "accept" },
+  { id: "de-alt-09", item: I("de-u01-bis-bald"), input: "Bis später", verdict: "almost", tag: "accept almost" },
+  { id: "de-alt-10", item: I("de-u01-ich-heisse"), input: "Ich bin Anna.", verdict: "correct", tag: "accept (judge)" },
+  { id: "de-alt-11", item: I("de-u05-rechnung"), input: "Zahlen, bitte!", verdict: "correct", tag: "accept" },
+  { id: "de-alt-12", item: I("de-u03-ihre-nummer"), input: "Was ist Ihre Telefonnummer?", verdict: "almost", tag: "accept almost" },
+  // ── typos only on content words ─────────────────────────────────────────────────
+  { id: "de-typo-01", item: I("de-u01-guten-abend"), input: "Guten Abent", verdict: "almost", reason: "typo", tag: "Abent (judge)" },
+  { id: "de-typo-02", item: I("de-u01-entschuldigung"), input: "Entschuldigun", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "de-typo-03", item: I("de-u01-entschuldigung"), input: "Entshuldigung", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "de-typo-04", item: I("de-u03-buchstabieren"), input: "buchstabiren", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "de-typo-05", item: I("de-u03-buchstabieren"), input: "buchstabirn", verdict: "almost", reason: "typo", tag: "2 typos in ≥10 letters" },
+  { id: "de-typo-06", item: I("de-u04-ich-habe-schwester"), input: "Ich habe eine Schwster und zwei Brüder.", verdict: "almost", reason: "typo", tag: "typo in content word of a sentence" },
+  { id: "de-typo-07", item: I("de-u06-bahnhof"), input: "der Bahnhoff", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "de-typo-08", item: I("de-u05-tee"), input: "der Te", verdict: "wrong", tag: "no typo on short words" },
+  { id: "de-typo-09", item: I("de-u03-acht"), input: "echt", verdict: "wrong", tag: "no typo on short words" },
+  { id: "de-typo-10", item: I("de-u03-vier"), input: "für", verdict: "wrong", tag: "vier/für minimal pair" },
+  { id: "de-typo-11", item: W("de", "die Stadt", { pos: "noun", gender: "f" }), input: "die Staat", verdict: "wrong", tag: "Staat/Stadt minimal pair" },
+  { id: "de-typo-12", item: I("de-u05-s-lang-kurz"), input: "Stat", verdict: "wrong", tag: "sound item: no typo allowance" },
+  { id: "de-typo-13", item: W("de", "Wein"), input: "Wien", verdict: "wrong", tag: "Wein/Wien minimal pair" },
+  { id: "de-typo-14", item: I("de-u02-s-ei-ie"), input: "Wein", verdict: "wrong", tag: "Wien/Wein sound item" },
+];
+
+export const CASES: Case[] = [...it, ...de];
