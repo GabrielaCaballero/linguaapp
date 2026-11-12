@@ -6,7 +6,7 @@ _Engine/UI builder · 2026-11-12 · branch `v2-redesign`. Spec: 10-spec.md §4�
 
 ```bash
 npm install
-npx vitest run                     # 161 tests (checker golden set, FSRS, placement sim, goals, session, migration, backup, LLM guardrails, content rules)
+npx vitest run                     # 178 tests (checker golden set, FSRS, placement sim, goals, session, migration, backup, LLM guardrails, content rules)
 npx tsc --noEmit && npx eslint
 NEXT_DIST_DIR=.next-v2 npx next dev -p 3300     # dev
 NEXT_DIST_DIR=.next-v2 npm run build && NEXT_DIST_DIR=.next-v2 npx next start -p 3300
@@ -42,3 +42,27 @@ Onboarding in Spanish → Italian (explain in Español) → "Un poco" → can-do
 - The Browser pane occasionally stopped painting (rAF stalled) until the viewport was resized — a pane quirk, not reproduced in the app logic.
 - First-session practice fill may include freshly seeded (placement) words; acceptable as "quick confirmation" but could be gentler.
 - `docs/team/decisions.md` commit also carries the content agent's uncommitted decision lines.
+
+## Fix round (after 20-judge-report.md)
+
+Verified at phone size on the port-3300 dev server against the real content, plus unit tests (178 total). tsc, eslint and `NEXT_DIST_DIR=.next-v2 npm run build` are green.
+
+| Judge issue | Status | What changed / how verified |
+|---|---|---|
+| **P0-1** second lesson reuses old state | **Fixed** | `src/lib/nav.ts` adds a per-visit nonce to every `/lesson`, `/onboarding` and `/placement` link. Those pages key their state on `useSearchParams()` inside `<Suspense>`. Today closes its sheets before navigating. Browser: quit → Continue, Results → "One more round", switch IT→DE → Start, and add a language all gave fresh sessions. |
+| **P0-2** A1.2+ → Unit 6, whole course seeded | **Fixed** | `unitDifficulty()` / `startUnit(units, θ, SE)` / `seeds(units, startUnit, …)` in `placement.ts`. Start/seed decisions use the conservative θ − SE. The start unit and later units are never seeded. "Start lower/higher" moves one unit at a time (browser: 6→5→4→3, 125→104→78→52 seeded words). es→it reading items weigh ×0.6. Real-content tests: A1.2 learner starts mid-course, every unit is reachable, <75 % of items seeded. A very strong learner (85 % right) still lands at Unit 6 with the "beyond" note pointing to "Keep what I know". |
+| P1-1 "5 min" lasts 1–2 min | **Fixed** | The player appends up to 8 more chunks until the chosen minutes have really passed. Results offers "One more round · 5 min". The ring counts real minutes. |
+| P1-2 default goals "Very demanding" | **Fixed** | Default is Steady 15 min/day, capped so all languages total ≤ 30 (`otherMinutes`). This also applies to the v1 goal-only step (IT 15 + DE 15). |
+| P1-3 "to fix" mismatch / not first | **Fixed** | Results counts every miss in the session (a later correct answer no longer erases it). The next lesson opens with today's and yesterday's misses (≤ 15). Browser: Results "67" → next day Today "67" → first task was a missed word. |
+| P1-4 weekly check after a break | **Fixed** (logic), not re-screenshotted | Skipped after a ≥ 7-day break or with a 0 average. Dates more than 2 years out read "more than 2 years away". The third button says "Switch to N min/day, no date". The ring shrinks when a card shows. |
+| P1-5 goal sheet overlap / 90 clamp / rounding | **Fixed** | The commitment card is back in normal flow, with the alternatives above it. Over 90 shows "90+ / More than 90 min a day". `roundUp5` has an epsilon, so the 30-min alternative saves as 30. |
+| P1-6 umlaut note names the wrong letter | **Fixed** | Note reads e.g. "La diéresis importa (ü ≠ u · Tschüss)". |
+| P1-7 register feedback | **Fixed** | New reason `register` (du/dich/bist… on a formal item, Sie/Lei on an informal one; lowercase *sie* is not flagged), plus `spanish` (*chao→ciao*, *gracias→grazie*…). Golden tests added. |
+| P1-8 beginner first minute | **Fixed** (mostly) | A session never opens with an audio-only sound item. Sound guesses show the meaning and "Listen and tap how it's spelled". Transparent cognates (*italiano↔italiano/a*, *caffè↔café*) skip the guess with a "same as in Spanish!" card. *Familie↔family* is not auto-detected. |
+| P1-9 flat results | **Partially** | "Got stronger" now counts correct reviews of cards you already had. The calibration insight needs ≥ 3 chips. A "to fix" insight was added. Review only / Speed round are disabled when there's nothing to do. "1 word" is pluralised. No new celebration beyond the existing confetti on goal reached. |
+| P1-10 offline | **Partially** | The page now posts every loaded `/_next/static` chunk to the SW to cache. Still not device-tested (the pane can't register SWs). |
+| P1-11 goals beyond content | **Fixed** | A2/B1 show "more units coming". The card says the course currently goes to A1 and you'll keep reviewing. |
+| P2: green guess tick, 44 px confidence chips, "En italiano" placeholder, export toast, register tag no longer gives away recognition answers, "Kinder options" copy | **Fixed** | |
+| P2: sheet covers options, mixed-language strings, Grüß Gott note, content distractors, import-from-welcome preview, Me copy, step dots, cold-load skeleton | **Not fixed** | Content items belong to the content stream. |
+
+Screenshots updated: `03-placement-result` (unit 4 after one-unit steps), `04-goal` (Steady 15 default, taken before the level-card label fix), `05-lesson-guess-first` (Italian beginner opens on meaning: *Ciao*), and new `16-goal-edit-honest` (alternatives above the card).
