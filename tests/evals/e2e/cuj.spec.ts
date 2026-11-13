@@ -269,6 +269,20 @@ test.describe("CUJ-7 change goal", () => {
 });
 
 test.describe("CUJ-12 v1 owner upgrade", () => {
+  test("Back on the upgrade goal screen goes home instead of looping (live bug 2026-11-14)", async ({ page }) => {
+    await page.goto("/");
+    const v1 = migrateV1Fixture(Date.now());
+    await page.evaluate((v) => { localStorage.clear(); localStorage.setItem("lingua:v1", JSON.stringify(v)); }, v1);
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toBeVisible();
+    await page.getByRole("button", { name: T.es.back }).click();
+    await page.waitForURL((u) => u.pathname === "/");
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toHaveCount(0);
+    expect(page.url()).not.toContain("/onboarding");
+  });
+
   test("v1 blob → goal-only onboarding, due dates kept, Ties offered once, no Milestones", async ({ page }) => {
     await page.goto("/");
     const v1 = migrateV1Fixture(Date.now());

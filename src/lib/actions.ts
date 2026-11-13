@@ -83,6 +83,19 @@ export function setAnchor(anchor: Anchor | undefined) {
   update((db) => ({ ...db, profile: { ...db.profile, anchor } }));
 }
 
+/**
+ * "Not now" on the goal step after the v1 upgrade: stop asking. Courses keep no goal (10 min
+ * a day by default) and a goal can be set any time from Me → Edit goal.
+ */
+export function skipPendingGoals() {
+  update((db) => {
+    if (!db.profile.pendingGoal?.length) return db;
+    const profile = { ...db.profile };
+    delete profile.pendingGoal;
+    return { ...db, profile };
+  });
+}
+
 export function finishOnboarding() {
   update((db) => ({ ...db, profile: { ...db.profile, onboarded: true } }));
 }
