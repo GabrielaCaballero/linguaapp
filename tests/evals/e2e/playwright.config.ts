@@ -36,7 +36,7 @@ export default defineConfig({
     {
       // Same app built with a (fake) Supabase configured, for account.spec.ts. Built after the
       // first so the two builds never race on tsconfig.json.
-      command: `until curl -sf http://localhost:${PORT}/ >/dev/null; do sleep 2; done; NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key npx next build && NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key npx next start -p ${SYNC_PORT}`,
+      command: `until curl -sf http://localhost:${PORT}/ >/dev/null; do sleep 2; done; NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key NEXT_PUBLIC_AUTH_GOOGLE=1 npx next build && NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key npx next start -p ${SYNC_PORT}`,
       cwd: "../../..",
       port: SYNC_PORT,
       reuseExistingServer: true,

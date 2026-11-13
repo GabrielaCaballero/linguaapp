@@ -3,6 +3,7 @@
 // garbage from the server, and deleting synced data.
 import { describe, expect, it } from "vitest";
 import { createEngine, BadRemoteError } from "@/lib/sync/engine";
+import type { RemoteAdapter } from "@/lib/sync/remote";
 import { memoryRemote } from "@/lib/sync/remote";
 import { toPayload } from "@/lib/sync/merge";
 import { KEYS, memoryAdapter, type StorageAdapter } from "@/lib/storage-adapter";
@@ -14,13 +15,13 @@ const legacy: LegacyIndex = new Map();
 type Server = ReturnType<typeof memoryRemote>;
 
 /** A fake phone: its own storage + DB, talking to the shared server. */
-function device(server: Server, db: DB, opts: { online?: () => boolean } = {}) {
+function device(server: Server, db: DB, opts: { online?: () => boolean; remote?: RemoteAdapter } = {}) {
   const storage: StorageAdapter = memoryAdapter({ [KEYS.v2]: JSON.stringify(db) });
   let current = db;
   let appliedFromSync = 0;
   const engine = createEngine({
     storage,
-    remote: server.remote,
+    remote: opts.remote ?? server.remote,
     getDB: () => current,
     applyDB: (d) => {
       current = d;
@@ -39,6 +40,11 @@ function device(server: Server, db: DB, opts: { online?: () => boolean } = {}) {
     },
     get applied() {
       return appliedFromSync;
+    },
+    /** What the app does on sign-out after forget(): wipe the device. */
+    wipe() {
+      current = emptyDB(NOW);
+      storage.set(KEYS.v2, JSON.stringify(current));
     },
     /** A local change, as the store would make it (then onCommit → markDirty). */
     write(next: DB) {
@@ -264,25 +270,107 @@ describe("sync engine · two devices, one account", () => {
   });
 });
 
-describe("sync engine · deleting and forgetting", () => {
-  it("delete synced data → server row gone, device keeps progress", async () => {
+describe("sync engine · starting over, deletes and forgetting", () => {
+  it("Reset on one device replaces the account copy; the other device adopts it instead of merging it back (P1-3)", async () => {
     const server = memoryRemote();
-    const phone = device(server, learner({ n: 6 }));
+    const phone = device(server, learner({ n: 12 }));
     await phone.engine.beginLogin("u1");
-    await phone.engine.deleteRemote();
-    expect(server.row).toBeNull();
-    expect(phone.db.reviews).toHaveLength(6);
-    expect(await phone.engine.syncNow()).toBe("idle");
-    expect(server.row).toBeNull();
+    const laptop = device(server, emptyDB(NOW));
+    await laptop.engine.beginLogin("u1");
+    expect(laptop.db.reviews).toHaveLength(12);
+    const revBefore = server.row!.rev;
+    // Phone: Settings → Reset everything (resetDB, then startOver).
+    phone.wipe();
+    expect(await phone.engine.startOver()).toBe("idle");
+    expect(server.row!.rev).toBeGreaterThan(revBefore); // never deleted, rev never restarts
+    expect((server.row!.db as DB).reviews).toEqual([]);
+    expect(await laptop.engine.syncNow()).toBe("idle");
+    expect(laptop.db.reviews).toEqual([]);
+    expect(laptop.db.epoch).toBe(phone.db.epoch);
+    // and the phone stays empty after another round
+    await phone.engine.syncNow();
+    expect(phone.db.reviews).toEqual([]);
   });
-  it("data deleted from another device → this device re-uploads on its next change", async () => {
+  it("import on one device → every device ends up with exactly the imported progress", async () => {
+    const server = memoryRemote();
+    const phone = device(server, learner({ n: 10 }));
+    await phone.engine.beginLogin("u1");
+    const laptop = device(server, emptyDB(NOW));
+    await laptop.engine.beginLogin("u1");
+    const imported = learner({ seed: 9, n: 4 });
+    phone.write(imported);
+    await phone.engine.startOver();
+    await laptop.engine.syncNow();
+    expect(reviewKeys(laptop.db)).toEqual(reviewKeys(imported));
+  });
+  it("'Use this device' wins on the other devices too", async () => {
+    const server = memoryRemote();
+    const tablet = device(server, learner({ seed: 1, n: 8 }));
+    await tablet.engine.beginLogin("u1");
+    const phone = device(server, learner({ seed: 2, n: 3 }));
+    const first = await phone.engine.beginLogin("u1");
+    expect(first.kind).toBe("choose");
+    await phone.engine.resolve("device");
+    await tablet.engine.syncNow();
+    expect(reviewKeys(tablet.db)).toEqual(reviewKeys(phone.db));
+    expect(tablet.db.reviews).toHaveLength(3);
+  });
+  it("row deleted by the owner in the dashboard → this device re-uploads on its next change", async () => {
     const server = memoryRemote();
     const phone = device(server, learner({ n: 6 }));
     await phone.engine.beginLogin("u1");
-    await server.remote.deleteMine();
+    server.adminDelete();
     phone.write(extend(phone.db, { seed: 2, n: 1, from: NOW }));
     await phone.engine.syncNow();
-    expect(server.row?.rev).toBe(1);
+    expect((server.row!.db as DB).reviews).toHaveLength(7);
+  });
+  it("sign-out while a sync is in flight: the late server answer never lands on the wiped device (P1-2)", async () => {
+    const server = memoryRemote();
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    let hold = false;
+    const slow: RemoteAdapter = {
+      getRev: () => server.remote.getRev(),
+      push: (r, d) => server.remote.push(r, d),
+      pull: async () => {
+        if (hold) await gate;
+        return server.remote.pull();
+      },
+    };
+    const phone = device(server, learner({ n: 6 }), { remote: slow });
+    await phone.engine.beginLogin("u1");
+    server.write(extend(serverDB(server)!, { seed: 5, n: 4, from: NOW })); // another device wrote
+    hold = true;
+    const inFlight = phone.engine.syncNow();
+    await Promise.resolve();
+    phone.engine.forget();
+    phone.wipe();
+    const applied = phone.applied;
+    release();
+    expect(await inFlight).toBe("off");
+    expect(phone.applied).toBe(applied);
+    expect(phone.db.reviews).toEqual([]);
+    expect(phone.storage.get(KEYS.sync)).toBeNull();
+  });
+  it("settled() waits for a running sync", async () => {
+    const server = memoryRemote();
+    const phone = device(server, learner({ n: 3 }));
+    await phone.engine.beginLogin("u1");
+    phone.write(extend(phone.db, { seed: 2, n: 1, from: NOW }));
+    void phone.engine.syncNow();
+    await phone.engine.settled();
+    expect(phone.engine.isDirty()).toBe(false);
+  });
+  it("a document from a newer app version → 'outdated', and this device never overwrites it (P1-5)", async () => {
+    const server = memoryRemote();
+    const phone = device(server, learner({ n: 3 }));
+    await phone.engine.beginLogin("u1");
+    server.write({ ...serverDB(server)!, version: 3, newThing: { x: 1 } });
+    const rev = server.row!.rev;
+    phone.write(extend(phone.db, { seed: 2, n: 1, from: NOW }));
+    expect(await phone.engine.syncNow()).toBe("outdated");
+    expect(server.row!.rev).toBe(rev);
+    expect((server.row!.db as { version: number }).version).toBe(3);
   });
   it("forget() removes sync state and the pre-login backup, not the DB", async () => {
     const server = memoryRemote();

@@ -14,8 +14,6 @@ export interface RemoteAdapter {
   pull(): Promise<RemoteDoc | null>;
   /** Write if the server is still at `expectedRev` (0 = no row yet). Returns the new rev, or -1 on conflict. */
   push(expectedRev: number, doc: unknown): Promise<number>;
-  /** Delete my synced document (the account stays). */
-  deleteMine(): Promise<void>;
 }
 
 export class RemoteError extends Error {}
@@ -27,14 +25,22 @@ function deviceLabel(): string {
 }
 
 export function supabaseRemote(client: SupabaseClient): RemoteAdapter {
+  // Row-level security already limits every query to the caller's row; filtering by the
+  // user id as well means a policy mistake can't silently return someone else's row.
+  const me = async () => {
+    const { data } = await client.auth.getSession();
+    const id = data.session?.user.id;
+    if (!id) throw new RemoteError("not signed in");
+    return id;
+  };
   return {
     async getRev() {
-      const { data, error } = await client.from("user_state").select("rev").maybeSingle();
+      const { data, error } = await client.from("user_state").select("rev").eq("user_id", await me()).maybeSingle();
       if (error) throw new RemoteError(error.message);
       return data ? Number(data.rev) : null;
     },
     async pull() {
-      const { data, error } = await client.from("user_state").select("db, rev").maybeSingle();
+      const { data, error } = await client.from("user_state").select("db, rev").eq("user_id", await me()).maybeSingle();
       if (error) throw new RemoteError(error.message);
       return data ? { db: data.db, rev: Number(data.rev) } : null;
     },
@@ -42,10 +48,6 @@ export function supabaseRemote(client: SupabaseClient): RemoteAdapter {
       const { data, error } = await client.rpc("push_state", { expected_rev: expectedRev, doc, p_device: deviceLabel() });
       if (error) throw new RemoteError(error.message);
       return Number(data);
-    },
-    async deleteMine() {
-      const { error } = await client.rpc("delete_my_state");
-      if (error) throw new RemoteError(error.message);
     },
   };
 }
@@ -75,10 +77,6 @@ export function memoryRemote(init: RemoteDoc | null = null) {
       row = { db: JSON.parse(JSON.stringify(doc)), rev: current + 1 };
       return row.rev;
     },
-    async deleteMine() {
-      guard("deleteMine");
-      row = null;
-    },
   };
   return {
     remote,
@@ -88,6 +86,10 @@ export function memoryRemote(init: RemoteDoc | null = null) {
     },
     setOffline(v: boolean) {
       offline = v;
+    },
+    /** Simulate the owner deleting the row in the dashboard. */
+    adminDelete() {
+      row = null;
     },
     /** Simulate another device writing directly. */
     write(db: unknown) {

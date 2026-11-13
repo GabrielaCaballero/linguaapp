@@ -161,6 +161,20 @@ export interface DB {
   events: AppEvent[];
   /** v1 Ties log, kept only until the learner has been offered a download once. */
   legacyTies?: unknown[];
+  /**
+   * Sync: changes when the learner deliberately replaces everything (Reset, import, "Use
+   * this device"). Devices on a different epoch take the server copy instead of merging.
+   */
+  epoch?: string;
+  /** Sync: things removed on purpose, so a merge with another device doesn't bring them back. */
+  deleted?: Tombstones;
+}
+
+export interface Tombstones {
+  /** Course language → when it was removed. */
+  courses?: Partial<Record<TargetLang, number>>;
+  /** Custom word id → when it was removed. */
+  custom?: Record<string, number>;
 }
 
 export const DEFAULT_SETTINGS: Settings = {

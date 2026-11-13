@@ -13,7 +13,9 @@ create table if not exists public.user_state (
 
 alter table public.user_state enable row level security;
 
-revoke all on public.user_state from anon, public;
+-- Supabase's default privileges give every role full access to new tables: take it all
+-- back, then allow signed-in users only what the app needs (never deleting rows).
+revoke all on public.user_state from anon, authenticated, public;
 grant select, insert, update on public.user_state to authenticated;
 
 drop policy if exists "read own state" on public.user_state;
@@ -22,7 +24,9 @@ drop policy if exists "update own state" on public.user_state;
 create policy "read own state" on public.user_state for select to authenticated using (user_id = (select auth.uid()));
 create policy "insert own state" on public.user_state for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "update own state" on public.user_state for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
--- No delete policy: clients delete only through delete_my_state() / delete_me() below.
+-- No delete policy: a progress row is never deleted while the account exists, so its rev
+-- only ever increases (a reset uploads a new document instead). delete_me() below removes
+-- the whole account, and the row with it.
 
 -- Optimistic write: succeeds only if nobody else wrote since `expected_rev`.
 -- Returns the new rev, or -1 on conflict (the app then pulls, merges and retries).
@@ -55,15 +59,9 @@ begin
 end;
 $$;
 
--- Remove only my synced progress (the account stays).
-create or replace function public.delete_my_state()
-returns void
-language sql
-security definer
-set search_path = ''
-as $$
-  delete from public.user_state where user_id = auth.uid();
-$$;
+-- Older versions had delete_my_state(); deleting the row let rev restart at 1, which could
+-- make a device skip a merge. Removed.
+drop function if exists public.delete_my_state();
 
 -- Delete my whole account; my progress row goes with it (on delete cascade).
 create or replace function public.delete_me()
@@ -81,8 +79,6 @@ end;
 $$;
 
 revoke all on function public.push_state(bigint, jsonb, text) from anon, public;
-revoke all on function public.delete_my_state() from anon, public;
 revoke all on function public.delete_me() from anon, public;
 grant execute on function public.push_state(bigint, jsonb, text) to authenticated;
-grant execute on function public.delete_my_state() to authenticated;
 grant execute on function public.delete_me() to authenticated;

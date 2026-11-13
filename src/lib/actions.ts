@@ -40,6 +40,7 @@ export function removeCourse(lang: TargetLang) {
     const left = Object.keys(courses) as TargetLang[];
     return {
       ...db,
+      deleted: { ...db.deleted, courses: { ...db.deleted?.courses, [lang]: Date.now() } },
       cards,
       profile: { ...db.profile, courses, activeLang: left.includes(db.profile.activeLang) ? db.profile.activeLang : left[0] ?? "it", onboarded: left.length > 0 },
     };
@@ -184,7 +185,7 @@ export function removeCustomWord(id: string) {
   update((db) => {
     const cards = { ...db.cards };
     delete cards[id];
-    return { ...db, custom: db.custom.filter((c) => c.id !== id), cards };
+    return { ...db, custom: db.custom.filter((c) => c.id !== id), cards, deleted: { ...db.deleted, custom: { ...db.deleted?.custom, [id]: Date.now() } } };
   });
 }
 

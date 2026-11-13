@@ -190,6 +190,8 @@ export function testerStats(db: DB) {
     sessions: db.sessions.length,
     minutes: Math.round(db.sessions.reduce((a, s) => a + s.seconds, 0) / 60),
     reviews: db.reviews.length,
+    // Strategy §5 signals, computable on the device (docs/product/01-strategy.md).
+    signals: strategySignals(db),
     perLang: Object.fromEntries(
       langs.map((l) => [
         l,
@@ -204,6 +206,36 @@ export function testerStats(db: DB) {
       ]),
     ),
     events: db.events.reduce<Record<string, number>>((a, e) => ((a[e.type] = (a[e.type] ?? 0) + 1), a), {}),
+  };
+}
+
+/** The success signals the strategy tracks, from this device's own data. */
+export function strategySignals(db: DB, now = Date.now()) {
+  // Practice days per week over the last 4 weeks (only weeks since the profile existed).
+  const since = Math.max(now - 28 * DAY, db.profile.createdAt || now);
+  const days = new Set(db.sessions.filter((s) => s.t >= since).map((s) => new Date(s.t).toDateString()));
+  const weeks = Math.max(1, (now - since) / (7 * DAY));
+  // Share of sessions (≥ 10 graded answers) whose accuracy sat in the 80–85 % target band,
+  // and within the wider 75–90 % comfort zone.
+  const graded = db.sessions.filter((s) => s.graded >= 10);
+  const acc = graded.map((s) => s.correct / s.graded);
+  const share = (lo: number, hi: number) => (acc.length ? Math.round((100 * acc.filter((a) => a >= lo && a <= hi).length) / acc.length) : null);
+  // North star, Weekly Retained Items: answers in the last 7 days that were right after a
+  // gap of ≥ 7 days since that item's previous review (decisions.md 2026-11-12).
+  const weekAgo = now - 7 * DAY;
+  const last = new Map<string, number>();
+  let wri = 0;
+  for (const r of [...db.reviews].sort((a, b) => a.t - b.t)) {
+    const prev = last.get(r.id);
+    if (r.t >= weekAgo && prev !== undefined && r.t - prev >= 7 * DAY && r.verdict !== "wrong") wri++;
+    last.set(r.id, r.t);
+  }
+  return {
+    practiceDaysPerWeek: Math.round((days.size / weeks) * 10) / 10,
+    sessionsGraded: acc.length,
+    sessionsInTargetBandPct: share(0.8, 0.85),
+    sessionsInComfortZonePct: share(0.75, 0.9),
+    weeklyRetainedItems: wri,
   };
 }
 

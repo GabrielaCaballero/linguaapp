@@ -15,9 +15,14 @@ export interface SyncState {
   /** Local changes not yet uploaded. */
   dirty: boolean;
   lastSyncAt?: number;
+  /**
+   * The next upload replaces the server copy instead of merging with it (Reset, import,
+   * "Use this device"). Comes with a new `db.epoch`, so other devices adopt it too.
+   */
+  replace?: boolean;
 }
 
-export type SyncStatus = "off" | "idle" | "syncing" | "offline" | "error";
+export type SyncStatus = "off" | "idle" | "syncing" | "offline" | "error" | "outdated";
 
 export type FirstLogin =
   | { kind: "uploaded" | "downloaded" | "empty" | "same" }
@@ -42,6 +47,23 @@ export class BadRemoteError extends Error {
   }
 }
 
+/** The server copy was written by a newer app (a format this build doesn't know). Never overwrite it. */
+export class NewerFormatError extends Error {
+  constructor() {
+    super("newer-format");
+  }
+}
+
+/** The user signed out (or deleted the account) while a sync was in flight: drop its result. */
+class Abandoned extends Error {}
+
+/** Highest document format this build understands (DB.version). */
+export const KNOWN_FORMAT = 2;
+
+export function newEpoch(now: number): string {
+  return `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 const MAX_ROUNDS = 4;
 
 export function createEngine(deps: EngineDeps) {
@@ -55,6 +77,8 @@ export function createEngine(deps: EngineDeps) {
   let running: Promise<SyncStatus> | null = null;
   let again = false;
   let pending: { userId: string; remote: DB; rev: number } | null = null;
+  // Bumped by forget(); a sync that started earlier must not write anything afterwards.
+  let generation = 0;
   const listeners = new Set<() => void>();
   let snapshot: Snapshot = { status, lastSyncAt: st?.lastSyncAt, dirty: !!st?.dirty, signedIn: !!st };
 
@@ -85,6 +109,8 @@ export function createEngine(deps: EngineDeps) {
     }
   }
   function parseRemote(x: unknown): DB {
+    const v = (x as { version?: unknown } | null)?.version;
+    if (typeof v === "number" && v > KNOWN_FORMAT) throw new NewerFormatError();
     try {
       return migrateAny(x, deps.legacy, now());
     } catch {
@@ -103,8 +129,30 @@ export function createEngine(deps: EngineDeps) {
   async function round(): Promise<SyncStatus> {
     if (!st) return "off";
     const s = st;
+    const gen = generation;
+    /** Await a server call, then make sure we're still the same signed-in session. */
+    const still = async <T,>(p: Promise<T>): Promise<T> => {
+      const r = await p;
+      if (gen !== generation || st !== s) throw new Abandoned();
+      return r;
+    };
     for (let i = 0; i < MAX_ROUNDS; i++) {
-      const serverRev = await deps.remote.getRev();
+      if (s.replace) {
+        // Overwrite the server copy with this device's (it carries a new epoch).
+        const at = (await still(deps.remote.getRev())) ?? 0;
+        const v = version;
+        const newRev = await still(deps.remote.push(at, toPayload(deps.getDB())));
+        if (newRev >= 0) {
+          s.rev = newRev;
+          s.replace = false;
+          s.dirty = version !== v;
+          s.lastSyncAt = now();
+          save();
+          if (!s.dirty) return "idle";
+        }
+        continue;
+      }
+      const serverRev = await still(deps.remote.getRev());
       if (serverRev === null) {
         // Nothing on the server (first upload, or synced data was deleted elsewhere).
         if (s.rev !== 0) {
@@ -112,13 +160,21 @@ export function createEngine(deps: EngineDeps) {
           s.dirty = true;
         }
       } else if (serverRev !== s.rev) {
-        const doc = await deps.remote.pull();
+        const doc = await still(deps.remote.pull());
         if (doc) {
           const remote = parseRemote(doc.db);
-          const merged = mergeDB(deps.getDB(), remote);
-          deps.applyDB(merged);
-          s.rev = doc.rev;
-          s.dirty = s.dirty || !samePayload(merged, remote);
+          const local = deps.getDB();
+          if ((remote.epoch ?? "") !== (local.epoch ?? "")) {
+            // Another device started over (Reset / import / "Use that device"): take its copy.
+            deps.applyDB(adopt(remote));
+            s.rev = doc.rev;
+            s.dirty = false;
+          } else {
+            const merged = mergeDB(local, remote);
+            deps.applyDB(merged);
+            s.rev = doc.rev;
+            s.dirty = s.dirty || !samePayload(merged, remote);
+          }
         } else {
           s.rev = 0;
           s.dirty = true;
@@ -131,7 +187,7 @@ export function createEngine(deps: EngineDeps) {
         return "idle";
       }
       const v = version;
-      const newRev = await deps.remote.push(s.rev, toPayload(deps.getDB()));
+      const newRev = await still(deps.remote.push(s.rev, toPayload(deps.getDB())));
       if (newRev >= 0) {
         s.rev = newRev;
         s.dirty = version !== v;
@@ -152,7 +208,8 @@ export function createEngine(deps: EngineDeps) {
       try {
         setStatus(await round());
       } catch (e) {
-        setStatus(e instanceof BadRemoteError ? "error" : isOnline() ? "error" : "offline");
+        if (e instanceof Abandoned) return "off";
+        setStatus(e instanceof NewerFormatError ? "outdated" : e instanceof BadRemoteError ? "error" : isOnline() ? "error" : "offline");
       }
     } while (again && st);
     return status;
@@ -218,7 +275,9 @@ export function createEngine(deps: EngineDeps) {
         deps.applyDB(merged);
         st = { userId, rev, dirty: !samePayload(merged, remote) };
       } else {
-        st = { userId, rev, dirty: true };
+        // "Use this device": it replaces the account copy everywhere.
+        deps.applyDB({ ...deps.getDB(), epoch: newEpoch(now()) });
+        st = { userId, rev, dirty: true, replace: true };
       }
       save();
       return engine.syncNow();
@@ -250,18 +309,29 @@ export function createEngine(deps: EngineDeps) {
     isDirty: () => !!st?.dirty,
     signedInAs: () => st?.userId ?? null,
 
-    /** Delete the synced copy only; this device keeps its progress and re-uploads nothing until the next change. */
-    async deleteRemote() {
-      await deps.remote.deleteMine();
-      if (st) {
-        st.rev = 0;
-        st.dirty = false;
-        save();
-      }
+    /**
+     * The device's DB was replaced on purpose (Reset everything, import a backup): stamp a
+     * new epoch and make it the account's copy on every device. The server row is never
+     * deleted, so its rev keeps increasing.
+     */
+    startOver(): Promise<SyncStatus> {
+      if (!st) return Promise.resolve<SyncStatus>("off");
+      deps.applyDB({ ...deps.getDB(), epoch: newEpoch(now()) });
+      st.replace = true;
+      st.dirty = true;
+      version++;
+      save();
+      return engine.syncNow();
+    },
+
+    /** Resolves when no sync is running (sign-out waits for this before wiping). */
+    async settled(): Promise<void> {
+      while (running) await running.catch(() => undefined);
     },
 
     /** Forget sync state on this device (sign-out, account deleted). Does not touch the DB. */
     forget() {
+      generation++;
       pending = null;
       st = null;
       deps.storage.remove(KEYS.preLogin);

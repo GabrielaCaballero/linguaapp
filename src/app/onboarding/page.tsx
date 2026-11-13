@@ -1,5 +1,6 @@
 "use client";
 
+import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import type { BaseLang, TargetLang } from "@/content/schema";
@@ -162,6 +163,7 @@ function Flow() {
             </div>
             <h1 className="hero" style={{ fontSize: "2.25rem" }}>{t.welcomeTitle}</h1>
             <p className="muted" style={{ marginTop: 12 }}>{syncOn ? t.welcomeSubSync : t.welcomeSub}</p>
+            <InstallHint t={t} />
           </div>
           <div className="bottom-bar">
             <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>

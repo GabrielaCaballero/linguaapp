@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getEngine } from "@/lib/sync/client";
 import type { TargetLang } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { getDB, useDB } from "@/lib/store";
@@ -30,6 +31,10 @@ export interface SessionSummary {
 export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: SessionSummary; onDone: () => void; onMore?: () => void }) {
   const db = useDB() ?? getDB();
   const [now] = useState(() => Date.now());
+  // A lesson just ended: upload it now rather than waiting for the background timer.
+  useEffect(() => {
+    void getEngine()?.syncNow();
+  }, []);
   const mins = todayMinutes(db, now, summary.lang);
   const target = targetFor(db, summary.lang);
   const reached = mins >= target;

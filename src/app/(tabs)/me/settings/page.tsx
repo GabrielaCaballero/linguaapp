@@ -200,7 +200,7 @@ export default function SettingsPage() {
               <div className="row between"><span className="caption">{t.importItems}</span><span className="tabular">{preview.preview.cards}</span></div>
               <div className="row between" style={{ alignItems: "flex-start" }}><span className="caption">{t.importGoals}</span><span style={{ textAlign: "right" }}>{preview.preview.goals.map((g) => <div key={g}>{g}</div>)}</span></div>
             </div>
-            <button className="btn btn-primary" onClick={() => { replaceDB(preview.db); setPreview(null); setToast(t.importDone); }}>{t.importDo}</button>
+            <button className="btn btn-primary" onClick={() => { replaceDB(preview.db); if (signedIn) void getEngine()?.startOver(); setPreview(null); setToast(t.importDone); }}>{t.importDo}</button>
             <button className="btn btn-ghost" onClick={() => setPreview(null)}>{t.cancel}</button>
           </div>
         )}
@@ -212,7 +212,7 @@ export default function SettingsPage() {
           <p className="muted" style={{ margin: 0 }}>{t.resetType(t.resetWord)}</p>
           {signedIn && <p className="label" style={{ margin: 0, color: "var(--miss)" }}>{t.acctResetNote}</p>}
           <input className="input" value={resetText} onChange={(e) => setResetText(e.target.value)} autoCapitalize="characters" aria-label={t.resetWord} />
-          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={async () => { if (signedIn) { try { await getEngine()?.deleteRemote(); } catch { /* offline: next sync re-uploads nothing new */ } } resetDB(); setReset(false); router.replace(onboardingHref()); }}>
+          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={() => { resetDB(); if (signedIn) void getEngine()?.startOver(); setReset(false); router.replace(onboardingHref()); }}>
             {t.sReset}
           </button>
           <button className="btn btn-ghost" onClick={() => setReset(false)}>{t.cancel}</button>

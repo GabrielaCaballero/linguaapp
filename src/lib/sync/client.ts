@@ -17,6 +17,11 @@ export function isSyncConfigured(): boolean {
   return !!URL_ && !!ANON;
 }
 
+/** "Continue with Google" is shown only when the owner has set up a Google OAuth client too. */
+export function isGoogleEnabled(): boolean {
+  return isSyncConfigured() && process.env.NEXT_PUBLIC_AUTH_GOOGLE === "1";
+}
+
 let client: SupabaseClient | null = null;
 function getClient(): SupabaseClient {
   if (!client) {
@@ -31,6 +36,9 @@ function getClient(): SupabaseClient {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: false,
+        // PKCE: Google sends back a one-time code (not tokens) that only this browser,
+        // which holds the matching secret, can exchange. The email code is unaffected.
+        flowType: "pkce",
       },
     });
     client.auth.onAuthStateChange((_e, session) => {
@@ -81,7 +89,7 @@ export function useAccount(): AccountState & { configured: boolean } {
 }
 
 // ---- sign in ------------------------------------------------------------------------
-export type AuthError = "notInvited" | "badCode" | "tooMany" | "network";
+export type AuthError = "notInvited" | "badCode" | "tooMany" | "network" | "google" | "googleOtherBrowser";
 
 function classify(e: { message?: string; status?: number; code?: string } | null): AuthError {
   const m = `${e?.code ?? ""} ${e?.message ?? ""}`.toLowerCase();
@@ -106,6 +114,65 @@ export async function verifyCode(email: string, token: string): Promise<{ user: 
     const { data, error } = await getClient().auth.verifyOtp({ email, token, type: "email" });
     if (error || !data.user) return { error: classify(error) };
     const user = { id: data.user.id, email: data.user.email ?? email };
+    setUser(user);
+    return { user };
+  } catch {
+    return { error: "network" };
+  }
+}
+
+// ---- sign in with Google (optional) ---------------------------------------------------
+/**
+ * Leave for Google's consent screen. Google returns to /account on this same origin with
+ * ?code=… (or ?error=…), handled by finishGoogle. Invite-only still holds: Supabase refuses
+ * any Google account whose email the owner hasn't added (signups are off).
+ */
+export async function startGoogle(from: "welcome" | "settings"): Promise<AuthError | null> {
+  try {
+    const { error } = await getClient().auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/account?from=${from}`, queryParams: { prompt: "select_account" } },
+    });
+    return error ? "network" : null;
+  } catch {
+    return "network";
+  }
+}
+
+export interface OAuthReturn {
+  code?: string;
+  error?: string;
+  errorCode?: string;
+  errorDescription?: string;
+}
+
+/** Read Google's answer from the return URL (query, or hash on some error paths). */
+export function readOAuthReturn(search: string, hash: string): OAuthReturn | null {
+  const q = new URLSearchParams(search);
+  const h = new URLSearchParams(hash.replace(/^#/, ""));
+  const get = (k: string) => q.get(k) ?? h.get(k) ?? undefined;
+  const r: OAuthReturn = { code: get("code"), error: get("error"), errorCode: get("error_code"), errorDescription: get("error_description") };
+  return r.code || r.error ? r : null;
+}
+
+const exchanged = new Set<string>();
+export async function finishGoogle(r: OAuthReturn): Promise<{ user: AccountUser } | { error: AuthError }> {
+  if (r.error || !r.code) {
+    const m = `${r.errorCode ?? ""} ${r.errorDescription ?? ""}`.toLowerCase();
+    return { error: /signup|not allowed/.test(m) ? "notInvited" : "google" };
+  }
+  if (exchanged.has(r.code)) return { error: "google" };
+  exchanged.add(r.code);
+  try {
+    const { data, error } = await getClient().auth.exchangeCodeForSession(r.code);
+    if (error || !data.user) {
+      const m = `${(error as { code?: string } | null)?.code ?? ""} ${error?.message ?? ""}`.toLowerCase();
+      // The secret half of PKCE lives in the browser that started sign-in. Landing in another
+      // one (e.g. Safari instead of the installed app) can't finish: say so plainly.
+      if (/verifier|flow.?state|pkce/.test(m)) return { error: "googleOtherBrowser" };
+      return { error: error && classify(error) === "notInvited" ? "notInvited" : "google" };
+    }
+    const user = { id: data.user.id, email: data.user.email ?? "" };
     setUser(user);
     return { user };
   } catch {
@@ -147,6 +214,9 @@ export function useSyncStatus() {
  */
 export async function signOut(opts: { force?: boolean; forgetKey?: boolean } = {}): Promise<"done" | "unsynced"> {
   const e = getEngine();
+  // Let a sync that is already running finish first, then try once more if needed. forget()
+  // also makes any late answer from the server be ignored, so nothing lands on the wiped device.
+  await e?.settled();
   if (e?.isDirty()) await e.syncNow();
   if (e?.isDirty() && !opts.force) return "unsynced";
   e?.forget();

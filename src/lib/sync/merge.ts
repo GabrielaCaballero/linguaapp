@@ -4,10 +4,13 @@
 //  - never lose a review: reviews and sessions are a union, de-duplicated by key;
 //  - cards: the copy reviewed most recently wins (ties: more reps, then local);
 //  - profile: the newest edit wins (profile.updatedAt), courses are merged per language;
+//  - deletions are remembered (db.deleted): a course or custom word removed on one device
+//    stays removed, unless the course was added again later;
+//  - fields this build doesn't know (written by a newer app) are kept, never dropped;
 //  - events (on-device metrics) and legacyTies never leave the device.
 // mergeDB(a, a) deep-equals a, and the review/card/session sets of mergeDB(a, b) and
 // mergeDB(b, a) are the same.
-import { MAX_REVIEWS, type CardV2, type Course, type DB, type Profile, type ReviewLog, type SessionRecord, type TargetLang } from "../model";
+import { MAX_REVIEWS, type CardV2, type Course, type DB, type Profile, type ReviewLog, type SessionRecord, type TargetLang, type Tombstones } from "../model";
 
 /** What gets uploaded: the DB minus on-device-only data. The AI key is never in a DB. */
 export function toPayload(db: DB): DB {
@@ -49,20 +52,40 @@ function pickCourse(local: Course | undefined, remote: Course | undefined, prefe
   return { ...base, unit: Math.max(local.unit ?? 1, remote.unit ?? 1) };
 }
 
-function mergeProfile(local: Profile, remote: Profile): Profile {
+function maxMerge<K extends string>(a: Partial<Record<K, number>> | undefined, b: Partial<Record<K, number>> | undefined): Partial<Record<K, number>> | undefined {
+  const out: Partial<Record<K, number>> = { ...(b ?? {}) } as Partial<Record<K, number>>;
+  for (const [k, v] of Object.entries(a ?? {}) as [K, number][]) out[k] = Math.max(out[k] ?? 0, v);
+  return Object.keys(out).length ? out : undefined;
+}
+
+function mergeTombstones(a: Tombstones | undefined, b: Tombstones | undefined): Tombstones | undefined {
+  const courses = maxMerge<TargetLang>(a?.courses, b?.courses);
+  const custom = maxMerge<string>(a?.custom, b?.custom) as Record<string, number> | undefined;
+  if (!courses && !custom) return undefined;
+  const out: Tombstones = {};
+  if (courses) out.courses = courses;
+  if (custom) out.custom = custom;
+  return out;
+}
+
+function mergeProfile(local: Profile, remote: Profile, deleted: Tombstones | undefined): Profile {
   const lu = local.updatedAt ?? 0;
   const ru = remote.updatedAt ?? 0;
   const preferLocal = lu >= ru;
   const winner = preferLocal ? local : remote;
+  const loser = preferLocal ? remote : local;
   const courses: Partial<Record<TargetLang, Course>> = {};
   for (const l of new Set([...Object.keys(local.courses), ...Object.keys(remote.courses)]) as Set<TargetLang>) {
     const c = pickCourse(local.courses[l], remote.courses[l], preferLocal);
-    if (c) courses[l] = c;
+    // Removed on some device after this course was (last) added → stays removed.
+    const gone = deleted?.courses?.[l];
+    if (c && !(gone !== undefined && gone >= (c.addedAt ?? 0))) courses[l] = c;
   }
   const seen: Record<string, number> = { ...(remote.seen ?? {}) };
   for (const [k, v] of Object.entries(local.seen ?? {})) seen[k] = Math.max(seen[k] ?? 0, v);
   const lastBackupAt = Math.max(local.lastBackupAt ?? 0, remote.lastBackupAt ?? 0) || undefined;
   const merged: Profile = {
+    ...loser,
     ...winner,
     courses,
     onboarded: local.onboarded || remote.onboarded,
@@ -78,6 +101,7 @@ function mergeProfile(local: Profile, remote: Profile): Profile {
     const first = Object.keys(courses)[0] as TargetLang | undefined;
     if (first) merged.activeLang = first;
   }
+  if (!Object.keys(courses).length) merged.onboarded = false;
   if (merged.pendingGoal) {
     merged.pendingGoal = merged.pendingGoal.filter((l) => courses[l] && !courses[l]!.goal);
     if (!merged.pendingGoal.length) delete merged.pendingGoal;
@@ -87,22 +111,40 @@ function mergeProfile(local: Profile, remote: Profile): Profile {
 
 /** Merge a pulled document into the local one. `local.events` and `local.legacyTies` are kept. */
 export function mergeDB(local: DB, remote: DB): DB {
-  const cards: Record<string, CardV2> = { ...remote.cards };
+  const deleted = mergeTombstones(local.deleted, remote.deleted);
+  const profile = mergeProfile(local.profile, remote.profile, deleted);
+  const gone = deleted?.custom ?? {};
+
+  const cards: Record<string, CardV2> = {};
+  for (const [id, c] of Object.entries(remote.cards)) cards[id] = c;
   for (const [id, c] of Object.entries(local.cards)) cards[id] = cards[id] ? pickCard(c, cards[id]) : c;
+  for (const [id, c] of Object.entries(cards)) {
+    // A removed course takes its cards with it; a removed custom word takes its card.
+    const courseGone = deleted?.courses?.[c.lang] !== undefined && !profile.courses[c.lang];
+    if (courseGone || gone[id] !== undefined) delete cards[id];
+  }
 
   let reviews = unionBy(local.reviews, remote.reviews, reviewKey, (r) => r.t);
   if (reviews.length > MAX_REVIEWS) reviews = reviews.slice(-MAX_REVIEWS);
 
+  const custom = [...local.custom, ...remote.custom.filter((i) => !local.custom.some((x) => x.id === i.id))].filter((i) => gone[i.id] === undefined);
+
   const out: DB = {
+    ...remote,
     ...local,
     version: 2,
-    profile: mergeProfile(local.profile, remote.profile),
+    profile,
     cards,
     reviews,
     sessions: unionBy(local.sessions, remote.sessions, sessionKey, (s) => s.t),
-    custom: [...local.custom, ...remote.custom.filter((i) => !local.custom.some((x) => x.id === i.id))],
+    custom,
     events: local.events,
   };
+  // Same epoch in normal syncs; on "Combine" the account's epoch is kept.
+  if (remote.epoch !== undefined) out.epoch = remote.epoch;
+  else delete out.epoch;
+  if (deleted) out.deleted = deleted;
+  else delete out.deleted;
   if (local.legacyTies === undefined) delete out.legacyTies;
   return out;
 }

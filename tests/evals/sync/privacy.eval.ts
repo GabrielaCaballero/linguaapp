@@ -58,6 +58,15 @@ describe("privacy · no server secrets in the app", () => {
   it("sign-up is never possible from the app (shouldCreateUser: false)", () => {
     expect(read("src/lib/sync/client.ts")).toMatch(/shouldCreateUser:\s*false/);
   });
+  it("Google sign-in uses PKCE and only returns to this app's own origin", () => {
+    const src = read("src/lib/sync/client.ts");
+    expect(src).toMatch(/flowType:\s*"pkce"/);
+    expect(src).toMatch(/redirectTo:\s*`\$\{window\.location\.origin\}\/account\?from=\$\{from\}`/);
+    expect(src).toMatch(/NEXT_PUBLIC_AUTH_GOOGLE === "1"/);
+  });
+  it("the Google client secret is never in the app", () => {
+    for (const f of files) expect(read(f), f).not.toMatch(/GOOGLE_CLIENT_SECRET|client_secret|GOCSPX-/);
+  });
   it("the auth session uses the storage adapter, not cookies", () => {
     const src = read("src/lib/sync/client.ts");
     expect(src).toMatch(/storageKey:\s*KEYS\.auth/);
@@ -91,7 +100,21 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     }
   });
   it("functions can't be called anonymously", () => {
-    for (const f of ["push_state", "delete_my_state", "delete_me"]) expect(sql).toMatch(new RegExp(`revoke all on function public\\.${f}\\([^)]*\\) from anon`));
+    for (const f of ["push_state", "delete_me"]) expect(sql).toMatch(new RegExp(`revoke all on function public\\.${f}\\([^)]*\\) from anon`));
+  });
+  it("signed-in users get no DELETE on the table, and the progress row is never deleted by the app", () => {
+    expect(sql).toMatch(/revoke all on public\.user_state from anon, authenticated, public/);
+    expect(sql).not.toMatch(/grant[^;]*delete[^;]*on public\.user_state/);
+    expect(sql).toMatch(/drop function if exists public\.delete_my_state/);
+    expect(read("src/lib/sync/remote.ts")).not.toMatch(/delete_my_state/);
+  });
+  it("queries also filter by the signed-in user's id (defence in depth)", () => {
+    expect((read("src/lib/sync/remote.ts").match(/\.eq\("user_id", await me\(\)\)/g) ?? []).length).toBe(2);
+  });
+  it("pages send a CSP that limits where data can be sent", () => {
+    const cfg = read("next.config.ts");
+    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com/);
+    expect(cfg).toMatch(/frame-ancestors 'none'/);
   });
   it("rows are deleted with the user (on delete cascade) and size-capped", () => {
     expect(sql).toContain("on delete cascade");

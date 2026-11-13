@@ -192,3 +192,49 @@ describe("merge · on-device-only data", () => {
     expect(samePayload(a, b)).toBe(true);
   });
 });
+
+describe("merge · deletions don't come back (P1-3)", () => {
+  it("a course removed on one device stays removed, with its cards", () => {
+    const both = learner({ langs: ["it", "de"], n: 10 });
+    const removed: DB = structuredClone(both);
+    delete removed.profile.courses.de;
+    removed.cards = Object.fromEntries(Object.entries(removed.cards).filter(([, c]) => c.lang !== "de"));
+    removed.deleted = { courses: { de: NOW + 1000 } };
+    for (const m of [mergeDB(removed, both), mergeDB(both, removed)]) {
+      expect(m.profile.courses.de).toBeUndefined();
+      expect(Object.values(m.cards).some((c) => c.lang === "de")).toBe(false);
+      expect(m.deleted?.courses?.de).toBe(NOW + 1000);
+    }
+  });
+  it("a course added again after being removed is kept", () => {
+    const a = learner({ langs: ["it", "de"], n: 6 });
+    const b: DB = structuredClone(a);
+    b.deleted = { courses: { de: NOW - 1000 } };
+    b.profile.courses.de = { ...b.profile.courses.de!, addedAt: NOW };
+    expect(mergeDB(a, b).profile.courses.de).toBeDefined();
+    expect(mergeDB(b, a).profile.courses.de).toBeDefined();
+  });
+  it("a custom word removed on one device stays removed", () => {
+    const a = learner({ n: 3 });
+    const word = { id: "custom-x", lang: "it" as const, unit: "custom", type: "word" as const, cefr: "A1.1" as const, target: "ciao", gloss: { es: "hola", en: "hi" }, spoken: "ciao", tags: ["custom"] };
+    a.custom = [word];
+    a.cards["custom-x"] = card("custom-x", "it", NOW);
+    const b: DB = structuredClone(a);
+    b.custom = [];
+    delete b.cards["custom-x"];
+    b.deleted = { custom: { "custom-x": NOW + 5 } };
+    for (const m of [mergeDB(a, b), mergeDB(b, a)]) {
+      expect(m.custom).toEqual([]);
+      expect(m.cards["custom-x"]).toBeUndefined();
+    }
+  });
+  it("fields written by a newer app are kept, not dropped", () => {
+    const local = learner({ n: 2 });
+    const remote = { ...structuredClone(local), futureField: [1, 2] } as DB & { futureField: number[] };
+    (remote.profile as unknown as Record<string, unknown>).futurePref = "x";
+    const m = mergeDB(local, remote) as DB & { futureField?: number[] };
+    expect(m.futureField).toEqual([1, 2]);
+    expect((m.profile as unknown as Record<string, unknown>).futurePref).toBe("x");
+  });
+});
+
