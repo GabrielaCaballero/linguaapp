@@ -32,4 +32,9 @@ export const AUDITOR = "QA lead (eval phase), 2026-11-12";
 // 2026-11-13 · phase 2: units 13–18 (it + de, B1) read item by item the same way before re-pinning.
 // Fixed during review: it-u15-non-credo-che-venga en gloss no longer assumes "he"; de-u15 pat-wo-da
 // es prompt used a Spanish/German mix → German stem in both prompts.
+// 2026-11-13 · phase 3: units 19–24 (it + de, B2) read item by item the same way before re-pinning.
+// Fixed during review: it-u20 tile distractor «notte.» (punctuation) → «notturno»; it-u21 rendersi
+// conto gloss duplicated accorgersi's; it-u24 «cartera» → «bolsa (cartera)», «apetece» → «gustaría»
+// (neutral Spanish), "Do you fancy" → "Would you like"; de-u21-br-daten was ambiguous (die Daten is
+// also the plural of das Datum) → rewritten; de-u24 distractor «den Daumen drücken» is in Duden → replaced.
 export const FAILS: Record<string, Finding> = {};

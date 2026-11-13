@@ -242,8 +242,10 @@ test.describe("CUJ-7 change goal", () => {
     await page.locator(".choice-card", { hasText: T.en.levelA2 }).click();
     await page.getByRole("button", { name: T.en.months(3) }).click();
     await expect(page.getByText(T.en.feas.demanding).first()).toBeVisible();
-    // P1-11: levels beyond the shipped content say so
-    await expect(page.getByText(T.en.moreUnitsSoon).first()).toBeVisible();
+    // GO-7 / P1-11: the copy is driven by the shipped units; the course now reaches B2 (the top goal
+    // level), so no level is "beyond the course" and the B2 choice is offered without that caption.
+    await expect(page.locator(".choice-card", { hasText: T.en.levelB2 })).toBeVisible();
+    await expect(page.getByText(T.en.moreUnitsSoon)).toHaveCount(0);
     await expect(page.getByText(T.en.altTitle)).toBeVisible();
     // P1-5: nothing on the goal sheet is covered by another element (judge saw the card overlap the chips)
     const covered = await page.evaluate(() => {
