@@ -4,7 +4,9 @@ _2026-11-13 · Status: current (main + `accounts-sync`), revised after the Uber 
 
 ## 1. Shape of the system
 
-Lingua is a **local-first, client-only web app**. All learning logic runs in the browser. The only servers are static hosting (Vercel) and, when the owner turns accounts on, Supabase (sign-in plus one Postgres table). There is no backend code of our own.
+Lingua is a **client-only web app whose progress lives in the account**. All learning logic runs in the browser. With accounts on, the server (Supabase: sign-in plus two Postgres tables) holds each learner's full history; the phone keeps a small working cache, about 1 MB at most, so lessons still work offline. Guests (no account) keep everything on the phone. The only other server is static hosting (Vercel). There is no backend code of our own.
+
+**Storage on a phone (measured / computed):** the app itself ≈ 2.3 MB (cached for offline). Signed in: schedule + goals + settings + the last 45 days of answers and events ≈ 0.3–1 MB, and it stops growing (a test checks a year of daily practice stays under 1 MB). Guest: everything stays on the phone, up to ≈ 3 MB of answers (capped at 20 000).
 
 ```mermaid
 flowchart LR
@@ -69,7 +71,7 @@ tests/                    unit tests; tests/evals/{checker,engine,content,ux,syn
 
 ## 4. Data model
 
-One JSON document per device, `lingua:v2`:
+On the phone, one JSON document, `lingua:v2` (signed in, `reviews` and `events` hold only the last 45 days; `LOCAL_HISTORY_DAYS`):
 
 ```ts
 DB = {
@@ -114,17 +116,21 @@ Other keys: `lingua:llm` (AI key: never backed up, never synced) · `lingua:llm-
 - The Supabase session lives in `lingua:auth` through the storage adapter (no cookies, `detectSessionInUrl: false`).
 
 ### 7.2 Server schema (`supabase/schema.sql`)
-- `user_state(user_id uuid PK = auth.uid(), db jsonb, rev bigint, updated_at, device)`, `on delete cascade` from `auth.users`, `pg_column_size(db) < 4 MB`.
-- RLS on; `anon` has no access. Select/insert/update policies `to authenticated using (user_id = auth.uid())`. No delete policy.
+- `user_state(user_id uuid PK = auth.uid(), db jsonb, rev bigint, updated_at, device)`: the **state** (card schedules, goals, settings, sessions, custom words, epoch, tombstones), without answers. Typically 50–250 KB. `on delete cascade` from `auth.users`, `pg_column_size(db) < 4 MB`.
+- `user_reviews(user_id, epoch, t, item, mode, r jsonb)`, primary key `(user_id, epoch, t, item, mode)`: **one row per answer**, the full history. Insert-only for learners (select + insert granted, no update/delete), so an answer sent twice is simply ignored. `on delete cascade` from `auth.users`.
+- RLS on both; `anon` has no access; default privileges revoked first. Every policy is `to authenticated` and scoped to `auth.uid()`.
 - `push_state(expected_rev, doc, device)`: SECURITY INVOKER (RLS applies), insert when `expected_rev = 0`, otherwise update only if `rev` matches; returns the new rev or −1.
-- `delete_my_state()` and `delete_me()`: SECURITY DEFINER with `search_path = ''`, scoped to `auth.uid()`.
+- `forget_other_answers(keep_epoch)` (after starting over) and `delete_me()`: SECURITY DEFINER with `search_path = ''`, scoped to `auth.uid()`.
 
 ### 7.3 Sync engine (`src/lib/sync/engine.ts`)
-- **One document per user** with optimistic concurrency on `rev`. The server row is **never deleted** while the account exists, so `rev` only increases (a restarted rev could make a device skip a merge).
+- **Answers are sent once.** Each answer on the phone carries an `up` flag once the account has it. A sync sends only answers without the flag (in batches of 500), then sets it. Clock differences between devices can't make an answer get skipped, because there is no time watermark.
+- **Recent answers come down.** When another device has changed the state, the phone also fetches that account's answers from the last 45 days (from the last fetch minus 14 days), so stats and "N to fix" include practice from other devices. A new phone downloads the state plus 45 days of answers, never the whole history.
+- **The phone trims itself.** After each successful sync, answers already in the account and events older than 45 days are dropped from the phone. An answer that hasn't reached the account is never dropped. Card schedules are never trimmed, so scheduling is unaffected. Stats that look at history (calibration, accuracy by exercise) cover the last 45 days on a signed-in phone.
+- **State: one document per user** with optimistic concurrency on `rev`. The server row is **never deleted** while the account exists, so `rev` only increases (a restarted rev could make a device skip a merge).
 - **Triggers** (SyncRunner): app open, `online`, app visible/hidden, end of every lesson (Results), at most every **2 minutes** while practising, and "Sync now". Triggers start as soon as the engine has finished the first sign-in (no restart needed). Calls are serialized; a version counter notices edits made during an upload.
 - **Conflict:** push fails (−1) → pull → `mergeDB(local, remote)` → push against the remote rev; up to 4 rounds.
-- **`mergeDB` rules (pure):** reviews = union keyed by time|item|mode, capped at the newest 20 000 · sessions = union · cards: later `last_review` wins, then more reps, then local (if the same word was reviewed on two devices while both were offline, the review *log* keeps both answers but the schedule follows the later one) · profile: last writer wins on `updatedAt` (device clocks) · courses merged per language by their latest stamp · custom words: union · **tombstones** (`deleted`): a removed course (with its cards) or custom word stays removed unless the course was added again later · fields this build doesn't know are kept, never dropped. `events` and legacy ties never upload.
-- **Starting over (epoch):** Reset everything, importing a backup, and "Use this device" stamp a new `epoch` and set `replace`: the next upload overwrites the server copy instead of merging. A device that pulls a document with a different epoch **adopts** it (keeping its own on-device events) instead of merging, so the old progress can't come back from another phone. Unsynced answers on that other device are dropped; this is the meaning of "start over".
+- **`mergeDB` rules (pure):** reviews (the phone's cache) = union keyed by time|item|mode · sessions = union · cards: later `last_review` wins, then more reps, then local (if the same word was reviewed on two devices while both were offline, the review *log* keeps both answers but the schedule follows the later one) · profile: last writer wins on `updatedAt` (device clocks) · courses merged per language by their latest stamp · custom words: union · **tombstones** (`deleted`): a removed course (with its cards) or custom word stays removed unless the course was added again later · fields this build doesn't know are kept, never dropped. `events` and legacy ties never upload.
+- **Starting over (epoch):** Reset everything, importing a backup, and "Use this device" stamp a new `epoch` and set `replace`: the next upload sends all the device's answers under the new epoch, overwrites the state, then deletes the account's answers from other epochs (`forget_other_answers`). A device that pulls a document with a different epoch **adopts** it (keeping its own on-device events) instead of merging, so the old progress can't come back from another phone. Unsynced answers on that other device are dropped; this is the meaning of "start over".
 - **Format gate:** a server document with `version` above what this build knows (`KNOWN_FORMAT = 2`) sets status `outdated` ("Update Lingua to keep syncing") and this device never writes over it.
 - **First login** on a device returns uploaded / downloaded / empty / same / choose; "choose" offers Combine (merge) / Use account / Use device. If the device already had progress, a copy is saved as `lingua:pre-login-backup` first. There is no button to restore it yet, and sign-out removes it (tech debt §12).
 - **Sign out** waits for any running sync, tries a final sync, refuses (unless forced) if still dirty, then wipes the device. A server answer that arrives after sign-out is discarded (generation counter), so nothing lands on the wiped device.
@@ -164,7 +170,7 @@ Other keys: `lingua:llm` (AI key: never backed up, never synced) · `lingua:llm-
 
 ## 11. Capacity, failure modes and data lifecycle
 
-**Capacity math.** One review log entry is ~140 bytes of JSON. A daily 15-minute learner makes ~60 graded answers a day ≈ 22 000 a year, so a heavy user reaches the 20 000-review cap (≈ 2.8 MB document) in about a year; the oldest reviews are then dropped from the synced document. Postgres stores jsonb compressed, under the 4 MB `pg_column_size` check. Uploads happen at lesson end and at most every 2 minutes, so a 15-minute day costs ~8 uploads; at 20 users that is far inside the Supabase free tier.
+**Capacity math.** One answer is ~150 bytes. A daily 15-minute learner gives ~60 answers a day ≈ 22 000 a year ≈ 3.3 MB of answer rows per user-year in the account (plus index). 20 users ≈ 70 MB/year, well inside the Supabase free tier (500 MB database). Each sync sends the new answers (a 5-minute lesson ≈ 20 answers ≈ 3 KB) plus the state document (50–250 KB); syncs happen at lesson end, when the app is hidden, and at most every 2 minutes. On the phone: ≤ ~1 MB signed in (45 days), ≤ ~3 MB as a guest.
 
 | Failure | What the user sees | What happens to data |
 |---|---|---|
@@ -186,13 +192,15 @@ Other keys: `lingua:llm` (AI key: never backed up, never synced) · `lingua:llm-
 | Client-only app, no backend | Next server routes; Firebase functions | €0, offline by construction, Capacitor-ready |
 | Supabase (Auth + one table) | Firebase, Clerk + Postgres, custom | One vendor, EU region, RLS, free tier |
 | Email **code**, not magic link | Magic link; passwords | iOS opens links in Safari, separate from the installed app |
-| One document per user + `rev` | Per-card rows, CRDT | Simple and fast enough at this scale; revisit past ~20 users |
+| Progress lives in the account; phone keeps a 45-day cache | Local-only with optional backup; online-only | Owner's concern: phone storage and effortless progress. Online-only would break practising offline |
+| Answers as rows (sent once) + one small state document with `rev` | Whole document incl. answers; per-card rows; CRDT | Uploads stay tiny; the state document stays small enough to replace whole |
 | Epoch + tombstones | Deleting the row on reset | Deleting restarted `rev` and let other devices resurrect data |
 | Google behind a flag, PKCE | Implicit flow; always on | Production unchanged until the owner sets up OAuth; codes are useless if intercepted |
 
 ## 13. Known limits and tech debt
 
-1. Whole-document sync: fine to ~20 users; beyond that, send deltas or move to per-card rows.
+1. The state document is still sent whole (50–250 KB). Fine for ~20 users; beyond that, per-card rows.
+1b. Full history is only in the account: a "show my whole history" view would need to page it from the server (none exists yet).
 2. **No server backups** on the free plan. Next: a `prev_db` column written inside `push_state` (one-step undo) or a scheduled `pg_dump`.
 3. **No real-Postgres test of RLS/grants/`delete_me`.** Next: Supabase CLI locally + pgTAP (B can't read or update A's row; anon denied; definer functions touch only the caller).
 4. **Several tabs** each run their own engine; a second tab could upload after the first signs out. Next: `navigator.locks` + `storage` events on `lingua:sync`/`lingua:auth`.

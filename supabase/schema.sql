@@ -1,5 +1,6 @@
 -- Lingua · accounts & sync schema (paste once into Supabase → SQL Editor → Run).
--- One row per user holding their whole progress document. Row-level security means each
+-- Per user: one row holding the progress state (schedule, goals, settings) and one row per
+-- answer in user_reviews. Row-level security means each
 -- signed-in person can only ever read or write their own row. Safe to run again.
 
 create table if not exists public.user_state (
@@ -27,6 +28,30 @@ create policy "update own state" on public.user_state for update to authenticate
 -- No delete policy: a progress row is never deleted while the account exists, so its rev
 -- only ever increases (a reset uploads a new document instead). delete_me() below removes
 -- the whole account, and the row with it.
+
+-- Every answer a learner gives, one row each. The phone sends each answer once and keeps
+-- only the last few weeks; the full history lives here. Insert-only for the learner: no
+-- updates, no deletes (except "start over" and account deletion, via functions below).
+create table if not exists public.user_reviews (
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  epoch   text not null default '',
+  t       bigint not null,
+  item    text not null,
+  mode    text not null,
+  r       jsonb not null,
+  primary key (user_id, epoch, t, item, mode),
+  constraint user_reviews_r_size check (pg_column_size(r) < 2000)
+);
+
+alter table public.user_reviews enable row level security;
+
+revoke all on public.user_reviews from anon, authenticated, public;
+grant select, insert on public.user_reviews to authenticated;
+
+drop policy if exists "read own answers" on public.user_reviews;
+drop policy if exists "add own answers" on public.user_reviews;
+create policy "read own answers" on public.user_reviews for select to authenticated using (user_id = (select auth.uid()));
+create policy "add own answers" on public.user_reviews for insert to authenticated with check (user_id = (select auth.uid()));
 
 -- Optimistic write: succeeds only if nobody else wrote since `expected_rev`.
 -- Returns the new rev, or -1 on conflict (the app then pulls, merges and retries).
@@ -63,6 +88,17 @@ $$;
 -- make a device skip a merge. Removed.
 drop function if exists public.delete_my_state();
 
+-- After "Reset everything" / importing a backup / "Use this device": remove my answers
+-- from before (any other epoch), so they're really gone from the account.
+create or replace function public.forget_other_answers(keep_epoch text)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from public.user_reviews where user_id = auth.uid() and epoch <> keep_epoch;
+$$;
+
 -- Delete my whole account; my progress row goes with it (on delete cascade).
 create or replace function public.delete_me()
 returns void
@@ -80,5 +116,7 @@ $$;
 
 revoke all on function public.push_state(bigint, jsonb, text) from anon, public;
 revoke all on function public.delete_me() from anon, public;
+revoke all on function public.forget_other_answers(text) from anon, public;
 grant execute on function public.push_state(bigint, jsonb, text) to authenticated;
 grant execute on function public.delete_me() to authenticated;
+grant execute on function public.forget_other_answers(text) to authenticated;

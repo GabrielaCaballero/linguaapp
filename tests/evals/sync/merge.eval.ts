@@ -173,10 +173,10 @@ describe("merge · on-device-only data", () => {
     expect(p.events).toEqual([]);
     expect("legacyTies" in p).toBe(false);
   });
-  it("toPayload keeps all learning data", () => {
+  it("toPayload keeps all learning state; answers travel separately (their own table)", () => {
     const db = learner({ n: 30 });
     const p = toPayload(db);
-    expect(p.reviews).toEqual(db.reviews);
+    expect(p.reviews).toEqual([]);
     expect(p.cards).toEqual(db.cards);
     expect(p.profile).toEqual(db.profile);
   });

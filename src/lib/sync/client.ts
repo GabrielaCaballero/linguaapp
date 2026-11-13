@@ -127,7 +127,7 @@ export async function verifyCode(email: string, token: string): Promise<{ user: 
  * ?code=… (or ?error=…), handled by finishGoogle. Invite-only still holds: Supabase refuses
  * any Google account whose email the owner hasn't added (signups are off).
  */
-export async function startGoogle(from: "welcome" | "settings"): Promise<AuthError | null> {
+export async function startGoogle(from: "welcome" | "settings" | "home"): Promise<AuthError | null> {
   try {
     const { error } = await getClient().auth.signInWithOAuth({
       provider: "google",

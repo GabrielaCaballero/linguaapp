@@ -31,7 +31,7 @@ Adults aged 25–65 with a reason to learn: a move, family, a trip, a class they
 2. **Honest goals.** Hours come from published course estimates, adjusted for your language pair (Spanish→Italian ×0.7). If your goal is unrealistic, the app says so and offers two alternatives.
 3. **Your first language is an asset.** Spanish speakers get cognate rules and false-friend warnings for Italian. Every item is glossed in both Spanish and English.
 4. **One obvious next action.** Today shows one ring and one Start button. You never have to decide what to practise.
-5. **Private and offline by default.** Everything works with no account and no network. An account only adds sync. The optional AI tutor uses your own key, and that key never leaves your phone.
+5. **Your progress lives in your account, and practice still works offline.** Signed in, every answer is saved to your account and follows you to any phone with nothing to download or export; the phone keeps only a small cache (about 1 MB) so lessons work on a train. You can still try it without an account. The optional AI tutor uses your own key, and that key never leaves your phone.
 6. **Accurate grading.** A linguistically careful answer checker: accents count as "almost", articles must be exact, and a typo can never turn *nonno* into *nono*. An optional LLM can only *raise* a grade, never lower it.
 
 ## 4. What we will not do (non-goals)

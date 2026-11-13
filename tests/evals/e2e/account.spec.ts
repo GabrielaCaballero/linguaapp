@@ -6,7 +6,7 @@
 import { expect, test, type BrowserContext, type Page, type Route } from "@playwright/test";
 import { onboard, playLesson, readDB, T, watchErrors } from "./helpers";
 
-const SYNC = "http://localhost:3510";
+const SYNC = `http://localhost:${process.env.EVAL_SYNC_PORT ?? 3510}`;
 const FAKE = "https://lingua-test.supabase.co";
 const CODE = "123456";
 const KEY = "sk-ant-api03-e2e-should-never-leave-000000";
@@ -15,6 +15,9 @@ const t = T.es;
 type Row = { db: unknown; rev: number };
 function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean } = {}) {
   const rows = new Map<string, Row>();
+  // user_reviews: one row per answer, keyed like the real primary key.
+  const answers = new Map<string, { uid: string; epoch: string; t: number; r: unknown }>();
+  const mineOf = (uid: string) => [...answers.values()].filter((a) => a.uid === uid);
   const authorize: URL[] = [];
   const reads: string[] = [];
   const bodies: string[] = [];
@@ -93,6 +96,30 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
       if (single) return out ? json(route, 200, out) : json(route, 406, { code: "PGRST116", message: "no rows" });
       return json(route, 200, out ? [out] : []);
     }
+    if (p === "/rest/v1/user_reviews") {
+      const eqv = (k: string) => url.searchParams.get(k)?.replace(/^eq\./, "");
+      if (eqv("user_id") && eqv("user_id") !== uid) return json(route, 200, []);
+      if (req.method() === "POST") {
+        for (const a of JSON.parse(body) as { user_id: string; epoch: string; t: number; item: string; mode: string; r: unknown }[]) {
+          if (a.user_id !== uid) return json(route, 403, { message: "rls" });
+          const k = `${uid}|${a.epoch}|${a.t}|${a.item}|${a.mode}`;
+          if (!answers.has(k)) answers.set(k, { uid, epoch: a.epoch, t: a.t, r: a.r });
+        }
+        return route.fulfill({ status: 201, headers: cors });
+      }
+      const epoch = eqv("epoch") ?? "";
+      const since = Number((url.searchParams.get("t") ?? "gte.0").replace(/^gte\./, ""));
+      const list = mineOf(uid).filter((a) => a.epoch === epoch && a.t >= since).sort((x, y) => x.t - y.t);
+      if (req.method() === "HEAD") return route.fulfill({ status: 200, headers: { ...cors, "content-range": `*/${list.length}` } });
+      const off = Number(url.searchParams.get("offset") ?? 0);
+      const lim = Number(url.searchParams.get("limit") ?? 1000);
+      return json(route, 200, list.slice(off, off + lim).map((a) => ({ r: a.r })));
+    }
+    if (p === "/rest/v1/rpc/forget_other_answers") {
+      const { keep_epoch } = JSON.parse(body);
+      for (const [k, a] of answers) if (a.uid === uid && a.epoch !== keep_epoch) answers.delete(k);
+      return json(route, 200, null);
+    }
     if (p === "/rest/v1/rpc/push_state") {
       const { expected_rev, doc } = JSON.parse(body);
       const cur = rows.get(uid)?.rev ?? 0;
@@ -102,6 +129,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
     }
     if (p === "/rest/v1/rpc/delete_me") {
       rows.delete(uid);
+      for (const [k, a] of answers) if (a.uid === uid) answers.delete(k);
       for (const [e, id] of users) if (id === uid) users.delete(e);
       return json(route, 200, null);
     }
@@ -109,6 +137,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   }
   return {
     rows,
+    answers,
     bodies,
     authorize,
     reads,
@@ -176,7 +205,8 @@ test.describe("e2e-sync · with an account", () => {
     await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
     expect(fake.rows.size).toBe(1);
     const stored = [...fake.rows.values()][0].db as { reviews: unknown[]; events: unknown[] };
-    expect(stored.reviews).toHaveLength(mine.reviews.length);
+    expect(stored.reviews).toEqual([]); // answers travel in their own table, each once
+    expect(fake.answers.size).toBe(mine.reviews.length);
     expect(stored.events).toEqual([]);
 
     await phone.getByRole("button", { name: t.continue }).click();
@@ -264,7 +294,7 @@ test.describe("e2e-sync · with an account", () => {
     expect(left.llm).toBeNull();
     expect(left.auth).toBeNull();
     expect(left.sync).toBeNull();
-    expect(([...fake.rows.values()][0].db as { reviews: unknown[] }).reviews.length).toBeGreaterThan(0);
+    expect(fake.answers.size).toBeGreaterThan(0);
   });
 
   test("CUJ-20 delete account removes the server copy; the device keeps its progress as a guest", async ({ page, context }) => {
@@ -282,6 +312,36 @@ test.describe("e2e-sync · with an account", () => {
     await expect(page.getByText(t.acctSync)).toBeVisible();
     const db = await readDB(page);
     expect(db.reviews.length).toBeGreaterThan(0);
+  });
+});
+
+test.describe("e2e-sync · sign-in first", () => {
+  test.use({ baseURL: SYNC, locale: "es-ES" });
+
+  test("Welcome leads with Sign in; trying without an account is still one tap", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"]);
+    await fake.attach(context);
+    await page.goto("/");
+    const signInBtn = page.getByRole("button", { name: t.haveAccount });
+    const tryBtn = page.getByRole("button", { name: t.tryFirst });
+    await expect(signInBtn).toBeVisible();
+    await expect(tryBtn).toBeVisible();
+    await expect(signInBtn).toHaveClass(/btn-primary/);
+    await expect(page.getByRole("button", { name: t.getStarted })).toHaveCount(0);
+  });
+
+  test("a guest is offered once, on Results, to save their progress", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"]);
+    await fake.attach(context);
+    await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+    const st = await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9 });
+    expect(st.sawResults).toBe(true);
+    await expect(page.getByText(t.saveTitle)).toBeVisible();
+    await expect(page.getByRole("link", { name: t.saveDo })).toHaveAttribute("href", /\/account\?from=home/);
+    // Offered once: it's recorded as shown, so no later Results offers it again.
+    expect((await readDB(page)).profile.seen?.saveOffer).toBeGreaterThan(0);
+    await page.getByRole("button", { name: t.notNow }).click();
+    await expect(page.getByText(t.saveTitle)).toHaveCount(0);
   });
 });
 
@@ -321,7 +381,7 @@ test.describe("e2e-sync · after the first sign-in (no reload)", () => {
     await page.getByRole("textbox", { name: t.resetWord }).fill(t.resetWord);
     await page.locator(".sheet").getByRole("button", { name: t.sReset }).click();
     await page.waitForURL(/\/onboarding/);
-    await expect.poll(() => ([...fake.rows.values()][0].db as { reviews: unknown[] }).reviews.length).toBe(0);
+    await expect.poll(() => fake.answers.size).toBe(0); // old answers removed from the account
     expect([...fake.rows.values()][0].rev).toBeGreaterThan(revBefore);
 
     await p2.goto("/me/settings");
@@ -351,8 +411,7 @@ test.describe("e2e-sync · sign in with Google", () => {
     expect(a.searchParams.get("code_challenge")).toBeTruthy();
     expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
     await expect.poll(() => fake.rows.size).toBe(1);
-    const row = [...fake.rows.values()][0].db as { reviews: unknown[] };
-    expect(row.reviews.length).toBeGreaterThan(0);
+    expect(fake.answers.size).toBeGreaterThan(0);
     await page.goto("/me/settings");
     await expect(page.getByText(t.acctSignedInAs("ana@gmail.com"))).toBeVisible();
     expect(errs).toEqual([]);

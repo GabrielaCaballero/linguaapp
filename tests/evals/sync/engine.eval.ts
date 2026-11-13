@@ -7,11 +7,14 @@ import type { RemoteAdapter } from "@/lib/sync/remote";
 import { memoryRemote } from "@/lib/sync/remote";
 import { toPayload } from "@/lib/sync/merge";
 import { KEYS, memoryAdapter, type StorageAdapter } from "@/lib/storage-adapter";
-import { emptyDB, type DB } from "@/lib/model";
+import { emptyDB, LOCAL_HISTORY_DAYS, type DB } from "@/lib/model";
+import { DAY } from "@/lib/dates";
 import { migrateAny, type LegacyIndex } from "@/lib/migrate";
 import { extend, learner, NOW, reviewKeys } from "./fixtures";
 
 const legacy: LegacyIndex = new Map();
+/** What an account holds for a learner: the state document plus their answers (the fake files them in its table). */
+const account = (db: DB) => ({ ...toPayload(db), reviews: db.reviews });
 type Server = ReturnType<typeof memoryRemote>;
 
 /** A fake phone: its own storage + DB, talking to the shared server. */
@@ -55,7 +58,12 @@ function device(server: Server, db: DB, opts: { online?: () => boolean; remote?:
   };
 }
 
-const serverDB = (s: Server) => (s.row ? migrateAny(s.row.db, legacy, NOW) : null);
+/** The account as a whole: the state document plus its answers table. */
+const serverDB = (s: Server) => {
+  if (!s.row) return null;
+  const db = migrateAny(s.row.db, legacy, NOW);
+  return { ...db, reviews: s.reviewsFor(db.epoch ?? "") };
+};
 
 describe("sync engine · first sign-in on a device", () => {
   it("empty account + progress on device → uploads it, keeps a pre-login backup", async () => {
@@ -83,7 +91,7 @@ describe("sync engine · first sign-in on a device", () => {
     expect(server.row?.rev).toBe(1);
   });
   it("account has progress + fresh device → downloads it", async () => {
-    const server = memoryRemote({ db: toPayload(learner({ n: 30 })), rev: 4 });
+    const server = memoryRemote({ db: account(learner({ n: 30 })), rev: 4 });
     const phone = device(server, emptyDB(NOW));
     expect((await phone.engine.beginLogin("u1")).kind).toBe("downloaded");
     expect(phone.db.reviews).toHaveLength(30);
@@ -91,7 +99,7 @@ describe("sync engine · first sign-in on a device", () => {
     expect(server.calls.filter((c) => c === "push")).toHaveLength(0);
   });
   it("download keeps this device's on-device events", async () => {
-    const server = memoryRemote({ db: toPayload(learner({ n: 3 })), rev: 1 });
+    const server = memoryRemote({ db: account(learner({ n: 3 })), rev: 1 });
     const fresh = emptyDB(NOW);
     fresh.events = [{ t: 1, type: "session_start", lang: "it", mode: "x" }];
     const phone = device(server, fresh);
@@ -100,12 +108,12 @@ describe("sync engine · first sign-in on a device", () => {
   });
   it("same progress on both → no question", async () => {
     const db = learner({ n: 10 });
-    const server = memoryRemote({ db: toPayload(db), rev: 2 });
+    const server = memoryRemote({ db: account(db), rev: 2 });
     expect((await device(server, db).engine.beginLogin("u1")).kind).toBe("same");
   });
   it("different progress on both → asks, with a summary of each side", async () => {
     const base = learner({ n: 10 });
-    const server = memoryRemote({ db: toPayload(extend(base, { seed: 2, n: 4, from: NOW })), rev: 2 });
+    const server = memoryRemote({ db: account(extend(base, { seed: 2, n: 4, from: NOW })), rev: 2 });
     const r = await device(server, base).engine.beginLogin("u1");
     expect(r.kind).toBe("choose");
     if (r.kind === "choose") {
@@ -117,7 +125,7 @@ describe("sync engine · first sign-in on a device", () => {
     const base = learner({ n: 10 });
     const remote = extend(base, { seed: 2, n: 4, from: NOW });
     const local = extend(base, { seed: 3, n: 6, from: NOW + 3_600_000 });
-    const server = memoryRemote({ db: toPayload(remote), rev: 2 });
+    const server = memoryRemote({ db: account(remote), rev: 2 });
     const phone = device(server, local);
     await phone.engine.beginLogin("u1");
     expect(await phone.engine.resolve("combine")).toBe("idle");
@@ -127,7 +135,7 @@ describe("sync engine · first sign-in on a device", () => {
   });
   it("choose → use account replaces this device", async () => {
     const remote = learner({ seed: 5, n: 7 });
-    const server = memoryRemote({ db: toPayload(remote), rev: 2 });
+    const server = memoryRemote({ db: account(remote), rev: 2 });
     const phone = device(server, learner({ seed: 9, n: 3 }));
     await phone.engine.beginLogin("u1");
     await phone.engine.resolve("account");
@@ -136,7 +144,7 @@ describe("sync engine · first sign-in on a device", () => {
   });
   it("choose → use this device overwrites the account", async () => {
     const local = learner({ seed: 9, n: 3 });
-    const server = memoryRemote({ db: toPayload(learner({ seed: 5, n: 7 })), rev: 2 });
+    const server = memoryRemote({ db: account(learner({ seed: 5, n: 7 })), rev: 2 });
     const phone = device(server, local);
     await phone.engine.beginLogin("u1");
     await phone.engine.resolve("device");
@@ -223,7 +231,7 @@ describe("sync engine · two devices, one account", () => {
       if (!sneaked) {
         sneaked = true;
         const other = extend(laptop.db, { seed: 99, n: 2, from: NOW + 50_000 });
-        server.write(toPayload(other));
+        server.write(account(other));
       }
       return realPush(rev, doc);
     };
@@ -283,7 +291,8 @@ describe("sync engine · starting over, deletes and forgetting", () => {
     phone.wipe();
     expect(await phone.engine.startOver()).toBe("idle");
     expect(server.row!.rev).toBeGreaterThan(revBefore); // never deleted, rev never restarts
-    expect((server.row!.db as DB).reviews).toEqual([]);
+    expect(serverDB(server)!.reviews).toEqual([]);
+    expect(server.answerCount).toBe(0); // old answers are gone from the account too
     expect(await laptop.engine.syncNow()).toBe("idle");
     expect(laptop.db.reviews).toEqual([]);
     expect(laptop.db.epoch).toBe(phone.db.epoch);
@@ -322,7 +331,7 @@ describe("sync engine · starting over, deletes and forgetting", () => {
     server.adminDelete();
     phone.write(extend(phone.db, { seed: 2, n: 1, from: NOW }));
     await phone.engine.syncNow();
-    expect((server.row!.db as DB).reviews).toHaveLength(7);
+    expect(serverDB(server)!.reviews).toHaveLength(7);
   });
   it("sign-out while a sync is in flight: the late server answer never lands on the wiped device (P1-2)", async () => {
     const server = memoryRemote();
@@ -330,8 +339,7 @@ describe("sync engine · starting over, deletes and forgetting", () => {
     const gate = new Promise<void>((r) => (release = r));
     let hold = false;
     const slow: RemoteAdapter = {
-      getRev: () => server.remote.getRev(),
-      push: (r, d) => server.remote.push(r, d),
+      ...server.remote,
       pull: async () => {
         if (hold) await gate;
         return server.remote.pull();
@@ -398,3 +406,94 @@ describe("sync engine · starting over, deletes and forgetting", () => {
     expect(again.snapshot().status).toBe("idle");
   });
 });
+
+describe("sync engine · the account holds the history, the phone stays small", () => {
+  /** A year of daily practice: 60 answers a day. */
+  function yearOfPractice(): DB {
+    const db = learner({ n: 1, start: NOW - 365 * DAY });
+    const ids = Object.keys(db.cards);
+    for (let d = 365; d >= 1; d--) {
+      for (let k = 0; k < 60; k++) {
+        db.reviews.push({ t: NOW - d * DAY + k * 60_000, id: ids[0], lang: "it", mode: k % 2 ? "recall" : "recognize", verdict: "correct", rating: 3, source: "checker", ms: 2000 });
+      }
+      db.events.push({ t: NOW - d * DAY, type: "session_start", lang: "it", mode: "auto" });
+    }
+    return db;
+  }
+
+  it("signing in uploads the whole history once; the phone then keeps only the last weeks", async () => {
+    const server = memoryRemote();
+    const big = yearOfPractice();
+    const phone = device(server, big);
+    await phone.engine.beginLogin("u1");
+    expect(server.reviewsFor()).toHaveLength(big.reviews.length);
+    const cutoff = NOW - LOCAL_HISTORY_DAYS * DAY;
+    expect(phone.db.reviews.every((r) => r.t >= cutoff)).toBe(true);
+    expect(phone.db.events.every((e) => e.t >= cutoff)).toBe(true);
+    expect(phone.db.reviews.length).toBeLessThan(big.reviews.length / 7);
+    // cards (the schedule) are never trimmed
+    expect(Object.keys(phone.db.cards)).toEqual(Object.keys(big.cards));
+  });
+
+  it("on a phone after a year of daily practice, saved progress stays near 1 MB", async () => {
+    const server = memoryRemote();
+    const phone = device(server, yearOfPractice());
+    await phone.engine.beginLogin("u1");
+    expect(phone.storage.get(KEYS.v2)!.length).toBeLessThan(1_000_000);
+  });
+
+  it("after that, each sync sends only the new answers", async () => {
+    const server = memoryRemote();
+    const sent: number[] = [];
+    const spy: RemoteAdapter = { ...server.remote, pushReviews: (e, rows) => (sent.push(rows.length), server.remote.pushReviews(e, rows)) };
+    const phone = device(server, learner({ n: 40 }), { remote: spy });
+    await phone.engine.beginLogin("u1");
+    expect(sent).toEqual([40]);
+    phone.write(extend(phone.db, { seed: 3, n: 2, from: NOW + DAY }));
+    await phone.engine.syncNow();
+    expect(sent).toEqual([40, 2]);
+    await phone.engine.syncNow();
+    expect(sent).toEqual([40, 2]);
+    expect(phone.db.reviews.filter((r) => !r.up)).toHaveLength(0);
+  });
+
+  it("a new phone downloads only recent answers; older history stays in the account", async () => {
+    const server = memoryRemote();
+    const first = device(server, yearOfPractice());
+    await first.engine.beginLogin("u1");
+    const total = server.answerCount;
+    const second = device(server, emptyDB(NOW));
+    expect((await second.engine.beginLogin("u1")).kind).toBe("downloaded");
+    expect(second.db.reviews.length).toBeLessThan(total / 7);
+    expect(second.db.reviews.every((r) => r.up)).toBe(true);
+    expect(server.answerCount).toBe(total);
+  });
+
+  it("answers made offline are never dropped from the phone before they reach the account", async () => {
+    const server = memoryRemote();
+    const phone = device(server, learner({ n: 3 }));
+    await phone.engine.beginLogin("u1");
+    server.setOffline(true);
+    // an old answer that was never uploaded (e.g. clock was wrong) must survive trimming
+    const old = extend(phone.db, { seed: 4, n: 1, from: NOW - 200 * DAY });
+    phone.write(old);
+    await phone.engine.syncNow();
+    expect(phone.db.reviews.some((r) => r.t === old.reviews[old.reviews.length - 1].t)).toBe(true);
+    server.setOffline(false);
+    await phone.engine.syncNow();
+    expect(server.reviewsFor().some((r) => r.t === old.reviews[old.reviews.length - 1].t)).toBe(true);
+  });
+
+  it("a review answered on the laptop shows up in the phone's recent history", async () => {
+    const server = memoryRemote();
+    const phone = device(server, learner({ n: 5 }));
+    await phone.engine.beginLogin("u1");
+    const laptop = device(server, emptyDB(NOW));
+    await laptop.engine.beginLogin("u1");
+    laptop.write(extend(laptop.db, { seed: 8, n: 3, from: NOW + 1000 }));
+    await laptop.engine.syncNow();
+    await phone.engine.syncNow();
+    expect(reviewKeys(phone.db)).toEqual(reviewKeys(laptop.db));
+  });
+});
+

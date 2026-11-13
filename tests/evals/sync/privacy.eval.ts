@@ -109,12 +109,26 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     expect(read("src/lib/sync/remote.ts")).not.toMatch(/delete_my_state/);
   });
   it("queries also filter by the signed-in user's id (defence in depth)", () => {
-    expect((read("src/lib/sync/remote.ts").match(/\.eq\("user_id", await me\(\)\)/g) ?? []).length).toBe(2);
+    const src = read("src/lib/sync/remote.ts");
+    for (const q of src.match(/client\.from\("user_(state|reviews)"\)\.select[^;]*/g) ?? []) expect(q).toMatch(/\.eq\("user_id", (await me\(\)|uid)\)/);
+    expect((src.match(/client\.from\("user_(state|reviews)"\)\.select/g) ?? []).length).toBe(4);
   });
   it("pages send a CSP that limits where data can be sent", () => {
     const cfg = read("next.config.ts");
     expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com/);
     expect(cfg).toMatch(/frame-ancestors 'none'/);
+  });
+  it("answers table: row-level security, read/insert own only, never update or delete", () => {
+    expect(sql).toContain("alter table public.user_reviews enable row level security");
+    expect(sql).toMatch(/revoke all on public\.user_reviews from anon, authenticated, public/);
+    expect(sql).toMatch(/grant select, insert on public\.user_reviews to authenticated;/);
+    const own = policies.filter((p) => p.includes("public.user_reviews"));
+    expect(own.map((p) => (p.match(/for (\w+)/) ?? [])[1]).sort()).toEqual(["insert", "select"]);
+    expect(sql).toMatch(/user_reviews \([\s\S]*references auth\.users \(id\) on delete cascade/);
+  });
+  it("forget_other_answers can't be called anonymously and only touches the caller", () => {
+    expect(sql).toMatch(/revoke all on function public\.forget_other_answers\(text\) from anon/);
+    expect(sql).toMatch(/delete from public\.user_reviews where user_id = auth\.uid\(\) and epoch <> keep_epoch/);
   });
   it("rows are deleted with the user (on delete cascade) and size-capped", () => {
     expect(sql).toContain("on delete cascade");

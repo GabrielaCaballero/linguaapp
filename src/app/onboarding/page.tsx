@@ -166,8 +166,15 @@ function Flow() {
             <InstallHint t={t} />
           </div>
           <div className="bottom-bar">
-            <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
-            {syncOn && <button className="btn btn-ghost" onClick={() => router.push(accountHref("welcome"))}>{t.haveAccount}</button>}
+            {syncOn ? (
+              <>
+                {/* Accounts on: progress belongs in the account, so signing in comes first. */}
+                <button className="btn btn-primary" onClick={() => router.push(accountHref("welcome"))}>{t.haveAccount}</button>
+                <button className="btn btn-secondary" onClick={go}>{t.tryFirst}</button>
+              </>
+            ) : (
+              <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
+            )}
             <button className="btn btn-ghost" onClick={() => fileRef.current?.click()}>{t.haveBackup}</button>
             <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && importFile(e.target.files[0])} />
           </div>

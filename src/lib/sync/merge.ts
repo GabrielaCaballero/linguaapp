@@ -12,11 +12,20 @@
 // mergeDB(b, a) are the same.
 import { MAX_REVIEWS, type CardV2, type Course, type DB, type Profile, type ReviewLog, type SessionRecord, type TargetLang, type Tombstones } from "../model";
 
-/** What gets uploaded: the DB minus on-device-only data. The AI key is never in a DB. */
+/**
+ * The account's state document: the DB minus on-device-only data and minus the answer
+ * history, which lives in its own server table (one row per answer, sent only once).
+ * The AI key is never in a DB.
+ */
 export function toPayload(db: DB): DB {
   const { legacyTies: _drop, ...rest } = db;
   void _drop;
-  return { ...rest, events: [] };
+  return { ...rest, events: [], reviews: [] };
+}
+
+/** Union of two answer lists, de-duplicated, oldest first. */
+export function mergeReviews(a: ReviewLog[], b: ReviewLog[]): ReviewLog[] {
+  return unionBy(a, b, reviewKey, (r) => r.t);
 }
 
 const reviewKey = (r: ReviewLog) => `${r.t}|${r.id}|${r.mode}`;

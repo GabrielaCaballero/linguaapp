@@ -23,7 +23,8 @@ codes) and paste two values into **Vercel**. No coding.
 1. Left menu → **SQL Editor** → *New query*.
 2. Open `supabase/schema.sql` from the repo (on GitHub: the `supabase` folder), copy **all** of it, paste it in.
 3. Click **Run**. You should see *Success. No rows returned*.
-   (Already ran an older version? Run the new file again: it's safe to re-run and tightens permissions.)
+   (Already ran an older version? Run the new file again: it's safe to re-run. It now also
+   creates the `user_reviews` table, where every answer is kept.)
 
 ## 3. Make it invite-only (2 min)
 
@@ -102,8 +103,9 @@ version running on your Mac.
    > 1) Abre este enlace en **Safari** (iPhone) o **Chrome** (Android), no dentro de WhatsApp:
    >    https://linguaapp.vercel.app
    > 2) iPhone: Compartir → «Agregar a pantalla de inicio». Android: «Instalar app».
-   > 3) Empieza como invitado. Cuando quieras guardar tu progreso: Ajustes → Sincronizar
-   >    entre dispositivos → tu correo (este: ___) → el código de 6 dígitos que te llega.
+   > 3) Toca «Iniciar sesión», escribe tu correo (este: ___) y el código de 6 dígitos que
+   >    te llega. Tu progreso queda guardado en tu cuenta: si cambias de teléfono, solo
+   >    vuelves a iniciar sesión.
    > Tu clave de IA (si usas el tutor) nunca sale de tu teléfono. Como yo administro Lingua,
    > puedo ver tus respuestas, metas y palabras agregadas; nada más.
 
@@ -112,7 +114,8 @@ To remove someone: **Users** → ⋯ → *Delete user* (their progress is delete
 ## 10. One-time safety check (5 min, before inviting friends)
 
 Create two test users A and B, sign in as each on different browsers and do a lesson.
-In Supabase → **Table Editor → user_state** you should see two rows. Then tell me and I'll
+In Supabase → **Table Editor → user_state** you should see two rows, and
+**user_reviews** should have rows for both (one per answer). Then tell me and I'll
 run the check that A can't read B's row — or follow `docs/team/42-accounts-security-privacy.md`.
 
 ## Before the first friend: launch checklist

@@ -2,8 +2,9 @@
 // service worker registers and nothing touches the phone server's .next on port 3200.
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3500;
-const SYNC_PORT = 3510;
+// Overridable so two checkouts (e.g. parallel sessions) can run evals at the same time.
+const PORT = Number(process.env.EVAL_PORT ?? 3500);
+const SYNC_PORT = Number(process.env.EVAL_SYNC_PORT ?? 3510);
 const SYNC_URL = "https://lingua-test.supabase.co";
 export default defineConfig({
   testDir: __dirname,

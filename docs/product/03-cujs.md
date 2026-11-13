@@ -26,6 +26,8 @@ Each CUJ is a journey a real persona must be able to finish. Every one has accep
 
 | CUJ | Persona | Journey | Acceptance criteria | Proven by |
 |---|---|---|---|---|
+| **14b · Sign-in first** | P5 | Fresh phone on an accounts-on build | ✔ Welcome's main button is Sign in; "Try it first, without an account" one tap away ✔ A guest sees "Save your progress" once, on the first Results | e2e-sync |
+| **15f · The phone stays small** | P4 | A year of daily practice, signed in | ✔ Progress on the phone < 1 MB ✔ Each sync sends only new answers ✔ A new phone downloads only the last 45 days; full history stays in the account ✔ An answer is never dropped from the phone before it reaches the account | sync evals |
 | **14 · Guest, accounts not configured** | P4 | Use the app on a build with no Supabase | ✔ No "I have an account", no sync row in Settings ✔ `/account` redirects away ✔ Zero requests to any auth server | e2e-sync |
 | **15 · Progress follows you** | P1 Ana | Phone A: practise as guest → Settings → Sync across devices → email → code → upload. Phone B: Welcome → I have an account → email → code | ✔ Phone B shows the same words, reviews and goals ✔ The AI key appears in no request body ✔ ≤ 4 taps plus typing the code [manual] | e2e-sync + sync evals |
 | **15c · Two devices offline, then both sync** | P1 | Phone and laptop both practise offline, then reconnect in any order | ✔ Both end with every answer from both ✔ Each word's schedule follows its most recent review | sync evals (engine) |

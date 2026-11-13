@@ -28,7 +28,8 @@ flowchart TD
   A[Open app] --> B{Saved progress<br/>on device?}
   B -- yes --> T[Today]
   B -- no --> W[Welcome]
-  W --> L[App language es/en]
+  W -- accounts on: Sign in --> SI[Sign in, then download progress or onboard]
+  W -- Try it first / Get started --> L[App language es/en]
   L --> C[Which languages? it / de]
   C --> E[Per language: explain in, experience, 3 can-dos]
   E --> X{Experience = never?}

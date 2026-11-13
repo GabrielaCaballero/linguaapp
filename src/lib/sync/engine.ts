@@ -2,10 +2,10 @@
 // The device stays the source of truth (the app works fully offline); the server copy is
 // what lets progress follow the user to another phone. Depends only on a StorageAdapter
 // and a RemoteAdapter, so every case runs in Node tests with in-memory fakes.
-import type { DB } from "../model";
+import { LOCAL_HISTORY_DAYS, type DB, type ReviewLog } from "../model";
 import { migrateAny, type LegacyIndex } from "../migrate";
 import { KEYS, type StorageAdapter } from "../storage-adapter";
-import { mergeDB, samePayload, summarize, toPayload, type Summary } from "./merge";
+import { mergeDB, mergeReviews, samePayload, summarize, toPayload, type Summary } from "./merge";
 import type { RemoteAdapter } from "./remote";
 
 export interface SyncState {
@@ -15,6 +15,8 @@ export interface SyncState {
   /** Local changes not yet uploaded. */
   dirty: boolean;
   lastSyncAt?: number;
+  /** When answers were last fetched from the account (to bring in other devices' answers). */
+  pulledAt?: number;
   /**
    * The next upload replaces the server copy instead of merging with it (Reset, import,
    * "Use this device"). Comes with a new `db.epoch`, so other devices adopt it too.
@@ -65,6 +67,11 @@ export function newEpoch(now: number): string {
 }
 
 const MAX_ROUNDS = 4;
+const DAY_MS = 86_400_000;
+const WINDOW = LOCAL_HISTORY_DAYS * DAY_MS;
+const BATCH = 500;
+const rkey = (r: ReviewLog) => `${r.t}|${r.id}|${r.mode}`;
+const epochOf = (db: DB) => db.epoch ?? "";
 
 export function createEngine(deps: EngineDeps) {
   const now = deps.now ?? Date.now;
@@ -126,19 +133,65 @@ export function createEngine(deps: EngineDeps) {
     return out;
   }
 
+  type Still = <T>(p: Promise<T>) => Promise<T>;
+
+  /** Upload answers the account doesn't have yet, then mark them as safely stored. */
+  async function sendAnswers(still: Still) {
+    const db = deps.getDB();
+    const rows = db.reviews.filter((r) => !r.up);
+    if (!rows.length) return;
+    const epoch = epochOf(db);
+    for (let i = 0; i < rows.length; i += BATCH) {
+      await still(deps.remote.pushReviews(epoch, rows.slice(i, i + BATCH).map(({ up: _u, ...r }) => (void _u, r))));
+    }
+    const sent = new Set(rows.map(rkey));
+    const cur = deps.getDB();
+    if (epochOf(cur) !== epoch) return;
+    deps.applyDB({ ...cur, reviews: cur.reviews.map((r) => (!r.up && sent.has(rkey(r)) ? { ...r, up: true } : r)) });
+  }
+
+  /** Bring recent answers from the account (other devices) into this phone's history. */
+  async function fetchAnswers(s: SyncState, still: Still, fresh: boolean) {
+    const epoch = epochOf(deps.getDB());
+    const since = fresh || !s.pulledAt ? now() - WINDOW : Math.max(now() - WINDOW, s.pulledAt - 14 * DAY_MS);
+    const rows = (await still(deps.remote.pullReviews(epoch, since))).map((r) => ({ ...r, up: true as const }));
+    s.pulledAt = now();
+    const cur = deps.getDB();
+    if (!rows.length || epochOf(cur) !== epoch) return;
+    const merged = mergeReviews(cur.reviews, rows);
+    if (merged.length !== cur.reviews.length) deps.applyDB({ ...cur, reviews: merged });
+  }
+
+  /** Keep the phone small: drop answers (already in the account) and events older than the window. */
+  function trim() {
+    const db = deps.getDB();
+    const cutoff = now() - WINDOW;
+    const reviews = db.reviews.filter((r) => r.t >= cutoff || !r.up);
+    const events = db.events.filter((e) => e.t >= cutoff);
+    if (reviews.length !== db.reviews.length || events.length !== db.events.length) deps.applyDB({ ...db, reviews, events });
+  }
+
   async function round(): Promise<SyncStatus> {
     if (!st) return "off";
     const s = st;
     const gen = generation;
     /** Await a server call, then make sure we're still the same signed-in session. */
-    const still = async <T,>(p: Promise<T>): Promise<T> => {
+    const still: Still = async (p) => {
       const r = await p;
       if (gen !== generation || st !== s) throw new Abandoned();
       return r;
     };
+    const done = (): SyncStatus => {
+      s.lastSyncAt = now();
+      save();
+      trim();
+      return "idle";
+    };
     for (let i = 0; i < MAX_ROUNDS; i++) {
       if (s.replace) {
-        // Overwrite the server copy with this device's (it carries a new epoch).
+        // Overwrite the account with this device's progress (it carries a new epoch):
+        // answers first, then the state document, then clear out the old epoch's answers.
+        await sendAnswers(still);
         const at = (await still(deps.remote.getRev())) ?? 0;
         const v = version;
         const newRev = await still(deps.remote.push(at, toPayload(deps.getDB())));
@@ -146,15 +199,15 @@ export function createEngine(deps: EngineDeps) {
           s.rev = newRev;
           s.replace = false;
           s.dirty = version !== v;
-          s.lastSyncAt = now();
           save();
-          if (!s.dirty) return "idle";
+          await still(deps.remote.forgetOtherEpochs(epochOf(deps.getDB())));
+          if (!s.dirty) return done();
         }
         continue;
       }
       const serverRev = await still(deps.remote.getRev());
       if (serverRev === null) {
-        // Nothing on the server (first upload, or synced data was deleted elsewhere).
+        // No state document on the server (first upload, or deleted by the owner).
         if (s.rev !== 0) {
           s.rev = 0;
           s.dirty = true;
@@ -166,14 +219,16 @@ export function createEngine(deps: EngineDeps) {
           const local = deps.getDB();
           if ((remote.epoch ?? "") !== (local.epoch ?? "")) {
             // Another device started over (Reset / import / "Use that device"): take its copy.
-            deps.applyDB(adopt(remote));
+            deps.applyDB({ ...adopt(remote), reviews: [] });
             s.rev = doc.rev;
             s.dirty = false;
+            await fetchAnswers(s, still, true);
           } else {
             const merged = mergeDB(local, remote);
             deps.applyDB(merged);
             s.rev = doc.rev;
             s.dirty = s.dirty || !samePayload(merged, remote);
+            await fetchAnswers(s, still, false);
           }
         } else {
           s.rev = 0;
@@ -181,19 +236,16 @@ export function createEngine(deps: EngineDeps) {
         }
         save();
       }
-      if (!s.dirty) {
-        s.lastSyncAt = now();
-        save();
-        return "idle";
-      }
+      // Answers go up before the state that refers to them.
+      await sendAnswers(still);
+      if (!s.dirty) return done();
       const v = version;
       const newRev = await still(deps.remote.push(s.rev, toPayload(deps.getDB())));
       if (newRev >= 0) {
         s.rev = newRev;
         s.dirty = version !== v;
-        s.lastSyncAt = now();
         save();
-        if (!s.dirty) return "idle";
+        if (!s.dirty) return done();
       }
       // conflict (someone else wrote first) or new local changes: go round again
     }
@@ -242,8 +294,10 @@ export function createEngine(deps: EngineDeps) {
       }
       const remote = parseRemote(doc.db);
       if (!hasLocal) {
-        deps.applyDB(adopt(remote));
-        st = { userId, rev: doc.rev, dirty: false, lastSyncAt: now() };
+        // Only the recent answers come down; older history stays in the account.
+        const recent = await deps.remote.pullReviews(epochOf(remote), now() - WINDOW);
+        deps.applyDB({ ...adopt(remote), reviews: recent.map((r) => ({ ...r, up: true as const })) });
+        st = { userId, rev: doc.rev, dirty: false, lastSyncAt: now(), pulledAt: now() };
         save();
         setStatus("idle");
         return { kind: "downloaded" };
@@ -251,11 +305,12 @@ export function createEngine(deps: EngineDeps) {
       if (samePayload(local, remote)) {
         st = { userId, rev: doc.rev, dirty: false, lastSyncAt: now() };
         save();
-        setStatus("idle");
+        await engine.syncNow(); // uploads any answers the account is missing
         return { kind: "same" };
       }
       pending = { userId, remote, rev: doc.rev };
-      return { kind: "choose", local: summarize(local), remote: summarize(remote) };
+      const remoteSummary = { ...summarize(remote), reviews: await deps.remote.countReviews(epochOf(remote)) };
+      return { kind: "choose", local: summarize(local), remote: remoteSummary };
     },
 
     /** Answer the "progress in two places" question. */
@@ -264,19 +319,22 @@ export function createEngine(deps: EngineDeps) {
       const { userId, remote, rev } = pending;
       pending = null;
       if (choice === "account") {
-        deps.applyDB(adopt(remote));
-        st = { userId, rev, dirty: false, lastSyncAt: now() };
+        const recent = await deps.remote.pullReviews(epochOf(remote), now() - WINDOW);
+        deps.applyDB({ ...adopt(remote), reviews: recent.map((r) => ({ ...r, up: true as const })) });
+        st = { userId, rev, dirty: false, lastSyncAt: now(), pulledAt: now() };
         save();
         setStatus("idle");
         return "idle";
       }
       if (choice === "combine") {
         const merged = mergeDB(deps.getDB(), remote);
-        deps.applyDB(merged);
-        st = { userId, rev, dirty: !samePayload(merged, remote) };
+        const recent = await deps.remote.pullReviews(epochOf(remote), now() - WINDOW);
+        deps.applyDB({ ...merged, reviews: mergeReviews(merged.reviews, recent.map((r) => ({ ...r, up: true as const }))) });
+        st = { userId, rev, dirty: !samePayload(merged, remote), pulledAt: now() };
       } else {
         // "Use this device": it replaces the account copy everywhere.
-        deps.applyDB({ ...deps.getDB(), epoch: newEpoch(now()) });
+        const mine = deps.getDB();
+        deps.applyDB({ ...mine, epoch: newEpoch(now()), reviews: mine.reviews.map(({ up: _u, ...r }) => (void _u, r)) });
         st = { userId, rev, dirty: true, replace: true };
       }
       save();
@@ -316,7 +374,9 @@ export function createEngine(deps: EngineDeps) {
      */
     startOver(): Promise<SyncStatus> {
       if (!st) return Promise.resolve<SyncStatus>("off");
-      deps.applyDB({ ...deps.getDB(), epoch: newEpoch(now()) });
+      const fresh = deps.getDB();
+      // Every answer on this device belongs to the new start and must be uploaded again.
+      deps.applyDB({ ...fresh, epoch: newEpoch(now()), reviews: fresh.reviews.map(({ up: _u, ...r }) => (void _u, r)) });
       st.replace = true;
       st.dirty = true;
       version++;

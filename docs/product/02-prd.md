@@ -70,7 +70,9 @@ Priority: **P0** = launch blocker, **P1** = must ship in this release, **P2** = 
 ### 4.5 Data, privacy and offline
 | ID | Requirement | Pri | Status |
 |---|---|---|---|
-| DA-1 | All progress stored on the device; works with no account and no network after the first load | P0 | ✅ |
+| DA-1 | Signed in, progress is stored in the account and nobody ever has to download, export or move it; practice works with no network after the first load | P0 | 🟡 |
+| DA-1b | Signed in, Lingua uses at most ~1 MB of phone storage for progress (last 45 days cached; full history in the account), plus ~2.3 MB for the app | P0 | ✅ (eval: a year of daily practice < 1 MB) |
+| DA-1c | Guests (no account) keep everything on the phone (≤ ~3 MB) and are offered, once after their first lesson, to save it to an account | P1 | ✅ |
 | DA-2 | Installable PWA; service worker precaches all routes | P0 | ✅ |
 | DA-3 | Export/import backup (JSON) with preview; a malformed file changes nothing; the AI key is never in a backup | P0 | ✅ |
 | DA-4 | v1 → v2 migration keeps the owner's progress (due dates ±1 day) | P0 | ✅ |
@@ -79,7 +81,7 @@ Priority: **P0** = launch blocker, **P1** = must ship in this release, **P2** = 
 ### 4.6 Accounts and sync
 | ID | Requirement | Pri | Status |
 |---|---|---|---|
-| AC-1 | Accounts are optional and invisible when the server isn't configured; guests never see a sign-in wall | P0 | ✅ |
+| AC-1 | Accounts are invisible when the server isn't configured. When it is, Welcome leads with **Sign in** and offers "Try it first, without an account"; guests never hit a sign-in wall | P0 | ✅ |
 | AC-2 | Invite-only: only emails the owner has added can sign in; anyone else gets "not invited yet" | P0 | 🟡 |
 | AC-3 | Sign in with a 6-digit email code (works inside the installed iOS app) | P0 | 🟡 |
 | AC-4 | **Sign in with Google** as an alternative, shown only when the owner enables it; same invite rule; email code always available as fallback | P1 | 🟡 |

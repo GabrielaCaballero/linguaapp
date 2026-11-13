@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getEngine } from "@/lib/sync/client";
+import { getEngine, isSyncConfigured } from "@/lib/sync/client";
+import { accountHref } from "@/lib/nav";
 import type { TargetLang } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { getDB, useDB } from "@/lib/store";
@@ -31,6 +32,12 @@ export interface SessionSummary {
 export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: SessionSummary; onDone: () => void; onMore?: () => void }) {
   const db = useDB() ?? getDB();
   const [now] = useState(() => Date.now());
+  // Guests are offered, once, to keep their progress in an account (accounts must be on).
+  const [offerSave, setOfferSave] = useState(() => isSyncConfigured() && !getEngine()?.signedInAs() && !getDB().profile.seen?.saveOffer);
+  const [saveOffered] = useState(offerSave);
+  useEffect(() => {
+    if (saveOffered) markSeen("saveOffer"); // shown once, whatever the learner taps
+  }, [saveOffered]);
   // A lesson just ended: upload it now rather than waiting for the background timer.
   useEffect(() => {
     void getEngine()?.syncNow();
@@ -42,7 +49,7 @@ export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: Sess
   const tomorrowEnd = startOfDay(now) + 2 * DAY;
   const tomorrow = dueCount(db, summary.lang, tomorrowEnd);
   const insight = summary.sureWrong > 0 ? t.insightSureWrong(summary.sureWrong) : summary.guessRight > 0 ? t.insightGuessRight(summary.guessRight) : summary.confUsed >= 3 && summary.graded >= 5 && summary.correct / summary.graded > 0.8 ? t.insightCalibrated : summary.toFix.length > 0 ? t.insightToFix(summary.toFix.length) : t.insightSpacing;
-  const offerSounds = !db.profile.settings.sounds && !db.profile.seen?.soundsOffer;
+  const offerSounds = !offerSave && !db.profile.settings.sounds && !db.profile.seen?.soundsOffer;
   const offerTutor = summary.typedMiss && !getConfig() && !db.profile.seen?.tutorOffer;
 
   return (
@@ -67,6 +74,16 @@ export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: Sess
           <span className="label">{insight}</span>
         </div>
         <p className="caption" style={{ margin: 0 }}>{t.tomorrow(tomorrow)}</p>
+        {offerSave && (
+          <div className="card stack" style={{ width: "100%", textAlign: "left", gap: 8 }}>
+            <span className="label" style={{ fontWeight: 600 }}>{t.saveTitle}</span>
+            <span className="caption">{t.saveSub}</span>
+            <div className="row" style={{ gap: 8 }}>
+              <Link href={accountHref("home")} className="btn btn-secondary btn-sm">{t.saveDo}</Link>
+              <button className="btn btn-ghost btn-sm" onClick={() => setOfferSave(false)}>{t.notNow}</button>
+            </div>
+          </div>
+        )}
         {offerSounds && (
           <div className="row" style={{ justifyContent: "center" }}>
             <span className="label muted">{t.soundsOffer}</span>

@@ -32,8 +32,8 @@ Three tabs. Full-screen flows hide the tab bar.
 |---|---|---|---|---|
 | Today | Ring + Start | First day: no cards, "Start · 5 min" | Pill "Offline — practice still works" | — |
 | Lesson | Task + Check | — | Listening/tutor skipped silently | Tutor failure falls back to the local verdict |
-| Results | Ring fills, three counts, one insight | — | — | — |
-| Welcome | Title, Get started, I have an account, I have a backup | Install tip in iPhone Safari; "open in Safari/Chrome" inside other apps' browsers; nothing once installed | Works | — |
+| Results | Ring fills, three counts, one insight | Guest on an accounts-on build: one "Save your progress" card, shown once (then the sounds/tutor offers) | — | — |
+| Welcome | Accounts on: **Sign in** (primary), "Try it first, without an account", I have a backup. Accounts off: Get started, I have a backup | Install tip in iPhone Safari; "open in Safari/Chrome" inside other apps' browsers; nothing once installed | Works | — |
 | Account | Email form (+ Google button) | — | Google button disabled; sending a code shows the network error | Not invited · wrong code · too many tries · network · Google didn't finish · Google returned to a different browser (all in plain words, inline, `role=alert`) |
 | Settings → Account | "Signed in as…", status, last sync, Sync now, Sign out, Delete | Guest: one row "Sync across devices · Invite only" | "Offline — will sync later" | "Couldn't sync — will retry" · "Update Lingua to keep syncing" |
 

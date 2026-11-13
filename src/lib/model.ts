@@ -125,6 +125,8 @@ export interface ReviewLog {
   ms?: number;
   /** Days since the previous review of this card (for "remembered after a week"). */
   gap?: number;
+  /** Sync: this answer is safely in the account's history (so the phone may drop it later). */
+  up?: true;
 }
 
 export interface SessionRecord {
@@ -150,6 +152,11 @@ export type AppEvent =
 
 export const MAX_REVIEWS = 20_000;
 export const MAX_EVENTS = 10_000;
+/**
+ * Signed in, the phone keeps only this many days of answer history and on-device events;
+ * older answers live in the account. Card schedules, goals and settings are always kept.
+ */
+export const LOCAL_HISTORY_DAYS = 45;
 
 export interface DB {
   version: 2;

@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "rea
 import { getDB, useDB } from "@/lib/store";
 import { finishGoogle, getEngine, isGoogleEnabled, isSyncConfigured, readOAuthReturn, sendCode, startGoogle, verifyCode, type AccountUser, type AuthError } from "@/lib/sync/client";
 import { BadRemoteError, type Choice, type FirstLogin } from "@/lib/sync/engine";
-import { onboardingHref } from "@/lib/nav";
+import { onboardingHref, type AccountFrom } from "@/lib/nav";
 import { BackHeader, Loading, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 
@@ -20,7 +20,8 @@ export default function AccountPage() {
 
 function AccountRoute() {
   const sp = useSearchParams();
-  const from = sp.get("from") === "welcome" ? "welcome" : "settings";
+  const f = sp.get("from");
+  const from: AccountFrom = f === "welcome" || f === "home" ? f : "settings";
   // Keyed on `from` only: Google's ?code=… is stripped from the URL once read, and that
   // must not reset the screen.
   return <SignIn key={from} from={from} />;
@@ -28,7 +29,7 @@ function AccountRoute() {
 
 type Step = { id: "email" } | { id: "code" } | { id: "choose"; info: Extract<FirstLogin, { kind: "choose" }> } | { id: "done" };
 
-function SignIn({ from }: { from: "welcome" | "settings" }) {
+function SignIn({ from }: { from: AccountFrom }) {
   const db = useDB();
   const t = useT(db);
   const router = useRouter();
@@ -74,7 +75,7 @@ function SignIn({ from }: { from: "welcome" | "settings" }) {
   }, [db]);
 
   if (!db) return <Loading />;
-  const back = from === "welcome" ? onboardingHref() : "/me/settings";
+  const back = from === "welcome" ? onboardingHref() : from === "home" ? "/" : "/me/settings";
   if (!isSyncConfigured()) {
     router.replace(back);
     return <Loading />;
