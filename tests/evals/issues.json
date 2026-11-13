@@ -141,5 +141,31 @@
    "manual: goal picker shows 'more units coming' for A2/B1"
   ],
   "verified": "A2/B1 show 'more units coming' in the goal picker (e2e)."
+ },
+ {
+  "id": "P0-S1",
+  "sev": "P0",
+  "title": "Sync loses a review (any device, any order, offline or not)",
+  "status": "closed",
+  "evals": [
+   "sync: merge invariants ×12 seeds",
+   "sync: two devices offline → reconnect",
+   "sync: conflict retried",
+   "sync: change during upload",
+   "e2e-sync: CUJ-15 second device"
+  ],
+  "verified": "Pre-registered class guard; all listed evals pass. Re-open on any failure."
+ },
+ {
+  "id": "P0-S2",
+  "sev": "P0",
+  "title": "AI-tutor key leaves the device",
+  "status": "closed",
+  "evals": [
+   "sync: privacy · uploaded document never contains the key",
+   "sync: toPayload fields",
+   "e2e-sync: no request to Supabase carries the key"
+  ],
+  "verified": "Pre-registered class guard; all listed evals pass. Re-open on any failure."
  }
 ]

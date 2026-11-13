@@ -11,7 +11,9 @@ import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/li
 import { downloadText, exportBackup, parseBackup, type BackupPreview } from "@/lib/backup";
 import { getConfig, subscribeConfig } from "@/lib/llm/provider";
 import { courseLangs, targetFor } from "@/lib/stats";
-import { onboardingHref, placementHref } from "@/lib/nav";
+import { accountHref, onboardingHref, placementHref } from "@/lib/nav";
+import { deleteAccount, getEngine, signOut, useAccount, useSyncStatus } from "@/lib/sync/client";
+import { localeOf } from "@/lib/i18n";
 import { BackHeader, Loading, Seal, Seg, Sheet, Switch, Toast, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { GoalPicker } from "@/components/GoalPicker";
@@ -29,7 +31,16 @@ export default function SettingsPage() {
   const [goalFor, setGoalFor] = useState<TargetLang | null>(null);
   const [about, setAbout] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const acct = useAccount();
+  const sync = useSyncStatus();
+  const [outOpen, setOutOpen] = useState(false);
+  const [outUnsynced, setOutUnsynced] = useState(false);
+  const [forgetKey, setForgetKey] = useState(true);
+  const [delOpen, setDelOpen] = useState(false);
+  const [delText, setDelText] = useState("");
+  const [busy, setBusy] = useState(false);
   if (!db) return <Loading />;
+  const signedIn = !!acct.user && sync.signedIn;
   const s = db.profile.settings;
   const set = (p: Partial<Settings>) => setSettings(p);
   const langs = courseLangs(db);
@@ -50,6 +61,39 @@ export default function SettingsPage() {
   return (
     <main className="screen">
       <BackHeader title={t.settings} backLabel={t.back} href="/me" />
+
+      {acct.configured && acct.ready && (
+        <>
+          <div className="group-title">{t.acct}</div>
+          <div className="group">
+            {signedIn ? (
+              <>
+                <div className="cell">
+                  <Icon name="user" size={20} className="accent" />
+                  <span className="grow">
+                    {t.acctSignedInAs(acct.user!.email)}
+                    <div className="cell-sub" role="status">
+                      {sync.status === "idle" ? (sync.lastSyncAt ? t.acctLastSync(new Date(sync.lastSyncAt).toLocaleString(localeOf(db.profile.appLang), { dateStyle: "short", timeStyle: "short" })) : t.acctNeverSynced) : t.acctStatus[sync.status]}
+                    </div>
+                  </span>
+                </div>
+                <button className="cell" disabled={sync.status === "syncing"} onClick={() => void getEngine()?.syncNow()}><Icon name="refresh" size={20} /><span className="grow">{t.acctSyncNow}</span></button>
+                <button className="cell" onClick={() => { setOutUnsynced(false); setOutOpen(true); }}><Icon name="back" size={20} /><span className="grow">{t.acctSignOut}</span></button>
+                <button className="cell" style={{ color: "var(--miss)" }} onClick={() => { setDelText(""); setDelOpen(true); }}><Icon name="trash" size={20} /><span className="grow">{t.acctDelete}</span></button>
+              </>
+            ) : (
+              <Link href={accountHref("settings")} className="cell">
+                <Icon name="user" size={20} className="accent" />
+                <span className="grow">
+                  {t.acctSync}
+                  <div className="cell-sub">{t.acctSyncSub}</div>
+                </span>
+                <Icon name="chevron" size={18} className="muted" />
+              </Link>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="group-title">{t.sCourses}</div>
       <div className="group">
@@ -156,7 +200,7 @@ export default function SettingsPage() {
               <div className="row between"><span className="caption">{t.importItems}</span><span className="tabular">{preview.preview.cards}</span></div>
               <div className="row between" style={{ alignItems: "flex-start" }}><span className="caption">{t.importGoals}</span><span style={{ textAlign: "right" }}>{preview.preview.goals.map((g) => <div key={g}>{g}</div>)}</span></div>
             </div>
-            <button className="btn btn-primary" onClick={() => { replaceDB(preview.db); setPreview(null); setToast(t.importDone); }}>{t.importDo}</button>
+            <button className="btn btn-primary" onClick={() => { replaceDB(preview.db); if (signedIn) void getEngine()?.startOver(); setPreview(null); setToast(t.importDone); }}>{t.importDo}</button>
             <button className="btn btn-ghost" onClick={() => setPreview(null)}>{t.cancel}</button>
           </div>
         )}
@@ -166,8 +210,9 @@ export default function SettingsPage() {
         <div className="stack">
           <h2 className="h2">{t.sReset}</h2>
           <p className="muted" style={{ margin: 0 }}>{t.resetType(t.resetWord)}</p>
+          {signedIn && <p className="label" style={{ margin: 0, color: "var(--miss)" }}>{t.acctResetNote}</p>}
           <input className="input" value={resetText} onChange={(e) => setResetText(e.target.value)} autoCapitalize="characters" aria-label={t.resetWord} />
-          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={() => { resetDB(); setReset(false); router.replace(onboardingHref()); }}>
+          <button className="btn btn-primary" disabled={resetText.trim().toUpperCase() !== t.resetWord} style={{ background: resetText.trim().toUpperCase() === t.resetWord ? "var(--miss)" : undefined }} onClick={() => { resetDB(); if (signedIn) void getEngine()?.startOver(); setReset(false); router.replace(onboardingHref()); }}>
             {t.sReset}
           </button>
           <button className="btn btn-ghost" onClick={() => setReset(false)}>{t.cancel}</button>
@@ -200,6 +245,44 @@ export default function SettingsPage() {
         </ul>
         <button className="btn btn-secondary" onClick={() => setAbout(false)}>{t.close}</button>
       </Sheet>
+      <Sheet open={outOpen} onClose={() => setOutOpen(false)} label={t.acctSignOut}>
+        <div className="stack">
+          <h2 className="h2">{t.acctSignOutTitle}</h2>
+          <p className="muted" style={{ margin: 0 }}>{outUnsynced ? t.acctSignOutUnsynced : t.acctSignOutSub}</p>
+          <label className="row" style={{ gap: 12 }}>
+            <input type="checkbox" checked={forgetKey} onChange={(e) => setForgetKey(e.target.checked)} style={{ width: 22, height: 22 }} />
+            <span className="label">{t.acctForgetKey}</span>
+          </label>
+          <button className="btn btn-primary" disabled={busy} onClick={async () => {
+            setBusy(true);
+            const r = await signOut({ force: outUnsynced, forgetKey });
+            setBusy(false);
+            if (r === "unsynced") { setOutUnsynced(true); return; }
+            setOutOpen(false);
+            router.replace(onboardingHref());
+          }}>{outUnsynced ? t.acctSignOutAnyway : t.acctSignOut}</button>
+          <button className="btn btn-ghost" onClick={() => setOutOpen(false)}>{t.cancel}</button>
+        </div>
+      </Sheet>
+
+      <Sheet open={delOpen} onClose={() => setDelOpen(false)} label={t.acctDelete}>
+        <div className="stack">
+          <h2 className="h2">{t.acctDelete}</h2>
+          <p className="muted" style={{ margin: 0 }}>{t.acctDeleteSub}</p>
+          <button className="btn btn-secondary" onClick={exportNow}><Icon name="download" size={20} /> {t.sExport}</button>
+          <p className="label" style={{ margin: 0 }}>{t.acctDeleteType(t.acctDeleteWord)}</p>
+          <input className="input" value={delText} onChange={(e) => setDelText(e.target.value)} autoCapitalize="characters" aria-label={t.acctDeleteWord} />
+          <button className="btn btn-primary" disabled={busy || delText.trim().toUpperCase() !== t.acctDeleteWord} style={{ background: delText.trim().toUpperCase() === t.acctDeleteWord ? "var(--miss)" : undefined }} onClick={async () => {
+            setBusy(true);
+            const ok = await deleteAccount();
+            setBusy(false);
+            setDelOpen(false);
+            setToast(ok ? t.acctDeleted : t.acctDeleteFailed);
+          }}>{t.acctDelete}</button>
+          <button className="btn btn-ghost" onClick={() => setDelOpen(false)}>{t.cancel}</button>
+        </div>
+      </Sheet>
+
       <Toast text={toast} onDone={() => setToast(null)} />
     </main>
   );

@@ -41,7 +41,8 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
   const t = T[plan.appLang];
   const t0 = Date.now();
   await page.goto("/");
-  await btn(page, T.en.getStarted).or(btn(page, T.es.getStarted)).first().click();
+  // Accounts-on builds lead with "Sign in"; the guest path is "Try it first".
+  await btn(page, T.en.getStarted).or(btn(page, T.es.getStarted)).or(btn(page, T.en.tryFirst)).or(btn(page, T.es.tryFirst)).first().click();
   await page.locator(".choice-card", { hasText: T.en.baseName[plan.appLang] }).first().click();
   await btn(page, t.continue).click();
   for (const l of plan.langs) await page.locator(".choice-card", { hasText: l.lang === "it" ? "Italiano" : "Deutsch" }).click();

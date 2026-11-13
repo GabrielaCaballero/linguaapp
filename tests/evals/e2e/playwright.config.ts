@@ -2,7 +2,10 @@
 // service worker registers and nothing touches the phone server's .next on port 3200.
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3500;
+// Overridable so two checkouts (e.g. parallel sessions) can run evals at the same time.
+const PORT = Number(process.env.EVAL_PORT ?? 3500);
+const SYNC_PORT = Number(process.env.EVAL_SYNC_PORT ?? 3510);
+const SYNC_URL = "https://lingua-test.supabase.co";
 export default defineConfig({
   testDir: __dirname,
   testMatch: /.*\.spec\.ts$/,
@@ -23,11 +26,22 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: `NEXT_DIST_DIR=.next-qa npx next build && NEXT_DIST_DIR=.next-qa npx next start -p ${PORT}`,
-    cwd: "../../..",
-    port: PORT,
-    reuseExistingServer: true,
-    timeout: 300_000,
-  },
+  webServer: [
+    {
+      command: `NEXT_DIST_DIR=.next-qa npx next build && NEXT_DIST_DIR=.next-qa npx next start -p ${PORT}`,
+      cwd: "../../..",
+      port: PORT,
+      reuseExistingServer: true,
+      timeout: 300_000,
+    },
+    {
+      // Same app built with a (fake) Supabase configured, for account.spec.ts. Built after the
+      // first so the two builds never race on tsconfig.json.
+      command: `until curl -sf http://localhost:${PORT}/ >/dev/null; do sleep 2; done; NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key NEXT_PUBLIC_AUTH_GOOGLE=1 npx next build && NEXT_DIST_DIR=.next-qa-sync NEXT_PUBLIC_SUPABASE_URL=${SYNC_URL} NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key npx next start -p ${SYNC_PORT}`,
+      cwd: "../../..",
+      port: SYNC_PORT,
+      reuseExistingServer: true,
+      timeout: 600_000,
+    },
+  ],
 });

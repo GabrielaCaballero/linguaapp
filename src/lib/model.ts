@@ -74,6 +74,8 @@ export interface Profile {
   lastBackupAt?: number;
   /** Things shown once (tips, offers). */
   seen?: Record<string, number>;
+  /** Last time anything in the profile changed (cross-device sync: newest profile wins). */
+  updatedAt?: number;
 }
 
 /** FSRS card, serialised with epoch-ms dates. */
@@ -123,6 +125,8 @@ export interface ReviewLog {
   ms?: number;
   /** Days since the previous review of this card (for "remembered after a week"). */
   gap?: number;
+  /** Sync: this answer is safely in the account's history (so the phone may drop it later). */
+  up?: true;
 }
 
 export interface SessionRecord {
@@ -146,6 +150,14 @@ export type AppEvent =
   | { t: number; type: "checkin_choice"; lang: TargetLang; choice: string }
   | { t: number; type: "alt_candidate"; itemId: string; text: string };
 
+export const MAX_REVIEWS = 20_000;
+export const MAX_EVENTS = 10_000;
+/**
+ * Signed in, the phone keeps only this many days of answer history and on-device events;
+ * older answers live in the account. Card schedules, goals and settings are always kept.
+ */
+export const LOCAL_HISTORY_DAYS = 45;
+
 export interface DB {
   version: 2;
   profile: Profile;
@@ -156,6 +168,20 @@ export interface DB {
   events: AppEvent[];
   /** v1 Ties log, kept only until the learner has been offered a download once. */
   legacyTies?: unknown[];
+  /**
+   * Sync: changes when the learner deliberately replaces everything (Reset, import, "Use
+   * this device"). Devices on a different epoch take the server copy instead of merging.
+   */
+  epoch?: string;
+  /** Sync: things removed on purpose, so a merge with another device doesn't bring them back. */
+  deleted?: Tombstones;
+}
+
+export interface Tombstones {
+  /** Course language → when it was removed. */
+  courses?: Partial<Record<TargetLang, number>>;
+  /** Custom word id → when it was removed. */
+  custom?: Record<string, number>;
 }
 
 export const DEFAULT_SETTINGS: Settings = {

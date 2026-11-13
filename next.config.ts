@@ -1,5 +1,17 @@
 import type { NextConfig } from "next";
 
+// The page may only talk to itself, the Supabase project and Anthropic (the AI tutor). The
+// sign-in session and the AI key live in localStorage, so this limits where an injected
+// script could send them. Scripts/styles aren't restricted here (Next inlines bootstrap code).
+const SUPABASE = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const CSP = [
+  `connect-src 'self' ${SUPABASE} https://api.anthropic.com`.replace(/\s+/g, " ").trim(),
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   cacheComponents: true,
@@ -13,6 +25,7 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Content-Security-Policy", value: CSP },
         ],
       },
       {

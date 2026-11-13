@@ -1,10 +1,10 @@
 // Lingua service worker — hand-written, no dependencies.
 // Cache-first for hashed static assets, fonts and icons; network-first for pages with a
 // cache fallback; the main routes are precached on install so a cold start works offline.
-const VERSION = "lingua-v2-1";
+const VERSION = "lingua-v2-2";
 const STATIC = `${VERSION}-static`;
 const PAGES = `${VERSION}-pages`;
-const ROUTES = ["/", "/path", "/me", "/me/settings", "/me/settings/tutor", "/me/words", "/lesson", "/onboarding", "/placement"];
+const ROUTES = ["/", "/path", "/me", "/me/settings", "/me/settings/tutor", "/me/words", "/lesson", "/onboarding", "/placement", "/account"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

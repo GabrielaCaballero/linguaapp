@@ -2,13 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 import { COURSES } from "./content";
-import { emptyDB, type AppEvent, type DB } from "./model";
+import { emptyDB, MAX_EVENTS, MAX_REVIEWS, type AppEvent, type DB } from "./model";
 import { migrateAny, type LegacyIndex } from "./migrate";
 import { KEYS, localAdapter, type StorageAdapter } from "./storage-adapter";
 import type { TargetLang } from "@/content/schema";
-
-const MAX_REVIEWS = 20_000;
-const MAX_EVENTS = 10_000;
 
 let legacyIndex: LegacyIndex | null = null;
 export function legacy(): LegacyIndex {
@@ -61,21 +58,33 @@ function persist(db: DB) {
   localAdapter.set(KEYS.v2, JSON.stringify(db));
 }
 
-export function update(fn: (db: DB) => DB) {
-  const next = fn(getDB());
+/** Called after every write; `fromSync` is true when the write came from a pulled document. */
+type CommitListener = (db: DB, info: { fromSync: boolean; eventsOnly: boolean }) => void;
+const commitListeners = new Set<CommitListener>();
+export function onCommit(l: CommitListener): () => void {
+  commitListeners.add(l);
+  return () => void commitListeners.delete(l);
+}
+
+export function update(fn: (db: DB) => DB, opts: { fromSync?: boolean } = {}) {
+  const prev = getDB();
+  const next = fn(prev);
   if (next.reviews.length > MAX_REVIEWS) next.reviews = next.reviews.slice(-MAX_REVIEWS);
   if (next.events.length > MAX_EVENTS) next.events = next.events.slice(-MAX_EVENTS);
+  if (!opts.fromSync && next.profile !== prev.profile) next.profile = { ...next.profile, updatedAt: Date.now() };
   cache = next;
   persist(next);
   listeners.forEach((l) => l());
+  const eventsOnly = next.profile === prev.profile && next.cards === prev.cards && next.reviews === prev.reviews && next.sessions === prev.sessions && next.custom === prev.custom;
+  commitListeners.forEach((l) => l(next, { fromSync: !!opts.fromSync, eventsOnly }));
 }
 
 export function logEvent(e: AppEvent) {
   update((db) => ({ ...db, events: [...db.events, e] }));
 }
 
-export function replaceDB(db: DB) {
-  update(() => db);
+export function replaceDB(db: DB, opts: { fromSync?: boolean } = {}) {
+  update(() => db, opts);
 }
 
 export function resetDB() {
