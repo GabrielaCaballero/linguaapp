@@ -3,15 +3,19 @@ import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Goal, GoalLevel } from "./model";
 import { DAY } from "./dates";
 
-/** Cumulative guided hours from zero to the END of each level. */
-export const HOURS: Record<"A0" | GoalLevel, number> = { A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375 };
+/**
+ * Cumulative guided hours from zero to the END of each level (Cambridge English guided learning
+ * hours: A2 180–200, B1 350–400, B2 500–600; ALTE "can-do" course lengths agree). B2 = 600, the
+ * top of the Cambridge band, because B2 needs the most self-study per guided hour.
+ */
+export const HOURS: Record<"A0" | GoalLevel, number> = { A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600 };
 
 /** Where a placed learner already is (placed band = roughly halfway through that band). */
-export const CURRENT_HOURS: Record<Cefr, number> = { A0: 0, "A1.1": 22.5, "A1.2": 67.5, A2: 140, B1: 282.5 };
+export const CURRENT_HOURS: Record<Cefr, number> = { A0: 0, "A1.1": 22.5, "A1.2": 67.5, A2: 140, B1: 282.5, B2: 487.5 };
 
 export const MULT: Record<`${BaseLang}-${TargetLang}`, number> = { "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3 };
 
-export const LEVELS: GoalLevel[] = ["A1.1", "A1", "A2", "B1"];
+export const LEVELS: GoalLevel[] = ["A1.1", "A1", "A2", "B1", "B2"];
 export const MIN_CLAMP = 5;
 export const MAX_CLAMP = 90;
 const WEEK = 7 * DAY;
@@ -78,9 +82,8 @@ export function projectedDate(i: Omit<PlanInput, "by"> & { minPerDay: number }):
 
 /** Next goal level above where the learner is now. */
 export function nextLevel(current: Cefr): GoalLevel {
-  const order: GoalLevel[] = ["A1.1", "A1", "A2", "B1"];
   const have = CURRENT_HOURS[current];
-  return order.find((l) => HOURS[l] > have) ?? "B1";
+  return LEVELS.find((l) => HOURS[l] > have) ?? "B2";
 }
 
 /** Amber-card alternatives: (a) the date that needs 30 min/day; (b) the highest level reachable by the date at 30 min/day. */
@@ -100,6 +103,19 @@ export function dailyMinutes(g: Goal | undefined): number {
   if (!g) return 10;
   if (g.kind === "maintain") return 5;
   return g.minutesPerDay;
+}
+
+/** The goal level a unit's CEFR tag completes (A1.2 is the second half of A1). */
+export const UNIT_LEVEL: Record<Cefr, GoalLevel | null> = { A0: null, "A1.1": "A1.1", "A1.2": "A1", A2: "A2", B1: "B1", B2: "B2" };
+
+/** Highest goal level the shipped units of a course reach (GO-7: goals above it say "more units coming"). */
+export function courseTop(unitCefrs: Cefr[]): GoalLevel {
+  let top: GoalLevel = "A1.1";
+  for (const c of unitCefrs) {
+    const l = UNIT_LEVEL[c];
+    if (l && HOURS[l] > HOURS[top]) top = l;
+  }
+  return top;
 }
 
 export function retentionFor(kind: Goal["kind"]): number {

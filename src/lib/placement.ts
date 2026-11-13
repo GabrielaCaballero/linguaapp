@@ -1,9 +1,9 @@
-// Adaptive placement: Rasch model + EAP estimate on a 61-point grid over [−4, 3].
+// Adaptive placement: Rasch model + EAP estimate on an 81-point grid over [−4, 4] (B2 items sit at +2.5).
 // P(correct) = 1 / (1 + e^−(θ − b)). Stop at 15 items, or SE < 0.45 after ≥ 8, or "I'm a beginner".
 import type { BaseLang, Cefr, PlacementItem, TargetLang, Unit } from "@/content/schema";
 import type { Experience } from "./model";
 
-export const GRID = Array.from({ length: 61 }, (_, k) => -4 + (7 * k) / 60);
+export const GRID = Array.from({ length: 81 }, (_, k) => -4 + k / 10);
 export const MIN_ITEMS = 8;
 export const MAX_ITEMS = 15;
 export const SE_STOP = 0.45;
@@ -110,17 +110,18 @@ export const CUTS: [number, Cefr][] = [
   [-1, "A1.1"],
   [0, "A1.2"],
   [1, "A2"],
+  [2, "B1"],
 ];
 
 export function band(theta: number): Cefr {
   for (const [cut, c] of CUTS) if (theta < cut) return c;
-  return "B1";
+  return "B2";
 }
 
-const ORDER: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
+const ORDER: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2"];
 export const cefrRank = (c: Cefr) => ORDER.indexOf(c);
 
-const BAND_LO: Record<Cefr, number> = { A0: -3, "A1.1": -2, "A1.2": -1, A2: 0, B1: 1 };
+const BAND_LO: Record<Cefr, number> = { A0: -3, "A1.1": -2, "A1.2": -1, A2: 0, B1: 1, B2: 2 };
 
 /**
  * A Rasch-scale difficulty per unit. Units sharing a CEFR band are spread evenly across it, in
@@ -135,7 +136,7 @@ export function unitDifficulty(units: Unit[]): Map<number, number> {
     const group = sorted.filter((u) => u.cefr === c);
     if (!group.length) continue;
     const lo = BAND_LO[c];
-    const hi = cefrRank(c) === top && c !== "B1" ? lo + 2 : lo + 1;
+    const hi = cefrRank(c) === top && c !== ORDER[ORDER.length - 1] ? lo + 2 : lo + 1;
     group.forEach((u, k) => out.set(u.index, lo + ((k + 0.5) * (hi - lo)) / group.length));
   }
   return out;

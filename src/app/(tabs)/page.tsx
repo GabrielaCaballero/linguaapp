@@ -8,7 +8,8 @@ import { useNow } from "@/lib/hooks";
 import { Icon } from "@/components/icons";
 import { Ring, Seal, Sheet, Toast, WeekDots, Loading, useT } from "@/components/ui";
 import { LANG_NAME, units } from "@/lib/content";
-import { dueCount, courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
+import { courseTop, retentionFor } from "@/lib/goals";
+import { dueCount, courseComplete, courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
 import { lastSessionAt, AWAY_DAYS } from "@/lib/session";
 import { DAY, fmtMonth, startOfWeek } from "@/lib/dates";
 import { checkinChoice, dropLegacyTies, saveGoal, setActiveLang } from "@/lib/actions";
@@ -66,6 +67,7 @@ export default function Today() {
   const fix = toFix(db, lang, now);
   const sleep = sleepReady(db, lang, now);
   const lastBackup = db.profile.lastBackupAt ?? db.profile.createdAt;
+  const complete = courseComplete(db, lang);
   if (db.legacyTies?.length) {
     card = (
       <div className="card stack">
@@ -96,6 +98,19 @@ export default function Today() {
           )}
           <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => { saveGoal(lang, { ...g, kind: "steady", minutesPerDay: Math.max(5, wc.avg), setAt: g.setAt }); checkinChoice(lang, "keep-pace", key); }}>{t.keepPace(Math.max(5, wc.avg))}</button>
         </div>
+      </div>
+    );
+  } else if (complete) {
+    // GO-8: end of content — say so plainly, keep reviews going, offer Maintain.
+    card = (
+      <div className="card stack">
+        <div className="h2" style={{ fontSize: "1.0625rem" }}>{t.courseDoneTitle}</div>
+        <div className="label muted">{t.courseDoneSub(courseTop(units(lang).map((u) => u.cefr)))}</div>
+        {course.goal?.kind !== "maintain" && (
+          <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={() => saveGoal(lang, { kind: "maintain", minutesPerDay: 5, retention: retentionFor("maintain"), setAt: Date.now() })}>
+            {t.courseDoneMaintain}
+          </button>
+        )}
       </div>
     );
   } else if (away) {
@@ -182,15 +197,15 @@ export default function Today() {
       <Sheet open={menu} onClose={() => setMenu(false)} label={t.moreOptions}>
         <div className="group">
           {[
-            { k: "review", label: t.reviewOnly, icon: "refresh", off: dueNow === 0 },
-            { k: "new", label: t.newOnly, icon: "plus", off: false },
-            { k: "speed", label: t.speedRound, icon: "bolt", off: learned < 4 },
+            { k: "review", label: t.reviewOnly, icon: "refresh", off: dueNow === 0, sub: t.nothingToReview },
+            { k: "new", label: t.newOnly, icon: "plus", off: complete, sub: t.noNewWords },
+            { k: "speed", label: t.speedRound, icon: "bolt", off: learned < 4, sub: t.nothingToReview },
           ].map((o) => (
             <button key={o.k} className="cell" onClick={() => start(o.k)} disabled={o.off} style={{ opacity: o.off ? 0.5 : 1 }}>
               <Icon name={o.icon} size={20} className="accent" />
               <span className="grow">
                 {o.label}
-                {o.off && <div className="cell-sub">{t.nothingToReview}</div>}
+                {o.off && <div className="cell-sub">{o.sub}</div>}
               </span>
               <Icon name="chevron" size={18} className="muted" />
             </button>

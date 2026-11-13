@@ -107,6 +107,19 @@ export function currentUnit(db: DB, lang: TargetLang): Unit {
   return us.find((u) => u.index >= start) ?? us[us.length - 1];
 }
 
+/**
+ * GO-8: every item the learner can see, from their start unit to the last unit, has been
+ * introduced (has a card). Nothing new is left; reviews keep going.
+ */
+export function courseComplete(db: DB, lang: TargetLang): boolean {
+  const c = db.profile.courses[lang];
+  if (!c) return false;
+  const start = c.unit ?? 1;
+  return units(lang)
+    .filter((u) => u.index >= start)
+    .every((u) => u.items.every((i) => !visible(i, c.explainIn) || !!db.cards[i.id]));
+}
+
 /** Yesterday's (most recent earlier day's) misses that are still unfixed. */
 export function toFix(db: DB, lang: TargetLang, now: number): string[] {
   const today = startOfDay(now);

@@ -73,7 +73,7 @@ export const deUnits: Unit[] = [
   ]),
 ];
 
-const BAND_B: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5 };
+const BAND_B: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5 };
 const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
 
 function placementBank(lang: TargetLang, units: Unit[]): PlacementItem[] {
