@@ -5,7 +5,9 @@ import type { BaseLang, PlacementItem, TargetLang } from "@/content/schema";
 import { answer, band, beginner, nextItem, p, priorMean, seeds, start, startUnit, MAX_ITEMS, MIN_ITEMS, type PlacementState } from "@/lib/placement";
 import { alternatives, dailyMinutes, feasibility, HOURS, MULT, planForDate, projectedDate, retentionFor } from "@/lib/goals";
 import { emptyDB, type DB } from "@/lib/model";
-import { weeklyCheck } from "@/lib/stats";
+import { courseComplete, weeklyCheck } from "@/lib/stats";
+import { courseTop } from "@/lib/goals";
+import { visible } from "@/lib/content";
 import { DAY } from "@/lib/dates";
 import { normal, rng } from "../lib/fixtures";
 
@@ -39,6 +41,24 @@ describe("placement: simulated learners on the real banks", () => {
       expect(err[Math.floor(err.length / 2)]).toBeLessThan(0.5);
     });
   }
+  for (const [lang, base] of PAIRS) {
+    it(`${base}→${lang}: 300 advanced learners (A2–B2, θ 0…3), median |θ̂−θ| < 0.5, bands reach B2`, () => {
+      const r = rng(lang === "it" ? 31 : 37);
+      const err: number[] = [];
+      let b2 = 0;
+      for (let k = 0; k < 300; k++) {
+        const theta = 3 * r();
+        const mu = Math.max(-0.5, Math.min(1, 0.5 + 0.5 * normal(r))); // "lived there" ± can-do shift
+        const s = run(lang, base, mu, (it) => r() < p(theta, it.b));
+        expect(s.responses.length).toBeLessThanOrEqual(MAX_ITEMS);
+        err.push(Math.abs(s.theta - theta));
+        if (band(s.theta) === "B2") b2++;
+      }
+      err.sort((a, b) => a - b);
+      expect(err[Math.floor(err.length / 2)]).toBeLessThan(0.5);
+      expect(b2).toBeGreaterThan(0);
+    });
+  }
   it("'I'm a beginner' ends the test at A0 → Unit 1, nothing seeded", () => {
     const s = beginner(start(-1.5));
     expect(s.done).toBe(true);
@@ -67,10 +87,10 @@ describe("placement → unit mapping and seeding (P0-2 regression)", () => {
   for (const lang of ["it", "de"] as TargetLang[]) {
     const units = courses[lang].units;
     const total = units.flatMap((u) => u.items).length;
-    it(`${lang}: start unit is monotonic in θ and every unit 1–6 is reachable`, () => {
+    it(`${lang}: start unit is monotonic in θ and every unit is reachable`, () => {
       let prev = 0;
       const seen = new Set<number>();
-      for (let th = -4; th <= 3; th += 0.05) {
+      for (let th = -4; th <= 4; th += 0.05) {
         const u = startUnit(units, th, 0.45).index;
         expect(u).toBeGreaterThanOrEqual(prev);
         prev = u;
@@ -84,7 +104,9 @@ describe("placement → unit mapping and seeding (P0-2 regression)", () => {
         const su = startUnit(units, th, 0.45);
         const sd = new Set(seeds(units, su.index, courses[lang].placement, s));
         for (const u of units.filter((x) => x.index >= su.index)) for (const i of u.items) expect(sd.has(i.id)).toBe(false);
-        expect(sd.size).toBeLessThan(total * 0.85);
+        // Never the whole course: at least the last unit is always left to learn (the old "< 85 %"
+        // bound assumed 6 units; with 12–24 units a learner beyond the course seeds up to 23/24).
+        expect(sd.size).toBeLessThanOrEqual(total - units[units.length - 1].items.length);
       }
     });
     it(`${lang}: a mid-A1.2 learner (θ=−0.5) is not 'beyond the course' and starts after Unit 1`, () => {
@@ -106,9 +128,9 @@ const by = (months: number) => NOW + months * 30.44 * DAY;
 
 describe("goals math (spec §4.5)", () => {
   it("multipliers per pair", () => expect(MULT).toEqual({ "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3 }));
-  it("cumulative hours", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375 }));
+  it("cumulative hours (B2 = 600, top of Cambridge's 500–600 band)", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600 }));
   for (const [lang, base] of PAIRS)
-    for (const target of ["A1.1", "A1", "A2", "B1"] as const)
+    for (const target of ["A1.1", "A1", "A2", "B1", "B2"] as const)
       for (const months of [3, 6, 12])
         it(`from zero ${base}→${lang} ${target} in ${months} mo matches the spec formula`, () => {
           const plan = planForDate({ base, lang, current: "A0", target, by: by(months), now: NOW });
@@ -175,5 +197,26 @@ describe("weekly check (P1-4 regression)", () => {
   it("a projection is never absurd: either ≤ 2 years out or the UI's 'more than 2 years' copy applies", () => {
     const w = weeklyCheck(db(2, 1), "it", NOW);
     if (w) expect(Number.isFinite(w.projected)).toBe(true);
+  });
+});
+
+describe("GO-7 / GO-8: course scope and end of content", () => {
+  it("course top follows the shipped units (no hard-coded A1)", () => {
+    for (const lang of ["it", "de"] as TargetLang[]) {
+      const top = courseTop(courses[lang].units.map((u) => u.cefr));
+      expect(HOURS[top]).toBeGreaterThan(HOURS.A1);
+    }
+    expect(courseTop(["A0", "A1.1", "A1.1"])).toBe("A1.1");
+    expect(courseTop(["A1.1", "A1.2"])).toBe("A1");
+  });
+  it("courseComplete: false while any visible item is new, true once every one has a card (bridges for the other base ignored)", () => {
+    const d = emptyDB(NOW);
+    d.profile.courses.it = { explainIn: "en", addedAt: NOW, unit: 1, goal: undefined };
+    expect(courseComplete(d, "it")).toBe(false);
+    const all = courses.it.units.flatMap((u) => u.items).filter((i) => visible(i, "en"));
+    for (const i of all) d.cards[i.id] = {} as DB["cards"][string];
+    expect(courseComplete(d, "it")).toBe(true);
+    delete d.cards[all[all.length - 1].id];
+    expect(courseComplete(d, "it")).toBe(false);
   });
 });

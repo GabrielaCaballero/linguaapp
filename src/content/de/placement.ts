@@ -1,10 +1,10 @@
 import type { PlacementItem } from "../schema";
 import { spreadAnswers } from "../build";
 
-// 30 items · 6 per band (A0, A1.1, A1.2, A2, B1) · per band: 2 vocab, 2 grammar,
+// 36 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2) · per band: 2 vocab, 2 grammar,
 // 1 listening, 1 reading. Options are authored with the key first; spreadAnswers()
 // rotates them deterministically so the key isn't always in the same slot.
-// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 (±0.4 within band).
+// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band).
 const bank: PlacementItem[] = [
   // ── A0 ─────────────────────────────────────────────────────
   {
@@ -355,6 +355,76 @@ const bank: PlacementItem[] = [
         { es: "En la biblioteca central", en: "At the main library" },
         { es: "En ningún lugar", en: "Nowhere" },
         { es: "Solo por internet", en: "Only online" },
+      ],
+      answer: 0,
+    },
+  },
+  // ── B2 (added with units 19–24) ────────────────────────────
+  {
+    id: "de-p-31", lang: "de", cefr: "B2", b: 2.4, skill: "vocab", kind: "mcq", stem: "die Voraussetzung",
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "el requisito", en: "the prerequisite" },
+        { es: "la suposición", en: "the assumption" },
+        { es: "el presupuesto (dinero)", en: "the budget" },
+        { es: "el pronóstico", en: "the forecast" },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-32", lang: "de", cefr: "B2", b: 2.5, skill: "vocab", kind: "mcq", stem: "eine nachhaltige Lösung",
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "una solución sostenible", en: "a sustainable solution" },
+        { es: "una solución posterior", en: "a later solution" },
+        { es: "una solución provisional", en: "a temporary solution" },
+        { es: "una solución cara", en: "an expensive solution" },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-33", lang: "de", cefr: "B2", b: 2.2, skill: "grammar", kind: "cloze", stem: "Wenn ich das gewusst ___, wäre ich früher gekommen.",
+    mcq: {
+      prompt: { es: "Completa la frase.", en: "Complete the sentence." },
+      options: ["hätte", "würde", "habe", "wäre"],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-34", lang: "de", cefr: "B2", b: 2.7, skill: "grammar", kind: "cloze", stem: "Der Minister sagte, er ___ nichts von dem Plan gewusst.",
+    mcq: {
+      prompt: { es: "Completa (estilo indirecto, lengua escrita).", en: "Complete (reported speech, written style)." },
+      options: ["habe", "haben", "hatten", "habest"],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-35", lang: "de", cefr: "B2", b: 2.5, skill: "listening", kind: "listen", spoken: "Hätte ich den Zug nicht verpasst, wäre ich pünktlich gewesen.",
+    mcq: {
+      prompt: { es: "¿Qué pasó?", en: "What happened?" },
+      options: [
+        { es: "Llegó tarde porque perdió el tren.", en: "They were late because they missed the train." },
+        { es: "Llegó a tiempo gracias al tren.", en: "They were on time thanks to the train." },
+        { es: "El tren llegó con retraso.", en: "The train was delayed." },
+        { es: "Va a tomar el próximo tren.", en: "They'll take the next train." },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-36", lang: "de", cefr: "B2", b: 2.2, skill: "reading", kind: "mcq",
+    stem: "Aufgrund von Bauarbeiten bleibt die Filiale bis einschließlich Freitag geschlossen. Ab Samstag gelten wieder die gewohnten Öffnungszeiten.",
+    mcq: {
+      prompt: { es: "¿Cuándo vuelve a abrir la sucursal?", en: "When does the branch open again?" },
+      options: [
+        { es: "El sábado, con el horario de siempre.", en: "On Saturday, with its usual hours." },
+        { es: "El viernes, con el horario de siempre.", en: "On Friday, with its usual hours." },
+        { es: "El sábado, con horario reducido.", en: "On Saturday, with shorter hours." },
+        { es: "Todavía no se sabe.", en: "It isn't known yet." },
       ],
       answer: 0,
     },

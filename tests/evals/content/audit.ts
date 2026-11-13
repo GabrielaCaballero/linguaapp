@@ -25,4 +25,8 @@ export const AUDITOR = "QA lead (eval phase), 2026-11-12";
 // it-p-27 (distractor «avrà» grammatical) · de-u01-wie-gehts (en gloss lacked "informal")
 // de-u03-zehn/hundert/buchstabieren, de-u05-essen, de-u06-gross/hell/dunkel/teuer/billig
 // (capitalised-noun give-away distractors) · de-p-30 (word-for-word answer key).
+// 2026-11-13 · content-to-B2 phase 1: units 7–12 (it + de, ~300 items) and the 12 B2 placement items
+// were read item by item against the same rubric before re-pinning. Fixed during review: it-u09-uovo
+// distractor «l'ufo» → «l'ovile»; de-u11 dialogue option «a las catorce» → «a las dos»; de-p-32 key
+// shortened so its length doesn't give it away.
 export const FAILS: Record<string, Finding> = {};

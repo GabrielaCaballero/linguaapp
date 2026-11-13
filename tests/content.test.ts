@@ -9,7 +9,9 @@ import { fixtureCourses } from "./fixtures/mini-course";
 const real = (contentModule as unknown as { courses?: Partial<Record<TargetLang, CoursePack>> }).courses;
 
 const FORBIDDEN = /lavello|zurig|zürich|zurich|gabriela|\bgabi\b|comune|cittadinanza|citizenship|\bfide\b|dante alighieri society|plida/i;
-const BANDS = ["A0", "A1.1", "A1.2", "A2", "B1"] as const;
+// The engine fixture keeps the original five bands; the real course packs add B2 (decisions.md 2026-11-13).
+const FIXTURE_BANDS = ["A0", "A1.1", "A1.2", "A2", "B1"] as const;
+const BANDS = [...FIXTURE_BANDS, "B2"] as const;
 
 function mcqOk(m: Mcq | undefined, where: string, problems: string[]) {
   if (!m) return;
@@ -21,7 +23,7 @@ function mcqOk(m: Mcq | undefined, where: string, problems: string[]) {
   });
 }
 
-function validate(pack: CoursePack, opts: { strictPlacement: boolean }): string[] {
+function validate(pack: CoursePack, opts: { strictPlacement: boolean; bands?: readonly string[] }): string[] {
   const p: string[] = [];
   const lang = pack.lang;
   const ids = new Set<string>();
@@ -74,8 +76,9 @@ function validate(pack: CoursePack, opts: { strictPlacement: boolean }): string[
   }
   // placement
   const pIds = new Set<string>();
-  if (opts.strictPlacement && pack.placement.length < 30) p.push(`placement has ${pack.placement.length} items (need ≥30)`);
-  for (const band of BANDS) {
+  const bands = opts.bands ?? BANDS;
+  if (opts.strictPlacement && pack.placement.length < 6 * bands.length) p.push(`placement has ${pack.placement.length} items (need ≥${6 * bands.length})`);
+  for (const band of bands) {
     const n = pack.placement.filter((x) => x.cefr === band).length;
     if (opts.strictPlacement && n < 6) p.push(`placement band ${band} has ${n} items (need 6)`);
   }
@@ -102,7 +105,7 @@ function validate(pack: CoursePack, opts: { strictPlacement: boolean }): string[
 
 describe("fixture course packs", () => {
   for (const pack of Object.values(fixtureCourses)) {
-    it(`${pack.lang} fixture is valid`, () => expect(validate(pack, { strictPlacement: true })).toEqual([]));
+    it(`${pack.lang} fixture is valid`, () => expect(validate(pack, { strictPlacement: true, bands: FIXTURE_BANDS })).toEqual([]));
   }
 });
 

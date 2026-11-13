@@ -6,7 +6,7 @@ import type { BaseLang, Cefr, Item, TargetLang } from "@/content/schema";
 export type { BaseLang, Cefr, Item, TargetLang };
 
 /** Levels a goal can aim for. "A1" = end of A1.2. */
-export type GoalLevel = "A1.1" | "A1" | "A2" | "B1";
+export type GoalLevel = "A1.1" | "A1" | "A2" | "B1" | "B2";
 export type GoalKind = "level" | "trip" | "steady" | "maintain";
 
 export interface Goal {

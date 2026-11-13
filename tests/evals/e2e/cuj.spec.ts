@@ -195,11 +195,17 @@ test.describe("CUJ-5 mistakes", () => {
     await writeDB(page, db0);
     await page.goto("/");
     await page.locator(".btn-primary").click();
+    // Wait for an *unanswered* typed task: playLesson may itself answer a typed task, which
+    // leaves a read-only input behind (that race made this case flaky, ~50 % on the baseline too).
+    const typed = page.locator("input.input.big:not([readonly])");
     for (let k = 0; k < 40; k++) {
-      if (await page.locator("input.input.big").isVisible().catch(() => false)) break;
+      // let the next task render before deciding, so the helper never sees it first
+      await page.locator(".prompt-eyebrow, .fb").first().waitFor({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(200);
+      if (await typed.isVisible().catch(() => false)) break;
       await playLesson(page, { lang: "it", base: "en", appLang: "en", maxSteps: 1 });
     }
-    await page.locator("input.input.big").fill("grazzie mile");
+    await typed.fill("grazzie mile");
     await page.locator(".answer-area .btn-primary").click();
     await expect(page.locator(".fb")).toBeVisible();
     await expect(page.locator(".fb [lang=it]").first()).toBeVisible();

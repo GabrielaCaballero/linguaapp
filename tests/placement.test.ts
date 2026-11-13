@@ -67,10 +67,10 @@ describe("placement engine", () => {
     expect(band(s.theta)).toBe("A0");
   });
 
-  it("always right ends at B1", () => {
+  it("always right ends at B1 or above (the grid reaches B2; the fixture bank stops at B1)", () => {
     let s = start(priorMean("bit"));
     while (!s.done) s = answer(s, nextItem(itCourse.placement, s)!, true, "es", itCourse.placement.length);
-    expect(band(s.theta)).toBe("B1");
+    expect(["B1", "B2"]).toContain(band(s.theta));
   });
 
   it("rotates skills", () => {
@@ -108,6 +108,7 @@ describe("placement engine", () => {
     expect(band(-0.2)).toBe("A1.2");
     expect(band(0.5)).toBe("A2");
     expect(band(1.2)).toBe("B1");
+    expect(band(2.4)).toBe("B2");
   });
 
   it("fixture: start unit from θ, conservative with SE", () => {

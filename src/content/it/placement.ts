@@ -1,9 +1,9 @@
 import type { PlacementItem } from "../schema";
 import { spreadAnswers } from "../build";
 
-// 30 items · 6 per band (A0, A1.1, A1.2, A2, B1) · per band: 2 vocab, 2 grammar,
+// 36 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2) · per band: 2 vocab, 2 grammar,
 // 1 listening, 1 reading. At least one false friend per band (weighted ×1.5 for es→it).
-// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 (±0.4 within band).
+// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band).
 const bank: PlacementItem[] = [
   // ── A0 ─────────────────────────────────────────────────────
   {
@@ -354,6 +354,76 @@ const bank: PlacementItem[] = [
         { es: "Cerrará por restauración.", en: "It will close for restoration." },
         { es: "La entrada será gratis.", en: "Entry will be free." },
         { es: "Abrirá solo los lunes.", en: "It will open only on Mondays." },
+      ],
+      answer: 0,
+    },
+  },
+  // ── B2 (added with units 19–24) ────────────────────────────
+  {
+    id: "it-p-31", lang: "it", cefr: "B2", b: 2.3, skill: "vocab", kind: "mcq", stem: "Cosa intendi dire?", falseFriend: true,
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "¿Qué quieres decir?", en: "What do you mean?" },
+        { es: "¿Qué entiendes?", en: "What do you understand?" },
+        { es: "¿Qué piensas hacer?", en: "What are you planning to do?" },
+        { es: "¿A quién se lo quieres decir?", en: "Who do you want to tell?" },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-32", lang: "it", cefr: "B2", b: 2.6, skill: "vocab", kind: "mcq", stem: "una somma ingente",
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "una suma enorme", en: "a huge sum" },
+        { es: "una suma ingenua", en: "a naive sum" },
+        { es: "una suma urgente", en: "an urgent sum" },
+        { es: "una suma insuficiente", en: "an insufficient sum" },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-33", lang: "it", cefr: "B2", b: 2.3, skill: "grammar", kind: "cloze", stem: "Se l'avessi saputo, te lo ___ detto.",
+    mcq: {
+      prompt: { es: "Completa la frase.", en: "Complete the sentence." },
+      options: ["avrei", "avessi", "avrò", "ho"],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-34", lang: "it", cefr: "B2", b: 2.6, skill: "grammar", kind: "cloze", stem: "Benché ___ tardi, siamo usciti lo stesso.",
+    mcq: {
+      prompt: { es: "Completa la frase (italiano estándar).", en: "Complete the sentence (standard Italian)." },
+      options: ["fosse", "era", "è", "sarebbe"],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-35", lang: "it", cefr: "B2", b: 2.7, skill: "listening", kind: "listen", spoken: "Mi aveva detto che sarebbe passato a prendermi, ma non si è fatto vivo.",
+    mcq: {
+      prompt: { es: "¿Qué pasó?", en: "What happened?" },
+      options: [
+        { es: "Dijo que pasaría a buscarme, pero no apareció.", en: "He said he'd pick me up, but he never showed up." },
+        { es: "Pasó a buscarme, pero tarde.", en: "He picked me up, but late." },
+        { es: "Me llamó para decir que no venía.", en: "He called to say he wasn't coming." },
+        { es: "Fui yo a buscarlo a él.", en: "I went to pick him up." },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-36", lang: "it", cefr: "B2", b: 2.4, skill: "reading", kind: "mcq",
+    stem: "Visto l'elevato numero di richieste, le iscrizioni chiuderanno con una settimana di anticipo rispetto alla data prevista.",
+    mcq: {
+      prompt: { es: "¿Qué va a pasar con las inscripciones?", en: "What will happen to registration?" },
+      options: [
+        { es: "Cerrarán una semana antes de lo previsto.", en: "It will close a week earlier than planned." },
+        { es: "Se prolongarán una semana más.", en: "It will be extended by a week." },
+        { es: "Abrirán dentro de una semana.", en: "It will open in a week." },
+        { es: "Habrá más plazas la semana que viene.", en: "There will be more places next week." },
       ],
       answer: 0,
     },
