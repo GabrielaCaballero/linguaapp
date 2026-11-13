@@ -21,11 +21,13 @@ function check(lang: TargetLang, name: string, bad: (i: Item) => string | false)
 for (const lang of ["it", "de"] as TargetLang[]) {
   const c = courses[lang];
   describe(`content ${lang}`, () => {
-    it(`${lang}: 6 units, indices 1–6, ids ${lang}-uNN, cefr non-decreasing`, () => {
-      expect(c.units.map((u) => u.index)).toEqual([1, 2, 3, 4, 5, 6]);
-      const order = ["A0", "A1.1", "A1.2", "A2", "B1"];
+    it(`${lang}: units indexed 1…N with no gaps (N ≥ 6), ids ${lang}-uNN, cefr non-decreasing`, () => {
+      expect(c.units.length).toBeGreaterThanOrEqual(6);
+      expect(c.units.map((u) => u.index)).toEqual(c.units.map((_, k) => k + 1));
+      const order = ["A0", "A1.1", "A1.2", "A2", "B1", "B2"];
       c.units.forEach((u, k) => {
-        expect(u.id).toBe(`${lang}-u0${u.index}`);
+        expect(order).toContain(u.cefr);
+        expect(u.id).toBe(`${lang}-u${String(u.index).padStart(2, "0")}`);
         if (k) expect(order.indexOf(u.cefr)).toBeGreaterThanOrEqual(order.indexOf(c.units[k - 1].cefr));
         expect(u.canDo.length).toBeGreaterThanOrEqual(1);
         expect(u.canDo.length).toBeLessThanOrEqual(3);
@@ -110,10 +112,10 @@ for (const lang of ["it", "de"] as TargetLang[]) {
     });
     check(lang, "no owner-specific or banned strings", (i) => (BANNED.test(JSON.stringify(i)) ? "banned string" : false));
 
-    it(`${lang}: placement bank 30 items, 6 per band, 2 vocab/2 grammar/1 listening/1 reading`, () => {
+    it(`${lang}: placement bank 36 items, 6 per band (A0…B2), 2 vocab/2 grammar/1 listening/1 reading`, () => {
       const p = c.placement;
-      expect(p.length).toBe(30);
-      for (const band of ["A0", "A1.1", "A1.2", "A2", "B1"]) {
+      expect(p.length).toBe(36);
+      for (const band of ["A0", "A1.1", "A1.2", "A2", "B1", "B2"]) {
         const b = p.filter((x) => x.cefr === band);
         expect(b.length, band).toBe(6);
         const n = (s: string) => b.filter((x) => x.skill === s).length;
@@ -122,7 +124,7 @@ for (const lang of ["it", "de"] as TargetLang[]) {
       }
     });
     it(`${lang}: placement b within ±0.4 of the band centre; MCQ valid; seeds exist`, () => {
-      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5 };
+      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5 };
       const unitIds = new Set(c.units.flatMap((u) => u.items.map((i) => i.id)));
       for (const x of c.placement) {
         expect(Math.abs(x.b - centre[x.cefr]), x.id).toBeLessThanOrEqual(0.4 + 1e-9);

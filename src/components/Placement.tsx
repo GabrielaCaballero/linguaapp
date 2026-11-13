@@ -6,6 +6,7 @@ import type { Dict } from "@/lib/i18n";
 import { course, gl, units } from "@/lib/content";
 import { answer as answerP, band, beginner, nextItem, seeds, start, startUnit, type PlacementState } from "@/lib/placement";
 import { norm } from "@/lib/check";
+import { courseTop } from "@/lib/goals";
 import { Speaker } from "./lesson/Exercises";
 import { Icon } from "./icons";
 import { feel } from "@/lib/feel";
@@ -19,7 +20,7 @@ export interface PlacementOutcome {
   beyond: boolean;
 }
 
-const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
+const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2"];
 
 /** Outcome from the estimate; `unitOverride` comes from "Start lower/higher" (one unit per tap). */
 export function outcomeFor(lang: TargetLang, s: PlacementState, unitOverride?: number): PlacementOutcome {
@@ -57,7 +58,7 @@ export function PlacementTest({ lang, base, mu, t, canListen, onDone, onClose }:
     onDone(outcomeFor(lang, b, 1));
   };
 
-  const pos = Math.max(0, Math.min(1, (s.theta + 3.5) / 6));
+  const pos = Math.max(0, Math.min(1, (s.theta + 3.5) / 7));
   if (!item) return null;
   return (
     <div className="lesson" style={{ padding: 0, minHeight: "auto", flex: 1 }}>
@@ -69,7 +70,7 @@ export function PlacementTest({ lang, base, mu, t, canListen, onDone, onClose }:
         )}
         <div style={{ flex: 1 }}>
           <div className="meter" aria-hidden="true">
-            {BANDS.map((b, k) => <span key={b} className={k / 5 < pos ? "on" : ""} />)}
+            {BANDS.map((b, k) => <span key={b} className={k / BANDS.length < pos ? "on" : ""} />)}
             <div className="meter-pin" style={{ left: `${pos * 100}%` }} />
           </div>
           <div className="meter-labels" aria-hidden="true">{BANDS.map((b) => <span key={b}>{b}</span>)}</div>
@@ -153,7 +154,7 @@ export function PlacementResult({ lang, base, outcome, t, onChange, onContinue }
         <h1 className="title">{t.resultTitle(outcome.cefr)}</h1>
         <p className="h2" style={{ fontWeight: 500 }}>{t.resultStart(outcome.unit, `${u?.title.target ?? ""} · ${u ? gl(u.title, base) : ""}`)}</p>
         {known > 0 && <p className="muted" style={{ margin: 0 }}>{t.resultKnown(known)}</p>}
-        {outcome.beyond && <p className="card-soft label" style={{ margin: 0 }}>{t.resultBeyond}</p>}
+        {outcome.beyond && <p className="card-soft label" style={{ margin: 0 }}>{t.resultBeyond(courseTop(units(lang).map((x) => x.cefr)))}</p>}
         <div className="row" style={{ justifyContent: "center" }}>
           <button className="btn btn-secondary btn-sm" onClick={() => shiftUnit(-1)} disabled={outcome.unit <= 1}>{t.startLower}</button>
           <button className="btn btn-secondary btn-sm" onClick={() => shiftUnit(1)} disabled={outcome.unit >= max}>{t.startHigher}</button>

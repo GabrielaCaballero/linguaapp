@@ -1,7 +1,7 @@
 // Lingua content contract v2.0 — FROZEN. Change only via docs/team/decisions.md.
 export type TargetLang = "it" | "de";
 export type BaseLang = "es" | "en";
-export type Cefr = "A0" | "A1.1" | "A1.2" | "A2" | "B1";
+export type Cefr = "A0" | "A1.1" | "A1.2" | "A2" | "B1" | "B2"; // B2 added 2026-11-13 (decisions.md)
 export type Register = "formal" | "informal";
 export type Region = "DE" | "AT" | "CH" | "S-DE" | "IT" | "CH-IT";
 /** Text in every base language. Both keys REQUIRED. */
@@ -89,7 +89,7 @@ export interface PlacementItem {
   id: string;                 // `${lang}-p-${NN}`
   lang: TargetLang;
   cefr: Cefr;
-  b: number;                  // Rasch difficulty: A0 -2.5 · A1.1 -1.5 · A1.2 -0.5 · A2 +0.5 · B1 +1.5 (±0.4 within band)
+  b: number;                  // Rasch difficulty: A0 -2.5 · A1.1 -1.5 · A1.2 -0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band)
   skill: "vocab" | "grammar" | "listening" | "reading";
   kind: "mcq" | "listen" | "cloze" | "type";
   stem?: string;              // target-language text shown; cloze uses "___"

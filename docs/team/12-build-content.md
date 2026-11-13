@@ -63,3 +63,23 @@ Checks: `npx vitest run tests/content.test.ts` passes (10/10), and the full suit
 - Import only `courses` from `@/content` (`Record<TargetLang, CoursePack>`). The schema types are also re-exported there (`export type *`).
 - Sound items: `exercises: ["pick-spelling","listen"]`, with distractors as alternative spellings. Pattern, listening and dialogue items use `["question"]`. Bridge items use `["guess","recall"]` (cognate, with distractors) or `["guess","question"]` (false friend, with a Glossed MCQ).
 - Plural-only German nouns and country/language names have `pos: "other"`. They have no `gender`, so skip the article drill for them.
+
+## Content to B2 (2026-11-13, branch `claude/content-to-b2-f81709`)
+
+Units 7–24 per language (map in `01-curriculum.md` §7). Same authoring helper and conventions as units 1–6.
+
+| | Italian | German |
+|---|---|---|
+| A1.2 + A2 (u07–u12) | 153 items | 168 items |
+| B1 (u13–u18) | 146 items | 145 items |
+| B2 (u19–u24) | 144 items | 144 items |
+| **Total units 1–24** | 610 | 620 |
+| Placement | 36 (adds 6 B2 items, incl. false friend *intendere*) | 36 (adds 6 B2 items) |
+
+- Higher levels lean on sentences with `accept` alternatives (both genders, *col/con il*, *per me / secondo me*, KI/KII variants marked "almost"), `errors` for classic mistakes (*ho andato*, *se avrei*, *weil ich bin*, *mit der Bus*, *für drei Jahre*), and single-word tile distractors.
+- Register twins with "(formal)/(informal)" in the gloss (*Ti va / Le va un caffè?*, *Was meinst du / meinen Sie dazu?*).
+- Bridges: es→it (*uscire, restare, albergo, officina, sindaco, ferie, romanzo, essere al verde…*), en→de (*wer, will, Brief, Rezept, eventuell, sensibel, spenden, aktuell, konsequent, Daten, Argument, sympathisch*), es→de (*Rathaus, Mantel, Firma, Rente, Gymnasium, Roman*).
+- Every new item was read against the audit rubric and pinned in `tests/evals/content/audit-hashes.json`; fixes made during review are listed in `audit.ts`.
+- `reviewed` stays unset: it means human native-speaker sign-off, which this is not.
+
+**Please have a native speaker double-check:** Italian passato remoto/trapassato items and B2 idioms (*avere le mani bucate*, *essere al verde*); German Konjunktiv I items (de-u20) and the idioms in de-u24; Spanish regional pairs in new glosses (*bolsa (cartera)*, *agua de la llave (del grifo)*, *celular*).

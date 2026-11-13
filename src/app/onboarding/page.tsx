@@ -12,7 +12,7 @@ import { priorMean } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref, lessonHref } from "@/lib/nav";
 import { isSyncConfigured } from "@/lib/sync/client";
-import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse } from "@/lib/actions";
+import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
 import { parseBackup } from "@/lib/backup";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
@@ -136,7 +136,17 @@ function Flow() {
   const header = step.id !== "welcome" && step.id !== "placement" && (
     <div className="row between" style={{ minHeight: 48, marginLeft: -12 }}>
       {idx > 0 || mode !== "new" ? (
-        <button className="icon-btn" aria-label={t.back} onClick={() => (idx === 0 ? router.replace("/") : back())}>
+        <button
+          className="icon-btn"
+          aria-label={t.back}
+          onClick={() => {
+            if (idx > 0) return back();
+            // Today sends anyone with a pending goal straight back here, so leaving the
+            // goal-only flow must clear it first, or Back would loop forever.
+            if (mode === "goalOnly") skipPendingGoals();
+            router.replace("/");
+          }}
+        >
           <Icon name="back" />
         </button>
       ) : (

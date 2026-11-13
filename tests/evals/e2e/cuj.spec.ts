@@ -195,11 +195,17 @@ test.describe("CUJ-5 mistakes", () => {
     await writeDB(page, db0);
     await page.goto("/");
     await page.locator(".btn-primary").click();
+    // Wait for an *unanswered* typed task: playLesson may itself answer a typed task, which
+    // leaves a read-only input behind (that race made this case flaky, ~50 % on the baseline too).
+    const typed = page.locator("input.input.big:not([readonly])");
     for (let k = 0; k < 40; k++) {
-      if (await page.locator("input.input.big").isVisible().catch(() => false)) break;
+      // let the next task render before deciding, so the helper never sees it first
+      await page.locator(".prompt-eyebrow, .fb").first().waitFor({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(200);
+      if (await typed.isVisible().catch(() => false)) break;
       await playLesson(page, { lang: "it", base: "en", appLang: "en", maxSteps: 1 });
     }
-    await page.locator("input.input.big").fill("grazzie mile");
+    await typed.fill("grazzie mile");
     await page.locator(".answer-area .btn-primary").click();
     await expect(page.locator(".fb")).toBeVisible();
     await expect(page.locator(".fb [lang=it]").first()).toBeVisible();
@@ -236,8 +242,10 @@ test.describe("CUJ-7 change goal", () => {
     await page.locator(".choice-card", { hasText: T.en.levelA2 }).click();
     await page.getByRole("button", { name: T.en.months(3) }).click();
     await expect(page.getByText(T.en.feas.demanding).first()).toBeVisible();
-    // P1-11: levels beyond the shipped content say so
-    await expect(page.getByText(T.en.moreUnitsSoon).first()).toBeVisible();
+    // GO-7 / P1-11: the copy is driven by the shipped units; the course now reaches B2 (the top goal
+    // level), so no level is "beyond the course" and the B2 choice is offered without that caption.
+    await expect(page.locator(".choice-card", { hasText: T.en.levelB2 })).toBeVisible();
+    await expect(page.getByText(T.en.moreUnitsSoon)).toHaveCount(0);
     await expect(page.getByText(T.en.altTitle)).toBeVisible();
     // P1-5: nothing on the goal sheet is covered by another element (judge saw the card overlap the chips)
     const covered = await page.evaluate(() => {
@@ -261,6 +269,20 @@ test.describe("CUJ-7 change goal", () => {
 });
 
 test.describe("CUJ-12 v1 owner upgrade", () => {
+  test("Back on the upgrade goal screen goes home instead of looping (live bug 2026-11-14)", async ({ page }) => {
+    await page.goto("/");
+    const v1 = migrateV1Fixture(Date.now());
+    await page.evaluate((v) => { localStorage.clear(); localStorage.setItem("lingua:v1", JSON.stringify(v)); }, v1);
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toBeVisible();
+    await page.getByRole("button", { name: T.es.back }).click();
+    await page.waitForURL((u) => u.pathname === "/");
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("button", { name: T.es.setGoal })).toHaveCount(0);
+    expect(page.url()).not.toContain("/onboarding");
+  });
+
   test("v1 blob → goal-only onboarding, due dates kept, Ties offered once, no Milestones", async ({ page }) => {
     await page.goto("/");
     const v1 = migrateV1Fixture(Date.now());

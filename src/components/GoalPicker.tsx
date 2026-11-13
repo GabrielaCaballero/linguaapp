@@ -4,23 +4,24 @@ import { useState } from "react";
 import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import type { Goal, GoalKind, GoalLevel } from "@/lib/model";
-import { alternatives, CURRENT_HOURS, HOURS, planForDate, projectedDate, retentionFor } from "@/lib/goals";
+import { alternatives, courseTop, CURRENT_HOURS, HOURS, LEVELS, planForDate, projectedDate, retentionFor } from "@/lib/goals";
+import { units } from "@/lib/content";
 import { addMonths, clock, fmtMonth, toISO, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
 import { Icon } from "./icons";
 import { Ring, Sheet } from "./ui";
 
 /** Goal step: pick a goal type, see the live commitment card (min/day + label + date), save. */
-/** Content currently covers up to this level; goals beyond it are honest about "more units coming". */
-const COURSE_TOP: GoalLevel = "A1";
 
 export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial, t, onSave, cta, otherMinutes = 0 }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void; cta?: string; otherMinutes?: number }) {
   const [now] = useState(() => Date.now());
   const locale = localeOf(appLang);
   const [kind, setKind] = useState<GoalKind>(initial?.kind ?? "steady");
-  const reachable = (["A1.1", "A1", "A2", "B1"] as GoalLevel[]).filter((l) => HOURS[l] > CURRENT_HOURS[current]);
-  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B1" };
-  const [target, setTarget] = useState<GoalLevel>(initial?.target && reachable.includes(initial.target) ? initial.target : reachable.includes(DEFAULT[current]) ? DEFAULT[current] : reachable[0] ?? "B1");
+  // The shipped units decide how far the course goes; goals beyond it are honest about "more units coming" (GO-7).
+  const COURSE_TOP = courseTop(units(lang).map((u) => u.cefr));
+  const reachable = LEVELS.filter((l) => HOURS[l] > CURRENT_HOURS[current]);
+  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "B2" };
+  const [target, setTarget] = useState<GoalLevel>(initial?.target && reachable.includes(initial.target) ? initial.target : reachable.includes(DEFAULT[current]) ? DEFAULT[current] : reachable[0] ?? "B2");
   const [months, setMonths] = useState<number | null>(initial?.by ? null : 6);
   const [date, setDate] = useState<string>(initial?.by ?? toISO(addMonths(new Date(now), 6)));
   // Sane default: a steady 15 min/day, keeping all languages together at ≤ 30 min/day.
@@ -34,7 +35,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const planIn = { base, lang, current, target: effTarget, by, now, daysPerWeek, classHoursPerWeek: classes };
   const plan = planForDate(planIn);
   const alt = plan.label === "demanding" ? alternatives(planIn) : null;
-  const stTarget = reachable[0] ?? "B1";
+  const stTarget = reachable[0] ?? "B2";
   const steadyDate = projectedDate({ base, lang, current, target: target ?? stTarget, minPerDay: steadyMin, now, daysPerWeek, classHoursPerWeek: classes });
 
   const minutes = kind === "maintain" ? 5 : kind === "steady" ? steadyMin : plan.minPerDay;
@@ -43,7 +44,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const beyondCourse = (kind === "level" || kind === "steady") && HOURS[target] > HOURS[COURSE_TOP];
   const label = kind === "maintain" ? "relaxed" : kind === "steady" ? (steadyMin <= 15 ? "relaxed" : steadyMin <= 30 ? "steady" : steadyMin <= 45 ? "ambitious" : "demanding") : plan.label;
   const amber = (kind === "level" || kind === "trip") && plan.label === "demanding";
-  const levelName: Record<GoalLevel, string> = { "A1.1": t.levelA11, A1: t.levelA1, A2: t.levelA2, B1: t.levelB1 };
+  const levelName: Record<GoalLevel, string> = { "A1.1": t.levelA11, A1: t.levelA1, A2: t.levelA2, B1: t.levelB1, B2: t.levelB2 };
 
   const pickMonths = (m: number) => {
     setMonths(m);
@@ -176,7 +177,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
               </button>
             </div>
             {plan.alreadyThere && (kind === "level" || kind === "trip") && <div className="caption">{t.alreadyThere}</div>}
-            {beyondCourse && <div className="caption">{t.beyondCourse}</div>}
+            {beyondCourse && <div className="caption">{t.beyondCourse(COURSE_TOP)}</div>}
           </div>
         </div>
         <p className="caption" style={{ margin: 0 }}>{t.estimate}</p>

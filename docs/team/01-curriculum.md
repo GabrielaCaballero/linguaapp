@@ -175,6 +175,33 @@ interface ContentItem {
 | **Learning scientist** | Validate the 0.65–0.7 hour multiplier for Spanish speakers and the conversion from class hours to app minutes. New items per session and per day (I assume 8–12). Placement scoring: "I don't know", pass thresholds, initial SRS intervals for "probably known" items. |
 | **Engineering** | Whether the data model can be generated from or validated against a schema (JSON + build-time check). TTS quality for it-IT/de-DE on iOS and Android. Which free-answer exercises (dialogue role-play) are worth sending to an LLM. |
 
+## 7. Units 7–24 as built (A1.2 → B2), 2026-11-13
+
+The 10-unit A2 / B1 blocks in §2 are compressed to **6 units per level** (~25 items each, denser grammar per unit) so the course reaches B2 in 24 units per language. Order still follows §2 and the textbook consensus; B2 topics follow the CILS/CELI/PLIDA B2 syllabus and Goethe B2 (Prüfungsziele). Each phase ships only when `npm run eval` meets the bar.
+
+| # | Level | Italian | Grammar focus | German | Grammar focus |
+|---|---|---|---|---|---|
+| 7 | A1.2 | La mia giornata | reflexive verbs, -isc-, telling time | Mein Tag | separable verbs, time, am/um |
+| 8 | A1.2 | Tempo libero | andare/fare/venire/uscire, piacere, modals | Freizeit | können/wollen/müssen, gern, weekdays |
+| 9 | A1.2 | Fare la spesa | articulated prepositions, partitive, quanto | In der Stadt | dative (mit/zu/bei), zum/zur, imperative |
+| 10 | A2 | Il fine settimana | passato prossimo (avere/essere, irregular participles) | Was hast du gemacht? | Perfekt (haben/sein), participles, war/hatte |
+| 11 | A2 | Quando ero piccolo | imperfetto vs passato prossimo, c'era | Gesundheit | weil (verb last), wehtun + dative, sollen/dürfen |
+| 12 | A2 | In viaggio | futuro, lo/la/li/le, ci (place) | Unterwegs | two-way prepositions, comparative, weather |
+| 13 | B1 | Salute e consigli | imperative tu/Lei + pronouns, dovresti | Arbeit und Beruf | Konjunktiv II (politeness, wishes), dass |
+| 14 | B1 | Il lavoro | present conditional, combined pronouns (glielo) | Erinnerungen | Präteritum, Plusquamperfekt, als/wenn |
+| 15 | B1 | Secondo me | congiuntivo presente (penso che, è importante che) | Menschen und Beziehungen | relative clauses, verbs with prepositions (worauf/darauf) |
+| 16 | B1 | Racconti | trapassato prossimo, relatives (cui, il quale), passato remoto (recognition) | Umwelt | passive (werden), zu + infinitive, obwohl/trotzdem |
+| 17 | B1 | Se fossi… | congiuntivo imperfetto, periodo ipotetico (2nd type) | Medien und Meinung | opinions, adjective endings, deshalb/trotzdem |
+| 18 | B1 | Società e ambiente | si impersonale / passivante, passive with essere/venire | Pläne und Träume | Futur I, Konjunktiv II hypotheses (wenn ich … hätte), n-declension |
+| 19 | B2 | Il mondo del lavoro | formal register, gerund and participle clauses, nominalisation | Arbeitswelt | nominal style, passive with modals, zwar … aber, sowohl … als auch |
+| 20 | B2 | Cronaca e notizie | discorso indiretto, concordanza dei tempi | Nachrichten | Konjunktiv I (indirect speech) |
+| 21 | B2 | Se l'avessi saputo | periodo ipotetico (3rd type), condizionale passato, future-in-the-past | Wissenschaft und Technik | participial attributes, passive alternatives (lässt sich, ist zu) |
+| 22 | B2 | Arte e cultura | passato remoto, congiuntivo trapassato, benché/affinché/nonostante | Kultur | Konjunktiv II past (hätte gemacht), als ob |
+| 23 | B2 | Discutere | connectors for argument, pronominal verbs (farcela, cavarsela, andarsene) | Diskutieren | je … desto, modal particles (doch, ja, eben), genitive prepositions |
+| 24 | B2 | Modi di dire | idioms, register, altered nouns (-ino, -one, -accio) | Redewendungen | idioms, register, Funktionsverbgefüge |
+
+Bridges: es→it false friends and transfer tips continue (uscire/salire, restare, albergo, sono andato vs «he ido», ero vs «era»); German has en→de false friends (wer, will, Brief, Rezept…) and es→de ones (Rathaus, Mantel…).
+
 ### Sources
 - Council of Europe, CEFR (2001) and Companion Volume (2020): can-do descriptors.
 - Cambridge English, [Guided learning hours](https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours) and [Guide to CEFR](https://cefr.schools.ac.cy/downloads/GuideToCEFR.pdf): A1 90–100 h, A2 180–200 h, B1 350–400 h, cumulative.
