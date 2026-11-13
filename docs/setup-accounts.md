@@ -33,26 +33,10 @@ codes) and paste two values into **Vercel**. No coding.
 3. Under **Email**: keep it enabled, keep **Confirm email** on.
 4. Leave every other provider off for now (Google is optional, step 11).
 
-## 4. Make the email show a code instead of a link (3 min)
+## 4. Email sending (10 min) — do this before the template
 
-Why: on iPhone a link opens Safari, not the installed app, so people would end up signed in
-in the wrong place. A 6-digit code works everywhere.
-
-1. **Authentication → Emails → Templates** (or *Email Templates*).
-2. Open **Magic Link**. Replace the body with:
-
-   ```
-   <h2>Your Lingua code</h2>
-   <p>Type this code in the app: <strong>{{ .Token }}</strong></p>
-   <p>It expires in 1 hour. If you didn't ask for it, ignore this email.</p>
-   ```
-   Subject: `Your Lingua code`. Save.
-3. (Optional) Do the same for **Invite user**.
-
-## 5. Email sending (10 min) — the one fiddly step
-
-Supabase's built-in email only sends a few emails per hour and is meant for testing. It's
-fine for **you alone** to try it today. Before inviting friends, set up your own sender:
+Supabase only lets you edit the email templates (step 5) **after** custom SMTP is set up, and
+its built-in email only sends a few emails per hour. So set up your own sender first:
 
 **Option A — Gmail (no domain needed)**
 1. Your Google Account → **Security** → turn on **2-Step Verification** (if not already).
@@ -64,6 +48,23 @@ fine for **you alone** to try it today. Before inviting friends, set up your own
 
 **Option B — Resend** (if you own a domain): sign up at resend.com, verify the domain,
 then paste its SMTP host / user / password into the same Supabase screen.
+
+## 5. Make the email show a code instead of a link (3 min)
+
+Why: on iPhone a link opens Safari, not the installed app, so people would end up signed in
+in the wrong place. A 6-digit code works everywhere.
+
+1. **Authentication → Emails → Templates** (needs step 4 done first; otherwise Supabase shows
+   "Set up custom SMTP to edit templates").
+2. Open **Magic link or OTP**. Replace the body with:
+
+   ```
+   <h2>Your Lingua code</h2>
+   <p>Type this code in the app: <strong>{{ .Token }}</strong></p>
+   <p>It expires in 1 hour. If you didn't ask for it, ignore this email.</p>
+   ```
+   Subject: `Your Lingua code`. Save.
+3. (Optional) Do the same for **Invite user**.
 
 ## 6. Tell Supabase where the app lives (1 min)
 
