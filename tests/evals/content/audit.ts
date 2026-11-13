@@ -29,4 +29,7 @@ export const AUDITOR = "QA lead (eval phase), 2026-11-12";
 // were read item by item against the same rubric before re-pinning. Fixed during review: it-u09-uovo
 // distractor «l'ufo» → «l'ovile»; de-u11 dialogue option «a las catorce» → «a las dos»; de-p-32 key
 // shortened so its length doesn't give it away.
+// 2026-11-13 · phase 2: units 13–18 (it + de, B1) read item by item the same way before re-pinning.
+// Fixed during review: it-u15-non-credo-che-venga en gloss no longer assumes "he"; de-u15 pat-wo-da
+// es prompt used a Spanish/German mix → German stem in both prompts.
 export const FAILS: Record<string, Finding> = {};

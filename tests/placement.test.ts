@@ -152,7 +152,7 @@ describe("placement → units with the real content", () => {
     });
     it(`${lang}: every unit is reachable by some θ`, () => {
       const reached = new Set<number>();
-      for (let th = -4; th <= 3; th += 0.05) reached.add(startUnit(us, th, 0.45).index);
+      for (let th = -4; th <= 4; th += 0.05) reached.add(startUnit(us, th, 0.45).index); // grid reaches 4 since B2
       for (const u of us) expect(reached.has(u.index)).toBe(true);
     });
   }
