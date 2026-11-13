@@ -32,9 +32,11 @@ flowchart TD
   W -- Try it first / Get started --> L[App language es/en]
   L --> C[Which languages? it / de]
   C --> E[Per language: explain in, experience, 3 can-dos]
-  E --> X{Experience = never?}
-  X -- yes --> U1[Start at Unit 1]
-  X -- no --> P[Placement: 8–15 adaptive items]
+  E --> X{Experience?}
+  X -- never --> U1[Start at Unit 1]
+  X -- I know my level --> KL[Pick A1 · A2 · B1 · B2] --> KU[Start at the first unit of that level]
+  X -- a bit / classes / lived --> P[Placement: 8–15 adaptive items]
+  KU --> G
   P --> R[Result: band + start unit<br/>Start lower / higher]
   U1 --> G[Goal + live minutes/day card]
   R --> G

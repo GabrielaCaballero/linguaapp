@@ -268,6 +268,58 @@ test.describe("CUJ-7 change goal", () => {
   });
 });
 
+test.describe("CUJ-2b I know my level", () => {
+  test("Ana skips the test, picks B1 in Italian, and starts at the first B1 unit", async ({ page }) => {
+    const t = T.es;
+    await page.goto("/");
+    await page.getByRole("button", { name: T.en.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
+    await page.locator(".choice-card", { hasText: "Español" }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: "Italiano" }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.baseName.es }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.expKnown }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await expect(page.getByText(t.levelTitle(t.langName.it))).toBeVisible();
+    await expect(page.getByText(t.placementStart)).toHaveCount(0);
+    await page.locator(".choice-card", { hasText: t.knowB1 }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await expect(page.getByRole("button", { name: t.setGoal })).toBeVisible();
+    await page.getByRole("button", { name: t.setGoal }).click();
+    await page.getByRole("button", { name: t.startFirst }).click();
+    await page.waitForURL(/\/lesson/);
+    const db = await readDB(page);
+    const course = db.profile.courses.it;
+    expect(course.placement.cefr).toBe("B1");
+    expect(course.placement.items).toBe(0);
+    // B1 units are 13–18 (engine eval checks the exact mapping against the content)
+    expect(course.unit).toBeGreaterThanOrEqual(13);
+    expect(course.unit).toBeLessThanOrEqual(18);
+  });
+
+  test("from the test intro, 'I know my level' replaces the test", async ({ page }) => {
+    const t = T.en;
+    await page.goto("/");
+    await page.getByRole("button", { name: t.getStarted }).click();
+    await page.locator(".choice-card", { hasText: "English" }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: "Deutsch" }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.baseName.en }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.expBit }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    for (let k = 0; k < 3; k++) await page.locator(".seg").nth(k).getByRole("button", { name: t.partly, exact: true }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.expKnown }).click();
+    await expect(page.getByText(t.levelTitle(t.langName.de))).toBeVisible();
+    await page.locator(".choice-card", { hasText: t.knowA2 }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await expect(page.getByRole("button", { name: t.setGoal })).toBeVisible();
+  });
+});
+
 test.describe("CUJ-12 v1 owner upgrade", () => {
   test("Back on the upgrade goal screen goes home instead of looping (live bug 2026-11-14)", async ({ page }) => {
     await page.goto("/");

@@ -3,12 +3,12 @@
 import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import type { BaseLang, TargetLang } from "@/content/schema";
+import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Anchor, Experience, Goal } from "@/lib/model";
 import { getDB, legacy, replaceDB, useDB } from "@/lib/store";
 import { dict } from "@/lib/i18n";
-import { LANG_NAME } from "@/lib/content";
-import { priorMean } from "@/lib/placement";
+import { LANG_NAME, units } from "@/lib/content";
+import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref, lessonHref } from "@/lib/nav";
 import { isSyncConfigured } from "@/lib/sync/client";
@@ -20,9 +20,9 @@ import { Loading, Seal, Toast } from "@/components/ui";
 import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/components/Placement";
 import { GoalPicker } from "@/components/GoalPicker";
 
-type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "cando" | "pIntro" | "placement" | "pResult" | "goal" | "anchor";
+type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "goal" | "anchor";
 interface Step { id: StepId; lang?: TargetLang }
-interface LangDraft { explainIn: BaseLang; exp?: Experience; canDo: (number | null)[]; outcome?: PlacementOutcome; goal?: Goal }
+interface LangDraft { explainIn: BaseLang; exp?: Experience; canDo: (number | null)[]; outcome?: PlacementOutcome; goal?: Goal; /** "I know my level": pick it instead of taking the test. */ known?: boolean }
 
 export default function Onboarding() {
   return (
@@ -79,7 +79,8 @@ function Flow() {
     const d = drafts[l];
     if (mode !== "goalOnly") {
       steps.push({ id: "explain", lang: l }, { id: "exp", lang: l });
-      if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
+      if (d?.known) steps.push({ id: "level", lang: l });
+      else if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
     }
     steps.push({ id: "goal", lang: l });
   }
@@ -242,8 +243,32 @@ function Flow() {
       body = (
         <Question title={t.experienceTitle(t.langName[lang!])} next={go} disabled={!d?.exp} t={t} seal={lang}>
           {opts.map((o) => (
-            <Choice key={o.v} on={d?.exp === o.v} onClick={() => patch(lang!, { exp: o.v, outcome: o.v === "never" ? undefined : d?.outcome })} title={o.title} sub={o.sub} />
+            <Choice key={o.v} on={!d?.known && d?.exp === o.v} onClick={() => patch(lang!, { exp: o.v, known: false, outcome: o.v === "never" ? undefined : d?.known ? undefined : d?.outcome })} title={o.title} sub={o.sub} />
           ))}
+          <Choice on={!!d?.known} onClick={() => patch(lang!, { exp: "classes", known: true, outcome: undefined })} title={t.expKnown} sub={t.expKnownSub} />
+        </Question>
+      );
+      break;
+    }
+    case "level": {
+      const levels: { v: Cefr; title: string; sub: string }[] = [
+        { v: "A1.1", title: "A1", sub: t.knowA1 },
+        { v: "A2", title: "A2", sub: t.knowA2 },
+        { v: "B1", title: "B1", sub: t.knowB1 },
+        { v: "B2", title: "B2", sub: t.knowB2 },
+      ];
+      body = (
+        <Question title={t.levelTitle(t.langName[lang!])} sub={t.levelSub} next={go} disabled={!d?.outcome} t={t} seal={lang}>
+          {levels.map((o) => (
+            <Choice key={o.v} on={d?.outcome?.cefr === o.v} onClick={() => patch(lang!, { outcome: selfReported(units(lang!), o.v) })} title={o.title} sub={o.sub} />
+          ))}
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => patch(lang!, { known: false, outcome: undefined })} // the check's steps take this step's place
+          >
+            {t.takeCheck}
+          </button>
         </Question>
       );
       break;
@@ -291,6 +316,15 @@ function Flow() {
               }}
             >
               {t.imBeginner}
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => {
+                patch(lang!, { known: true, outcome: undefined });
+                setIdx((i) => i - 1); // cando + test steps become the single "pick your level" step
+              }}
+            >
+              {t.expKnown}
             </button>
           </div>
         </>

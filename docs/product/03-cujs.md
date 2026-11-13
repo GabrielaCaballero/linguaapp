@@ -10,6 +10,7 @@ Each CUJ is a journey a real persona must be able to finish. Every one has accep
 |---|---|---|---|---|
 | **1 · First open → first lesson** | P2 Mateo, P4 Priya | App language → Italian → explain in Spanish → "a bit" → placement → goal → first session → results → Today | ✔ First answer (placement item) within 4 min ✔ Placement 8–15 items, with "I don't know" and "I'm a beginner" ✔ Result names a band and a unit, with lower/higher ✔ Goal card updates live ✔ UI fully in the chosen language (ux-static + e2e-ux) | e2e-cuj |
 | **2 · Absolute beginner** | P3 Emma | "Never studied" → no placement → Unit 1 | ✔ No test items ✔ First items are guess-first with teaching | e2e-cuj |
+| **2b · I know my level** | P1 Ana | Experience → "I know my level" → B1 → goal | ✔ No test items ✔ Starts at the first B1 unit ✔ Also reachable from the test intro | e2e-cuj + engine |
 | **3 · Daily return** | P2 | Next day: open → Start → session ends by itself | ✔ One primary button, ≤ 1 card ✔ Yesterday's reviews appear ✔ The ring fills ✔ "Practise more" offered, never auto-started | e2e-cuj |
 | **4 · Second language** | P1 Ana | Switcher → Add Deutsch → explain in English → placement → goal | ✔ Under 3 min ✔ Accent colour switches ✔ Today shows combined minutes and the other-language chip ✔ Italian progress untouched | e2e-cuj |
 | **5 · Mistakes** | P3 | Miss 3 items | ✔ Each requeued in-session ✔ Feedback shows the answer and a note ✔ "I was right" works ✔ Tomorrow shows "3 to fix" | e2e-cuj |

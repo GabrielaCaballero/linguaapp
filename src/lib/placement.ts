@@ -170,6 +170,22 @@ export function seeds(units: Unit[], startIndex: number, bank: PlacementItem[], 
   return [...out];
 }
 
+/** Middle of each band on the θ scale (between the CUTS). */
+const BAND_THETA: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5 };
+
+/**
+ * "I know my level": skip the test. Start at the first unit of the chosen level; every
+ * earlier unit is seeded as "probably known" (confirmed by quick reviews in week 1).
+ */
+export function selfReported(units: Unit[], level: Cefr): { state: PlacementState; cefr: Cefr; unit: number; seedIds: string[]; beyond: boolean } {
+  const sorted = [...units].sort((a, b) => a.index - b.index);
+  const first = sorted.find((u) => cefrRank(u.cefr) >= cefrRank(level)) ?? sorted[sorted.length - 1];
+  const theta = BAND_THETA[level];
+  const state: PlacementState = { mu: theta, responses: [], theta, se: 1, done: true, beginner: false };
+  const seedIds = sorted.filter((u) => u.index < first.index).flatMap((u) => u.items.filter((i) => i.type !== "bridge").map((i) => i.id));
+  return { state, cefr: level, unit: first.index, seedIds, beyond: false };
+}
+
 export function oneStep(c: Cefr, dir: -1 | 1): Cefr {
   return ORDER[Math.max(0, Math.min(ORDER.length - 1, cefrRank(c) + dir))];
 }

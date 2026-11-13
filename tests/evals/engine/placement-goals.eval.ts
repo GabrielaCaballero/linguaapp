@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { courses } from "@/content";
 import type { BaseLang, PlacementItem, TargetLang } from "@/content/schema";
-import { answer, band, beginner, nextItem, p, priorMean, seeds, start, startUnit, MAX_ITEMS, MIN_ITEMS, type PlacementState } from "@/lib/placement";
+import { answer, band, beginner, cefrRank, nextItem, p, priorMean, seeds, selfReported, start, startUnit, MAX_ITEMS, MIN_ITEMS, type PlacementState } from "@/lib/placement";
 import { alternatives, dailyMinutes, feasibility, HOURS, MULT, planForDate, projectedDate, retentionFor } from "@/lib/goals";
 import { emptyDB, type DB } from "@/lib/model";
 import { courseComplete, weeklyCheck } from "@/lib/stats";
@@ -220,3 +220,28 @@ describe("GO-7 / GO-8: course scope and end of content", () => {
     expect(courseComplete(d, "it")).toBe(false);
   });
 });
+
+describe("placement · \"I know my level\" (skip the test)", () => {
+  for (const lang of ["it", "de"] as const) {
+    const us = courses[lang].units;
+    for (const level of ["A1.1", "A2", "B1", "B2"] as const) {
+      it(`${lang} ${level}: starts at the first unit of that level, earlier units seeded, nothing later`, () => {
+        const o = selfReported(us, level);
+        const startU = us.find((u) => u.index === o.unit)!;
+        expect(cefrRank(startU.cefr)).toBeGreaterThanOrEqual(cefrRank(level));
+        for (const u of us.filter((x) => x.index < o.unit)) expect(cefrRank(u.cefr)).toBeLessThan(cefrRank(level));
+        const before = new Set(us.filter((u) => u.index < o.unit).flatMap((u) => u.items.map((i) => i.id)));
+        expect(o.seedIds.every((id) => before.has(id))).toBe(true);
+        expect(o.state.responses).toHaveLength(0);
+        expect(o.cefr).toBe(level);
+      });
+    }
+  }
+  it("levels map to increasing start units", () => {
+    const starts = (["A1.1", "A2", "B1", "B2"] as const).map((l) => selfReported(courses.it.units, l).unit);
+    expect([...starts].sort((a, b) => a - b)).toEqual(starts);
+    expect(new Set(starts).size).toBe(4);
+    expect(starts[0]).toBe(courses.it.units.find((u) => u.cefr === "A1.1")!.index); // unit 1 (A0, first steps) is skipped
+  });
+});
+

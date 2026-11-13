@@ -32,6 +32,7 @@ Priority: **P0** = launch blocker, **P1** = must ship in this release, **P2** = 
 | ON-1 | One question per screen: app language (es/en, from the device language) → languages to learn (it/de, multi-select) → per-language "explain in" + prior experience + 3 can-do ratings | P0 | ✅ |
 | ON-2 | Adaptive placement (Rasch/EAP): 8–15 items, stops at SE < 0.45, "I don't know" on every item, "I'm a beginner" exit; skipped for "never studied" | P0 | ✅ |
 | ON-3 | Result names a CEFR band and a start unit, with "Start lower / higher" (one unit each) | P0 | ✅ |
+| ON-2b | **"I know my level"**: on the experience question (and on the test intro), learners can skip the test and pick A1 · A2 · B1 · B2 (each with a one-line "you can…"). They start at the first unit of that level; earlier units are seeded as probably known. "Not sure? Take the 3-minute check" brings the test back | P1 | ✅ |
 | ON-4 | Goal step with a live commitment card (see 4.4), then the practice-time anchor, then the first session starts | P0 | ✅ |
 | ON-5 | "I have a backup" import on Welcome; "I have an account" sign-in on Welcome when accounts are configured | P1 | ✅ / 🟡 |
 | ON-6 | Welcome shows one line of install help: in iPhone Safari "Share → Add to Home Screen"; inside another app's browser (Instagram, Facebook…) "Open in Safari or Chrome". Hidden once installed | P1 | ✅ (manual check on devices) |
