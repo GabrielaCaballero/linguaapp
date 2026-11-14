@@ -160,6 +160,31 @@ can sign in with Google, and they must use that same Gmail address.
 
 To turn Google off again: delete `NEXT_PUBLIC_AUTH_GOOGLE` in Vercel and redeploy.
 
+## 12. Optional: feedback on writing (≈20 min)
+
+Learners write short texts (an email, a postcard) and an AI tutor (Claude Haiku) gives three
+corrections and one thing done well. **You pay** for it with your own Anthropic key, capped:
+6 texts per person per week, 400 per month for everyone, and a spend limit you set. Expected
+cost for ~20 friends: well under US$1 a month.
+
+1. **Run the database file again** (step 2): it adds the `essays` table. Safe to re-run.
+2. **Anthropic key with a spend limit:** go to **console.anthropic.com** → sign in → **Settings →
+   Limits** → set a **monthly spend limit of US$5** → then **API keys → Create key**, name it
+   `Lingua essays`, and copy it (starts with `sk-ant-`). This key goes **only** into Supabase,
+   never into Vercel or the app.
+3. **Deploy the grading function** from a terminal in the project folder (I can run these with
+   you; the first one opens a browser to log you in to Supabase):
+   ```
+   npx supabase login
+   npx supabase link --project-ref tvjfthpdcehwhsilfzjl
+   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-…your key…
+   npx supabase functions deploy grade-essay
+   ```
+4. Open the app → **Path** → **Writing practice** → pick a task, write, **Get feedback**.
+
+If learners see "Writing feedback isn't set up yet", the key is missing or wrong (step 3).
+To turn it off: Supabase → **Edge Functions → grade-essay → Delete**.
+
 ---
 
 ### Good to know

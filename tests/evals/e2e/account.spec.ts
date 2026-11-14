@@ -18,6 +18,8 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   // user_reviews: one row per answer, keyed like the real primary key.
   const answers = new Map<string, { uid: string; epoch: string; t: number; r: unknown }>();
   const mineOf = (uid: string) => [...answers.values()].filter((a) => a.uid === uid);
+  // essays + the grade-essay Edge Function (the real one calls Claude; this one answers a fixed grade)
+  const essays: { id: string; uid: string; task_id: string; lang: string; text: string; result: unknown; created_at: string }[] = [];
   const authorize: URL[] = [];
   const reads: string[] = [];
   const bodies: string[] = [];
@@ -115,6 +117,31 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
       const lim = Number(url.searchParams.get("limit") ?? 1000);
       return json(route, 200, list.slice(off, off + lim).map((a) => ({ r: a.r })));
     }
+    if (p === "/functions/v1/grade-essay") {
+      const { taskId, text } = JSON.parse(body);
+      const quote = String(text).split(/\s+/).slice(0, 2).join(" ");
+      const result = {
+        overall: 4,
+        scores: { task: 4, grammar: 3, vocabulary: 4, coherence: 4 },
+        corrections: [{ quote, fix: `${quote}!`, why: "Fake grader: a punctuation note." }],
+        wellDone: "Fake grader: a clear invitation.",
+        summary: "Fake grader: good work.",
+        checks: [],
+        model: "fake",
+      };
+      const row = { id: `e${essays.length + 1}`, uid, task_id: taskId, lang: "de", text, result, created_at: new Date().toISOString() };
+      essays.push(row);
+      return json(route, 200, { id: row.id, result });
+    }
+    if (p === "/rest/v1/essays") {
+      if (req.method() === "DELETE") {
+        const id = (url.searchParams.get("id") ?? "").replace(/^eq\./, "");
+        const k = essays.findIndex((e) => e.id === id && e.uid === uid);
+        if (k >= 0) essays.splice(k, 1);
+        return route.fulfill({ status: 204, headers: cors });
+      }
+      return json(route, 200, essays.filter((e) => e.uid === uid).map(({ uid: _u, ...e }) => (void _u, e)).reverse());
+    }
     if (p === "/rest/v1/rpc/forget_other_answers") {
       const { keep_epoch } = JSON.parse(body);
       for (const [k, a] of answers) if (a.uid === uid && a.epoch !== keep_epoch) answers.delete(k);
@@ -138,6 +165,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   return {
     rows,
     answers,
+    essays,
     bodies,
     authorize,
     reads,
@@ -440,3 +468,36 @@ test.describe("e2e-sync · sign in with Google", () => {
     await ctx2.close();
   });
 });
+
+test.describe("e2e-sync · writing practice", () => {
+  test.use({ baseURL: SYNC, locale: "es-ES" });
+
+  test("CUJ-28 write a short text, get feedback, find it in 'Your texts', delete it", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"]);
+    await fake.attach(context);
+    await onboard(page, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "never" }] });
+    await page.goto("/");
+    // guest: the task works, but feedback asks to sign in
+    await page.goto("/write?task=de-w-geburtstag");
+    await expect(page.getByText(t.writeSignIn)).toBeVisible();
+    await signIn(page, "ana@example.com", "settings");
+    await page.getByRole("button", { name: t.continue }).click();
+    await page.goto("/path");
+    await page.getByRole("link", { name: new RegExp(t.writeOpen) }).click();
+    await page.getByRole("link", { name: /cumpleaños/ }).click();
+    const text = "Liebe Lena, am Samstag feiere ich meinen Geburtstag bei mir zu Hause. Die Party beginnt um acht Uhr. Wir essen Pizza und tanzen. Ich hoffe, du hast Zeit! Bitte schreib mir bis Donnerstag. Viele Grüße, Anna";
+    await page.getByRole("textbox", { name: t.writeYourText }).fill(text);
+    await expect(page.getByLabel(t.writeChecks)).toContainText(t.writeCheck.greeting);
+    await page.getByRole("button", { name: t.writeSubmit }).click();
+    await expect(page.getByRole("status")).toContainText(t.writeOverall);
+    await expect(page.getByRole("status")).toContainText("4/5");
+    await expect(page.getByRole("status")).toContainText("a punctuation note");
+    expect(fake.essays).toHaveLength(1);
+    expect(fake.bodies.some((b) => b.includes("sk-ant-"))).toBe(false);
+    await page.goto("/write");
+    await expect(page.getByText(t.writeHistory)).toBeVisible();
+    await page.getByRole("button", { name: t.writeDelete }).click();
+    await expect.poll(() => fake.essays.length).toBe(0);
+  });
+});
+
