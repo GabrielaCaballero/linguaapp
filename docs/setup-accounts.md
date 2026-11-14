@@ -94,7 +94,9 @@ version running on your Mac.
 ## 9. Invite yourself first, then friends (1 min per person)
 
 1. Supabase → **Authentication → Users → Add user → Create new user**.
-2. Their email, tick **Auto Confirm User**, leave the password empty → *Create*.
+2. Their email, a **long random password** (Supabase now requires one; Lingua never uses it,
+   sign-in is always the emailed code), tick **Auto Confirm User** → *Create user*.
+   Don't use *Send invitation*: it emails a link, not a code.
 3. Send them the app link. They tap **I have an account** (or *Settings → Sync across
    devices*), type their email, then the 6-digit code from the email.
 
