@@ -53,6 +53,44 @@ drop policy if exists "add own answers" on public.user_reviews;
 create policy "read own answers" on public.user_reviews for select to authenticated using (user_id = (select auth.uid()));
 create policy "add own answers" on public.user_reviews for insert to authenticated with check (user_id = (select auth.uid()));
 
+-- Short writing tasks graded by the grade-essay Edge Function (docs/team/52). Each learner
+-- sees, adds and deletes only their own. The function writes here as the learner.
+create table if not exists public.essays (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  lang       text not null,
+  task_id    text not null,
+  text       text not null check (char_length(text) <= 4000),
+  result     jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.essays enable row level security;
+
+revoke all on public.essays from anon, authenticated, public;
+grant select, insert, delete on public.essays to authenticated;
+
+drop policy if exists "read own essays" on public.essays;
+drop policy if exists "add own essays" on public.essays;
+drop policy if exists "delete own essays" on public.essays;
+create policy "read own essays" on public.essays for select to authenticated using (user_id = (select auth.uid()));
+create policy "add own essays" on public.essays for insert to authenticated with check (user_id = (select auth.uid()));
+create policy "delete own essays" on public.essays for delete to authenticated using (user_id = (select auth.uid()));
+
+-- How many essays the caller graded in the last 7 days, and how many everyone graded this
+-- month (counts only, no content), so the function can keep the owner's AI bill capped.
+create or replace function public.essay_quota()
+returns json
+language sql
+security definer
+set search_path = ''
+as $$
+  select json_build_object(
+    'week', (select count(*) from public.essays where user_id = auth.uid() and created_at > now() - interval '7 days'),
+    'month', (select count(*) from public.essays where created_at >= date_trunc('month', now()))
+  );
+$$;
+
 -- Optimistic write: succeeds only if nobody else wrote since `expected_rev`.
 -- Returns the new rev, or -1 on conflict (the app then pulls, merges and retries).
 -- SECURITY INVOKER, so the row-level security policies above still apply.
@@ -117,6 +155,8 @@ $$;
 revoke all on function public.push_state(bigint, jsonb, text) from anon, public;
 revoke all on function public.delete_me() from anon, public;
 revoke all on function public.forget_other_answers(text) from anon, public;
+revoke all on function public.essay_quota() from anon, public;
 grant execute on function public.push_state(bigint, jsonb, text) to authenticated;
 grant execute on function public.delete_me() to authenticated;
 grant execute on function public.forget_other_answers(text) to authenticated;
+grant execute on function public.essay_quota() to authenticated;

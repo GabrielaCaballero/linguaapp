@@ -111,7 +111,8 @@ export type Mode =
   | "article"
   | "pick-spelling"
   | "question"
-  | "speed";
+  | "speed"
+  | "table";
 
 export interface ReviewLog {
   t: number;

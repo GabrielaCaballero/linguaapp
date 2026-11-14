@@ -33,26 +33,10 @@ codes) and paste two values into **Vercel**. No coding.
 3. Under **Email**: keep it enabled, keep **Confirm email** on.
 4. Leave every other provider off for now (Google is optional, step 11).
 
-## 4. Make the email show a code instead of a link (3 min)
+## 4. Email sending (10 min) — do this before the template
 
-Why: on iPhone a link opens Safari, not the installed app, so people would end up signed in
-in the wrong place. A 6-digit code works everywhere.
-
-1. **Authentication → Emails → Templates** (or *Email Templates*).
-2. Open **Magic Link**. Replace the body with:
-
-   ```
-   <h2>Your Lingua code</h2>
-   <p>Type this code in the app: <strong>{{ .Token }}</strong></p>
-   <p>It expires in 1 hour. If you didn't ask for it, ignore this email.</p>
-   ```
-   Subject: `Your Lingua code`. Save.
-3. (Optional) Do the same for **Invite user**.
-
-## 5. Email sending (10 min) — the one fiddly step
-
-Supabase's built-in email only sends a few emails per hour and is meant for testing. It's
-fine for **you alone** to try it today. Before inviting friends, set up your own sender:
+Supabase only lets you edit the email templates (step 5) **after** custom SMTP is set up, and
+its built-in email only sends a few emails per hour. So set up your own sender first:
 
 **Option A — Gmail (no domain needed)**
 1. Your Google Account → **Security** → turn on **2-Step Verification** (if not already).
@@ -64,6 +48,23 @@ fine for **you alone** to try it today. Before inviting friends, set up your own
 
 **Option B — Resend** (if you own a domain): sign up at resend.com, verify the domain,
 then paste its SMTP host / user / password into the same Supabase screen.
+
+## 5. Make the email show a code instead of a link (3 min)
+
+Why: on iPhone a link opens Safari, not the installed app, so people would end up signed in
+in the wrong place. A 6-digit code works everywhere.
+
+1. **Authentication → Emails → Templates** (needs step 4 done first; otherwise Supabase shows
+   "Set up custom SMTP to edit templates").
+2. Open **Magic link or OTP**. Replace the body with:
+
+   ```
+   <h2>Your Lingua code</h2>
+   <p>Type this code in the app: <strong>{{ .Token }}</strong></p>
+   <p>It expires in 1 hour. If you didn't ask for it, ignore this email.</p>
+   ```
+   Subject: `Your Lingua code`. Save.
+3. (Optional) Do the same for **Invite user**.
 
 ## 6. Tell Supabase where the app lives (1 min)
 
@@ -93,7 +94,9 @@ version running on your Mac.
 ## 9. Invite yourself first, then friends (1 min per person)
 
 1. Supabase → **Authentication → Users → Add user → Create new user**.
-2. Their email, tick **Auto Confirm User**, leave the password empty → *Create*.
+2. Their email, a **long random password** (Supabase now requires one; Lingua never uses it,
+   sign-in is always the emailed code), tick **Auto Confirm User** → *Create user*.
+   Don't use *Send invitation*: it emails a link, not a code.
 3. Send them the app link. They tap **I have an account** (or *Settings → Sync across
    devices*), type their email, then the 6-digit code from the email.
 
@@ -156,6 +159,31 @@ can sign in with Google, and they must use that same Gmail address.
    inside the installed iPhone app (the email code always works).
 
 To turn Google off again: delete `NEXT_PUBLIC_AUTH_GOOGLE` in Vercel and redeploy.
+
+## 12. Optional: feedback on writing (≈20 min)
+
+Learners write short texts (an email, a postcard) and an AI tutor (Claude Haiku) gives three
+corrections and one thing done well. **You pay** for it with your own Anthropic key, capped:
+6 texts per person per week, 400 per month for everyone, and a spend limit you set. Expected
+cost for ~20 friends: well under US$1 a month.
+
+1. **Run the database file again** (step 2): it adds the `essays` table. Safe to re-run.
+2. **Anthropic key with a spend limit:** go to **console.anthropic.com** → sign in → **Settings →
+   Limits** → set a **monthly spend limit of US$5** → then **API keys → Create key**, name it
+   `Lingua essays`, and copy it (starts with `sk-ant-`). This key goes **only** into Supabase,
+   never into Vercel or the app.
+3. **Deploy the grading function** from a terminal in the project folder (I can run these with
+   you; the first one opens a browser to log you in to Supabase):
+   ```
+   npx supabase login
+   npx supabase link --project-ref tvjfthpdcehwhsilfzjl
+   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-…your key…
+   npx supabase functions deploy grade-essay
+   ```
+4. Open the app → **Path** → **Writing practice** → pick a task, write, **Get feedback**.
+
+If learners see "Writing feedback isn't set up yet", the key is missing or wrong (step 3).
+To turn it off: Supabase → **Edge Functions → grade-essay → Delete**.
 
 ---
 

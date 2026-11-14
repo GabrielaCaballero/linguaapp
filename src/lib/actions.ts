@@ -116,6 +116,8 @@ export interface AnswerInput {
   ms: number;
   /** false for speed rounds: logged, but the schedule is left alone. */
   reschedule: boolean;
+  /** A hint was used: a right answer counts at most as Hard (never punished below that). */
+  hinted?: boolean;
 }
 
 /** Grade one answer: FSRS update + review log + metrics event. Returns the stability change. */
@@ -125,7 +127,8 @@ export function recordAnswer(a: AnswerInput): { before: number; after: number } 
   let after = 0;
   update((db) => {
     const prev = db.cards[a.item.id] ?? newCard(a.item.id, a.item.lang, now);
-    const rating = ratingFor(a.verdict, a.confidence, a.source);
+    const r0 = ratingFor(a.verdict, a.confidence, a.source);
+    const rating = a.hinted && r0 > 2 ? 2 : r0;
     const retention = db.profile.courses[a.item.lang]?.goal?.retention ?? 0.9;
     const gap = prev.last_review ? (now - prev.last_review) / DAY : undefined;
     const next = a.reschedule ? schedule(prev, rating, now, retention) : prev;

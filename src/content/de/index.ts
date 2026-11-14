@@ -25,11 +25,13 @@ import { unit as u23 } from "./u23";
 import { unit as u24 } from "./u24";
 import { placement } from "./placement";
 import { lexicon } from "./lexicon";
+import { grammar } from "./grammar";
 
 export const course: CoursePack = {
   lang: "de",
-  version: "2.3.0",
+  version: "2.4.0",
   units: [u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20, u21, u22, u23, u24],
   placement,
   lexicon,
+  grammar,
 };

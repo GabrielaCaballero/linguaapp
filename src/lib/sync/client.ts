@@ -9,6 +9,9 @@ import { KEYS, localAdapter } from "../storage-adapter";
 import { saveConfig } from "../llm/provider";
 import { createEngine, type Engine } from "./engine";
 import { supabaseRemote } from "./remote";
+import type { Grade, InstantCheck } from "../../../supabase/functions/_shared/writing";
+
+export type EssayResult = Grade & { checks: InstantCheck[]; model: string };
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -89,11 +92,13 @@ export function useAccount(): AccountState & { configured: boolean } {
 }
 
 // ---- sign in ------------------------------------------------------------------------
-export type AuthError = "notInvited" | "badCode" | "tooMany" | "network" | "google" | "googleOtherBrowser";
+export type AuthError = "notInvited" | "badCode" | "tooMany" | "network" | "google" | "googleOtherBrowser" | "emailSend";
 
 function classify(e: { message?: string; status?: number; code?: string } | null): AuthError {
   const m = `${e?.code ?? ""} ${e?.message ?? ""}`.toLowerCase();
   if (/signup|not allowed|user not found|otp_disabled/.test(m)) return "notInvited";
+  // The server is reachable but couldn't send the email (SMTP settings, sender not verified).
+  if (/sending|smtp|email.*(send|deliver)|unexpected_failure/.test(m) || (e?.status ?? 0) >= 500) return "emailSend";
   if (e?.status === 429 || /rate|too many|security purposes/.test(m)) return "tooMany";
   if (/expired|invalid|token/.test(m)) return "badCode";
   return "network";
@@ -103,6 +108,7 @@ function classify(e: { message?: string; status?: number; code?: string } | null
 export async function sendCode(email: string): Promise<AuthError | null> {
   try {
     const { error } = await getClient().auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    if (error) console.warn("sign-in code:", error.status, (error as { code?: string }).code, error.message);
     return error ? classify(error) : null;
   } catch {
     return "network";
@@ -252,4 +258,54 @@ export async function deleteAccount(): Promise<boolean> {
   localAdapter.remove(KEYS.auth);
   setUser(null);
   return true;
+}
+
+// ---- writing tasks graded by the server (docs/team/52) ------------------------------
+export type EssayError = "signin" | "offline" | "quota_user" | "quota_all" | "busy" | "setup" | "model" | "network";
+export interface EssayRow {
+  id: string;
+  task_id: string;
+  lang: string;
+  text: string;
+  result: EssayResult;
+  created_at: string;
+}
+
+/** Send a text to the grade-essay function. Signed-in learners only (the owner pays). */
+export async function gradeEssay(taskId: string, text: string, base: "es" | "en"): Promise<{ id: string | null; result: EssayResult } | { error: EssayError }> {
+  if (!isSyncConfigured() || !getEngine()?.signedInAs()) return { error: "signin" };
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return { error: "offline" };
+  try {
+    const { data, error } = await getClient().functions.invoke("grade-essay", { body: { taskId, text, base } });
+    if (error) {
+      const ctx = (error as { context?: Response }).context;
+      let code = "";
+      try {
+        code = ctx && typeof ctx.json === "function" ? String((await ctx.json())?.error ?? "") : "";
+      } catch {
+        /* not JSON */
+      }
+      if (code === "auth") return { error: "signin" };
+      if (code === "quota_user" || code === "quota_all" || code === "busy" || code === "setup") return { error: code };
+      return { error: ctx ? "model" : "network" };
+    }
+    return data as { id: string | null; result: EssayResult };
+  } catch {
+    return { error: "network" };
+  }
+}
+
+/** The learner's own graded texts, newest first (row-level security: only their rows). */
+export async function myEssays(): Promise<EssayRow[]> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return [];
+  const { data, error } = await getClient().from("essays").select("id, task_id, lang, text, result, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(50);
+  return error || !data ? [] : (data as EssayRow[]);
+}
+
+export async function deleteEssay(id: string): Promise<boolean> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return false;
+  const { error } = await getClient().from("essays").delete().eq("id", id).eq("user_id", uid);
+  return !error;
 }

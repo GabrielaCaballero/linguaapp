@@ -161,7 +161,7 @@ export const unit: Unit = {
         options: ["sul", "sullo", "nel", "sulla"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "prepositions"],
+      exercises: ["question"], grammar: ["it-g-prep-art"], tags: ["grammar", "prepositions"],
     },
     {
       id: "pat-partitivo", type: "pattern", target: "del pane · della frutta · dei pomodori · delle mele",
@@ -257,6 +257,25 @@ export const unit: Unit = {
       },
       note: { es: "aceite = l'olio (olio d'oliva). El ajo es «l'aglio»: ll/j → gli." },
       exercises: ["guess", "question"], tags: ["bridge", "food"],
+    },
+    // ── Tables (content v2.1) ─────────────────────────────────
+    {
+      id: "tab-di-articolo", type: "paradigm", target: "di + articolo", spoken: "di più articolo",
+      gloss: { es: "di + artículo (del, della…)", en: "di + article (del, della…)" },
+      grammar: ["it-g-prep-art"],
+      paradigm: {
+        caption: { es: "Une «di» con cada artículo", en: "Merge di with each article" },
+        cells: [
+          { label: "di + il", answer: "del", ruleId: "it-g-prep-art" },
+          { label: "di + lo", answer: "dello", ruleId: "it-g-prep-art" },
+          { label: "di + la", answer: "della", ruleId: "it-g-prep-art" },
+          { label: "di + l'", answer: "dell'", ruleId: "it-g-prep-art" },
+          { label: "di + i", answer: "dei", ruleId: "it-g-prep-art" },
+          { label: "di + gli", answer: "degli", ruleId: "it-g-prep-art" },
+          { label: "di + le", answer: "delle", ruleId: "it-g-prep-art" },
+        ],
+      },
+      tags: ["grammar", "prepositions", "table"],
     },
   ]),
 };

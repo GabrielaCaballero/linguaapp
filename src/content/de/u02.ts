@@ -162,7 +162,7 @@ export const unit: Unit = {
         options: ["kommt", "kommst", "komme", "kommen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "present"],
+      exercises: ["question"], grammar: ["de-g-praesens"], tags: ["grammar", "present"],
     },
     {
       id: "pat-verb-zwei", type: "pattern", target: "In Berlin wohne ich.",
@@ -255,6 +255,24 @@ export const unit: Unit = {
       },
       note: { en: "'Too / as well' is 'auch': Ich komme auch aus Spanien." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+    // ── Tables (content v2.1) ─────────────────────────────────
+    {
+      id: "tab-kommen", type: "paradigm", target: "kommen — Präsens", spoken: "kommen",
+      gloss: { es: "kommen (venir) — presente", en: "kommen (to come) — present" },
+      grammar: ["de-g-praesens"],
+      paradigm: {
+        caption: { es: "Conjuga «kommen» en presente", en: "Conjugate kommen in the present tense" },
+        cells: [
+          { label: "ich", answer: "komme", ruleId: "de-g-praesens" },
+          { label: "du", answer: "kommst", ruleId: "de-g-praesens" },
+          { label: "er / sie / es", answer: "kommt", ruleId: "de-g-praesens" },
+          { label: "wir", answer: "kommen", ruleId: "de-g-praesens" },
+          { label: "ihr", answer: "kommt", ruleId: "de-g-praesens" },
+          { label: "sie / Sie", answer: "kommen", ruleId: "de-g-praesens" },
+        ],
+      },
+      tags: ["grammar", "present", "table"],
     },
   ]),
 };
