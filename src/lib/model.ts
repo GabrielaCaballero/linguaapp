@@ -76,6 +76,17 @@ export interface Profile {
   seen?: Record<string, number>;
   /** Last time anything in the profile changed (cross-device sync: newest profile wins). */
   updatedAt?: number;
+  /** What the learner wants to be called (greeting, profile). */
+  name?: string;
+  /** Profile picture: an emoji on a colour, or a photo (stored in the account; cached on the phone). */
+  avatar?: Avatar;
+}
+
+export interface Avatar {
+  emoji?: string;
+  color?: string;
+  /** Set when a photo was uploaded; the time lets other devices know to fetch the new one. */
+  photoAt?: number;
 }
 
 /** FSRS card, serialised with epoch-ms dates. */

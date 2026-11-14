@@ -160,6 +160,11 @@ can sign in with Google, and they must use that same Gmail address.
 
 To turn Google off again: delete `NEXT_PUBLIC_AUTH_GOOGLE` in Vercel and redeploy.
 
+## 11b. Profile photos (1 min)
+
+Run `supabase/schema.sql` again (step 2). It creates a private `avatars` storage bucket where
+each person's photo is visible only to them (small JPEGs, 256 KB max). Nothing else to set up.
+
 ## 12. Optional: feedback on writing (≈20 min)
 
 Learners write short texts (an email, a postcard) and an AI tutor (Claude Haiku) gives three
@@ -183,6 +188,8 @@ cost for ~20 friends: well under US$1 a month.
 4. Open the app → **Path** → **Writing practice** → pick a task, write, **Get feedback**.
 
 If learners see "Writing feedback isn't set up yet", the key is missing or wrong (step 3).
+Learners who connected their **own** AI (Settings → AI tutor: Claude, ChatGPT or Gemini) get
+writing feedback from it instead, at no cost to you; this works for guests too.
 To turn it off: Supabase → **Edge Functions → grade-essay → Delete**.
 
 ---

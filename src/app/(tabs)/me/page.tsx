@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar } from "@/components/Avatar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,7 +54,10 @@ export default function MePage() {
   return (
     <main className="screen">
       <header className="row between" style={{ minHeight: 48 }}>
-        <h1 className="title">{t.meTitle}</h1>
+        <Link href="/me/settings" className="row" style={{ gap: 10, minHeight: 44, textDecoration: "none", color: "inherit" }} aria-label={t.editProfile}>
+          <Avatar avatar={db.profile.avatar} name={db.profile.name} size={40} label={t.profilePhoto} />
+          <h1 className="title">{db.profile.name || t.meTitle}</h1>
+        </Link>
         <Link href="/me/settings" className="icon-btn" aria-label={t.settings}>
           <Icon name="settings" />
         </Link>

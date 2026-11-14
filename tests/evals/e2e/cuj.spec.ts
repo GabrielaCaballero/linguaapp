@@ -383,3 +383,63 @@ test.describe("CUJ-12 v1 owner upgrade", () => {
     await expect(page.getByText(T.es.tiesTitle)).toHaveCount(1);
   });
 });
+
+test.describe("CUJ-29 profile", () => {
+  test("name in the greeting, an emoji picture, then a photo (guest: kept on the phone)", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await page.goto("/me/settings");
+    const name = page.getByRole("textbox", { name: t.yourName });
+    await name.fill("Ana");
+    await name.press("Enter");
+    await page.getByRole("button", { name: t.pickEmoji }).click();
+    await page.getByRole("button", { name: "🦊" }).click();
+    expect((await readDB(page)).profile).toMatchObject({ name: "Ana", avatar: { emoji: "🦊" } });
+    // a photo: a tiny PNG made in the page, shrunk to a 256 px JPEG and cached on the phone
+    const png = await page.evaluate(async () => {
+      const c = document.createElement("canvas");
+      c.width = 400;
+      c.height = 300;
+      const g = c.getContext("2d")!;
+      g.fillStyle = "#c4452a";
+      g.fillRect(0, 0, 400, 300);
+      const b: Blob = await new Promise((r) => c.toBlob((x) => r(x!), "image/png"));
+      return Array.from(new Uint8Array(await b.arrayBuffer()));
+    });
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({ name: "me.png", mimeType: "image/png", buffer: Buffer.from(png) });
+    await expect(page.getByRole("img", { name: t.profilePhoto }).first()).toHaveAttribute("src", /^data:image\/jpeg/);
+    expect((await readDB(page)).profile.avatar.photoAt).toBeGreaterThan(0);
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ana");
+    await page.goto("/me");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Ana");
+  });
+});
+
+test.describe("CUJ-30 AI tutor: choose your provider", () => {
+  test("Gemini with a free key: the app finds a cheap model and connects", async ({ page, context }) => {
+    const t = T.en;
+    let keyInUrl = false;
+    await context.route("https://generativelanguage.googleapis.com/**", async (route) => {
+      const url = route.request().url();
+      if (url.includes("AIza")) keyInUrl = true;
+      const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "content-type": "application/json" };
+      if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
+      if (url.includes("/models?")) return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ models: [{ name: "models/gemini-x-pro", supportedGenerationMethods: ["generateContent"] }, { name: "models/gemini-x-flash-lite", supportedGenerationMethods: ["generateContent"] }] }) });
+      return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"ok":"yes"}' }] }, finishReason: "STOP" }] }) });
+    });
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await page.goto("/me/settings/tutor");
+    await page.getByRole("button", { name: "Gemini", exact: true }).click();
+    await expect(page.getByRole("link", { name: new RegExp(t.getKey("Gemini")) })).toHaveAttribute("href", /aistudio\.google\.com/);
+    await page.getByRole("textbox", { name: t.apiKey }).fill("AIza-e2e-test-key");
+    await page.getByRole("button", { name: t.testConn }).click();
+    await expect(page.getByRole("status")).toContainText("gemini-x-flash-lite");
+    expect(keyInUrl).toBe(false);
+    const cfg = await page.evaluate(() => JSON.parse(localStorage.getItem("lingua:llm") ?? "null"));
+    expect(cfg).toMatchObject({ provider: "gemini", model: "gemini-x-flash-lite" });
+    // the key never goes into the progress data or backups
+    expect(JSON.stringify(await readDB(page))).not.toContain("AIza-e2e");
+  });
+});
+

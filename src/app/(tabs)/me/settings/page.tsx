@@ -9,7 +9,8 @@ import { getDB, legacy, replaceDB, resetDB, update, useDB } from "@/lib/store";
 import { LANG_NAME } from "@/lib/content";
 import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
 import { downloadText, exportBackup, parseBackup, type BackupPreview } from "@/lib/backup";
-import { getConfig, subscribeConfig } from "@/lib/llm/provider";
+import { getConfig, subscribeConfig, tutorName } from "@/lib/llm/provider";
+import { ProfileEditor } from "@/components/ProfileEditor";
 import { courseLangs, targetFor } from "@/lib/stats";
 import { accountHref, onboardingHref, placementHref } from "@/lib/nav";
 import { deleteAccount, getEngine, signOut, useAccount, useSyncStatus } from "@/lib/sync/client";
@@ -22,7 +23,7 @@ export default function SettingsPage() {
   const db = useDB();
   const t = useT(db);
   const router = useRouter();
-  const tutor = useSyncExternalStore(subscribeConfig, () => !!getConfig(), () => false);
+  const tutor = useSyncExternalStore(subscribeConfig, () => (getConfig() ? tutorName() : ""), () => "");
   const [toast, setToast] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ db: DB; preview: BackupPreview } | null>(null);
   const [reset, setReset] = useState(false);
@@ -61,6 +62,8 @@ export default function SettingsPage() {
   return (
     <main className="screen">
       <BackHeader title={t.settings} backLabel={t.back} href="/me" />
+
+      <ProfileEditor db={db} t={t} signedIn={signedIn} />
 
       {acct.configured && acct.ready && (
         <>
@@ -171,7 +174,7 @@ export default function SettingsPage() {
           <Icon name="sparkle" size={20} className="accent" />
           <span className="grow">
             {t.sTutor}
-            <div className="cell-sub">{tutor ? t.tutorOn : t.tutorNot}</div>
+            <div className="cell-sub">{tutor ? `${tutor} · ${t.tutorOn}` : t.tutorNot}</div>
           </span>
           <Icon name="chevron" size={18} className="muted" />
         </Link>

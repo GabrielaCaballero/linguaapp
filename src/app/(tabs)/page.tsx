@@ -46,7 +46,8 @@ export default function Today() {
   const practicedToday = mins > 0;
   const days = practiceDaysThisWeek(db, now);
   const hour = new Date(now).getHours();
-  const greet = hour < 12 ? t.greetMorning : hour < 19 ? t.greetAfternoon : t.greetEvening;
+  const greetBase = hour < 12 ? t.greetMorning : hour < 19 ? t.greetAfternoon : t.greetEvening;
+  const greet = db.profile.name ? `${greetBase}, ${db.profile.name}` : greetBase;
   const other = langs.find((l) => l !== lang);
   const locale = localeOf(db.profile.appLang);
   const last = lastSessionAt(db, lang);

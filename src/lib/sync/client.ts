@@ -243,6 +243,12 @@ export async function signOut(opts: { force?: boolean; forgetKey?: boolean } = {
 
 /** Delete the whole account (server data goes with it). This device keeps its progress as a guest. */
 export async function deleteAccount(): Promise<boolean> {
+  // Storage files aren't removed by the database cascade: delete the photo first.
+  try {
+    await removeAvatar();
+  } catch {
+    /* best effort */
+  }
   try {
     const { error } = await getClient().rpc("delete_me");
     if (error) return false;
@@ -303,9 +309,40 @@ export async function myEssays(): Promise<EssayRow[]> {
   return error || !data ? [] : (data as EssayRow[]);
 }
 
+/** Save a text graded on the device (own AI key) to the learner's account, if signed in. */
+export async function saveEssay(task: { id: string; lang: string }, text: string, result: EssayResult): Promise<boolean> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return false;
+  const { error } = await getClient().from("essays").insert({ lang: task.lang, task_id: task.id, text, result });
+  return !error;
+}
+
 export async function deleteEssay(id: string): Promise<boolean> {
   const uid = getEngine()?.signedInAs();
   if (!uid) return false;
   const { error } = await getClient().from("essays").delete().eq("id", id).eq("user_id", uid);
   return !error;
+}
+
+// ---- profile photo (Supabase Storage, private bucket "avatars", one file per learner) ----
+const avatarPath = (uid: string) => `${uid}/avatar.jpg`;
+
+export async function uploadAvatar(blob: Blob): Promise<boolean> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return false;
+  const { error } = await getClient().storage.from("avatars").upload(avatarPath(uid), blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+  return !error;
+}
+
+export async function downloadAvatar(): Promise<Blob | null> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return null;
+  const { data, error } = await getClient().storage.from("avatars").download(avatarPath(uid));
+  return error ? null : data;
+}
+
+export async function removeAvatar(): Promise<void> {
+  const uid = getEngine()?.signedInAs();
+  if (!uid) return;
+  await getClient().storage.from("avatars").remove([avatarPath(uid)]);
 }

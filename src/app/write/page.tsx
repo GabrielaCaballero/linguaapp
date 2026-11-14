@@ -11,6 +11,7 @@ import { BackHeader, Loading, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { deleteEssay, gradeEssay, isSyncConfigured, myEssays, useAccount, type EssayError, type EssayResult, type EssayRow } from "@/lib/sync/client";
 import { instantChecks, taskById, wordCount, WRITING_TASKS, type InstantCheck, type WritingTask } from "../../../supabase/functions/_shared/writing";
+import { gradeWithOwnAi, ownAiName } from "@/lib/writing";
 
 export default function WritePage() {
   return (
@@ -97,6 +98,8 @@ function Task({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<EssayError | null>(null);
   const [result, setResult] = useState<EssayResult | null>(null);
+  // With their own AI key, learners (guests too) get feedback from their own provider.
+  const [ownAi] = useState(() => ownAiName());
   const checks = useMemo(() => (task && text.trim() ? instantChecks(task, text) : []), [task, text]);
   if (!db) return <Loading />;
   if (!task) {
@@ -110,7 +113,7 @@ function Task({ id }: { id: string }) {
   const submit = async () => {
     setBusy(true);
     setErr(null);
-    const r = await gradeEssay(task.id, text, base);
+    const r = ownAi ? await gradeWithOwnAi(task, text, base) : await gradeEssay(task.id, text, base);
     setBusy(false);
     if ("error" in r) setErr(r.error);
     else setResult(r.result);
@@ -150,7 +153,7 @@ function Task({ id }: { id: string }) {
             </div>
             {checks.length > 0 && <Checks checks={checks} task={task} t={t} />}
             {err && <p role="alert" className="label" style={{ color: "var(--miss)", margin: 0 }}>{t.writeErr[err]}</p>}
-            {signedIn ? (
+            {signedIn || ownAi ? (
               <button className="btn btn-primary" disabled={busy || n < 5} onClick={() => void submit()}>
                 {busy ? t.writeGrading : t.writeSubmit}
               </button>
@@ -165,7 +168,7 @@ function Task({ id }: { id: string }) {
             <p className="caption" style={{ margin: 0 }}>{t.writePrivacy}</p>
           </>
         )}
-        {result && <Result result={result} text={text} task={task} t={t} onAgain={() => { setResult(null); setText(""); }} />}
+        {result && <Result result={result} text={text} task={task} t={t} ownAi={ownAi} onAgain={() => { setResult(null); setText(""); }} />}
       </div>
     </main>
   );
@@ -195,7 +198,7 @@ function Checks({ checks, task, t }: { checks: InstantCheck[]; task: WritingTask
   );
 }
 
-function Result({ result, text, task, t, onAgain }: { result: EssayResult; text: string; task: WritingTask; t: ReturnType<typeof useT>; onAgain: () => void }) {
+function Result({ result, text, task, t, ownAi, onAgain }: { result: EssayResult; text: string; task: WritingTask; t: ReturnType<typeof useT>; ownAi: string | null; onAgain: () => void }) {
   return (
     <div className="stack" style={{ gap: 12 }} role="status">
       <div className="card row between">
@@ -234,7 +237,7 @@ function Result({ result, text, task, t, onAgain }: { result: EssayResult; text:
         <p lang={task.lang} style={{ whiteSpace: "pre-wrap" }}>{text}</p>
       </details>
       <p className="caption" style={{ margin: 0 }}>
-        <Icon name="sparkle" size={14} /> {t.writeByAi}
+        <Icon name="sparkle" size={14} /> {ownAi ? `${t.writeOwnAi(ownAi)} ` : ""}{t.writeByAi}
       </p>
       <button className="btn btn-primary" onClick={onAgain}>{t.writeAgain}</button>
       <Link className="btn btn-ghost" href="/write">{t.writeOther}</Link>

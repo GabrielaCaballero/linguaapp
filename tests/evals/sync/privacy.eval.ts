@@ -84,7 +84,7 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     expect(policies.some((p) => p.includes("for insert"))).toBe(true);
     expect(policies.some((p) => p.includes("for update"))).toBe(true);
     // Progress rows are never deleted by learners; only their own essays can be (docs/team/52).
-    expect(policies.filter((p) => p.includes("for delete")).every((p) => p.includes("public.essays"))).toBe(true);
+    expect(policies.filter((p) => p.includes("for delete")).every((p) => p.includes("public.essays") || p.includes("storage.objects"))).toBe(true);
   });
   it("every policy is scoped to auth.uid() and to authenticated users", () => {
     for (const p of policies) {
@@ -116,7 +116,7 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
   });
   it("pages send a CSP that limits where data can be sent", () => {
     const cfg = read("next.config.ts");
-    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com/);
+    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com https:\/\/api\.openai\.com https:\/\/generativelanguage\.googleapis\.com`/);
     expect(cfg).toMatch(/frame-ancestors 'none'/);
   });
   it("answers table: row-level security, read/insert own only, never update or delete", () => {
@@ -137,6 +137,12 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     const own = policies.filter((p) => p.includes("public.essays"));
     expect(own.map((p) => (p.match(/for (\w+)/) ?? [])[1]).sort()).toEqual(["delete", "insert", "select"]);
     expect(sql).toMatch(/revoke all on function public\.essay_quota\(\) from anon/);
+  });
+  it("profile photos: private bucket, JPEG only, small, each learner only in their own folder", () => {
+    expect(sql).toMatch(/values \('avatars', 'avatars', false, 262144, array\['image\/jpeg'\]\)/);
+    const own = policies.filter((p) => p.includes("storage.objects"));
+    expect(own).toHaveLength(4);
+    for (const p of own) expect(p).toMatch(/bucket_id = 'avatars' and \(storage\.foldername\(name\)\)\[1\] = \(select auth\.uid\(\)\)::text/);
   });
   it("the AI grader's key lives only in the Edge Function's secrets, never in the app", () => {
     const fn = read("supabase/functions/grade-essay/index.ts");

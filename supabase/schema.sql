@@ -91,6 +91,21 @@ as $$
   );
 $$;
 
+-- Profile photos: a private bucket, one small JPEG per learner at "<user id>/avatar.jpg".
+-- Each learner can read and change only their own folder.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('avatars', 'avatars', false, 262144, array['image/jpeg'])
+on conflict (id) do update set public = false, file_size_limit = 262144, allowed_mime_types = array['image/jpeg'];
+
+drop policy if exists "read own avatar" on storage.objects;
+drop policy if exists "add own avatar" on storage.objects;
+drop policy if exists "change own avatar" on storage.objects;
+drop policy if exists "delete own avatar" on storage.objects;
+create policy "read own avatar" on storage.objects for select to authenticated using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+create policy "add own avatar" on storage.objects for insert to authenticated with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+create policy "change own avatar" on storage.objects for update to authenticated using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text) with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+create policy "delete own avatar" on storage.objects for delete to authenticated using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
 -- Optimistic write: succeeds only if nobody else wrote since `expected_rev`.
 -- Returns the new rev, or -1 on conflict (the app then pulls, merges and retries).
 -- SECURITY INVOKER, so the row-level security policies above still apply.
