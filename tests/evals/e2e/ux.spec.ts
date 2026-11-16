@@ -140,14 +140,14 @@ test("CUJ-11 backup: export → reset → import gives the same state; a bad fil
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: /Export/ }).click()]);
   const file = await dl.path();
   // bad file first: nothing changes
-  const input = page.locator("input[type=file]").first();
+  const input = page.locator("input[type=file][accept^=\"application/json\"]");
   await input.setInputFiles({ name: "bad.json", mimeType: "application/json", buffer: Buffer.from("{nope") });
   await page.waitForTimeout(500);
   expect((await readDB(page)).cards).toEqual(before.cards);
   // reset then import
   await page.evaluate(() => localStorage.removeItem("lingua:v2"));
   await page.goto("/me/settings");
-  await page.locator("input[type=file]").first().setInputFiles(file!);
+  await page.locator("input[type=file][accept^=\"application/json\"]").setInputFiles(file!);
   const confirm = page.getByRole("button", { name: /Import|Restore|Replace|Importar|Restaurar/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click();
   await page.waitForTimeout(500);

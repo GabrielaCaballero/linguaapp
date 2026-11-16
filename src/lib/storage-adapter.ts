@@ -41,4 +41,4 @@ export function memoryAdapter(init: Record<string, string> = {}): StorageAdapter
   };
 }
 
-export const KEYS = { v2: "lingua:v2", v1: "lingua:v1", v1Backup: "lingua:v1-backup", llm: "lingua:llm", llmCache: "lingua:llm-cache", sync: "lingua:sync", auth: "lingua:auth", preLogin: "lingua:pre-login-backup" } as const;
+export const KEYS = { v2: "lingua:v2", v1: "lingua:v1", v1Backup: "lingua:v1-backup", llm: "lingua:llm", llmCache: "lingua:llm-cache", sync: "lingua:sync", auth: "lingua:auth", preLogin: "lingua:pre-login-backup", avatar: "lingua:avatar" } as const;

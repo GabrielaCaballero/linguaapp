@@ -268,6 +268,33 @@ test.describe("CUJ-7 change goal", () => {
   });
 });
 
+test.describe("CUJ-27 tables and grammar", () => {
+  test("a due conjugation table: type every form, see which cell was wrong and why, open the rule", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "de", explainIn: "en", exp: "never" }] });
+    await page.goto("/");
+    const db = await readDB(page);
+    const now = Date.now();
+    // kommen table, learnt a while ago and due now (stability ≥ 1 → full table, no stems)
+    db.cards["de-u02-tab-kommen"] = { id: "de-u02-tab-kommen", lang: "de", due: now - 3600_000, stability: 4, difficulty: 5, elapsed_days: 4, scheduled_days: 4, learning_steps: 0, reps: 2, lapses: 0, state: 2, last_review: now - 4 * 86400_000, introducedAt: now - 8 * 86400_000 };
+    await writeDB(page, db);
+    await page.goto("/lesson?kind=review");
+    await expect(page.getByText(t.fillTable)).toBeVisible();
+    const forms = { ich: "komme", du: "kommt", "er / sie / es": "kommt", wir: "kommen", ihr: "kommt", "sie / Sie": "kommen" };
+    for (const [label, v] of Object.entries(forms)) await page.getByRole("textbox", { name: label, exact: true }).fill(v);
+    await page.getByRole("button", { name: t.check, exact: true }).click();
+    const fb = page.locator(".fb");
+    await expect(fb).toBeVisible();
+    await expect(fb).toContainText("kommst");
+    await expect(fb).toContainText(t.otherCell("er / sie / es"));
+    await fb.getByRole("button", { name: new RegExp(t.seeRule) }).click();
+    await expect(page.getByRole("dialog", { name: t.ruleTitle })).toContainText("du kommst");
+    const after = await readDB(page);
+    expect(after.reviews.at(-1).mode).toBe("table");
+    expect(after.reviews.at(-1).verdict).toBe("almost"); // 5 of 6 right
+  });
+});
+
 test.describe("CUJ-2b I know my level", () => {
   test("Ana skips the test, picks B1 in Italian, and starts at the first B1 unit", async ({ page }) => {
     const t = T.es;
@@ -356,3 +383,63 @@ test.describe("CUJ-12 v1 owner upgrade", () => {
     await expect(page.getByText(T.es.tiesTitle)).toHaveCount(1);
   });
 });
+
+test.describe("CUJ-29 profile", () => {
+  test("name in the greeting, an emoji picture, then a photo (guest: kept on the phone)", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await page.goto("/me/settings");
+    const name = page.getByRole("textbox", { name: t.yourName });
+    await name.fill("Ana");
+    await name.press("Enter");
+    await page.getByRole("button", { name: t.pickEmoji }).click();
+    await page.getByRole("button", { name: "🦊" }).click();
+    expect((await readDB(page)).profile).toMatchObject({ name: "Ana", avatar: { emoji: "🦊" } });
+    // a photo: a tiny PNG made in the page, shrunk to a 256 px JPEG and cached on the phone
+    const png = await page.evaluate(async () => {
+      const c = document.createElement("canvas");
+      c.width = 400;
+      c.height = 300;
+      const g = c.getContext("2d")!;
+      g.fillStyle = "#c4452a";
+      g.fillRect(0, 0, 400, 300);
+      const b: Blob = await new Promise((r) => c.toBlob((x) => r(x!), "image/png"));
+      return Array.from(new Uint8Array(await b.arrayBuffer()));
+    });
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({ name: "me.png", mimeType: "image/png", buffer: Buffer.from(png) });
+    await expect(page.getByRole("img", { name: t.profilePhoto }).first()).toHaveAttribute("src", /^data:image\/jpeg/);
+    expect((await readDB(page)).profile.avatar.photoAt).toBeGreaterThan(0);
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ana");
+    await page.goto("/me");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Ana");
+  });
+});
+
+test.describe("CUJ-30 AI tutor: choose your provider", () => {
+  test("Gemini with a free key: the app finds a cheap model and connects", async ({ page, context }) => {
+    const t = T.en;
+    let keyInUrl = false;
+    await context.route("https://generativelanguage.googleapis.com/**", async (route) => {
+      const url = route.request().url();
+      if (url.includes("AIza")) keyInUrl = true;
+      const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "content-type": "application/json" };
+      if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
+      if (url.includes("/models?")) return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ models: [{ name: "models/gemini-x-pro", supportedGenerationMethods: ["generateContent"] }, { name: "models/gemini-x-flash-lite", supportedGenerationMethods: ["generateContent"] }] }) });
+      return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"ok":"yes"}' }] }, finishReason: "STOP" }] }) });
+    });
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await page.goto("/me/settings/tutor");
+    await page.getByRole("button", { name: "Gemini", exact: true }).click();
+    await expect(page.getByRole("link", { name: new RegExp(t.getKey("Gemini")) })).toHaveAttribute("href", /aistudio\.google\.com/);
+    await page.getByRole("textbox", { name: t.apiKey }).fill("AIza-e2e-test-key");
+    await page.getByRole("button", { name: t.testConn }).click();
+    await expect(page.getByRole("status")).toContainText("gemini-x-flash-lite");
+    expect(keyInUrl).toBe(false);
+    const cfg = await page.evaluate(() => JSON.parse(localStorage.getItem("lingua:llm") ?? "null"));
+    expect(cfg).toMatchObject({ provider: "gemini", model: "gemini-x-flash-lite" });
+    // the key never goes into the progress data or backups
+    expect(JSON.stringify(await readDB(page))).not.toContain("AIza-e2e");
+  });
+});
+

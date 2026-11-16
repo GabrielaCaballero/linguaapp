@@ -295,5 +295,46 @@ export const unit: Unit = {
       note: { es: "Una carta (para enviar) es «der Brief»; la cuenta es «die Rechnung»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "cafe"],
     },
+    // ── Tables (content v2.1) ─────────────────────────────────
+    {
+      id: "tab-mein-akk", type: "paradigm", target: "mein — Akkusativ", spoken: "mein",
+      gloss: { es: "mein (mi) — acusativo", en: "mein (my) — accusative" },
+      grammar: ["de-g-possessiv"],
+      paradigm: {
+        caption: { es: "«mein» como objeto directo (acusativo)", en: "mein as a direct object (accusative)" },
+        cells: [
+          { label: "m · Bruder", answer: "meinen", ruleId: "de-g-possessiv" },
+          { label: "f · Schwester", answer: "meine", ruleId: "de-g-possessiv" },
+          { label: "n · Kind", answer: "mein", ruleId: "de-g-possessiv" },
+          { label: "Plural · Brüder", answer: "meine", ruleId: "de-g-possessiv" },
+        ],
+      },
+      tags: ["grammar", "possessive", "accusative", "table"],
+    },
+    {
+      id: "ich-besuche-meine-brueder", type: "sentence", target: "Ich besuche meine Brüder.",
+      gloss: { es: "Visito a mis hermanos.", en: "I'm visiting my brothers." },
+      grammar: ["de-g-possessiv"],
+      annot: {
+        meine: { es: "posesivo, acusativo plural", en: "possessive, accusative plural" },
+        Brüder: { es: "plural, objeto directo de «besuchen» (acusativo)", en: "plural, direct object of besuchen (accusative)" },
+      },
+      errors: [
+        {
+          text: "Ich besuche meinen Brüder.",
+          feedback: {
+            es: "Brüder es plural y objeto directo → meine. «meinen» es acusativo masculino singular (meinen Bruder) o dativo plural (meinen Brüdern).",
+            en: "Brüder is plural and the direct object → meine. 'meinen' is accusative masculine singular (meinen Bruder) or dative plural (meinen Brüdern).",
+          },
+          ruleId: "de-g-possessiv",
+        },
+        {
+          text: "Ich besuche mein Brüder.",
+          feedback: { es: "En plural el posesivo termina en -e: meine Brüder.", en: "In the plural the possessive ends in -e: meine Brüder." },
+          ruleId: "de-g-possessiv",
+        },
+      ],
+      tags: ["family", "possessive", "accusative"],
+    },
   ]),
 };

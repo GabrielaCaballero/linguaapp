@@ -9,8 +9,19 @@ import { gl, per } from "@/lib/content";
 import { speak } from "@/lib/speech";
 import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
+import { TableExercise } from "./Table";
 
-export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number }) => void;
+export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[] }) => void;
+
+/** One cell of a table exercise after checking. */
+export interface CellResult {
+  label: string;
+  expected: string;
+  text: string;
+  verdict: Verdict;
+  /** The learner typed another cell's form (e.g. "kommt" in the du row). */
+  otherCell?: string;
+}
 
 export interface ExProps {
   item: Item;
@@ -144,8 +155,10 @@ function Choices({ options, answer, lang, locked, picked, setPicked, speed, onSp
   );
 }
 
-export function Exercise(p: ExProps) {
+export function Exercise(p: ExProps & { stage?: "endings" | "full" }) {
   switch (p.mode) {
+    case "table":
+      return <TableExercise {...p} stage={p.stage ?? "full"} />;
     case "recall":
       return <Recall {...p} />;
     case "tiles":
@@ -277,9 +290,21 @@ export function QuestionStem({ item, base, t, canListen }: { item: Item; base: B
   return <TargetWord item={item} canListen={canListen} t={t} size="title" />;
 }
 
+/** First letter of each word, the rest hidden: "d… B…" for "der Bruder". */
+export function hintFor(target: string): string {
+  return target
+    .split(/\s+/)
+    .map((w) => (w.length <= 1 ? w : `${w[0]}${"·".repeat(Math.min(6, w.length - 1))}`))
+    .join(" ");
+}
+
 function Recall(p: ExProps) {
   const { item, base, t, locked, lex } = p;
   const [text, setText] = useState("");
+  const [hinted, setHinted] = useState(false);
+  // "I don't know": show the answer and ask the learner to type it once (typing helps memory).
+  const [shown, setShown] = useState(false);
+  const [copyMiss, setCopyMiss] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const id = setTimeout(() => ref.current?.focus(), 200);
@@ -288,7 +313,12 @@ function Recall(p: ExProps) {
   const submit = () => {
     if (!text.trim() || locked) return;
     const r = check(text, item, { lexicon: lex, base });
-    p.onSubmit({ verdict: r.verdict, check: r, text });
+    if (shown) {
+      if (r.verdict === "wrong") return setCopyMiss(true);
+      p.onSubmit({ verdict: "wrong", check: r, text, dontKnow: true });
+      return;
+    }
+    p.onSubmit({ verdict: r.verdict, check: r, text, hinted });
   };
   const insert = (ch: string) => {
     const el = ref.current;
@@ -307,16 +337,30 @@ function Recall(p: ExProps) {
       <Prompt eyebrow={`${t.translate} ${t.langName[item.lang]}`}>
         <div className="title">{gl(item.gloss, base)}</div>
         {item.register && <span className="pill" style={{ alignSelf: "flex-start" }}>{item.register}</span>}
-        {item.pos === "noun" && item.lang === "de" && <span className="caption">der / die / das + …</span>}
+        {item.pos === "noun" && item.lang === "de" && !shown && <span className="caption">der / die / das + …</span>}
+        {hinted && !shown && (
+          <span className="caption tabular" lang={item.lang} aria-label={t.hint}>
+            {hintFor(item.target)}
+          </span>
+        )}
+        {shown && (
+          <div className="card-soft stack" style={{ gap: 4 }}>
+            <span className="label" lang={item.lang} style={{ fontWeight: 600 }}>{item.target}</span>
+            <span className="caption">{copyMiss ? t.typeItAgain : t.typeItOnce}</span>
+          </div>
+        )}
       </Prompt>
       <div className="answer-area">
         <input
           ref={ref}
           className="input big"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            setCopyMiss(false);
+          }}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder={t.typeAnswer}
+          placeholder={shown ? t.typeItOnce : t.typeAnswer}
           lang={item.lang}
           autoCapitalize="off"
           autoCorrect="off"
@@ -335,7 +379,17 @@ function Recall(p: ExProps) {
             ))}
           </div>
         )}
-        <CheckBar t={t} disabled={!text.trim()} onCheck={submit} conf={p.conf} setConf={p.setConf} showConf={p.showConf} locked={locked} />
+        {!locked && !shown && (
+          <div className="row" style={{ gap: 8, justifyContent: "center" }}>
+            <button type="button" className="btn btn-ghost btn-sm" disabled={hinted} onClick={() => setHinted(true)}>
+              {t.hint}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setShown(true); setText(""); requestAnimationFrame(() => ref.current?.focus()); }}>
+              {t.dontKnow}
+            </button>
+          </div>
+        )}
+        <CheckBar t={t} disabled={!text.trim()} onCheck={submit} conf={p.conf} setConf={p.setConf} showConf={p.showConf && !shown} locked={locked} />
       </div>
     </>
   );

@@ -83,7 +83,8 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     expect(policies.some((p) => p.includes("for select"))).toBe(true);
     expect(policies.some((p) => p.includes("for insert"))).toBe(true);
     expect(policies.some((p) => p.includes("for update"))).toBe(true);
-    expect(policies.some((p) => p.includes("for delete"))).toBe(false);
+    // Progress rows are never deleted by learners; only their own essays can be (docs/team/52).
+    expect(policies.filter((p) => p.includes("for delete")).every((p) => p.includes("public.essays") || p.includes("storage.objects"))).toBe(true);
   });
   it("every policy is scoped to auth.uid() and to authenticated users", () => {
     for (const p of policies) {
@@ -115,7 +116,7 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
   });
   it("pages send a CSP that limits where data can be sent", () => {
     const cfg = read("next.config.ts");
-    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com/);
+    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com https:\/\/api\.openai\.com https:\/\/generativelanguage\.googleapis\.com`/);
     expect(cfg).toMatch(/frame-ancestors 'none'/);
   });
   it("answers table: row-level security, read/insert own only, never update or delete", () => {
@@ -129,6 +130,27 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
   it("forget_other_answers can't be called anonymously and only touches the caller", () => {
     expect(sql).toMatch(/revoke all on function public\.forget_other_answers\(text\) from anon/);
     expect(sql).toMatch(/delete from public\.user_reviews where user_id = auth\.uid\(\) and epoch <> keep_epoch/);
+  });
+  it("essays: RLS on, learners read/add/delete only their own, anon has nothing", () => {
+    expect(sql).toContain("alter table public.essays enable row level security");
+    expect(sql).toMatch(/revoke all on public\.essays from anon, authenticated, public/);
+    const own = policies.filter((p) => p.includes("public.essays"));
+    expect(own.map((p) => (p.match(/for (\w+)/) ?? [])[1]).sort()).toEqual(["delete", "insert", "select"]);
+    expect(sql).toMatch(/revoke all on function public\.essay_quota\(\) from anon/);
+  });
+  it("profile photos: private bucket, JPEG only, small, each learner only in their own folder", () => {
+    expect(sql).toMatch(/values \('avatars', 'avatars', false, 262144, array\['image\/jpeg'\]\)/);
+    const own = policies.filter((p) => p.includes("storage.objects"));
+    expect(own).toHaveLength(4);
+    for (const p of own) expect(p).toMatch(/bucket_id = 'avatars' and \(storage\.foldername\(name\)\)\[1\] = \(select auth\.uid\(\)\)::text/);
+  });
+  it("the AI grader's key lives only in the Edge Function's secrets, never in the app", () => {
+    const fn = read("supabase/functions/grade-essay/index.ts");
+    expect(fn).toMatch(/Deno\.env\.get\("ANTHROPIC_API_KEY"\)/);
+    expect(fn).not.toMatch(/sk-ant-/);
+    expect(fn).toMatch(/const MODEL = "claude-haiku-5-5"/);
+    expect(fn).toMatch(/\/auth\/v1\/user/); // every call is a signed-in learner
+    for (const f of walk("src").filter((x) => /\.(ts|tsx)$/.test(x))) expect(read(f), f).not.toMatch(/ANTHROPIC_API_KEY/);
   });
   it("rows are deleted with the user (on delete cascade) and size-capped", () => {
     expect(sql).toContain("on delete cascade");

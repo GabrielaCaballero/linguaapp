@@ -38,6 +38,8 @@ export interface CheckResult {
   detail?: { got: string; want: string };
   /** Secondary note on a correct answer (capital letter, ss, typing tip). */
   note?: Reason;
+  /** Grammar point that explains this mistake (from a known error's ruleId). */
+  ruleId?: string;
 }
 
 export interface CheckOptions {
@@ -256,7 +258,7 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
     }
   }
   // 2. known errors
-  for (const e of item.errors ?? []) if (norm(e.text) === a) return { verdict: "wrong", reason: "known-error", score: 0, feedback: fb(e.feedback) };
+  for (const e of item.errors ?? []) if (norm(e.text) === a) return { verdict: "wrong", reason: "known-error", score: 0, feedback: fb(e.feedback), ruleId: e.ruleId };
   // 3. accepted-but-almost alternatives
   for (const x of item.accept ?? []) if (x.verdict === "almost" && norm(x.text) === a) return { verdict: "almost", reason: "accept", score: SCORE.accept!, feedback: fb(x.feedback) };
 

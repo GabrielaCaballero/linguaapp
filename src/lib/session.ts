@@ -206,6 +206,8 @@ export function defaultModes(item: Item): Mode[] {
       return ["question"];
     case "bridge":
       return ["recognize"];
+    case "paradigm":
+      return [];
   }
 }
 
@@ -215,10 +217,25 @@ export interface ModeCtx {
   role: Role;
 }
 
-/** Mode ladder: recognize → tiles/article/listen → recall. Promote on stability ≥ 3 days. */
+/**
+ * Typing-first experiment (docs/team/51 §2): most items move to typed recall after the first
+ * night; a stable 20% of items keep the old ladder so retention can be compared on-device.
+ */
+export function typingArm(itemId: string): "typing" | "classic" {
+  let h = 0;
+  for (let k = 0; k < itemId.length; k++) h = (h * 31 + itemId.charCodeAt(k)) >>> 0;
+  return h % 5 === 0 ? "classic" : "typing";
+}
+
+/**
+ * Mode ladder: recognize → tiles/article/listen → recall.
+ * Typing arm: the same-session follow-up is already a step up, and typing starts once the
+ * card has survived a night (stability ≥ 1 day). Classic arm: promote on stability ≥ 3 days.
+ */
 export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): Mode {
   if (ctx.role === "intro") return "guess";
   if (ctx.role === "speed") return "speed";
+  if (item.type === "paradigm") return "table";
   let allowed: Mode[] = (item.exercises as Mode[] | undefined)?.filter((m) => m !== "guess" && (m as string) !== "speak") ?? defaultModes(item);
   if (!allowed.length) allowed = defaultModes(item);
   if (!ctx.canListen) allowed = allowed.filter((m) => m !== "listen" && m !== "pick-spelling");
@@ -229,8 +246,9 @@ export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): 
   if (!allowed.length) allowed = ["recognize"];
 
   const s = card?.stability ?? 0;
-  let level = card && card.state !== 0 ? (s >= 3 ? 2 : s >= 1 ? 1 : 0) : 0;
-  if (ctx.role === "followup") level = 0;
+  const typing = typingArm(item.id) === "typing";
+  let level = card && card.state !== 0 ? (typing ? (s >= 1 ? 2 : s > 0 ? 1 : 0) : s >= 3 ? 2 : s >= 1 ? 1 : 0) : 0;
+  if (ctx.role === "followup") level = typing ? 1 : 0;
   if (ctx.role === "requeue") level = Math.max(0, level - 1);
   level = Math.max(0, Math.min(2, level + ctx.shift));
   const reps = card?.reps ?? 0;

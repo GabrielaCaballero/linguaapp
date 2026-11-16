@@ -226,7 +226,7 @@ export const unit: Unit = {
         options: ["è", "e", "sei", "sono"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "essere"],
+      exercises: ["question"], grammar: ["it-g-essere-avere"], tags: ["grammar", "essere"],
     },
     {
       id: "pat-are", type: "pattern", target: "parlo, parli, parla",
@@ -330,6 +330,24 @@ export const unit: Unit = {
       distractors: ["posible", "possible", "posibile"],
       note: { es: "-ble → -bile, con doble s: posible → possibile, increíble → incredibile." },
       exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
+    },
+    // ── Tables (content v2.1) ─────────────────────────────────
+    {
+      id: "tab-essere", type: "paradigm", target: "essere — presente", spoken: "essere",
+      gloss: { es: "essere (ser/estar) — presente", en: "essere (to be) — present" },
+      grammar: ["it-g-essere-avere"],
+      paradigm: {
+        caption: { es: "Conjuga «essere» en presente", en: "Conjugate essere in the present tense" },
+        cells: [
+          { label: "io", answer: "sono", ruleId: "it-g-essere-avere" },
+          { label: "tu", answer: "sei", ruleId: "it-g-essere-avere" },
+          { label: "lui / lei", answer: "è", ruleId: "it-g-essere-avere" },
+          { label: "noi", answer: "siamo", ruleId: "it-g-essere-avere" },
+          { label: "voi", answer: "siete", ruleId: "it-g-essere-avere" },
+          { label: "loro", answer: "sono", ruleId: "it-g-essere-avere" },
+        ],
+      },
+      tags: ["grammar", "present", "table"],
     },
   ]),
 };

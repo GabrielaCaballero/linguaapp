@@ -1,7 +1,7 @@
 // Engine-side content helpers. The engine reads course packs ONLY through `@/content`
 // (src/content/index.ts, written by the content stream). Tests use tests/fixtures/mini-course.ts.
 import { courses } from "@/content";
-import type { BaseLang, CoursePack, Glossed, Item, Lexicon, TargetLang, Unit } from "@/content/schema";
+import type { BaseLang, CoursePack, Glossed, Item, Lexicon, TargetLang, Unit, GrammarPoint } from "@/content/schema";
 import type { DB } from "./model";
 
 export const COURSES: Record<TargetLang, CoursePack> = courses;
@@ -68,3 +68,15 @@ export function shown(i: Item): string {
 export const LANG_NAME: Record<TargetLang, string> = { it: "Italiano", de: "Deutsch" };
 export const SEAL: Record<TargetLang, string> = { it: "IT", de: "DE" };
 export const LOCALE: Record<TargetLang, string> = { it: "it-IT", de: "de-DE" };
+
+/** A grammar point by id (content v2.1), or undefined. */
+export function grammarPoint(id: string | undefined): GrammarPoint | undefined {
+  if (!id) return undefined;
+  const lang = id.startsWith("de-") ? "de" : id.startsWith("it-") ? "it" : undefined;
+  return lang ? COURSES[lang].grammar?.find((g) => g.id === id) : undefined;
+}
+
+/** All grammar points of a course, in level order. */
+export function grammarFor(lang: TargetLang): GrammarPoint[] {
+  return COURSES[lang].grammar ?? [];
+}

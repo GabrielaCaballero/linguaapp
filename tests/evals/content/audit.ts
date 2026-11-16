@@ -37,4 +37,8 @@ export const AUDITOR = "QA lead (eval phase), 2026-11-12";
 // conto gloss duplicated accorgersi's; it-u24 «cartera» → «bolsa (cartera)», «apetece» → «gustaría»
 // (neutral Spanish), "Do you fancy" → "Would you like"; de-u21-br-daten was ambiguous (die Daten is
 // also the plural of das Datum) → rewritten; de-u24 distractor «den Daumen drücken» is in Duden → replaced.
+// 2026-11-14 · learning P1 pilot: new tables de-u02-tab-kommen, de-u05-tab-mein-akk, it-u02-tab-essere,
+// it-u09-tab-di-articolo, sentence de-u05-ich-besuche-meine-brueder (+ known errors meinen/mein Brüder),
+// and grammar links added to de-u02-pat-kommen, de-u04-pat-mein-meine, it-u02-pat-essere,
+// it-u09-pat-prep-articolate — read against the rubric (forms, accents, glosses) before re-pinning.
 export const FAILS: Record<string, Finding> = {};

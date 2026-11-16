@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useDB } from "@/lib/store";
@@ -85,6 +86,14 @@ export default function PathPage() {
           );
         })}
       </div>
+      <Link href="/write" className="card row" style={{ marginTop: 24, gap: 12, textDecoration: "none", color: "inherit" }}>
+        <span className="accent"><Icon name="sparkle" size={22} /></span>
+        <span className="stack grow" style={{ gap: 2 }}>
+          <b className="label">{t.writeOpen}</b>
+          <span className="caption">{t.writeOpenSub}</span>
+        </span>
+        <Icon name="chevron" size={18} />
+      </Link>
       <p className="caption center" style={{ marginTop: 24 }}>{t.comingSoon}</p>
     </main>
   );

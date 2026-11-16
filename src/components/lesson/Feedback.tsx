@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { BaseLang, Item } from "@/content/schema";
+import type { BaseLang, GrammarPoint, Item } from "@/content/schema";
 import type { Verdict } from "@/lib/model";
 import type { Dict } from "@/lib/i18n";
 import type { CheckResult } from "@/lib/check";
 import { gl, per } from "@/lib/content";
 import { Icon } from "../icons";
-import { Speaker } from "./Exercises";
+import { Speaker, type CellResult } from "./Exercises";
 
 export interface TutorView {
   status: "checking" | "done" | "failed" | "unsure";
@@ -31,6 +31,9 @@ export function Feedback({
   overridden,
   tutor,
   onWhy,
+  grammar,
+  onRule,
+  cells,
 }: {
   t: Dict;
   item: Item;
@@ -45,6 +48,11 @@ export function Feedback({
   overridden: boolean;
   tutor?: TutorView;
   onWhy?: () => void;
+  /** The grammar point behind this item or mistake: one line here, the full card one tap away. */
+  grammar?: GrammarPoint;
+  onRule?: () => void;
+  /** Table exercises: every cell's result. */
+  cells?: CellResult[];
 }) {
   const btn = useRef<HTMLButtonElement>(null);
   const [more, setMore] = useState(false);
@@ -71,7 +79,10 @@ export function Feedback({
   const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
   const noteArg = check?.reason === "umlaut" ? umlautPair(check.detail?.got ?? "", check.detail?.want ?? item.target) : check?.detail?.want ?? item.target;
   const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](noteArg) : undefined;
-  const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) : undefined);
+  const ruleLine = grammar && v !== "correct" ? gl(grammar.short, base) : undefined;
+  const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) ?? ruleLine : undefined);
+  const annots = v !== "correct" && item.annot ? Object.entries(item.annot) : [];
+  const missed = (cells ?? []).filter((c) => c.verdict !== "correct");
   const full = per(item.note, base);
   const btnCls = v === "correct" ? "btn-ok" : v === "almost" ? "btn-almost" : "btn-primary";
 
@@ -99,6 +110,37 @@ export function Feedback({
           {full && full !== line && (
             <button type="button" className="icon-btn" style={{ width: 32, height: 32, color: "inherit" }} aria-label={t.more} aria-expanded={more} onClick={() => setMore((x) => !x)}>
               <Icon name="info" size={18} />
+            </button>
+          )}
+        </div>
+      )}
+      {missed.length > 0 && (
+        <ul className="fb-note" style={{ margin: 0, paddingLeft: 18 }}>
+          {missed.map((c) => (
+            <li key={c.label}>
+              <span lang={item.lang}>{c.label}: <b>{c.expected}</b></span>
+              {c.text.trim() ? <> · {t.yourAnswer}: <span lang={item.lang}>{c.text}</span></> : null}
+              {c.otherCell ? <> — {t.otherCell(c.otherCell)}</> : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      {annots.length > 0 && (
+        <div className="fb-note">
+          <span className="caption">{t.inThisSentence}</span>
+          {annots.map(([w, g]) => (
+            <div key={w}>
+              <b lang={item.lang}>{w}</b> — {gl(g, base)}
+            </div>
+          ))}
+        </div>
+      )}
+      {grammar && v !== "correct" && (
+        <div className="fb-note">
+          {ruleLine && ruleLine !== line && <div style={{ marginBottom: 4 }}>{ruleLine}</div>}
+          {onRule && (
+            <button type="button" className="link" onClick={onRule}>
+              {t.seeRule}: {gl(grammar.title, base)}
             </button>
           )}
         </div>

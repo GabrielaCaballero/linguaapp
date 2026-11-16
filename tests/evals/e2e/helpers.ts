@@ -149,6 +149,30 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     if (st.tasks === 0) st.firstEyebrow = eyebrow;
     st.tasks++;
     st.prompts.push(eyebrow);
+    // rule card after a new pattern (content v2.1): read it, carry on
+    if (eyebrow === t.ruleTitle) {
+      await btn(page, t.understood).click();
+      continue;
+    }
+    // first meeting with a table: study it, carry on
+    if (eyebrow === t.studyTable) {
+      await page.locator(".answer-area .btn-primary").click();
+      continue;
+    }
+    // table exercise: type every cell (or just the endings after the given stem)
+    if (eyebrow === t.fillTable || eyebrow === t.typeEndings) {
+      st.graded++;
+      const title = await txt(page, ".prompt .title");
+      const item = ITEMS.find((i) => i.lang === o.lang && i.type === "paradigm" && i.target === title);
+      const cells = item?.paradigm?.cells ?? [];
+      const stem = eyebrow === t.typeEndings ? stemOf(cells) : "";
+      const inputs = page.locator(".ptable input");
+      const n = await inputs.count();
+      const want = Math.random() < (o.accuracy ?? 0.85);
+      for (let k = 0; k < n; k++) await inputs.nth(k).fill(want && cells[k] ? cells[k].answer.slice(stem.length) : "x");
+      await page.locator(".answer-area .btn-primary").last().click();
+      continue;
+    }
     const teach = page.locator(".teach");
     // guess-first: pick any option, then Continue on the teaching card
     if (eyebrow.startsWith(t.newWord)) {
@@ -201,6 +225,14 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     await page.waitForTimeout(150);
   }
   return st;
+}
+
+/** Same rule as the app's table stage: shared prefix of all forms, if ≥ 2 letters. */
+function stemOf(cells: { answer: string }[]): string {
+  if (!cells.length) return "";
+  let p = cells[0].answer;
+  for (const c of cells) while (p && !c.answer.startsWith(p)) p = p.slice(0, -1);
+  return p.length >= 2 ? p : "";
 }
 
 /** Quit the current lesson through ✕ → End lesson. */

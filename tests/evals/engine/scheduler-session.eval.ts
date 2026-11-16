@@ -5,7 +5,7 @@ import type { Item } from "@/content/schema";
 import type { CardV2, ReviewLog } from "@/lib/model";
 import { DAY } from "@/lib/dates";
 import { newCard, ratingFor, retrievability, replay, rollTo4am, schedule, seededCard } from "@/lib/scheduler";
-import { AWAY_DAYS, BASE_NEW, buildSession, chooseMode, controllerShift, newBudget, requeue, rollingAccuracy, type BuildInput, type Task } from "@/lib/session";
+import { AWAY_DAYS, BASE_NEW, buildSession, chooseMode, typingArm, controllerShift, newBudget, requeue, rollingAccuracy, type BuildInput, type Task } from "@/lib/session";
 import { itemsFor } from "@/lib/content";
 import { lessonHref } from "@/lib/nav";
 import { rng } from "../lib/fixtures";
@@ -229,9 +229,33 @@ describe("requeue & mode ladder", () => {
     expect(t.filter((x) => x.itemId === "i2").length).toBe(3);
   });
   const noun = ITEMS.find((i) => i.pos === "noun" && i.gender)!;
-  it("intro → guess; first follow-up → easiest tier", () => {
+  it("intro → guess; first follow-up: typing arm one step up, classic arm easiest tier", () => {
     expect(chooseMode(noun, undefined, { canListen: true, shift: 0, role: "intro" })).toBe("guess");
-    expect(["recognize", "pick-spelling", "question"]).toContain(chooseMode(noun, newCard(noun.id, "it", NOW), { canListen: true, shift: 0, role: "followup" }));
+    const nouns = ITEMS.filter((i) => i.pos === "noun" && i.gender);
+    const typing = nouns.find((i) => typingArm(i.id) === "typing")!;
+    const classic = nouns.find((i) => typingArm(i.id) === "classic")!;
+    expect(["tiles", "article", "listen"]).toContain(chooseMode(typing, newCard(typing.id, "it", NOW), { canListen: true, shift: 0, role: "followup" }));
+    expect(["recognize", "pick-spelling", "question"]).toContain(chooseMode(classic, newCard(classic.id, "it", NOW), { canListen: true, shift: 0, role: "followup" }));
+  });
+  it("typing arm types after one night (stability ≥ 1 day); classic waits for 3 days", () => {
+    const words = ITEMS.filter((i) => i.type === "word");
+    const typing = words.find((i) => typingArm(i.id) === "typing")!;
+    const classic = words.find((i) => typingArm(i.id) === "classic")!;
+    const c = (id: string) => ({ ...schedule(newCard(id, "it", NOW), 3, NOW), stability: 1.5 });
+    expect(chooseMode(typing, c(typing.id), { canListen: true, shift: 0, role: "review" })).toBe("recall");
+    expect(chooseMode(classic, c(classic.id), { canListen: true, shift: 0, role: "review" })).not.toBe("recall");
+  });
+  it("about 20% of items stay in the classic (control) arm, stably", () => {
+    const all = Object.values(courses).flatMap((c) => c.units.flatMap((u) => u.items));
+    const share = all.filter((i) => typingArm(i.id) === "classic").length / all.length;
+    expect(share).toBeGreaterThan(0.15);
+    expect(share).toBeLessThan(0.25);
+    expect(typingArm(all[0].id)).toBe(typingArm(all[0].id));
+  });
+  it("paradigm items are always a table exercise (after the intro)", () => {
+    const tab = Object.values(courses).flatMap((c) => c.units.flatMap((u) => u.items)).find((i) => i.type === "paradigm")!;
+    expect(chooseMode(tab, newCard(tab.id, tab.lang, NOW), { canListen: true, shift: 0, role: "followup" })).toBe("table");
+    expect(chooseMode(tab, undefined, { canListen: true, shift: 0, role: "intro" })).toBe("guess");
   });
   it("stability ≥ 3 days → typed recall", () => {
     const c = { ...schedule(newCard(noun.id, "it", NOW), 3, NOW), stability: 10 };

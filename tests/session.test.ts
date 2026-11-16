@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSession, chooseMode, controllerShift, newBudget, requeue, rollingAccuracy, articleOf, type BuildInput, type Task } from "@/lib/session";
+import { buildSession, chooseMode, controllerShift, newBudget, requeue, rollingAccuracy, articleOf, type BuildInput, type Task, typingArm } from "@/lib/session";
 import { newCard, schedule } from "@/lib/scheduler";
 import type { CardV2, ReviewLog } from "@/lib/model";
 import { DAY } from "@/lib/dates";
@@ -133,9 +133,11 @@ describe("mode ladder", () => {
   const word = items.find((x) => x.id === "it-u02-caffe")!;
   const ctx = { canListen: true, shift: 0, role: "review" as const };
   it("intro → guess", () => expect(chooseMode(word, undefined, { ...ctx, role: "intro" })).toBe("guess"));
-  it("young card → recognize", () => {
+  it("young card (just missed) → not typed yet: easiest tier (classic arm) or one step up (typing arm)", () => {
     const c = schedule(newCard(word.id, "it", NOW), 1, NOW);
-    expect(chooseMode(word, c, ctx)).toBe("recognize");
+    const m = chooseMode(word, c, ctx);
+    expect(m).not.toBe("recall");
+    expect(typingArm(word.id) === "classic" ? ["recognize"] : ["tiles", "article", "listen"]).toContain(m);
   });
   it("stability ≥ 3 days → recall (typed)", () => {
     const c = { ...schedule(newCard(word.id, "it", NOW), 3, NOW), stability: 5 };

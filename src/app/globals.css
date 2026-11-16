@@ -437,3 +437,23 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .sheet .goal-bar { background: var(--surface); }
 .goal-bar .commit { padding: var(--s3) var(--s4); gap: var(--s3); }
 .goal-bar .commit .h2 { font-size: 1.125rem; }
+
+/* ── Tables & grammar (content v2.1) ───────────────────────── */
+.ptable { display: flex; flex-direction: column; gap: 6px; }
+.prow { display: grid; grid-template-columns: minmax(84px, 34%) 1fr auto; align-items: center; gap: 8px; min-height: 44px; }
+.plabel { font-size: var(--t-label); color: var(--text-2); }
+.pinput { display: flex; align-items: center; gap: 2px; }
+.pinput .input { min-height: 44px; padding: 8px 12px; font-size: 1.05rem; }
+.pstem { font-family: var(--font-display); font-size: 1.05rem; }
+.pform { font-size: 1.15rem; }
+.pfix { font-size: var(--t-label); white-space: nowrap; }
+.prow.is-ok .input { border-color: var(--ok); }
+.prow.is-almost .input { border-color: var(--almost); }
+.prow.is-miss .input { border-color: var(--miss); }
+.prow.is-miss .pfix { color: var(--miss); }
+.prow.is-almost .pfix { color: var(--almost); }
+.gtable-wrap { overflow-x: auto; }
+.gtable { border-collapse: collapse; width: 100%; font-size: var(--t-label); }
+.gtable th, .gtable td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+.gtable thead th { color: var(--text-2); font-weight: 600; }
+.gtable td { font-family: var(--font-display); }

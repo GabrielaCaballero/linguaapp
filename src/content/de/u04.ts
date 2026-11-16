@@ -214,7 +214,7 @@ export const unit: Unit = {
         options: ["meine", "mein", "meinen", "meiner"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "possessive"],
+      exercises: ["question"], grammar: ["de-g-possessiv"], tags: ["grammar", "possessive"],
     },
     {
       id: "pat-haben", type: "pattern", target: "ich habe, du hast, er hat",

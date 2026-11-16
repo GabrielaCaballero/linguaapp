@@ -16,12 +16,18 @@ import { feel } from "@/lib/feel";
 import type { CheckResult } from "@/lib/check";
 import { Icon } from "@/components/icons";
 import { Loading, Sheet, useT } from "@/components/ui";
-import { Exercise, Guess } from "@/components/lesson/Exercises";
+import { Exercise, Guess, type CellResult } from "@/components/lesson/Exercises";
+import { GrammarCard, RuleScreen } from "@/components/lesson/Grammar";
+import { TableStudy } from "@/components/lesson/Table";
+import { grammarPoint } from "@/lib/content";
+import { markSeen } from "@/lib/actions";
+import type { GrammarPoint } from "@/content/schema";
 import { Feedback, type TutorView } from "@/components/lesson/Feedback";
 import { Results, type SessionSummary } from "@/components/lesson/Results";
 import { explainWithTutor, gradeWithTutor, tutorAvailable } from "@/lib/llm/tutor";
 
 interface FB {
+  cells?: CellResult[];
   verdict: Verdict;
   check?: CheckResult;
   text?: string;
@@ -87,7 +93,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
 
   const make = (exclude?: Set<string>): Built => {
     const d = getDB();
-    const items = itemsFor(lang, d, base).filter((i) => settings.bridgeTips || i.type !== "bridge");
+    const items = itemsFor(lang, d, base).filter((i) => (settings.bridgeTips || i.type !== "bridge") && (kind !== "speed" || i.type !== "paradigm"));
     const idx = new Map(units(lang).map((u) => [u.id, u.index]));
     const now = Date.now();
     return buildSession({
@@ -120,6 +126,9 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   const [taskStart, setTaskStart] = useState(() => Date.now());
   const [speedLeft, setSpeedLeft] = useState(SPEED_SECONDS);
   const [hist, setHist] = useState<boolean[]>([]);
+  // Grammar: the full rule in a sheet, and the one-time rule card after a new pattern.
+  const [ruleOpen, setRuleOpen] = useState<GrammarPoint | null>(null);
+  const [ruleCard, setRuleCard] = useState<GrammarPoint | null>(null);
   const counts = useRef(new Map<string, number>());
   const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 });
   const finished = useRef(false);
@@ -178,6 +187,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   }, [task, item, canListen, shift]);
 
   const next = useCallback(() => {
+    setRuleCard(null);
     setFb(null);
     setRevealed(false);
     setConf(undefined);
@@ -208,11 +218,12 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   if (summary) return <Results t={t} summary={summary} onDone={() => router.replace("/")} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
   if (!task || !item || !mode) return <Loading />;
 
-  const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string }) => {
+  const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[] }) => {
     if (fb) return;
     const prevCard = getDB().cards[item.id];
-    const typed = mode === "recall" || mode === "tiles";
-    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed });
+    // "I don't know" answers aren't the learner's own attempt: no "I was right", no tutor.
+    const typed = (mode === "recall" || mode === "tiles") && !r.dontKnow;
+    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed, hinted: r.hinted });
     const s = stats.current;
     s.graded++;
     if (conf) s.confUsed++;
@@ -237,7 +248,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       setFb({ verdict: r.verdict, overridden: false, typed: false });
       return;
     }
-    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed };
+    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed, cells: r.cells };
     // AI tutor: only typed answers the checker didn't accept exactly
     if (typed && r.verdict !== "correct" && r.text && tutorAvailable()) {
       view.tutor = { status: "checking" };
@@ -305,7 +316,25 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       {built.welcomeBack && idx === 0 && !fb && <div className="card-soft label fade-in" style={{ marginTop: 8 }}>{t.welcomeBack}</div>}
 
       <div key={task.key} className="fade-in" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        {task.role === "intro" ? (
+        {ruleCard ? (
+          <RuleScreen point={ruleCard} base={base} t={t} onDone={next} />
+        ) : task.role === "intro" && item.type === "paradigm" ? (
+          <TableStudy
+            item={item}
+            base={base}
+            t={t}
+            onRule={grammarPoint(item.grammar?.[0]) ? () => setRuleOpen(grammarPoint(item.grammar?.[0])!) : undefined}
+            onDone={() => {
+              if (!revealed) {
+                setRevealed(true);
+                introduce(item);
+                stats.current.newItems.add(item.id);
+              }
+              for (const g of item.grammar ?? []) markSeen(`g:${g}`);
+              next();
+            }}
+          />
+        ) : task.role === "intro" ? (
           <Guess
             item={item}
             base={base}
@@ -321,7 +350,14 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
                 feel("tap", getDB().profile.settings);
               }
             }}
-            onDone={next}
+            onDone={() => {
+              // First meeting with a new pattern: show its rule card once, then carry on.
+              const g = grammarPoint(item.grammar?.find((id) => !getDB().profile.seen?.[`g:${id}`]));
+              if (g) {
+                markSeen(`g:${g.id}`);
+                setRuleCard(g);
+              } else next();
+            }}
           />
         ) : (
           <Exercise
@@ -339,6 +375,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
             conf={conf}
             setConf={setConf}
             showConf={showConf}
+            stage={task.role === "followup" || task.role === "requeue" || (getDB().cards[item.id]?.stability ?? 0) < 1 ? "endings" : "full"}
           />
         )}
       </div>
@@ -358,8 +395,23 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
           overridden={fb.overridden}
           tutor={fb.tutor && fb.tutor.status !== "failed" ? fb.tutor : fb.typed && onWhy ? { status: "done" } : undefined}
           onWhy={onWhy}
+          grammar={grammarPoint(ruleIdFor(item, fb.check?.ruleId))}
+          onRule={() => {
+            const g = grammarPoint(ruleIdFor(item, fb.check?.ruleId));
+            if (g) setRuleOpen(g);
+          }}
+          cells={fb.cells}
         />
       )}
+
+      <Sheet open={!!ruleOpen} onClose={() => setRuleOpen(null)} label={t.ruleTitle}>
+        {ruleOpen && (
+          <div className="stack" style={{ paddingBottom: 8, maxHeight: "70vh", overflowY: "auto" }}>
+            <GrammarCard point={ruleOpen} base={base} t={t} />
+            <button className="btn btn-primary" onClick={() => setRuleOpen(null)}>{t.understood}</button>
+          </div>
+        )}
+      </Sheet>
 
       <Sheet open={confirmClose} onClose={() => setConfirmClose(false)} label={t.closeLesson}>
         <div className="stack" style={{ paddingBottom: 8 }}>
@@ -379,6 +431,11 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       </Sheet>
     </main>
   );
+}
+
+/** Which grammar point explains this answer: the matched mistake's rule, else the item's own. */
+function ruleIdFor(item: Item, fromCheck?: string): string | undefined {
+  return fromCheck ?? item.grammar?.[0] ?? item.paradigm?.cells.find((c) => c.ruleId)?.ruleId;
 }
 
 // Async tutor results must check they still belong to the task on screen.

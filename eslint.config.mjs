@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Deno Edge Function (npm: imports, Deno globals); its shared logic in _shared is linted.
+    "supabase/functions/grade-essay/**",
   ]),
 ]);
 
