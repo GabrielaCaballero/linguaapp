@@ -167,7 +167,7 @@ export const unit: Unit = {
         options: ["verremmo", "verremo", "veniremmo", "verrebbero"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "conditional"],
+      exercises: ["question"], grammar: ["it-g-condizionale"], tags: ["grammar", "conditional"],
     },
     {
       id: "pat-pronomi-combinati", type: "pattern", target: "me lo · te lo · glielo · ce lo · ve lo",
@@ -184,7 +184,7 @@ export const unit: Unit = {
         options: ["gliel'", "le l'", "me l'", "ce l'"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "pronouns"],
+      exercises: ["question"], grammar: ["it-g-pronomi-combinati"], tags: ["grammar", "pronouns"],
     },
     {
       id: "pat-ne", type: "pattern", target: "Quanti colleghi hai? Ne ho dieci.",
@@ -201,7 +201,7 @@ export const unit: Unit = {
         options: ["ne", "li", "ci", "le"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "pronouns"],
+      exercises: ["question"], grammar: ["it-g-ne"], tags: ["grammar", "pronouns"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

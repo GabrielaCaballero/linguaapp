@@ -140,7 +140,7 @@ export const unit: Unit = {
         options: ["eine Frage stellen", "eine Frage machen", "eine Frage geben", "eine Frage tun"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "collocations"],
+      exercises: ["question"], grammar: ["de-g-funktionsverben"], tags: ["grammar", "collocations"],
     },
     {
       id: "pat-redewendungen", type: "pattern", target: "Schwein haben · Tomaten auf den Augen haben · die Daumen drücken",
@@ -162,7 +162,7 @@ export const unit: Unit = {
         ],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "idioms"],
+      exercises: ["question"], grammar: ["de-g-redewendungen"], tags: ["grammar", "idioms"],
     },
     {
       id: "pat-duzen-siezen", type: "pattern", target: "duzen · siezen · Wollen wir uns duzen?",
@@ -179,7 +179,7 @@ export const unit: Unit = {
         options: ["Wollen wir uns duzen?", "Wollen wir uns siezen?", "Duzen Sie mich!", "Wollen wir du?"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "register"],
+      exercises: ["question"], grammar: ["de-g-duzen-siezen"], tags: ["grammar", "register"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

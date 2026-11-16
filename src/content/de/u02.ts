@@ -179,7 +179,7 @@ export const unit: Unit = {
         options: ["Jetzt wohne ich in Wien.", "Jetzt ich wohne in Wien.", "Jetzt wohne in Wien ich."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "word-order"],
+      exercises: ["question"], grammar: ["de-g-verb-zwei"], tags: ["grammar", "word-order"],
     },
     {
       id: "pat-aus-der", type: "pattern", target: "aus der Schweiz",
@@ -196,7 +196,7 @@ export const unit: Unit = {
         options: ["der", "die", "dem", "das"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "country"],
+      exercises: ["question"], grammar: ["de-g-aus-der"], tags: ["grammar", "country"],
     },
 
     // ── Sounds ───────────────────────────────────────────────

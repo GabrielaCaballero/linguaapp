@@ -61,7 +61,7 @@ export const unit: Unit = {
         options: ["trentotto", "trentaotto", "trenta e otto", "trentotte"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "numbers"],
+      exercises: ["question"], grammar: ["it-g-ventuno"], tags: ["grammar", "numbers"],
     },
 
     // ── Age ──────────────────────────────────────────────────
@@ -104,7 +104,7 @@ export const unit: Unit = {
         options: ["ha", "è", "hai", "ho"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "avere"],
+      exercises: ["question"], grammar: ["it-g-essere-avere"], tags: ["grammar", "avere"],
     },
 
     // ── Phone, spelling, forms ───────────────────────────────

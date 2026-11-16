@@ -178,7 +178,7 @@ export const unit: Unit = {
         options: ["gegessen", "gegesst", "geesst", "essen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past"],
+      exercises: ["question"], grammar: ["de-g-perfekt-haben"], tags: ["grammar", "past"],
     },
     {
       id: "pat-perfekt-sein", type: "pattern", target: "Ich bin nach Berlin gefahren.",
@@ -195,7 +195,7 @@ export const unit: Unit = {
         options: ["sind", "haben", "hat", "ist"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past", "sein"],
+      exercises: ["question"], grammar: ["de-g-perfekt-sein"], tags: ["grammar", "past", "sein"],
     },
     {
       id: "pat-partizip", type: "pattern", target: "gemacht · aufgestanden · besucht · telefoniert",
@@ -212,7 +212,7 @@ export const unit: Unit = {
         options: ["besucht", "gebesucht", "besuchen", "gesucht"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past"],
+      exercises: ["question"], grammar: ["de-g-partizip"], tags: ["grammar", "past"],
     },
     {
       id: "pat-war-hatte", type: "pattern", target: "ich war · ich hatte",
@@ -229,7 +229,7 @@ export const unit: Unit = {
         options: ["hatte", "war", "habe", "hat"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past", "war-hatte"],
+      exercises: ["question"], grammar: ["de-g-war-hatte"], tags: ["grammar", "past", "war-hatte"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

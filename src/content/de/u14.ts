@@ -160,7 +160,7 @@ export const unit: Unit = {
         options: ["gingen", "gehten", "gangen", "gegangen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "praeteritum"],
+      exercises: ["question"], grammar: ["de-g-praeteritum"], tags: ["grammar", "praeteritum"],
     },
     {
       id: "pat-als-wenn", type: "pattern", target: "als · wenn · wann",
@@ -177,7 +177,7 @@ export const unit: Unit = {
         options: ["Als", "Wenn", "Wann", "Ob"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "als-wenn"],
+      exercises: ["question"], grammar: ["de-g-als-wenn"], tags: ["grammar", "als-wenn"],
     },
     {
       id: "pat-plusquamperfekt", type: "pattern", target: "Ich hatte gegessen. · Er war gegangen.",
@@ -194,7 +194,7 @@ export const unit: Unit = {
         options: ["hatte", "war", "hat", "ist"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "plusquamperfekt"],
+      exercises: ["question"], grammar: ["de-g-plusquamperfekt"], tags: ["grammar", "plusquamperfekt"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

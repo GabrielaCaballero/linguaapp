@@ -154,7 +154,7 @@ export const unit: Unit = {
         options: ["hättest", "wärst", "hast", "hattest"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv2-past"],
+      exercises: ["question"], grammar: ["de-g-konj2-vergangenheit"], tags: ["grammar", "konjunktiv2-past"],
     },
     {
       id: "pat-doppelinfinitiv", type: "pattern", target: "Du hättest es sagen sollen.",
@@ -171,7 +171,7 @@ export const unit: Unit = {
         options: ["Du hättest es sagen sollen.", "Du hättest es gesagt sollen.", "Du hättest es sagen gesollt.", "Du wärst es sagen sollen."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv2-past", "modals"],
+      exercises: ["question"], grammar: ["de-g-doppelinfinitiv"], tags: ["grammar", "konjunktiv2-past", "modals"],
     },
     {
       id: "pat-als-ob", type: "pattern", target: "als ob er krank wäre · als wäre er krank",
@@ -188,7 +188,7 @@ export const unit: Unit = {
         options: ["wäre", "ist", "war", "werde"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv2"],
+      exercises: ["question"], grammar: ["de-g-als-ob"], tags: ["grammar", "konjunktiv2"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

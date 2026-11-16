@@ -181,7 +181,7 @@ export const unit: Unit = {
         options: ["dem", "den", "der", "das"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "dative"],
+      exercises: ["question"], grammar: ["de-g-dativ"], tags: ["grammar", "dative"],
     },
     {
       id: "pat-zum-zur", type: "pattern", target: "zum Bahnhof · zur Post",
@@ -198,7 +198,7 @@ export const unit: Unit = {
         options: ["zur", "zum", "zu die", "nach"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "dative", "prepositions"],
+      exercises: ["question"], grammar: ["de-g-zum-zur"], tags: ["grammar", "dative", "prepositions"],
     },
     {
       id: "pat-imperativ", type: "pattern", target: "Gehen Sie! · Geh! · Nehmen Sie! · Nimm!",
@@ -215,7 +215,7 @@ export const unit: Unit = {
         options: ["Nehmen Sie den Bus.", "Sie nehmen den Bus?", "Nimm Sie den Bus.", "Nehmen den Bus Sie."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperative"],
+      exercises: ["question"], grammar: ["de-g-imperativ"], tags: ["grammar", "imperative"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

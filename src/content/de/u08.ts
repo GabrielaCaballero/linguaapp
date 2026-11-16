@@ -196,7 +196,7 @@ export const unit: Unit = {
         options: ["kann", "kannst", "könnt", "können"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "modals"],
+      exercises: ["question"], grammar: ["de-g-modalverben"], tags: ["grammar", "modals"],
     },
     {
       id: "pat-gern", type: "pattern", target: "Ich tanze gern. · Ich tanze lieber. · Ich tanze am liebsten.",
@@ -213,7 +213,7 @@ export const unit: Unit = {
         options: ["Ich tanze gern.", "Ich gern tanze.", "Ich mag tanze.", "Ich tanze gut."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "hobbies"],
+      exercises: ["question"], grammar: ["de-g-gern"], tags: ["grammar", "hobbies"],
     },
     {
       id: "pat-wochentage", type: "pattern", target: "Montag · Dienstag · Mittwoch · Donnerstag · Freitag · Samstag · Sonntag",
@@ -230,7 +230,7 @@ export const unit: Unit = {
         options: ["Am", "Im", "Um", "An der"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "time"],
+      exercises: ["question"], grammar: ["de-g-wochentage"], tags: ["grammar", "time"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

@@ -180,7 +180,7 @@ export const unit: Unit = {
         options: ["piacciono", "piace", "piaccio", "piacete"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "piacere"],
+      exercises: ["question"], grammar: ["it-g-piacere"], tags: ["grammar", "piacere"],
     },
     {
       id: "pat-irregolari", type: "pattern", target: "vado · faccio · vengo · esco",
@@ -197,7 +197,7 @@ export const unit: Unit = {
         options: ["usciamo", "esciamo", "uscimo", "escono"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "irregular"],
+      exercises: ["question"], grammar: ["it-g-irregolari"], tags: ["grammar", "irregular"],
     },
     {
       id: "pat-modali", type: "pattern", target: "posso · voglio · devo + infinito",
@@ -214,7 +214,7 @@ export const unit: Unit = {
         options: ["può", "puoi", "posso", "potere"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "modals"],
+      exercises: ["question"], grammar: ["it-g-modali"], tags: ["grammar", "modals"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

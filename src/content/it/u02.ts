@@ -243,7 +243,7 @@ export const unit: Unit = {
         options: ["abiti", "abita", "abito", "abitare"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "present"],
+      exercises: ["question"], grammar: ["it-g-are"], tags: ["grammar", "present"],
     },
     {
       id: "pat-nazionalita", type: "pattern", target: "spagnolo/spagnola · inglese",
@@ -260,7 +260,7 @@ export const unit: Unit = {
         options: ["inglese", "inglesa", "inglesi", "inglesia"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "agreement"],
+      exercises: ["question"], grammar: ["it-g-nazionalita"], tags: ["grammar", "agreement"],
     },
 
     // ── Sounds ───────────────────────────────────────────────

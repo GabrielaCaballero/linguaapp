@@ -178,7 +178,7 @@ export const unit: Unit = {
         options: ["dei", "del", "degli", "delle"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "partitive"],
+      exercises: ["question"], grammar: ["it-g-partitivo"], tags: ["grammar", "partitive"],
     },
     {
       id: "pat-quanto", type: "pattern", target: "quanto pane · quanta frutta · quanti pomodori · quante mele",
@@ -195,7 +195,7 @@ export const unit: Unit = {
         options: ["Quante", "Quanti", "Quanto", "Quanta"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "quantities"],
+      exercises: ["question"], grammar: ["it-g-quanto"], tags: ["grammar", "quantities"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

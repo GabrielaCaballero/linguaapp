@@ -197,7 +197,7 @@ export const unit: Unit = {
         options: ["das", "der", "die"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "gender"],
+      exercises: ["question"], grammar: ["de-g-der-die-das"], tags: ["grammar", "gender"],
     },
     {
       id: "pat-mein-meine", type: "pattern", target: "mein · meine",
@@ -232,7 +232,7 @@ export const unit: Unit = {
         options: ["hat", "hast", "habt", "haben"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "haben"],
+      exercises: ["question"], grammar: ["de-g-haben"], tags: ["grammar", "haben"],
     },
 
     // ── Sound ────────────────────────────────────────────────

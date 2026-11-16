@@ -103,7 +103,9 @@ export function buildSession(i: BuildInput): Built {
   let newN = welcomeBack || i.kind === "review" ? 0 : i.kind === "new" ? 8 : newBudget(shift);
   if (i.kind === "auto" && !welcomeBack && reviewIds.length < 4) newN += 1; // a quiet day: one more new word
   const fresh = i.items.filter((x) => !i.cards[x.id] && (i.unitIndexOf(x) === 0 || i.unitIndexOf(x) >= i.startUnit));
-  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1));
+  // Like a coursebook: within a unit, the grammar (patterns, tables) comes before the words.
+  const grammarFirst = (x: Item) => (x.type === "pattern" || x.type === "paradigm" ? 0 : 1);
+  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1) || grammarFirst(a) - grammarFirst(b));
   const newIds = interleave(fresh.map((x) => x.id), byId, false).slice(0, newN);
   // Start with meaning, not an audio-only spelling guess.
   if (newIds.length > 1 && byId.get(newIds[0])?.type === "sound") {

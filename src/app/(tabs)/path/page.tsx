@@ -77,9 +77,12 @@ export default function PathPage() {
                 )}
                 <div className="row between" style={{ marginTop: 12 }}>
                   <span className="caption">{t.learnedOf(p.learned, p.total)}</span>
-                  <button className={`btn ${isCur ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => router.push(lessonHref("auto", u.index))}>
-                    {t.practiseUnit}
-                  </button>
+                  <span className="row" style={{ gap: 6 }}>
+                    <Link className="btn btn-ghost btn-sm" href={`/unit?id=${u.id}`}>{t.overviewBtn}</Link>
+                    <button className={`btn ${isCur ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => router.push(lessonHref("auto", u.index))}>
+                      {t.practiseUnit}
+                    </button>
+                  </span>
                 </div>
               </div>
             </div>

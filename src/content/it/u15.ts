@@ -165,7 +165,7 @@ export const unit: Unit = {
         options: ["abbia", "ha", "avesse", "avrebbe"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-congiuntivo"], tags: ["grammar", "congiuntivo"],
     },
     {
       id: "pat-quando-congiuntivo", type: "pattern", target: "penso che sia · so che è",
@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["è", "sia", "fosse", "siano"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-quando-congiuntivo"], tags: ["grammar", "congiuntivo"],
     },
     {
       id: "pat-di-infinito", type: "pattern", target: "Penso di avere ragione.",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["Penso di avere ragione.", "Penso che ho ragione.", "Penso a avere ragione.", "Penso avere ragione."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-di-infinito"], tags: ["grammar", "congiuntivo"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

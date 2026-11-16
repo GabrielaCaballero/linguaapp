@@ -181,7 +181,7 @@ export const unit: Unit = {
         options: ["latte", "birra", "spremuta", "acqua"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "gender"],
+      exercises: ["question"], grammar: ["it-g-genere"], tags: ["grammar", "gender"],
     },
     {
       id: "pat-un-uno-una", type: "pattern", target: "un · uno · una · un'",
@@ -198,7 +198,7 @@ export const unit: Unit = {
         options: ["uno", "un", "una", "un'"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "articles"],
+      exercises: ["question"], grammar: ["it-g-un-uno-una"], tags: ["grammar", "articles"],
     },
     {
       id: "pat-il-lo-la", type: "pattern", target: "il · lo · la · l'",
@@ -215,7 +215,7 @@ export const unit: Unit = {
         options: ["lo", "il", "la", "l'"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "articles"],
+      exercises: ["question"], grammar: ["it-g-il-lo-la"], tags: ["grammar", "articles"],
     },
 
     // ── Sound ────────────────────────────────────────────────

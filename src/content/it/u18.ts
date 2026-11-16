@@ -161,7 +161,7 @@ export const unit: Unit = {
         options: ["vendono", "vende", "vendiamo", "vendete"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "si-impersonale"],
+      exercises: ["question"], grammar: ["it-g-si-impersonale"], tags: ["grammar", "si-impersonale"],
     },
     {
       id: "pat-passivo-essere", type: "pattern", target: "è stato scritto · è stata approvata",
@@ -178,7 +178,7 @@ export const unit: Unit = {
         options: ["da", "di", "per", "con"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passive"],
+      exercises: ["question"], grammar: ["it-g-passivo-essere"], tags: ["grammar", "passive"],
     },
     {
       id: "pat-passivo-venire", type: "pattern", target: "viene chiuso · va fatto",
@@ -195,7 +195,7 @@ export const unit: Unit = {
         options: ["La finestra viene chiusa alle otto.", "La finestra viene chiuso alle otto.", "La finestra viene chiudere alle otto.", "La finestra va chiudendo alle otto."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passive"],
+      exercises: ["question"], grammar: ["it-g-passivo-venire"], tags: ["grammar", "passive"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

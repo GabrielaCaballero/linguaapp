@@ -169,7 +169,7 @@ export const unit: Unit = {
         options: ["sarò", "sarà", "essero", "sono stato"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "future"],
+      exercises: ["question"], grammar: ["it-g-futuro"], tags: ["grammar", "future"],
     },
     {
       id: "pat-pronomi-diretti", type: "pattern", target: "lo · la · li · le",
@@ -186,7 +186,7 @@ export const unit: Unit = {
         options: ["lo", "la", "li", "gli"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "pronouns"],
+      exercises: ["question"], grammar: ["it-g-pronomi-diretti"], tags: ["grammar", "pronouns"],
     },
     {
       id: "pat-ci", type: "pattern", target: "ci = lì, in quel posto",
@@ -203,7 +203,7 @@ export const unit: Unit = {
         options: ["ci", "ne", "lo", "la"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "ci"],
+      exercises: ["question"], grammar: ["it-g-ci"], tags: ["grammar", "ci"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

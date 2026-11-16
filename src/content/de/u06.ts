@@ -179,7 +179,7 @@ export const unit: Unit = {
         options: ["die Stühle", "die Stuhls", "der Stühle", "die Stuhlen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "plural"],
+      exercises: ["question"], grammar: ["de-g-plural"], tags: ["grammar", "plural"],
     },
     {
       id: "pat-nicht-kein", type: "pattern", target: "nicht · kein",
@@ -196,7 +196,7 @@ export const unit: Unit = {
         options: ["keinen", "nicht", "kein", "keine"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "negation", "accusative"],
+      exercises: ["question"], grammar: ["de-g-nicht-kein"], tags: ["grammar", "negation", "accusative"],
     },
     {
       id: "pat-komposita", type: "pattern", target: "die Küche + der Tisch = der Küchentisch",
@@ -213,7 +213,7 @@ export const unit: Unit = {
         options: ["der", "die", "das"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "compound", "gender"],
+      exercises: ["question"], grammar: ["de-g-komposita"], tags: ["grammar", "compound", "gender"],
     },
 
     // ── Sound ────────────────────────────────────────────────

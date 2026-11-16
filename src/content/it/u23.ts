@@ -172,7 +172,7 @@ export const unit: Unit = {
         options: ["tuttavia", "inoltre", "innanzitutto", "quindi"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "connectors"],
+      exercises: ["question"], grammar: ["it-g-connettivi"], tags: ["grammar", "connectors"],
     },
     {
       id: "pat-verbi-pronominali", type: "pattern", target: "ce la faccio · me la cavo · me ne vado · te la prendi",
@@ -189,7 +189,7 @@ export const unit: Unit = {
         options: ["facciamo", "fanno", "fate", "faccio"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "pronominal-verbs"],
+      exercises: ["question"], grammar: ["it-g-verbi-pronominali"], tags: ["grammar", "pronominal-verbs"],
     },
     {
       id: "pat-metterci-volerci", type: "pattern", target: "ci metto un'ora · ci vuole un'ora · ci vogliono due ore",
@@ -206,7 +206,7 @@ export const unit: Unit = {
         options: ["ci vogliono", "ci vuole", "ci metti", "ci vuoi"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "pronominal-verbs"],
+      exercises: ["question"], grammar: ["it-g-metterci-volerci"], tags: ["grammar", "pronominal-verbs"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

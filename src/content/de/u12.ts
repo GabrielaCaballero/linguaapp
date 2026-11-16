@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["den", "dem", "der", "das"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "two-way"],
+      exercises: ["question"], grammar: ["de-g-wechselpraep"], tags: ["grammar", "two-way"],
     },
     {
       id: "pat-komparativ", type: "pattern", target: "schnell · schneller · am schnellsten",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["größer", "großer", "mehr groß", "am größten"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "comparison"],
+      exercises: ["question"], grammar: ["de-g-komparativ"], tags: ["grammar", "comparison"],
     },
     {
       id: "pat-wetter", type: "pattern", target: "Es regnet. · Es schneit. · Die Sonne scheint.",
@@ -216,7 +216,7 @@ export const unit: Unit = {
         options: ["Es schneit.", "Es regnet.", "Er schneit.", "Es ist Schnee."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "weather"],
+      exercises: ["question"], grammar: ["de-g-wetter"], tags: ["grammar", "weather"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

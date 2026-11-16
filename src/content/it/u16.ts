@@ -154,7 +154,7 @@ export const unit: Unit = {
         options: ["era", "aveva", "è", "sarebbe"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "trapassato"],
+      exercises: ["question"], grammar: ["it-g-trapassato"], tags: ["grammar", "trapassato"],
     },
     {
       id: "pat-relativi", type: "pattern", target: "che · con cui · di cui · il quale",
@@ -171,7 +171,7 @@ export const unit: Unit = {
         options: ["di cui", "che", "di che", "cui di"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "relatives"],
+      exercises: ["question"], grammar: ["it-g-relativi"], tags: ["grammar", "relatives"],
     },
     {
       id: "pat-passato-remoto", type: "pattern", target: "parlò · andò · fu · ebbe · fece · disse",
@@ -193,7 +193,7 @@ export const unit: Unit = {
         ],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passato-remoto"],
+      exercises: ["question"], grammar: ["it-g-passato-remoto"], tags: ["grammar", "passato-remoto"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

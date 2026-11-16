@@ -163,7 +163,7 @@ export const unit: Unit = {
         options: ["dipinse", "dipingé", "dipinto", "dipingeva"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passato-remoto"],
+      exercises: ["question"], grammar: ["it-g-passato-remoto-forme"], tags: ["grammar", "passato-remoto"],
     },
     {
       id: "pat-congiunzioni", type: "pattern", target: "benché · sebbene · affinché · purché · prima che · a meno che",
@@ -180,7 +180,7 @@ export const unit: Unit = {
         options: ["riporti", "riporta", "riporterai", "riportassi"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-congiunzioni"], tags: ["grammar", "congiuntivo"],
     },
     {
       id: "pat-superlativo", type: "pattern", target: "il più bello del mondo · il più bello che abbia mai visto",
@@ -197,7 +197,7 @@ export const unit: Unit = {
         options: ["del", "che", "nel", "di"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "comparison"],
+      exercises: ["question"], grammar: ["it-g-superlativo"], tags: ["grammar", "comparison"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

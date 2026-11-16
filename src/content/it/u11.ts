@@ -153,7 +153,7 @@ export const unit: Unit = {
         options: ["giocavamo", "giocavano", "giochiamo", "giocavate"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperfetto"],
+      exercises: ["question"], grammar: ["it-g-imperfetto"], tags: ["grammar", "imperfetto"],
     },
     {
       id: "pat-imperf-vs-pp", type: "pattern", target: "leggevo (sfondo) · è suonato (evento)",
@@ -170,7 +170,7 @@ export const unit: Unit = {
         options: ["ero", "sono stato", "sarò", "sia"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperfetto", "passato-prossimo"],
+      exercises: ["question"], grammar: ["it-g-imperf-vs-pp"], tags: ["grammar", "imperfetto", "passato-prossimo"],
     },
     {
       id: "pat-cera", type: "pattern", target: "c'era · c'erano",
@@ -187,7 +187,7 @@ export const unit: Unit = {
         options: ["c'erano", "c'era", "erano", "c'è"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperfetto"],
+      exercises: ["question"], grammar: ["it-g-cera"], tags: ["grammar", "imperfetto"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

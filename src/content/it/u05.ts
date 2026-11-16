@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["le sorelle", "le sorelli", "i sorelle", "la sorelle"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "plural", "articles"],
+      exercises: ["question"], grammar: ["it-g-plurale"], tags: ["grammar", "plural", "articles"],
     },
     {
       id: "pat-possessivi", type: "pattern", target: "mia madre · la mia famiglia",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["Mia sorella abita a Roma.", "La mia sorella abita a Roma.", "Mia la sorella abita a Roma."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "possessive"],
+      exercises: ["question"], grammar: ["it-g-possessivi"], tags: ["grammar", "possessive"],
     },
 
     // ── Sound ────────────────────────────────────────────────

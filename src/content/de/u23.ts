@@ -155,7 +155,7 @@ export const unit: Unit = {
         options: ["desto schneller sind wir da.", "desto wir sind schneller da.", "desto schneller wir sind da.", "dann schneller sind wir da."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "connectors"],
+      exercises: ["question"], grammar: ["de-g-je-desto"], tags: ["grammar", "connectors"],
     },
     {
       id: "pat-genitiv-praep", type: "pattern", target: "wegen des Wetters · trotz der Kosten · während des Urlaubs",
@@ -172,7 +172,7 @@ export const unit: Unit = {
         options: ["des", "dem", "den", "der"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "genitive"],
+      exercises: ["question"], grammar: ["de-g-genitiv-praep"], tags: ["grammar", "genitive"],
     },
     {
       id: "pat-modalpartikeln", type: "pattern", target: "doch · ja · mal · eben / halt",
@@ -189,7 +189,7 @@ export const unit: Unit = {
         options: ["mal", "ja", "denn", "zwar"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "particles"],
+      exercises: ["question"], grammar: ["de-g-modalpartikeln"], tags: ["grammar", "particles"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

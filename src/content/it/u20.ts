@@ -156,7 +156,7 @@ export const unit: Unit = {
         options: ["sarebbe venuto", "verrà", "verrebbe", "viene"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "reported-speech"],
+      exercises: ["question"], grammar: ["it-g-discorso-indiretto"], tags: ["grammar", "reported-speech"],
     },
     {
       id: "pat-concordanza", type: "pattern", target: "Penso che sia · Pensavo che fosse",
@@ -173,7 +173,7 @@ export const unit: Unit = {
         options: ["fossi", "sia", "sei", "saresti"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "concordanza"],
+      exercises: ["question"], grammar: ["it-g-concordanza"], tags: ["grammar", "concordanza"],
     },
     {
       id: "pat-domande-indirette", type: "pattern", target: "Mi ha chiesto se… · dove… · quando…",
@@ -190,7 +190,7 @@ export const unit: Unit = {
         options: ["se", "che", "come", "quando"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "reported-speech"],
+      exercises: ["question"], grammar: ["it-g-domande-indirette"], tags: ["grammar", "reported-speech"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────
