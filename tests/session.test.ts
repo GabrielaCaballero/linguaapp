@@ -23,15 +23,16 @@ function dueCard(id: string, daysOverdue: number): CardV2 {
 }
 
 describe("session builder", () => {
-  it("fresh learner: guess-first intros, each followed 3–6 tasks later", () => {
+  it("fresh learner: learn a bit, try it — each learn card is followed at once by a try, and checked again 3–6 tasks later", () => {
     const b = buildSession(input());
     const intros = b.tasks.filter((t) => t.role === "intro");
     expect(intros.length).toBe(6); // 5 + 1 on a quiet day
     for (const intro of intros) {
       const i = b.tasks.indexOf(intro);
+      expect(b.tasks[i + 1]).toMatchObject({ role: "try", itemId: intro.itemId });
       const f = b.tasks.findIndex((t) => t.role === "followup" && t.itemId === intro.itemId);
-      expect(f - i).toBeGreaterThanOrEqual(3);
-      expect(f - i).toBeLessThanOrEqual(7);
+      expect(f - (i + 1)).toBeGreaterThanOrEqual(3);
+      expect(f - (i + 1)).toBeLessThanOrEqual(8);
       expect(intro.graded).toBe(false);
     }
     // unit order: first new item comes from unit 1
@@ -116,15 +117,14 @@ describe("difficulty controller (target 80–85%)", () => {
 });
 
 describe("requeue", () => {
-  it("requeues a miss once, capped at 2 per item", () => {
+  it("requeues a miss once, capped at 1 retry per item per session", () => {
     let tasks: Task[] = [0, 1, 2, 3, 4, 5].map((k) => ({ key: `k${k}`, itemId: `i${k}`, role: "review", graded: true }));
     const counts = new Map<string, number>();
     tasks = requeue(tasks, 0, counts);
     expect(tasks[4].itemId).toBe("i0");
     expect(tasks[4].role).toBe("requeue");
-    tasks = requeue(tasks, 4, counts);
     const len = tasks.length;
-    tasks = requeue(tasks, tasks.length - 1, counts);
+    tasks = requeue(tasks, 4, counts); // missing the retry too: no third time in this lesson
     expect(tasks.length).toBe(len);
   });
 });

@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import type { Goal, GoalKind, GoalLevel } from "@/lib/model";
-import { alternatives, courseTop, CURRENT_HOURS, HOURS, LEVELS, planForDate, projectedDate, retentionFor } from "@/lib/goals";
+import { alternatives, courseTop, CURRENT_HOURS, HOURS, LEVELS, MULT, nextLevel, planForDate, projectedDate, retentionFor } from "@/lib/goals";
 import { units } from "@/lib/content";
 import { addMonths, clock, fmtMonth, toISO, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
@@ -30,7 +30,9 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const [showClasses, setShowClasses] = useState((initial?.classHours ?? 0) > 0);
   const [info, setInfo] = useState(false);
 
-  const effTarget: GoalLevel = kind === "trip" ? "A1.1" : target;
+  // A trip goal is "survive the trip": A1.1, or the next level up if you're already past it.
+  const tripTarget: GoalLevel = HOURS["A1.1"] > CURRENT_HOURS[current] ? "A1.1" : nextLevel(current);
+  const effTarget: GoalLevel = kind === "trip" ? tripTarget : target;
   const by = fromISO(date).getTime();
   const planIn = { base, lang, current, target: effTarget, by, now, daysPerWeek, classHoursPerWeek: classes };
   const plan = planForDate(planIn);
@@ -54,7 +56,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const save = () => {
     const g: Goal = {
       kind,
-      target: kind === "level" ? target : kind === "trip" ? "A1.1" : kind === "steady" ? target : undefined,
+      target: kind === "level" ? target : kind === "trip" ? tripTarget : kind === "steady" ? target : undefined,
       by: kind === "level" || kind === "trip" ? date : undefined,
       minutesPerDay: minutes,
       classHours: classes || undefined,
@@ -176,7 +178,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
                 <Icon name="info" size={18} />
               </button>
             </div>
-            {plan.alreadyThere && (kind === "level" || kind === "trip") && <div className="caption">{t.alreadyThere}</div>}
+            {plan.alreadyThere && (kind === "level" || kind === "trip") && <div className="caption">{classes > 0 ? t.alreadyThere : t.alreadyThereLevel}</div>}
             {beyondCourse && <div className="caption">{t.beyondCourse(COURSE_TOP)}</div>}
           </div>
         </div>
@@ -192,4 +194,67 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
       </Sheet>
     </>
   );
+}
+
+/**
+ * The onboarding goal (UX review 2026-11-16): one question — how many minutes a day — answered with
+ * something near and concrete ("in about 2 weeks: say hello and order a coffee"), never a level
+ * 17 months away. The full picker (level, trip date, classes) stays one tap away.
+ */
+export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWeek, initial, t, onSave }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; startUnit: number; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void }) {
+  const [minutes, setMinutes] = useState<number>(initial?.minutesPerDay && [5, 10, 15].includes(initial.minutesPerDay) ? initial.minutesPerDay : 5);
+  const [full, setFull] = useState(false);
+  const us = units(lang);
+  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "B2" };
+  if (full)
+    return <GoalPicker lang={lang} base={base} appLang={appLang} current={current} daysPerWeek={daysPerWeek} initial={initial} t={t} onSave={onSave} />;
+  const checkpoints = (m: number) => unitCheckpoints(us, startUnit, m, daysPerWeek, base, lang);
+  const save = () => onSave({ kind: "steady", target: DEFAULT[current], minutesPerDay: minutes, retention: retentionFor("steady"), setAt: clock() });
+  return (
+    <>
+      <div className="stack" style={{ gap: 12 }}>
+        <p className="label muted" style={{ margin: 0 }}>{t.simpleGoalSub}</p>
+        {[5, 10, 15].map((m) => {
+          const [first] = checkpoints(m);
+          return (
+            <button key={m} className="choice-card" style={{ alignItems: "flex-start" }} aria-pressed={minutes === m} onClick={() => setMinutes(m)}>
+              <span className="stack grow" style={{ gap: 2 }}>
+                <b>{t.goalCardMin(m)}</b>
+                {first && <span className="caption">{t.milestoneIn(first.days, first.canDo)}</span>}
+              </span>
+              <span className="check"><Icon name="check" size={16} strokeWidth={3} /></span>
+            </button>
+          );
+        })}
+        <div className="card-soft stack" style={{ gap: 6 }} aria-live="polite">
+          <b className="label">{t.milestonesTitle}</b>
+          {checkpoints(minutes).map((ms) => (
+            <span key={ms.unit} className="label">{t.milestoneIn(ms.days, ms.canDo)}</span>
+          ))}
+          <span className="caption">{t.milestoneNote}</span>
+        </div>
+        <button type="button" className="link label" style={{ alignSelf: "flex-start", minHeight: 44 }} onClick={() => setFull(true)}>{t.moreGoalOptions}</button>
+      </div>
+      <div className="bottom-bar">
+        <button className="btn btn-primary" onClick={save}>{t.setGoal}</button>
+      </div>
+    </>
+  );
+}
+
+/** Rough, honest checkpoints: when the learner will have worked through the next units at this pace. */
+export function unitCheckpoints(us: ReturnType<typeof units>, startUnit: number, minPerDay: number, daysPerWeek: number, base: BaseLang, lang: TargetLang): { unit: number; days: number; canDo: string }[] {
+  // About a minute and a half of practice per new item, counting the reviews that follow;
+  // closer languages go faster (same multipliers as the level estimates).
+  const perItem = 1.5 * MULT[`${base}-${lang}`];
+  const out: { unit: number; days: number; canDo: string }[] = [];
+  let minutes = 0;
+  for (const u of us.filter((x) => x.index >= startUnit).slice(0, 3)) {
+    minutes += u.items.filter((i) => i.unit === u.id).length * perItem;
+    const practiceDays = Math.ceil(minutes / minPerDay);
+    const days = Math.max(1, Math.round((practiceDays * 7) / Math.max(1, daysPerWeek)));
+    const c = u.canDo[0];
+    if (c) out.push({ unit: u.index, days, canDo: c[base] ?? c.en });
+  }
+  return [out[0], out[2] ?? out[1]].filter(Boolean) as typeof out;
 }

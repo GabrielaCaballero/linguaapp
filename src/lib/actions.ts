@@ -118,6 +118,8 @@ export interface AnswerInput {
   reschedule: boolean;
   /** A hint was used: a right answer counts at most as Hard (never punished below that). */
   hinted?: boolean;
+  /** The "try" right after learning: logged as practice, never "to fix". */
+  practice?: boolean;
 }
 
 /** Grade one answer: FSRS update + review log + metrics event. Returns the stability change. */
@@ -137,7 +139,7 @@ export function recordAnswer(a: AnswerInput): { before: number; after: number } 
     return {
       ...db,
       cards: { ...db.cards, [a.item.id]: next },
-      reviews: [...db.reviews, { t: now, id: a.item.id, lang: a.item.lang, mode: a.mode, verdict: a.verdict, rating, source: a.source, confidence: a.confidence, ms: a.ms, gap }],
+      reviews: [...db.reviews, { t: now, id: a.item.id, lang: a.item.lang, mode: a.mode, verdict: a.verdict, rating, source: a.source, confidence: a.confidence, ms: a.ms, gap, ...(a.practice ? { practice: true as const } : {}) }],
       events: [...db.events, { t: now, type: "answer", itemId: a.item.id, mode: a.mode, verdict: a.verdict, rating, source: a.source, ms: a.ms }],
     };
   });

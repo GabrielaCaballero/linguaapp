@@ -129,7 +129,8 @@ export function toFix(db: DB, lang: TargetLang, now: number): string[] {
   const last = new Map<string, string>();
   for (const r of before) if (r.t >= lastDay) last.set(r.id, r.verdict);
   const fixedToday = new Set(db.reviews.filter((r) => r.lang === lang && r.t >= today && r.verdict !== "wrong").map((r) => r.id));
-  const wrongEver = new Set(before.filter((r) => r.t >= lastDay && r.verdict === "wrong").map((r) => r.id));
+  // A miss on the "try" right after learning is practice: only real checks count as "to fix".
+  const wrongEver = new Set(before.filter((r) => r.t >= lastDay && r.verdict === "wrong" && !r.practice).map((r) => r.id));
   return [...wrongEver].filter((id) => !fixedToday.has(id) && db.cards[id]);
 }
 

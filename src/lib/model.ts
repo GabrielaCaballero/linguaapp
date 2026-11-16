@@ -11,7 +11,7 @@ export type GoalKind = "level" | "trip" | "steady" | "maintain";
 
 export interface Goal {
   kind: GoalKind;
-  /** Target level (level/trip). Trip is always A1.1. */
+  /** Target level (level/trip). Trip is A1.1, or the next level for someone already past it. */
   target?: GoalLevel;
   /** YYYY-MM-DD deadline (level/trip). */
   by?: string;
@@ -139,6 +139,8 @@ export interface ReviewLog {
   gap?: number;
   /** Sync: this answer is safely in the account's history (so the phone may drop it later). */
   up?: true;
+  /** The "try" right after a learn card: practice, not memory. Never counts as "to fix". */
+  practice?: true;
 }
 
 export interface SessionRecord {

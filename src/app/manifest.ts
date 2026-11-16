@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lingua — Italian & German",
-    short_name: "Lingua",
+    name: "Linguina · Italian & German",
+    short_name: "Linguina",
     description: "Italian and German, a few minutes a day. Works offline.",
     start_url: "/",
     display: "standalone",
