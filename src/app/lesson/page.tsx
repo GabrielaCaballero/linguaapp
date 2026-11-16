@@ -18,8 +18,9 @@ import { Icon } from "@/components/icons";
 import { Loading, Sheet, useT } from "@/components/ui";
 import { Exercise, Guess, type CellResult } from "@/components/lesson/Exercises";
 import { GrammarCard, RuleScreen } from "@/components/lesson/Grammar";
+import { UnitOverview, overviewSeenKeys } from "@/components/UnitOverview";
 import { TableStudy } from "@/components/lesson/Table";
-import { grammarPoint } from "@/lib/content";
+import { grammarPoint, unitOf } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
 import type { GrammarPoint } from "@/content/schema";
 import { Feedback, type TutorView } from "@/components/lesson/Feedback";
@@ -296,6 +297,10 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       }
     : undefined;
 
+  // A unit's first new item: show its overview first (coursebook order: overview, then practice).
+  const openerUnit = !speed && task.role === "intro" && !fb ? unitOf(item) : undefined;
+  const opener = openerUnit && !getDB().profile.seen?.[`unit:${openerUnit.id}`] ? openerUnit : null;
+
   const progress = speed && settings.speedTimer ? 1 - speedLeft / SPEED_SECONDS : idx / Math.max(1, tasks.length);
   const showConf = !speed && task.role !== "intro" && mode !== "guess";
 
@@ -316,7 +321,19 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       {built.welcomeBack && idx === 0 && !fb && <div className="card-soft label fade-in" style={{ marginTop: 8 }}>{t.welcomeBack}</div>}
 
       <div key={task.key} className="fade-in" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        {ruleCard ? (
+        {opener ? (
+          <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
+            <UnitOverview
+              unit={opener}
+              base={base}
+              t={t}
+              canListen={canListen}
+              onStart={() => {
+                for (const k of overviewSeenKeys(opener)) markSeen(k);
+              }}
+            />
+          </div>
+        ) : ruleCard ? (
           <RuleScreen point={ruleCard} base={base} t={t} onDone={next} />
         ) : task.role === "intro" && item.type === "paradigm" ? (
           <TableStudy

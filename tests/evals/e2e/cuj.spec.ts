@@ -88,7 +88,8 @@ test.describe("P0-1 lesson re-entry", () => {
     await page.getByRole("button", { name: T.en.continue, exact: true }).click();
     await page.getByRole("button", { name: /Start|Continue|Practise/ }).first().click();
     await page.waitForURL(/\/lesson/);
-    await expect(page.locator(".prompt-eyebrow").first()).toBeVisible();
+    // a fresh lesson: an exercise, or the next unit's overview if the lesson moves on to a new unit
+    await expect(page.locator(".prompt-eyebrow, .unit-overview").first()).toBeVisible();
     await expect(page.getByText(T.en.resultsTitle)).toHaveCount(0);
   });
   test("quit → Start again does not show the 'End lesson?' sheet", async ({ page }) => {
@@ -158,7 +159,8 @@ test.describe("CUJ-4 second language (P1 Ana)", () => {
     await page.goto("/");
     await page.locator(".btn-primary").click();
     await page.waitForURL(/\/lesson/);
-    await expect(page.locator(".prompt [lang=de], .prompt-word [lang=de], .teach [lang=de]").first().or(page.locator(".prompt .title").first())).toBeVisible();
+    // a new German unit now opens with its overview (coursebook order) — still German, not Italian
+    await expect(page.locator(".unit-overview [lang=de], .prompt [lang=de], .prompt-word [lang=de], .teach [lang=de]").first().or(page.locator(".prompt .title").first())).toBeVisible();
     await expect(page.getByText(T.es.resultsTitle)).toHaveCount(0);
   });
 });
@@ -440,6 +442,41 @@ test.describe("CUJ-30 AI tutor: choose your provider", () => {
     expect(cfg).toMatchObject({ provider: "gemini", model: "gemini-x-flash-lite" });
     // the key never goes into the progress data or backups
     expect(JSON.stringify(await readDB(page))).not.toContain("AIza-e2e");
+  });
+});
+
+test.describe("CUJ-31 unit overview first (coursebook order)", () => {
+  test("a new unit opens with its overview: goals, model dialogue, grammar with tables, key words; then practice starts with grammar", async ({ page }) => {
+    const t = T.en;
+    await page.goto("/");
+    await page.getByRole("button", { name: t.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
+    await page.locator(".choice-card", { hasText: "English" }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: "Deutsch" }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.baseName.en }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.expNever }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.setGoal }).click();
+    await page.getByRole("button", { name: t.startFirst }).click();
+    await page.waitForURL(/\/lesson/);
+    const ov = page.locator(".unit-overview");
+    await expect(ov).toBeVisible();
+    await expect(ov).toContainText(t.youWillLearn);
+    await expect(ov).toContainText(t.grammarHere);
+    await expect(ov).toContainText(t.keyWords);
+    await expect(ov.locator("[lang=de]").first()).toBeVisible();
+    await page.getByRole("button", { name: t.startPractising }).click();
+    await expect(page.locator(".prompt-eyebrow").first()).toBeVisible();
+    expect((await readDB(page)).profile.seen?.["unit:de-u01"]).toBeGreaterThan(0);
+    // and from the Path, any time
+    await page.goto("/path");
+    await page.getByRole("link", { name: t.overviewBtn }).first().click();
+    await expect(page.locator(".unit-overview")).toContainText(t.youWillLearn);
+    await page.goto("/unit?id=de-u04");
+    await expect(page.locator(".unit-overview")).toContainText(t.grammarHere);
+    await expect(page.locator(".unit-overview table").first()).toBeVisible();
   });
 });
 

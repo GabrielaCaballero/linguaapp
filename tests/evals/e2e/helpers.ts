@@ -67,6 +67,9 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
   }
   await btn(page, t.startFirst).click();
   await page.waitForURL(/\/lesson/);
+  // The first lesson opens with the unit overview (coursebook order); read it and start.
+  await page.locator(".unit-overview, .answer-area, .teach").first().waitFor();
+  if (await page.locator(".unit-overview").isVisible().catch(() => false)) await btn(page, t.startPractising).click();
   await page.locator(".answer-area, .teach").first().waitFor();
   out.firstAnswerMs = Date.now() - t0;
   void opts;
@@ -138,6 +141,11 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
         await btn(page, t.iWasRight).click();
       }
       await fb.getByRole("button", { name: t.continue }).click();
+      continue;
+    }
+    // unit overview before a unit's first new item: read it, then start practising
+    if (await page.locator(".unit-overview").isVisible().catch(() => false)) {
+      await btn(page, t.startPractising).click();
       continue;
     }
     const eyebrow = await txt(page, ".prompt-eyebrow");
