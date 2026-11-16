@@ -63,10 +63,10 @@ export const grammar3: GrammarPoint[] = [
       { es: "Pon la consecuencia en condicional (verrei, farei, girerei). El orden de las partes puede cambiar.", en: "Put the result in the conditional (verrei, farei, girerei). The two parts can swap order." },
     ],
     table: {
-      head: ["tipo", "se + …", "conseguenza", "esempio"],
+      head: ["tipo", "se + …", "conseguenza"],
       rows: [
-        ["reale", "presente", "presente / futuro", "Se ho tempo, vengo."],
-        ["possibile", "congiuntivo imperfetto", "condizionale", "Se avessi tempo, verrei."],
+        ["reale", "presente", "presente / futuro"],
+        ["possibile", "congiuntivo imperfetto", "condizionale"],
       ],
     },
     examples: [
@@ -206,8 +206,8 @@ export const grammar3: GrammarPoint[] = [
       en: "venire + participle = passive of an action (viene chiusa); andare + participle = 'must be done' (va firmato).",
     },
     rule: {
-      es: "venire puede reemplazar a essere en la pasiva para subrayar la acción, pero solo en tiempos simples (presente, imperfetto, futuro). andare + participio añade la idea de obligación: il modulo va firmato = el formulario debe firmarse. En ambos casos el participio concuerda con el sujeto.",
-      en: "venire can replace essere in the passive to stress the action, but only in simple tenses (present, imperfetto, future). andare + participle adds the idea of obligation: il modulo va firmato = the form must be signed. In both, the participle agrees with the subject.",
+      es: "venire puede reemplazar a essere en la pasiva para subrayar la acción, pero solo en tiempos simples (presente, imperfetto, futuro). andare + participio añade la idea de obligación: il modulo va firmato = el formulario debe firmarse (excepción: con perdere o distruggere no hay obligación y vale en tiempos compuestos: il pacco è andato perso). En ambos casos el participio concuerda con el sujeto.",
+      en: "venire can replace essere in the passive to stress the action, but only in simple tenses (present, imperfetto, future). andare + participle adds the idea of obligation: il modulo va firmato = the form must be signed (exception: with perdere or distruggere there is no obligation and compound tenses work: il pacco è andato perso). In both, the participle agrees with the subject.",
     },
     steps: [
       { es: "¿Describes algo que se hace (habitualmente)? → venire. ¿Algo que se debe hacer? → andare.", en: "Describing something that is done (habitually)? → venire. Something that must be done? → andare." },
@@ -313,7 +313,7 @@ export const grammar3: GrammarPoint[] = [
       { target: "Studiando ogni giorno, migliori.", gloss: { es: "Estudiando cada día, mejoras.", en: "By studying every day, you improve." } },
     ],
     pitfalls: {
-      es: "El gerundio no funciona como sustantivo ni va tras preposición: «Nuotando fa bene» y «prima di uscendo» son incorrectos. Usa el infinitivo: «Nuotare fa bene», «prima di uscire».",
+      es: "En español «vi a Marco saliendo del bar» puede significar que Marco salía; en italiano el gerundio se refiere al sujeto: «Ho visto Marco uscendo dal bar» = yo salía. Si salía Marco: «Ho visto Marco che usciva dal bar» o «Ho visto Marco uscire dal bar».",
       en: "English '-ing' as a noun or after a preposition is an infinitive in Italian: not 'Nuotando fa bene' or 'prima di uscendo', but 'Nuotare fa bene', 'prima di uscire'.",
     },
   },
@@ -494,12 +494,12 @@ export const grammar3: GrammarPoint[] = [
       { es: "Elige el auxiliar como en el passato prossimo y haz concordar con essere.", en: "Pick the auxiliary as in the passato prossimo and make it agree with essere." },
     ],
     table: {
-      head: ["tipo", "se + …", "conseguenza", "esempio"],
+      head: ["tipo", "se + …", "conseguenza"],
       rows: [
-        ["reale", "presente", "presente / futuro", "Se piove, resto a casa."],
-        ["possibile", "congiuntivo imperfetto", "condizionale", "Se potessi, verrei."],
-        ["irreale", "congiuntivo trapassato", "condizionale passato", "Se avessi saputo, sarei venuto."],
-        ["misto", "congiuntivo trapassato", "condizionale", "Se avessi studiato, ora avrei un lavoro migliore."],
+        ["reale", "presente", "presente / futuro"],
+        ["possibile", "congiuntivo imperfetto", "condizionale"],
+        ["irreale", "congiuntivo trapassato", "condizionale passato"],
+        ["misto", "congiuntivo trapassato", "condizionale"],
       ],
     },
     examples: [
@@ -606,7 +606,7 @@ export const grammar3: GrammarPoint[] = [
       en: "The passato remoto narrates finished, distant events: it is used mainly in writing, history and biographies, and in everyday speech in parts of the south. Regular verbs have three sets of endings (-are, -ere, -ire). Many irregulars follow a '1-3-3' pattern: only io, lui/lei and loro change; tu, noi and voi are regular.",
     },
     steps: [
-      { es: "Regular: quita -are / -ere / -ire y añade las terminaciones de la tabla.", en: "Regular: drop -are / -ere / -ire and add the endings from the table." },
+      { es: "Regular: quita -are / -ere / -ire y añade las terminaciones de la tabla (en -ere también: credetti, credette, credettero).", en: "Regular: drop -are / -ere / -ire and add the endings from the table (-ere verbs also: credetti, credette, credettero)." },
       { es: "Irregular: aprende la forma de io (ebbi, feci, dissi, presi, vidi, venni, scrissi, nacqui).", en: "Irregular: learn the io form (ebbi, feci, dissi, presi, vidi, venni, scrissi, nacqui)." },
       { es: "De ahí salen lui/lei (-i → -e: ebbe, fece) y loro (+ -ro: ebbero, fecero).", en: "From it you get lui/lei (-i → -e: ebbe, fece) and loro (+ -ro: ebbero, fecero)." },
       { es: "tu, noi y voi son regulares desde la raíz: avesti, avemmo, aveste. essere es aparte: fui, fosti, fu, fummo, foste, furono.", en: "tu, noi and voi are regular from the stem: avesti, avemmo, aveste. essere is separate: fui, fosti, fu, fummo, foste, furono." },
@@ -614,12 +614,12 @@ export const grammar3: GrammarPoint[] = [
     table: {
       head: ["", "parlare", "credere", "dormire", "fare"],
       rows: [
-        ["io", "parlai", "credei / credetti", "dormii", "feci"],
+        ["io", "parlai", "credei", "dormii", "feci"],
         ["tu", "parlasti", "credesti", "dormisti", "facesti"],
-        ["lui / lei", "parlò", "credé / credette", "dormì", "fece"],
+        ["lui / lei", "parlò", "credé", "dormì", "fece"],
         ["noi", "parlammo", "credemmo", "dormimmo", "facemmo"],
         ["voi", "parlaste", "credeste", "dormiste", "faceste"],
-        ["loro", "parlarono", "crederono / credettero", "dormirono", "fecero"],
+        ["loro", "parlarono", "crederono", "dormirono", "fecero"],
       ],
     },
     examples: [
@@ -708,8 +708,8 @@ export const grammar3: GrammarPoint[] = [
       { target: "Questo è il capolavoro più famoso del museo.", gloss: { es: "Esta es la obra maestra más famosa del museo.", en: "This is the most famous masterpiece in the museum." } },
     ],
     pitfalls: {
-      es: "«La città più bella nel mondo» es incorrecto: el grupo va con di, como en español «del mundo». Correcto: «la città più bella del mondo».",
-      en: "'La città più bella nel mondo' is wrong: English 'in the world' is di in Italian. Correct: 'la città più bella del mondo'.",
+      es: "El grupo suele ir con di: «la città più bella del mondo» (también se dice «al mondo»). Lo que sí es incorrecto es repetir el artículo: «la città la più bella» → la città più bella.",
+      en: "The group usually takes di: 'la città più bella del mondo' ('al mondo' is also fine). What is wrong is repeating the article: 'la città la più bella' → la città più bella.",
     },
   },
 

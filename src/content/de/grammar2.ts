@@ -68,8 +68,8 @@ export const grammar2: GrammarPoint[] = [
     },
     examples: [
       { target: "Wie komme ich zum Bahnhof?", gloss: { es: "¿Cómo llego a la estación?", en: "How do I get to the station?" } },
-      { target: "Ich gehe zur Post.", gloss: { es: "Voy a correos.", en: "I'm going to the post office." } },
-      { target: "Gehen Sie geradeaus bis zur Ampel.", gloss: { es: "Siga recto hasta el semáforo.", en: "Go straight on as far as the traffic lights." } },
+      { target: "Ich gehe zur Post.", gloss: { es: "Voy al correo.", en: "I'm going to the post office." } },
+      { target: "Gehen Sie geradeaus bis zur Ampel.", gloss: { es: "Siga derecho hasta el semáforo.", en: "Go straight on as far as the traffic lights." } },
       { target: "Wie komme ich zum Krankenhaus?", gloss: { es: "¿Cómo llego al hospital?", en: "How do I get to the hospital?" } },
     ],
     pitfalls: {
@@ -87,13 +87,13 @@ export const grammar2: GrammarPoint[] = [
       en: "Sie: infinitive + Sie (Gehen Sie!). du: the du form without -st and without du (du nimmst → Nimm!).",
     },
     rule: {
-      es: "El imperativo pone el verbo en primer lugar. Con Sie se usa el infinitivo seguido de Sie; con du se quita el pronombre y la terminación -st, y con ihr solo se quita el pronombre. El cambio e → i se queda (Nimm!), pero la diéresis a → ä desaparece (Fahr!).",
-      en: "The imperative puts the verb first. With Sie you use the infinitive followed by Sie; with du you drop the pronoun and the -st ending, and with ihr you just drop the pronoun. The e → i change stays (Nimm!), but the a → ä umlaut disappears (Fahr!).",
+      es: "El imperativo pone el verbo en primer lugar. Con Sie se usa el infinitivo seguido de Sie; con du se quita el pronombre y la terminación (-st o -t: du liest → Lies!; si la raíz termina en -t/-d queda -e: Arbeite!), y con ihr solo se quita el pronombre. El cambio e → i se queda (Nimm!), pero la diéresis a → ä desaparece (Fahr!).",
+      en: "The imperative puts the verb first. With Sie you use the infinitive followed by Sie; with du you drop the pronoun and the ending (-st or -t: du liest → Lies!; stems in -t/-d keep -e: Arbeite!), and with ihr you just drop the pronoun. The e → i change stays (Nimm!), but the a → ä umlaut disappears (Fahr!).",
     },
     steps: [
       { es: "¿Hablas de Sie, de du o a varias personas (ihr)?", en: "Are you speaking to Sie, du, or several people (ihr)?" },
       { es: "Sie: infinitivo + Sie al principio: Nehmen Sie den Bus.", en: "Sie: infinitive + Sie at the start: Nehmen Sie den Bus." },
-      { es: "du: toma la forma de du y quita du y -st: du gehst → Geh!, du nimmst → Nimm!", en: "du: take the du form and drop du and -st: du gehst → Geh!, du nimmst → Nimm!" },
+      { es: "du: toma la forma de du y quita du y la terminación: du gehst → Geh!, du nimmst → Nimm!, du liest → Lies!", en: "du: take the du form and drop du and the ending: du gehst → Geh!, du nimmst → Nimm!, du liest → Lies!" },
       { es: "Si la forma de du tiene ä, vuelve a a: du fährst → Fahr!", en: "If the du form has ä, go back to a: du fährst → Fahr!" },
     ],
     table: {
@@ -106,7 +106,7 @@ export const grammar2: GrammarPoint[] = [
       ],
     },
     examples: [
-      { target: "Gehen Sie geradeaus und dann links.", gloss: { es: "Siga recto y luego a la izquierda.", en: "Go straight on and then left." } },
+      { target: "Gehen Sie geradeaus und dann links.", gloss: { es: "Siga derecho y luego doble a la izquierda.", en: "Go straight on and then left." } },
       { target: "Nehmen Sie die U-Bahn.", gloss: { es: "Tome el metro.", en: "Take the underground." } },
       { target: "Nimm den Bus!", gloss: { es: "¡Toma el autobús!", en: "Take the bus!" } },
     ],
@@ -290,12 +290,12 @@ export const grammar2: GrammarPoint[] = [
       en: "After weil, the conjugated verb goes to the end: …, weil ich krank bin.",
     },
     rule: {
-      es: "weil (porque) abre una oración subordinada, y en las subordinadas el verbo conjugado se va al final. Si hay un modal o un tiempo compuesto, el verbo conjugado es lo último de todo. Delante de weil siempre va una coma.",
-      en: "weil (because) opens a subordinate clause, and in subordinate clauses the conjugated verb moves to the end. With a modal or a compound tense, the conjugated verb is the very last word. A comma always comes before weil.",
+      es: "weil (porque) abre una oración subordinada, y en las subordinadas el verbo conjugado se va al final. Si hay un modal o un tiempo compuesto, el verbo conjugado es lo último de todo. La oración con weil siempre va separada por coma: delante de weil, o detrás de la subordinada si empieza la frase.",
+      en: "weil (because) opens a subordinate clause, and in subordinate clauses the conjugated verb moves to the end. With a modal or a compound tense, the conjugated verb is the very last word. The weil clause is always set off by a comma: before weil, or after the clause when it starts the sentence.",
     },
     steps: [
       { es: "Escribe una coma y weil.", en: "Write a comma and weil." },
-      { es: "Pon el sujeto justo después: weil ich…", en: "Put the subject right after it: weil ich…" },
+      { es: "Normalmente el sujeto va justo después: weil ich…", en: "Usually the subject comes right after it: weil ich…" },
       { es: "Añade el resto de la frase.", en: "Add the rest of the clause." },
       { es: "Termina con el verbo conjugado: …, weil ich Fieber habe.", en: "Finish with the conjugated verb: …, weil ich Fieber habe." },
     ],
@@ -415,7 +415,7 @@ export const grammar2: GrammarPoint[] = [
     },
     steps: [
       { es: "¿La preposición es una de las nueve?", en: "Is the preposition one of the nine?" },
-      { es: "Pregúntate: ¿Wo? (posición) o ¿Wohin? (dirección, movimiento)", en: "Ask yourself: Wo? (position) or Wohin? (direction, movement)" },
+      { es: "Pregúntate: ¿Wo? (posición, también moverse dentro de un lugar: Ich laufe im Park) o ¿Wohin? (dirección: hacia un lugar)", en: "Ask yourself: Wo? (position, including moving around within a place: Ich laufe im Park) or Wohin? (direction: towards a place)" },
       { es: "Wo? → dativo: dem, der, dem, den. Wohin? → acusativo: den, die, das, die.", en: "Wo? → dative: dem, der, dem, den. Wohin? → accusative: den, die, das, die." },
       { es: "Contrae si se puede: in dem → im, an dem → am, in das → ins, auf das → aufs.", en: "Contract where possible: in dem → im, an dem → am, in das → ins, auf das → aufs." },
     ],
@@ -569,8 +569,8 @@ export const grammar2: GrammarPoint[] = [
       en: "dass = that; the conjugated verb goes last: Ich glaube, dass er recht hat.",
     },
     rule: {
-      es: "dass (que) une una opinión o una información a otra frase, y como toda subordinada manda el verbo conjugado al final. Con un modal o un tiempo compuesto, el infinitivo o el participio va primero y el verbo conjugado cierra la frase. Delante de dass siempre va coma.",
-      en: "dass (that) attaches an opinion or a piece of information to another sentence, and like every subordinate clause it sends the conjugated verb to the end. With a modal or a compound tense, the infinitive or participle comes first and the conjugated verb closes the clause. A comma always comes before dass.",
+      es: "dass (que) une una opinión o una información a otra frase, y como toda subordinada manda el verbo conjugado al final. Con un modal o un tiempo compuesto, el infinitivo o el participio va primero y el verbo conjugado cierra la frase. La oración con dass siempre va separada por coma.",
+      en: "dass (that) attaches an opinion or a piece of information to another sentence, and like every subordinate clause it sends the conjugated verb to the end. With a modal or a compound tense, the infinitive or participle comes first and the conjugated verb closes the clause. The dass clause is always set off by a comma.",
     },
     steps: [
       { es: "Frase principal + coma + dass.", en: "Main clause + comma + dass." },
@@ -832,7 +832,7 @@ export const grammar2: GrammarPoint[] = [
     ],
     pitfalls: {
       es: "«Ich denke in meine Kindheit» traduce «pensar en» con in. La preposición de denken es an: Ich denke an meine Kindheit. Y «esperar el bus» no lleva preposición en español, pero en alemán sí: Ich warte auf den Bus.",
-      en: "'Ich warte für den Bus' translates 'wait for' word by word. The preposition with warten is auf: Ich warte auf den Bus. Likewise 'think of/about' is denken an, not 'denken von'.",
+      en: "'Ich warte für den Bus' translates 'wait for' word by word. The preposition with warten is auf: Ich warte auf den Bus. Likewise 'think of' in the sense of remembering is denken an: Ich denke an dich.",
     },
   },
   {

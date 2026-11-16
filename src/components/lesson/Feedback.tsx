@@ -79,7 +79,10 @@ export function Feedback({
   const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
   const noteArg = check?.reason === "umlaut" ? umlautPair(check.detail?.got ?? "", check.detail?.want ?? item.target) : check?.detail?.want ?? item.target;
   const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](noteArg) : undefined;
-  const ruleLine = grammar && v !== "correct" ? gl(grammar.short, base) : undefined;
+  // The grammar line is for real mistakes; a typo or missing accent ("almost") gets no rule text.
+  // A table counts as a real mistake when any cell is wrong, even if the table as a whole is "almost".
+  const realMistake = !overridden && (v === "wrong" || !!check?.ruleId || (cells ?? []).some((c) => c.verdict === "wrong"));
+  const ruleLine = grammar && realMistake ? gl(grammar.short, base) : undefined;
   const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) ?? ruleLine : undefined);
   const annots = v !== "correct" && item.annot ? Object.entries(item.annot) : [];
   const missed = (cells ?? []).filter((c) => c.verdict !== "correct");
@@ -135,7 +138,7 @@ export function Feedback({
           ))}
         </div>
       )}
-      {grammar && v !== "correct" && (
+      {grammar && realMistake && (
         <div className="fb-note">
           {ruleLine && ruleLine !== line && <div style={{ marginBottom: 4 }}>{ruleLine}</div>}
           {onRule && (

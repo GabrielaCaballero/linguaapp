@@ -172,8 +172,8 @@ export const unit: Unit = {
       gloss: { es: "preposiciones de dos casos", en: "two-way prepositions" },
       pattern: {
         rule: {
-          es: "in, an, auf, über, unter, vor, hinter, neben, zwischen: ¿dónde? → dativo (im Park); ¿adónde? (movimiento) → acusativo (in den Park).",
-          en: "in, an, auf, über, unter, vor, hinter, neben, zwischen: where? → dative (im Park); where to? (movement) → accusative (in den Park).",
+          es: "in, an, auf, über, unter, vor, hinter, neben, zwischen: ¿dónde? → dativo (im Park); ¿adónde? (dirección) → acusativo (in den Park).",
+          en: "in, an, auf, über, unter, vor, hinter, neben, zwischen: where? → dative (im Park); where to? (direction) → accusative (in den Park).",
         },
         table: [["", "Wo? (Dativ)", "Wohin? (Akkusativ)"], ["der Park", "im Park", "in den Park"], ["die Stadt", "in der Stadt", "in die Stadt"], ["das Bett", "auf dem Bett", "aufs Bett"]],
       },

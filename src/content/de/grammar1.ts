@@ -29,7 +29,7 @@ export const grammar1: GrammarPoint[] = [
         ["heißen", "Wie heißt du?", "Wie heißen Sie?"],
         ["sein", "Bist du Lena?", "Sind Sie Frau Weber?"],
         ["dir / Ihnen", "Wie geht es dir?", "Wie geht es Ihnen?"],
-        ["Tschüss / Auf Wiedersehen", "Tschüss!", "Auf Wiedersehen!"],
+        ["Gruß", "Tschüss!", "Auf Wiedersehen!"],
       ],
     },
     examples: [
@@ -345,10 +345,10 @@ export const grammar1: GrammarPoint[] = [
     table: {
       head: ["", "m", "f", "n"],
       rows: [
-        ["Nominativ", "ein Kaffee", "eine Milch", "ein Wasser"],
-        ["Akkusativ", "einen Kaffee", "eine Milch", "ein Wasser"],
-        ["Nominativ", "der Kaffee", "die Milch", "das Wasser"],
-        ["Akkusativ", "den Kaffee", "die Milch", "das Wasser"],
+        ["Nom. (ein)", "ein Kaffee", "eine Milch", "ein Wasser"],
+        ["Akk. (ein)", "einen Kaffee", "eine Milch", "ein Wasser"],
+        ["Nom. (der)", "der Kaffee", "die Milch", "das Wasser"],
+        ["Akk. (der)", "den Kaffee", "die Milch", "das Wasser"],
       ],
     },
     examples: [

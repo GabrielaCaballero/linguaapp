@@ -424,8 +424,10 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       <Sheet open={!!ruleOpen} onClose={() => setRuleOpen(null)} label={t.ruleTitle}>
         {ruleOpen && (
           <div className="stack" style={{ paddingBottom: 8, maxHeight: "70vh", overflowY: "auto" }}>
-            <GrammarCard point={ruleOpen} base={base} t={t} />
-            <button className="btn btn-primary" onClick={() => setRuleOpen(null)}>{t.understood}</button>
+            <GrammarCard point={ruleOpen} base={base} t={t} mode="mistake" />
+            <div className="bottom-bar">
+              <button className="btn btn-primary" onClick={() => setRuleOpen(null)}>{t.understood}</button>
+            </div>
           </div>
         )}
       </Sheet>

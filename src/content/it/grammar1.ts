@@ -331,8 +331,8 @@ export const grammar1: GrammarPoint[] = [
       en: "Possessives take an article (la mia casa), except with a singular family member: mia madre, mio fratello.",
     },
     rule: {
-      es: "El posesivo concuerda con la cosa poseída, no con el dueño: mio padre, mia madre, i miei genitori. Normalmente va con artículo (la mia casa, il tuo numero), pero con un familiar en singular el artículo desaparece: mia sorella. El artículo vuelve en plural (le mie sorelle), con loro (il loro figlio) y casi siempre con mamma y papà.",
-      en: "The possessive agrees with the thing owned, not with the owner: mio padre, mia madre, i miei genitori. It normally takes an article (la mia casa, il tuo numero), but with a singular family member the article drops: mia sorella. The article comes back in the plural (le mie sorelle), with loro (il loro figlio) and usually with mamma and papà.",
+      es: "El posesivo concuerda con la cosa poseída, no con el dueño: mio padre, mia madre, i miei genitori. Normalmente va con artículo (la mia casa, il tuo numero), pero con un familiar en singular el artículo desaparece: mia sorella. El artículo vuelve en plural (le mie sorelle), con loro (il loro figlio), cuando el familiar lleva adjetivo o diminutivo (il mio fratello maggiore, la mia sorellina) y casi siempre con mamma y papà.",
+      en: "The possessive agrees with the thing owned, not with the owner: mio padre, mia madre, i miei genitori. It normally takes an article (la mia casa, il tuo numero), but with a singular family member the article drops: mia sorella. The article comes back in the plural (le mie sorelle), with loro (il loro figlio), when the family noun has an adjective or a diminutive (il mio fratello maggiore, la mia sorellina) and usually with mamma and papà.",
     },
     steps: [
       { es: "¿De quién es? Elige el posesivo: mio, tuo, suo, nostro, vostro, loro.", en: "Whose is it? Pick the possessive: mio, tuo, suo, nostro, vostro, loro." },
@@ -654,7 +654,7 @@ export const grammar1: GrammarPoint[] = [
     },
     steps: [
       { es: "Elige el verbo y la persona.", en: "Pick the verb and the person." },
-      { es: "¿noi o voi? Parte del infinitivo: andiamo, uscite.", en: "noi or voi? Start from the infinitive: andiamo, uscite." },
+      { es: "¿noi o voi? Casi siempre parte del infinitivo (andiamo, uscite, venite); fare es la excepción: facciamo, fate.", en: "noi or voi? Usually from the infinitive (andiamo, uscite, venite); fare is the exception: facciamo, fate." },
       { es: "Para las demás personas, usa la tabla: vado, esco, vengo, faccio.", en: "For the other persons, use the table: vado, esco, vengo, faccio." },
     ],
     table: {
