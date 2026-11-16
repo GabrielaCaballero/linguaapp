@@ -156,7 +156,7 @@ export const unit: Unit = {
         options: ["wird", "werdet", "wurde", "wirst"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "future"],
+      exercises: ["question"], grammar: ["de-g-futur"], tags: ["grammar", "future"],
     },
     {
       id: "pat-konj2-wenn", type: "pattern", target: "Wenn ich Zeit hätte, würde ich kommen.",
@@ -173,7 +173,7 @@ export const unit: Unit = {
         options: ["hätte", "habe", "hatte", "würde"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv2"],
+      exercises: ["question"], grammar: ["de-g-konj2-wenn"], tags: ["grammar", "konjunktiv2"],
     },
     {
       id: "pat-n-deklination", type: "pattern", target: "der Kunde → den / dem / des Kunden",
@@ -190,7 +190,7 @@ export const unit: Unit = {
         options: ["-en", "—", "-e", "-s"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "n-declension"],
+      exercises: ["question"], grammar: ["de-g-n-deklination"], tags: ["grammar", "n-declension"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

@@ -163,7 +163,7 @@ export const unit: Unit = {
         options: ["Distinti saluti", "Un bacio", "Ciao, a presto", "Un abbraccio"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "formal-writing"],
+      exercises: ["question"], grammar: ["it-g-lettera-formale"], tags: ["grammar", "formal-writing"],
     },
     {
       id: "pat-gerundio", type: "pattern", target: "studiando · avendo studiato · essendo arrivato",
@@ -180,7 +180,7 @@ export const unit: Unit = {
         options: ["Essendo", "Stato", "Essere", "Sendo"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "gerundio"],
+      exercises: ["question"], grammar: ["it-g-gerundio"], tags: ["grammar", "gerundio"],
     },
     {
       id: "pat-participio-assoluto", type: "pattern", target: "Finito il lavoro, … · Arrivati a casa, …",
@@ -197,7 +197,7 @@ export const unit: Unit = {
         options: ["Arrivati", "Arrivato", "Arrivata", "Arrivare"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "participio"],
+      exercises: ["question"], grammar: ["it-g-participio-assoluto"], tags: ["grammar", "participio"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

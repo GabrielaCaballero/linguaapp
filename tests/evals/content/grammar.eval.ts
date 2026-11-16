@@ -26,6 +26,21 @@ for (const [lang, c] of Object.entries(courses)) {
         for (const cell of i.paradigm?.cells ?? []) if (cell.ruleId) expect(ids.has(cell.ruleId), `${i.id} → ${cell.ruleId}`).toBe(true);
       }
     });
+    it("every grammar pattern links a textbook card (the unit overview shows it); ids unique; no unused cards", () => {
+      for (const i of items.filter((x) => x.type === "pattern")) expect(i.grammar?.length, i.id).toBeTruthy();
+      expect(ids.size).toBe((c.grammar ?? []).length);
+      const used = new Set(items.flatMap((i) => i.grammar ?? []));
+      for (const id of ids) expect(used.has(id), id).toBe(true);
+    });
+    it("card tables fit a phone: ≤ 5 columns, ≤ 7 rows; ≤ 4 steps", () => {
+      for (const g of c.grammar ?? []) {
+        if (g.table) {
+          expect(g.table.head.length, g.id).toBeLessThanOrEqual(5);
+          expect(g.table.rows.length, g.id).toBeLessThanOrEqual(7);
+        }
+        expect((g.steps ?? []).length, g.id).toBeLessThanOrEqual(4);
+      }
+    });
     it("paradigm tables: 2–7 cells (fits a phone with the keyboard open), labels unique, both captions", () => {
       for (const i of items.filter((x) => x.type === "paradigm")) {
         const cells = i.paradigm!.cells;

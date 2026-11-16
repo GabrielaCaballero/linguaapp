@@ -153,7 +153,7 @@ export const unit: Unit = {
         options: ["der ankommende Zug", "der angekommene Zug", "der ankommend Zug", "der Zug ankommend"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "participles"],
+      exercises: ["question"], grammar: ["de-g-partizipialattribut"], tags: ["grammar", "participles"],
     },
     {
       id: "pat-passiversatz", type: "pattern", target: "lässt sich reparieren · ist zu reparieren · reparierbar",
@@ -170,7 +170,7 @@ export const unit: Unit = {
         options: ["Das lässt sich nicht reparieren.", "Das lässt nicht reparieren.", "Das ist nicht reparieren.", "Das lässt sich nicht repariert."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passive-alternatives"],
+      exercises: ["question"], grammar: ["de-g-passiversatz"], tags: ["grammar", "passive-alternatives"],
     },
     {
       id: "pat-nominalisierung", type: "pattern", target: "entwickeln → die Entwicklung · lesen → das Lesen",
@@ -187,7 +187,7 @@ export const unit: Unit = {
         options: ["die Entdeckung", "das Entdeckung", "die Entdeckheit", "die Entdeckerei"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "word-formation"],
+      exercises: ["question"], grammar: ["de-g-nominalisierung"], tags: ["grammar", "word-formation"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

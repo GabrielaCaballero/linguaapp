@@ -281,7 +281,7 @@ export const unit: Unit = {
         options: ["Come si chiama?", "Come ti chiami?", "Come chiama?"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "register"],
+      exercises: ["question"], grammar: ["it-g-tu-lei"], tags: ["grammar", "register"],
     },
     {
       id: "dlg-piacere", type: "dialogue", target: "Piacere mio.", register: "formal",

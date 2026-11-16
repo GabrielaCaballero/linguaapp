@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["ich krank bin.", "ich bin krank.", "bin ich krank.", "krank ich bin."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "weil", "word-order"],
+      exercises: ["question"], grammar: ["de-g-weil"], tags: ["grammar", "weil", "word-order"],
     },
     {
       id: "pat-weh", type: "pattern", target: "Mir tut der Kopf weh. · Mir tun die Füße weh.",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["tun", "tut", "tue", "tust"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "dative"],
+      exercises: ["question"], grammar: ["de-g-weh"], tags: ["grammar", "dative"],
     },
     {
       id: "pat-sollen-duerfen", type: "pattern", target: "müssen · nicht müssen · nicht dürfen · sollen",
@@ -216,7 +216,7 @@ export const unit: Unit = {
         options: ["Du musst nicht kommen.", "Du darfst nicht kommen.", "Du sollst kommen.", "Du kannst nicht kommen."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "modals"],
+      exercises: ["question"], grammar: ["de-g-sollen-duerfen"], tags: ["grammar", "modals"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

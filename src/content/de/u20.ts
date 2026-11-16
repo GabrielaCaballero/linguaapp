@@ -161,7 +161,7 @@ export const unit: Unit = {
         options: ["habe", "haben", "hast", "habest"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv1"],
+      exercises: ["question"], grammar: ["de-g-konjunktiv1"], tags: ["grammar", "konjunktiv1"],
     },
     {
       id: "pat-indirekte-frage", type: "pattern", target: "Sie fragt, ob … · Sie fragt, wann …",
@@ -178,7 +178,7 @@ export const unit: Unit = {
         options: ["ob", "wenn", "dass", "was"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "indirect-questions"],
+      exercises: ["question"], grammar: ["de-g-indirekte-frage"], tags: ["grammar", "indirect-questions"],
     },
     {
       id: "pat-sollen-wollen", type: "pattern", target: "Er soll reich sein. · Er will es gesehen haben.",
@@ -195,7 +195,7 @@ export const unit: Unit = {
         options: ["Er soll Millionär sein.", "Er will Millionär sein.", "Er muss Millionär sein.", "Er darf Millionär sein."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "sollen"],
+      exercises: ["question"], grammar: ["de-g-sollen-wollen"], tags: ["grammar", "sollen"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

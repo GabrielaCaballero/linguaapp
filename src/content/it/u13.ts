@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["Non fumare!", "Non fumi!", "Non fuma!", "No fumare!"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperative"],
+      exercises: ["question"], grammar: ["it-g-imperativo-tu"], tags: ["grammar", "imperative"],
     },
     {
       id: "pat-imperativo-lei", type: "pattern", target: "parli! · prenda! · senta! · venga!",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["scusi", "scusa", "scusate", "scusare"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperative", "polite"],
+      exercises: ["question"], grammar: ["it-g-imperativo-lei"], tags: ["grammar", "imperative", "polite"],
     },
     {
       id: "pat-imperativo-pronomi", type: "pattern", target: "prendilo! · dimmi! · lo prenda!",
@@ -216,7 +216,7 @@ export const unit: Unit = {
         options: ["Prendila!", "La prendi!", "Prendela!", "La prenda!"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "imperative", "pronouns"],
+      exercises: ["question"], grammar: ["it-g-imperativo-pronomi"], tags: ["grammar", "imperative", "pronouns"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

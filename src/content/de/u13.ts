@@ -164,7 +164,7 @@ export const unit: Unit = {
         options: ["Könnten Sie das Fenster öffnen?", "Konnten Sie das Fenster öffnen?", "Könnten Sie das Fenster öffnet?", "Kannten Sie das Fenster öffnen?"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "konjunktiv2"],
+      exercises: ["question"], grammar: ["de-g-konj2-hoeflich"], tags: ["grammar", "konjunktiv2"],
     },
     {
       id: "pat-dass", type: "pattern", target: "Ich glaube, dass er recht hat.",
@@ -181,7 +181,7 @@ export const unit: Unit = {
         options: ["er recht hat.", "er hat recht.", "hat er recht.", "recht er hat."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "dass", "word-order"],
+      exercises: ["question"], grammar: ["de-g-dass"], tags: ["grammar", "dass", "word-order"],
     },
     {
       id: "pat-seit", type: "pattern", target: "Ich wohne seit zwei Jahren hier.",
@@ -198,7 +198,7 @@ export const unit: Unit = {
         options: ["Ich wohne seit zwei Jahren hier.", "Ich wohne für zwei Jahre hier.", "Ich wohne vor zwei Jahren hier.", "Ich wohne seit zwei Jahre hier."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "seit"],
+      exercises: ["question"], grammar: ["de-g-seit"], tags: ["grammar", "seit"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

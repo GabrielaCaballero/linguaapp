@@ -152,7 +152,7 @@ export const unit: Unit = {
         options: ["wird", "wurdet", "hat", "werden"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passive"],
+      exercises: ["question"], grammar: ["de-g-passiv"], tags: ["grammar", "passive"],
     },
     {
       id: "pat-zu-infinitiv", type: "pattern", target: "Ich habe vergessen, die Tür abzuschließen.",
@@ -169,7 +169,7 @@ export const unit: Unit = {
         options: ["abzuschließen", "zu abschließen", "abschließen", "abgeschlossen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "zu-infinitive"],
+      exercises: ["question"], grammar: ["de-g-zu-infinitiv"], tags: ["grammar", "zu-infinitive"],
     },
     {
       id: "pat-obwohl-trotzdem", type: "pattern", target: "Obwohl er krank ist, arbeitet er. · Er ist krank. Trotzdem arbeitet er.",
@@ -186,7 +186,7 @@ export const unit: Unit = {
         options: ["Obwohl er krank ist, arbeitet er.", "Obwohl er ist krank, arbeitet er.", "Obwohl er krank ist, er arbeitet.", "Trotzdem er krank ist, arbeitet er."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "connectors"],
+      exercises: ["question"], grammar: ["de-g-obwohl-trotzdem"], tags: ["grammar", "connectors"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

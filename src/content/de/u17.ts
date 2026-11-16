@@ -158,7 +158,7 @@ export const unit: Unit = {
         options: ["-es", "-er", "-e", "-en"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "adjective-endings"],
+      exercises: ["question"], grammar: ["de-g-adjektiv-ein"], tags: ["grammar", "adjective-endings"],
     },
     {
       id: "pat-adjektiv-der", type: "pattern", target: "der neue Kollege · den neuen Kollegen",
@@ -175,7 +175,7 @@ export const unit: Unit = {
         options: ["-en", "-e", "-er", "-es"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "adjective-endings"],
+      exercises: ["question"], grammar: ["de-g-adjektiv-der"], tags: ["grammar", "adjective-endings"],
     },
     {
       id: "pat-meinung", type: "pattern", target: "Ich finde, dass … · Meiner Meinung nach ist …",
@@ -192,7 +192,7 @@ export const unit: Unit = {
         options: ["Meiner Meinung nach ist das falsch.", "Meiner Meinung nach das ist falsch.", "Meine Meinung nach ist das falsch.", "Nach meine Meinung ist das falsch."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "opinion"],
+      exercises: ["question"], grammar: ["de-g-meinung"], tags: ["grammar", "opinion"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

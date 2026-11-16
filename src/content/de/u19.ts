@@ -165,7 +165,7 @@ export const unit: Unit = {
         options: ["Sehr geehrter Herr Schulz,", "Sehr geehrte Herr Schulz,", "Liebe Herr Schulz,", "Sehr geehrtes Herr Schulz,"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "formal-writing"],
+      exercises: ["question"], grammar: ["de-g-geschaeftsbrief"], tags: ["grammar", "formal-writing"],
     },
     {
       id: "pat-passiv-modal", type: "pattern", target: "muss gemacht werden · kann repariert werden",
@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["unterschrieben", "unterschreiben", "unterschreibt", "geunterschrieben"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "passive"],
+      exercises: ["question"], grammar: ["de-g-passiv-modal"], tags: ["grammar", "passive"],
     },
     {
       id: "pat-doppelkonnektoren", type: "pattern", target: "zwar … aber · sowohl … als auch · weder … noch · nicht nur … sondern auch",
@@ -199,7 +199,7 @@ export const unit: Unit = {
         options: ["Er arbeitet nicht nur, sondern studiert auch.", "Er arbeitet nicht nur, aber studiert auch.", "Er arbeitet nicht nur, sondern auch studiert.", "Er arbeitet weder, sondern studiert auch."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "connectors"],
+      exercises: ["question"], grammar: ["de-g-doppelkonnektoren"], tags: ["grammar", "connectors"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

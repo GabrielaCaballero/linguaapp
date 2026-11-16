@@ -156,7 +156,7 @@ export const unit: Unit = {
         options: ["das", "dem", "der", "den"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "relative-clauses"],
+      exercises: ["question"], grammar: ["de-g-relativsatz"], tags: ["grammar", "relative-clauses"],
     },
     {
       id: "pat-verben-praep", type: "pattern", target: "warten auf · denken an · sich freuen auf / über",
@@ -173,7 +173,7 @@ export const unit: Unit = {
         options: ["an", "auf", "über", "von"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "verb-preposition"],
+      exercises: ["question"], grammar: ["de-g-verben-praep"], tags: ["grammar", "verb-preposition"],
     },
     {
       id: "pat-wo-da", type: "pattern", target: "Worauf …? — Darauf. · Auf wen …? — Auf ihn.",
@@ -190,7 +190,7 @@ export const unit: Unit = {
         options: ["darauf", "worauf", "dafür", "daran"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "verb-preposition"],
+      exercises: ["question"], grammar: ["de-g-wo-da"], tags: ["grammar", "verb-preposition"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

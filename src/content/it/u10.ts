@@ -166,7 +166,7 @@ export const unit: Unit = {
         options: ["ho", "sono", "sei", "è"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past"],
+      exercises: ["question"], grammar: ["it-g-pp-avere"], tags: ["grammar", "past"],
     },
     {
       id: "pat-pp-essere", type: "pattern", target: "sono andato/a · siamo usciti/e",
@@ -183,7 +183,7 @@ export const unit: Unit = {
         options: ["andata", "andato", "andati", "andare"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past", "essere"],
+      exercises: ["question"], grammar: ["it-g-pp-essere"], tags: ["grammar", "past", "essere"],
     },
     {
       id: "pat-pp-irregolari", type: "pattern", target: "fatto · visto · preso · letto · scritto · detto",
@@ -200,7 +200,7 @@ export const unit: Unit = {
         options: ["preso", "prenduto", "prendito", "presto"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past", "irregular-pp"],
+      exercises: ["question"], grammar: ["it-g-pp-irregolari"], tags: ["grammar", "past", "irregular-pp"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

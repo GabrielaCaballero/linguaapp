@@ -305,7 +305,7 @@ export const unit: Unit = {
         options: ["Wie heißen Sie?", "Wie heißt du?", "Wie heißt Sie?"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "register"],
+      exercises: ["question"], grammar: ["de-g-du-sie"], tags: ["grammar", "register"],
     },
     {
       id: "dlg-im-kurs", type: "dialogue", target: "Freut mich auch!", register: "informal",

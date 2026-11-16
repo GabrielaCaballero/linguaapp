@@ -61,7 +61,7 @@ export const unit: Unit = {
         options: ["sechzehn", "sechszehn", "zehnsechs", "sechzig"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "numbers"],
+      exercises: ["question"], grammar: ["de-g-zehn"], tags: ["grammar", "numbers"],
     },
     num("zwanzig", "zwanzig", "veinte (20)", "twenty (20)", ["zwölf", "zweizig", "zwanzigste"]),
     {
@@ -79,7 +79,7 @@ export const unit: Unit = {
         options: ["zweiunddreißig", "dreiundzwanzig", "dreißigzwei", "zweidreißig"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "numbers"],
+      exercises: ["question"], grammar: ["de-g-einundzwanzig"], tags: ["grammar", "numbers"],
     },
     num("dreissig", "dreißig", "treinta (30)", "thirty (30)", ["dreizig", "dreizehn", "dreißigste"], {
       note: { es: "Es la única decena con ß; las demás terminan en -zig: vierzig.", en: "The only tens word with ß; the others end in -zig: vierzig." },
@@ -169,7 +169,7 @@ export const unit: Unit = {
         options: ["Hast du ein Handy?", "Hast ein Handy du?", "Du ein Handy hast?"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "word-order"],
+      exercises: ["question"], grammar: ["de-g-ja-nein"], tags: ["grammar", "word-order"],
     },
 
     // ── Sound ────────────────────────────────────────────────

@@ -175,7 +175,7 @@ export const unit: Unit = {
         options: ["einen", "ein", "eine", "einem"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "accusative", "articles"],
+      exercises: ["question"], grammar: ["de-g-ein-einen"], tags: ["grammar", "accusative", "articles"],
     },
     {
       id: "pat-kein", type: "pattern", target: "kein · keine · keinen",
@@ -192,7 +192,7 @@ export const unit: Unit = {
         options: ["kein", "nicht", "keine", "keinen"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "negation"],
+      exercises: ["question"], grammar: ["de-g-kein"], tags: ["grammar", "negation"],
     },
 
     // ── Sound ────────────────────────────────────────────────

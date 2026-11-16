@@ -138,7 +138,7 @@ export const unit: Unit = {
         options: ["fossi", "sarei", "ero", "sia"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-congiuntivo-imperfetto"], tags: ["grammar", "congiuntivo"],
     },
     {
       id: "pat-periodo-ipotetico", type: "pattern", target: "Se ho tempo, vengo. · Se avessi tempo, verrei.",
@@ -155,7 +155,7 @@ export const unit: Unit = {
         options: ["avessi", "avrei", "ho", "abbia"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "hypotheses"],
+      exercises: ["question"], grammar: ["it-g-periodo-ipotetico"], tags: ["grammar", "hypotheses"],
     },
     {
       id: "pat-magari-come-se", type: "pattern", target: "magari fosse… · come se fosse… · vorrei che fosse…",
@@ -172,7 +172,7 @@ export const unit: Unit = {
         options: ["Magari fossi in vacanza!", "Magari sono in vacanza!", "Magari sarei in vacanza!", "Magari sia in vacanza!"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "wishes"],
+      exercises: ["question"], grammar: ["it-g-magari-come-se"], tags: ["grammar", "wishes"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

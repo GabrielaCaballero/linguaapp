@@ -145,7 +145,7 @@ export const unit: Unit = {
         options: ["fossimo arrivati", "saremmo arrivati", "eravamo arrivati", "siamo arrivati"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "past-unreal"],
+      exercises: ["question"], grammar: ["it-g-ipotetico-irreale"], tags: ["grammar", "past-unreal"],
     },
     {
       id: "pat-condizionale-passato", type: "pattern", target: "avrei fatto · sarei andato · avrei dovuto",
@@ -162,7 +162,7 @@ export const unit: Unit = {
         options: ["Mi sarebbe piaciuto andare.", "Mi avrebbe piaciuto andare.", "Mi piacerebbe andato.", "Mi sarei piaciuto andare."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "conditional"],
+      exercises: ["question"], grammar: ["it-g-condizionale-passato"], tags: ["grammar", "conditional"],
     },
     {
       id: "pat-congiuntivo-trapassato", type: "pattern", target: "che tu avessi capito · che fosse partito",
@@ -179,7 +179,7 @@ export const unit: Unit = {
         options: ["avessi", "abbia", "hai", "avresti"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "congiuntivo"],
+      exercises: ["question"], grammar: ["it-g-congiuntivo-trapassato"], tags: ["grammar", "congiuntivo"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

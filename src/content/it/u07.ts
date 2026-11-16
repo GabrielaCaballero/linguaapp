@@ -200,7 +200,7 @@ export const unit: Unit = {
         options: ["ci alziamo", "si alziamo", "ci alzano", "mi alziamo"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "reflexive"],
+      exercises: ["question"], grammar: ["it-g-riflessivi"], tags: ["grammar", "reflexive"],
     },
     {
       id: "pat-isc", type: "pattern", target: "finisco, finisci, finisce, finiamo, finite, finiscono",
@@ -217,7 +217,7 @@ export const unit: Unit = {
         options: ["capiscono", "capono", "capiamo", "capisce"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "isc"],
+      exercises: ["question"], grammar: ["it-g-isc"], tags: ["grammar", "isc"],
     },
     {
       id: "pat-ore", type: "pattern", target: "Sono le tre e mezza · È l'una",
@@ -234,7 +234,7 @@ export const unit: Unit = {
         options: ["Sono le tre e mezza.", "È le tre e mezza.", "Sono tre e mezza.", "Sono le tre e metà."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "time"],
+      exercises: ["question"], grammar: ["it-g-ore"], tags: ["grammar", "time"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

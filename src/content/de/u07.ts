@@ -194,7 +194,7 @@ export const unit: Unit = {
         options: ["fängt", "anfängt", "fangt", "fängst"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "separable"],
+      exercises: ["question"], grammar: ["de-g-trennbar"], tags: ["grammar", "separable"],
     },
     {
       id: "pat-uhrzeit", type: "pattern", target: "Viertel nach sieben · halb acht · Viertel vor acht",
@@ -211,7 +211,7 @@ export const unit: Unit = {
         options: ["Es ist halb sieben.", "Es ist halb sechs.", "Es ist sechs halb.", "Es ist halb nach sechs."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "time"],
+      exercises: ["question"], grammar: ["de-g-uhrzeit"], tags: ["grammar", "time"],
     },
     {
       id: "pat-am-um", type: "pattern", target: "am Montag · am Abend · um acht Uhr",
@@ -228,7 +228,7 @@ export const unit: Unit = {
         options: ["am … um", "um … am", "im … um", "am … im"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "time", "prepositions"],
+      exercises: ["question"], grammar: ["de-g-am-um"], tags: ["grammar", "time", "prepositions"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

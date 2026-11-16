@@ -171,7 +171,7 @@ export const unit: Unit = {
         options: ["vive", "vivi", "vivo", "viva"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "present"],
+      exercises: ["question"], grammar: ["it-g-ere-ire"], tags: ["grammar", "present"],
     },
     {
       id: "pat-c-e", type: "pattern", target: "c'è · ci sono",
@@ -188,7 +188,7 @@ export const unit: Unit = {
         options: ["ci sono", "c'è", "sono", "ha"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar"],
+      exercises: ["question"], grammar: ["it-g-c-e"], tags: ["grammar"],
     },
     {
       id: "pat-a-in-di", type: "pattern", target: "a Roma · in Italia · di Napoli",
@@ -205,7 +205,7 @@ export const unit: Unit = {
         options: ["in", "a", "di", "da"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "prepositions"],
+      exercises: ["question"], grammar: ["it-g-a-in-di"], tags: ["grammar", "prepositions"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────

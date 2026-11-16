@@ -148,7 +148,7 @@ export const unit: Unit = {
         options: ["una parolaccia", "una parolina", "un parolone", "una parolona"],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "alterati"],
+      exercises: ["question"], grammar: ["it-g-alterati"], tags: ["grammar", "alterati"],
     },
     {
       id: "pat-registro", type: "pattern", target: "Dimmi. / Mi dica. · Scusa. / Mi scusi. · Ti va? / Le va?",
@@ -165,7 +165,7 @@ export const unit: Unit = {
         options: ["Mi dica.", "Dimmi.", "Dimmelo.", "Di'."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "register"],
+      exercises: ["question"], grammar: ["it-g-registro"], tags: ["grammar", "register"],
     },
     {
       id: "pat-centrare", type: "pattern", target: "Che c'entra? · Non ne posso più. · Ce l'ho con te.",
@@ -182,7 +182,7 @@ export const unit: Unit = {
         options: ["Questo non c'entra niente.", "Questo non entra niente.", "Questo non ne entra niente.", "Questo non c'è niente."],
         answer: 0,
       },
-      exercises: ["question"], tags: ["grammar", "idioms"],
+      exercises: ["question"], grammar: ["it-g-centrare"], tags: ["grammar", "idioms"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────
