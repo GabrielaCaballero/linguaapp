@@ -191,7 +191,7 @@ export default function SettingsPage() {
       <div className="group" style={{ marginTop: 24 }}>
         <button className="cell" onClick={() => setAbout(true)}><Icon name="book" size={20} /><span className="grow">{t.sAbout}</span><Icon name="chevron" size={18} className="muted" /></button>
       </div>
-      <p className="caption center" style={{ marginTop: 24 }}>Lingua v2</p>
+      <p className="caption center" style={{ marginTop: 24 }}>Linguina</p>
 
       <Sheet open={!!preview} onClose={() => setPreview(null)} label={t.importPreview}>
         {preview && (

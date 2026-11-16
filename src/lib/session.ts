@@ -1,13 +1,14 @@
 // Session builder + difficulty controller. Spec §4.3.
 // A session is a ~5-minute chunk (≈22 tasks): due reviews (oldest first, ≤15 per chunk, ≤40/day),
-// new items in unit order (guess first, then recalled 3–6 tasks later), interleaved by type,
+// new items in unit order (learn it, try it right away, then recalled 3–6 tasks later), interleaved by type,
 // misses requeued once (cap 2). The controller keeps rolling accuracy in the 80–85% band.
 import type { Item, TargetLang } from "@/content/schema";
 import type { CardV2, DB, Mode, ReviewLog } from "./model";
 import { DAY, startOfDay } from "./dates";
 import { retrievability } from "./scheduler";
 
-export type Role = "review" | "intro" | "followup" | "requeue" | "practice" | "speed";
+/** intro = the "learn" card; try = one easy exercise on it straight after; followup = the spaced check. */
+export type Role = "review" | "intro" | "try" | "followup" | "requeue" | "practice" | "speed";
 export type SessionKind = "auto" | "review" | "new" | "speed";
 
 export interface Task {
@@ -47,7 +48,8 @@ export const MAX_REVIEWS_PER_CHUNK = 15;
 export const MAX_REVIEWS_PER_DAY = 40;
 export const BASE_NEW = 5;
 export const TASKS_PER_MIN = 4.4;
-export const REQUEUE_CAP = 2;
+// One retry per miss in a session: enough to fix it, not so many that a lesson feels like a loop.
+export const REQUEUE_CAP = 1;
 export const AWAY_DAYS = 7;
 
 /** Rolling accuracy over the last 10 graded tasks for a language (null if fewer than 5). */
@@ -103,9 +105,15 @@ export function buildSession(i: BuildInput): Built {
   let newN = welcomeBack || i.kind === "review" ? 0 : i.kind === "new" ? 8 : newBudget(shift);
   if (i.kind === "auto" && !welcomeBack && reviewIds.length < 4) newN += 1; // a quiet day: one more new word
   const fresh = i.items.filter((x) => !i.cards[x.id] && (i.unitIndexOf(x) === 0 || i.unitIndexOf(x) >= i.startUnit));
-  // Like a coursebook: within a unit, the grammar (patterns, tables) comes before the words.
-  const grammarFirst = (x: Item) => (x.type === "pattern" || x.type === "paradigm" ? 0 : 1);
-  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1) || grammarFirst(a) - grammarFirst(b));
+  // Like a coursebook: within a unit, the grammar (patterns, tables) comes early — but the unit
+  // opens on its easiest thing, a word or phrase ("Ciao"), not on a grammar puzzle.
+  const opener = new Map<number, string>();
+  for (const x of i.items) {
+    const u = i.unitIndexOf(x);
+    if (u > 0 && !opener.has(u) && (x.type === "word" || x.type === "phrase")) opener.set(u, x.id);
+  }
+  const rank = (x: Item) => (opener.get(i.unitIndexOf(x)) === x.id ? 0 : x.type === "pattern" || x.type === "paradigm" ? 1 : 2);
+  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1) || rank(a) - rank(b));
   const newIds = interleave(fresh.map((x) => x.id), byId, false).slice(0, newN);
   // Start with meaning, not an audio-only spelling guess.
   if (newIds.length > 1 && byId.get(newIds[0])?.type === "sound") {
@@ -113,7 +121,8 @@ export function buildSession(i: BuildInput): Built {
     if (k > 0) newIds.unshift(newIds.splice(k, 1)[0]);
   }
 
-  // 3. assemble: reviews interleaved with intros; each intro's follow-up lands 3–6 tasks later
+  // 3. assemble: reviews interleaved with new items. Each new item is learn → try (one easy
+  //    exercise right away), and its spaced follow-up lands 3–6 tasks later.
   const seq: Task[] = [];
   const pending: { task: Task; at: number }[] = [];
   const R = [...reviewIds];
@@ -125,10 +134,12 @@ export function buildSession(i: BuildInput): Built {
       seq.push(pending.shift()!.task);
       continue;
     }
-    const introTurn = N.length && (R.length === 0 || seq.length % 3 === 1);
+    // Yesterday's misses all come first (P1-3), then new items every third task.
+    const introTurn = N.length && (R.length === 0 || (seq.length % 3 === 1 && seq.length >= prio.length));
     if (introTurn) {
       const id = N.shift()!;
       seq.push(mk(id, "intro", false));
+      seq.push(mk(id, "try"));
       pending.push({ task: mk(id, "followup"), at: seq.length + 3 + Math.floor(rand() * 3) });
       continue;
     }
@@ -217,6 +228,8 @@ export interface ModeCtx {
   canListen: boolean;
   shift: number; // controller
   role: Role;
+  /** For a follow-up: did the "try" right after learning go well (this session)? */
+  tryOk?: boolean;
 }
 
 /**
@@ -231,8 +244,10 @@ export function typingArm(itemId: string): "typing" | "classic" {
 
 /**
  * Mode ladder: recognize → tiles/article/listen → recall.
- * Typing arm: the same-session follow-up is already a step up, and typing starts once the
- * card has survived a night (stability ≥ 1 day). Classic arm: promote on stability ≥ 3 days.
+ * The "try" right after learning is always the easiest step (recognise it).
+ * Typing arm: the spaced follow-up is at least a step up, and is typed when the try went well,
+ * so learners type in their very first session. Later reviews type once the card survived a night.
+ * Classic arm: promote on stability ≥ 3 days.
  */
 export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): Mode {
   if (ctx.role === "intro") return "guess";
@@ -250,9 +265,10 @@ export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): 
   const s = card?.stability ?? 0;
   const typing = typingArm(item.id) === "typing";
   let level = card && card.state !== 0 ? (typing ? (s >= 1 ? 2 : s > 0 ? 1 : 0) : s >= 3 ? 2 : s >= 1 ? 1 : 0) : 0;
-  if (ctx.role === "followup") level = typing ? 1 : 0;
+  if (ctx.role === "followup") level = typing ? (ctx.tryOk ? 2 : 1) : 0;
   if (ctx.role === "requeue") level = Math.max(0, level - 1);
   level = Math.max(0, Math.min(2, level + ctx.shift));
+  if (ctx.role === "try") level = 0; // right after the learn card: always the easy step
   const reps = card?.reps ?? 0;
   for (const d of [0, -1, -2, 1, 2]) {
     const L = level + d;

@@ -37,9 +37,19 @@ const uniq = (xs: string[]) => {
 export function meaningOptions(item: Item, pool: Item[], base: BaseLang, key: string): { options: string[]; answer: number } {
   const r = seeded(key);
   const right = gl(item.gloss, base);
+  // Wrong options should be plausible: same unit first (the words you're learning together),
+  // then nearby units, then anything. "last week" next to "Hi / Bye" gives the answer away.
+  const near = (p: Item) => Math.abs(unitNo(p.unit) - unitNo(item.unit)) <= 1;
   const similar = pool.filter((p) => p.id !== item.id && p.type === item.type && (!item.pos || p.pos === item.pos));
   const others = pool.filter((p) => p.id !== item.id);
-  const cands = uniq([...shuffleWith(similar, r), ...shuffleWith(others, r)].map((p) => gl(p.gloss, base))).filter((g) => g.toLowerCase() !== right.toLowerCase());
+  const ordered = [
+    ...shuffleWith(similar.filter((p) => p.unit === item.unit), r),
+    ...shuffleWith(others.filter((p) => p.unit === item.unit && (p.type === "word" || p.type === "phrase")), r),
+    ...shuffleWith(similar.filter(near), r),
+    ...shuffleWith(similar, r),
+    ...shuffleWith(others, r),
+  ];
+  const cands = uniq(ordered.map((p) => gl(p.gloss, base))).filter((g) => g.toLowerCase() !== right.toLowerCase());
   const options = shuffleWith([right, ...cands.slice(0, 3)], r);
   return { options, answer: options.indexOf(right) };
 }
@@ -52,7 +62,8 @@ export function targetOptions(item: Item, pool: Item[], key: string): { options:
   let cands: string[] = [];
   if (item.type === "sound" && item.pair) cands.push(...item.pair);
   if (useDistractors) cands.push(...(item.distractors ?? []));
-  cands.push(...shuffleWith(pool.filter((p) => p.id !== item.id && p.type === item.type), r).map((p) => p.target));
+  const sameType = pool.filter((p) => p.id !== item.id && p.type === item.type);
+  cands.push(...[...shuffleWith(sameType.filter((p) => p.unit === item.unit), r), ...shuffleWith(sameType, r)].map((p) => p.target));
   cands = uniq(cands).filter((c) => c.toLowerCase() !== right.toLowerCase());
   const options = shuffleWith([right, ...cands.slice(0, 3)], r);
   return { options, answer: options.indexOf(right) };
@@ -80,4 +91,10 @@ export function tileSet(item: Item, lex: Lexicon, key: string): { tiles: string[
   if (extra.length < 2) extra = [...extra, ...shuffleWith(lex.closedClass.filter((c) => !lower.has(c.toLowerCase()) && c.length > 1), r)];
   const tiles = shuffleWith([...answer, ...uniq(extra).slice(0, Math.min(3, Math.max(2, Math.ceil(answer.length / 2))))], r);
   return { tiles, answer };
+}
+
+/** "it-u07" → 7; custom items → 0. */
+function unitNo(unit: string): number {
+  const m = unit.match(/-u(\d+)$/);
+  return m ? Number(m[1]) : 0;
 }

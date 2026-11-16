@@ -16,9 +16,10 @@ import { feel } from "@/lib/feel";
 import type { CheckResult } from "@/lib/check";
 import { Icon } from "@/components/icons";
 import { Loading, Sheet, useT } from "@/components/ui";
-import { Exercise, Guess, type CellResult } from "@/components/lesson/Exercises";
-import { GrammarCard, RuleScreen } from "@/components/lesson/Grammar";
-import { UnitOverview, overviewSeenKeys } from "@/components/UnitOverview";
+import { Exercise, type CellResult } from "@/components/lesson/Exercises";
+import { GrammarCard } from "@/components/lesson/Grammar";
+import { Learn } from "@/components/lesson/Learn";
+import { UnitIntro, overviewSeenKeys } from "@/components/UnitOverview";
 import { TableStudy } from "@/components/lesson/Table";
 import { grammarPoint, unitOf } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
@@ -29,6 +30,8 @@ import { explainWithTutor, gradeWithTutor, tutorAvailable } from "@/lib/llm/tuto
 
 interface FB {
   cells?: CellResult[];
+  /** Multiple choice: what was picked and what the right option says ("you picked X, it's Y"). */
+  choice?: { picked: string; answer: string };
   verdict: Verdict;
   check?: CheckResult;
   text?: string;
@@ -83,7 +86,11 @@ function LessonEntry({ kindParam, unitParam }: { kindParam: string | null; unitP
   return <Player kind={kind} unit={u > 0 ? u : undefined} canListen={canListen} t={t} />;
 }
 
-function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number; canListen: boolean; t: ReturnType<typeof useT> }) {
+function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKind; unit?: number; canListen: boolean; t: ReturnType<typeof useT> }) {
+  // "Can't listen now": the rest of this lesson uses text instead of audio.
+  const [noAudio, setNoAudio] = useState(false);
+  const canListen = deviceCanListen && !noAudio;
+  const onNoAudio = deviceCanListen && !noAudio ? () => setNoAudio(true) : undefined;
   const router = useRouter();
   const db = useDB()!;
   const lang: TargetLang = db.profile.activeLang;
@@ -127,9 +134,10 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   const [taskStart, setTaskStart] = useState(() => Date.now());
   const [speedLeft, setSpeedLeft] = useState(SPEED_SECONDS);
   const [hist, setHist] = useState<boolean[]>([]);
-  // Grammar: the full rule in a sheet, and the one-time rule card after a new pattern.
+  // Grammar: the full rule in a sheet (from a mistake). New patterns are taught on their learn card.
   const [ruleOpen, setRuleOpen] = useState<GrammarPoint | null>(null);
-  const [ruleCard, setRuleCard] = useState<GrammarPoint | null>(null);
+  // How the "try" right after each learn card went: decides whether its follow-up is typed.
+  const [tries, setTries] = useState<Record<string, boolean>>({});
   const counts = useRef(new Map<string, number>());
   const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 });
   const finished = useRef(false);
@@ -184,11 +192,10 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
 
   const mode: Mode | null = useMemo(() => {
     if (!task || !item) return null;
-    return chooseMode(item, getDB().cards[item.id], { canListen, shift, role: task.role });
-  }, [task, item, canListen, shift]);
+    return chooseMode(item, getDB().cards[item.id], { canListen, shift, role: task.role, tryOk: tries[item.id] });
+  }, [task, item, canListen, shift, tries]);
 
   const next = useCallback(() => {
-    setRuleCard(null);
     setFb(null);
     setRevealed(false);
     setConf(undefined);
@@ -219,12 +226,16 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
   if (summary) return <Results t={t} summary={summary} onDone={() => router.replace("/")} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
   if (!task || !item || !mode) return <Loading />;
 
-  const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[] }) => {
+  const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => {
     if (fb) return;
     const prevCard = getDB().cards[item.id];
     // "I don't know" answers aren't the learner's own attempt: no "I was right", no tutor.
     const typed = (mode === "recall" || mode === "tiles") && !r.dontKnow;
-    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed, hinted: r.hinted });
+    // The try right after a learn card is practice, not memory: it doesn't move the schedule,
+    // isn't requeued and isn't "to fix". The spaced follow-up a few tasks later is the real check.
+    const isTry = task.role === "try";
+    if (isTry) setTries((x) => ({ ...x, [item.id]: r.verdict !== "wrong" }));
+    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed && !isTry, hinted: r.hinted, practice: isTry });
     const s = stats.current;
     s.graded++;
     if (conf) s.confUsed++;
@@ -232,15 +243,15 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
     if (r.verdict !== "wrong") {
       s.correct++;
       // "Got stronger": a correct recall of a word you already had (reviews, seeds, practice).
-      if (task.role !== "followup" && prevCard && prevCard.state !== 0 && !s.toFix.has(item.id)) s.stronger.add(item.id);
+      if (task.role !== "followup" && !isTry && prevCard && prevCard.state !== 0 && !s.toFix.has(item.id)) s.stronger.add(item.id);
       if (conf === "guess") s.guessRight++;
       setCombo((c) => c + 1);
     } else {
-      s.toFix.add(item.id);
+      if (!isTry) s.toFix.add(item.id);
       if (conf === "sure") s.sureWrong++;
       if (typed) s.typedMiss = true;
       setCombo(0);
-      if (!speed) setTasks((ts) => requeue(ts, idx, counts.current));
+      if (!speed && !isTry) setTasks((ts) => requeue(ts, idx, counts.current));
     }
     feel(r.verdict === "correct" ? "success" : r.verdict === "almost" ? "almost" : "miss", getDB().profile.settings);
 
@@ -249,7 +260,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       setFb({ verdict: r.verdict, overridden: false, typed: false });
       return;
     }
-    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed, cells: r.cells };
+    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed, cells: r.cells, choice: r.choice };
     // AI tutor: only typed answers the checker didn't accept exactly
     if (typed && r.verdict !== "correct" && r.text && tutorAvailable()) {
       view.tutor = { status: "checking" };
@@ -297,12 +308,13 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
       }
     : undefined;
 
-  // A unit's first new item: show its overview first (coursebook order: overview, then practice).
+  // A unit's first new item: open with a one-screen "This unit" card (goals, the dialogue to listen to).
   const openerUnit = !speed && task.role === "intro" && !fb ? unitOf(item) : undefined;
   const opener = openerUnit && !getDB().profile.seen?.[`unit:${openerUnit.id}`] ? openerUnit : null;
 
   const progress = speed && settings.speedTimer ? 1 - speedLeft / SPEED_SECONDS : idx / Math.max(1, tasks.length);
-  const showConf = !speed && task.role !== "intro" && mode !== "guess";
+  // "How sure?" costs a row: ask on about one review in four, never on a try.
+  const showConf = !speed && task.role !== "intro" && task.role !== "try" && mode !== "guess" && idx % 4 === 2;
 
   return (
     <main className={`lesson${speed ? " speed" : ""}`} data-lesson>
@@ -322,19 +334,15 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
 
       <div key={task.key} className="fade-in" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
         {opener ? (
-          <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
-            <UnitOverview
-              unit={opener}
-              base={base}
-              t={t}
-              canListen={canListen}
-              onStart={() => {
-                for (const k of overviewSeenKeys(opener)) markSeen(k);
-              }}
-            />
-          </div>
-        ) : ruleCard ? (
-          <RuleScreen point={ruleCard} base={base} t={t} onDone={next} />
+          <UnitIntro
+            unit={opener}
+            base={base}
+            t={t}
+            canListen={canListen}
+            onStart={() => {
+              for (const k of overviewSeenKeys(opener)) markSeen(k);
+            }}
+          />
         ) : task.role === "intro" && item.type === "paradigm" ? (
           <TableStudy
             item={item}
@@ -352,31 +360,24 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
             }}
           />
         ) : task.role === "intro" ? (
-          <Guess
+          <Learn
             item={item}
             base={base}
-            pool={pool}
             t={t}
             canListen={canListen}
-            taskKey={task.key}
-            onReveal={() => {
+            onLearned={() => {
               if (!revealed) {
                 setRevealed(true);
                 introduce(item);
                 stats.current.newItems.add(item.id);
-                feel("tap", getDB().profile.settings);
               }
             }}
-            onDone={() => {
-              // First meeting with a new pattern: show its rule card once, then carry on.
-              const g = grammarPoint(item.grammar?.find((id) => !getDB().profile.seen?.[`g:${id}`]));
-              if (g) {
-                markSeen(`g:${g.id}`);
-                setRuleCard(g);
-              } else next();
-            }}
+            onDone={next}
+            onNoAudio={onNoAudio}
           />
         ) : (
+          <>
+          {task.role === "try" && !fb && <div className="try-tag label">{t.tryIt}</div>}
           <Exercise
             item={item}
             mode={speed ? "recognize" : mode}
@@ -388,12 +389,14 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
             locked={!!fb}
             taskKey={task.key}
             onSubmit={onSubmit}
+            onNoAudio={onNoAudio}
             speed={speed}
             conf={conf}
             setConf={setConf}
             showConf={showConf}
-            stage={task.role === "followup" || task.role === "requeue" || (getDB().cards[item.id]?.stability ?? 0) < 1 ? "endings" : "full"}
+            stage={task.role === "try" || task.role === "followup" || task.role === "requeue" || (getDB().cards[item.id]?.stability ?? 0) < 1 ? "endings" : "full"}
           />
+          </>
         )}
       </div>
 
@@ -418,6 +421,7 @@ function Player({ kind, unit, canListen, t }: { kind: SessionKind; unit?: number
             if (g) setRuleOpen(g);
           }}
           cells={fb.cells}
+          choice={fb.choice}
         />
       )}
 

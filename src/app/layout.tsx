@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Inter } from "next/font/google";
 import { Boot } from "@/components/Boot";
 import { SyncRunner } from "@/components/SyncRunner";
+import { AnalyticsTag } from "@/components/AnalyticsTag";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
-const fraunces = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--font-fraunces", axes: ["SOFT", "opsz"], display: "swap" });
+// Display face (titles, words in the language you learn): modern, warm, full Italian/German accents.
+const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-bricolage", axes: ["opsz", "wdth"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Lingua",
+  title: "Linguina",
   description: "Italian and German, a few minutes a day. Works offline.",
-  appleWebApp: { capable: true, title: "Lingua", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Linguina", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -29,7 +31,7 @@ const BOOT = `try{var d=JSON.parse(localStorage.getItem("lingua:v2")||"null");va
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" data-lang="it" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="es" data-lang="it" className={`${inter.variable} ${bricolage.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOT }} />
       </head>
@@ -37,6 +39,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <Boot />
         <SyncRunner />
+        {/* Only on Vercel: elsewhere (local, tests) the analytics script doesn't exist and would 404. */}
+        {process.env.VERCEL ? <AnalyticsTag /> : null}
       </body>
     </html>
   );

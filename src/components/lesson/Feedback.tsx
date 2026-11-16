@@ -34,6 +34,7 @@ export function Feedback({
   grammar,
   onRule,
   cells,
+  choice,
 }: {
   t: Dict;
   item: Item;
@@ -53,6 +54,8 @@ export function Feedback({
   onRule?: () => void;
   /** Table exercises: every cell's result. */
   cells?: CellResult[];
+  /** Multiple choice: the option picked and the right one. */
+  choice?: { picked: string; answer: string };
 }) {
   const btn = useRef<HTMLButtonElement>(null);
   const [more, setMore] = useState(false);
@@ -74,6 +77,7 @@ export function Feedback({
   }, [onContinue]);
 
   const v = overridden ? "correct" : verdict;
+  const choiceAnswerDiffers = !!choice && choice.answer !== item.target && choice.answer !== gl(item.gloss, base);
   const cls = v === "correct" ? "ok" : v === "almost" ? "almost" : "miss";
   const head = v === "correct" ? t.correct : v === "almost" ? t.almost : t.notQuite;
   const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
@@ -99,8 +103,20 @@ export function Feedback({
         {canListen && <Speaker text={item.spoken} lang={item.lang} label={t.listen} auto={v === "wrong"} />}
       </div>
       <div>
-        <div className="fb-word" lang={item.lang}>{item.target}</div>
-        <div className="label">{gl(item.gloss, base)}</div>
+        {/* A question's right answer is its option ("Come si chiama?"), not the item's headword. */}
+        {choiceAnswerDiffers ? (
+          <div className="fb-word">{choice!.answer}</div>
+        ) : (
+          <>
+            <div className="fb-word" lang={item.lang}>{item.target}</div>
+            <div className="label">{gl(item.gloss, base)}</div>
+          </>
+        )}
+        {choice && v !== "correct" && choice.picked !== choice.answer && (
+          <div className="caption" style={{ marginTop: 4 }}>
+            {t.youPicked}: <span style={{ textDecoration: "line-through" }}>{choice.picked}</span>
+          </div>
+        )}
         {text && v !== "correct" && (
           <div className="caption" style={{ marginTop: 4 }}>
             {t.yourAnswer}: <span lang={item.lang} style={{ textDecoration: "line-through" }}>{text}</span>

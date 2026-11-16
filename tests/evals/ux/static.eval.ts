@@ -30,7 +30,7 @@ function render(v: unknown): string {
 const EN_WORDS = /\b(the|you|your|and|with|lesson|today|words?|goal|review|start|settings|minutes|day|week|level|back|continue|check|correct|wrong|learn|practice|practise)\b/i;
 const ES_WORDS = /[¿¡ñáéíóú]|\b(el|los|las|tu|tú|para|lección|hoy|palabras?|meta|repaso|semana|nivel|día|minutos)\b/i;
 // Strings that legitimately look the same / contain the other language (names, codes, target-language examples).
-const SAME_OK = /^(\d+ min|Lingua|Claude.*|OK|IT|DE|A1.*|A2|B1|Español|English|Italiano|Deutsch|min|✦.*|.{0,3})$/;
+const SAME_OK = /^(\d+ min|Linguina|Lingua|Claude.*|OK|IT|DE|A1.*|A2|B1|Español|English|Italiano|Deutsch|min|✦.*|.{0,3})$/;
 const LEAK_OK_KEYS = new Set(["appName", "baseName", "langName", "levelA11", "levelA1", "levelA2", "levelB1", "sameAs", "tutorProvider", "anthropicName"]);
 
 describe("i18n completeness & leaks (CUJ-1 'UI fully in Spanish')", () => {
@@ -67,7 +67,7 @@ describe("i18n completeness & leaks (CUJ-1 'UI fully in Spanish')", () => {
 
 describe("no hard-coded UI strings in components (localisation leaks)", () => {
   const files = [...walk("src/app"), ...walk("src/components")].filter((f) => f.endsWith(".tsx"));
-  const ALLOW = /^(Lingua( v2)?|Claude|IT|DE|✦|der \/ die \/ das \+ …|·|—|…|→|✓|✕|~|\+|%|\?|\d.*)$/;
+  const ALLOW = /^(Linguina|Lingua( v2)?|Claude|IT|DE|✦|der \/ die \/ das \+ …|·|—|…|→|✓|✕|~|\+|%|\?|\d.*)$/;
   for (const f of files) {
     it(`${f}: no literal English/Spanish text nodes or aria-labels`, () => {
       const src = fs.readFileSync(path.join(ROOT, f), "utf8");

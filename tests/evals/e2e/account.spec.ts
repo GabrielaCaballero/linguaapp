@@ -190,7 +190,11 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
 }
 
 async function learnABit(page: Page) {
+  // Lessons end at their time limit; jump the clock past it after a few steps (as the CUJ journeys do).
+  await page.clock.install();
   await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+  await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9, maxSteps: 16 });
+  await page.clock.fastForward("11:00");
   const st = await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9 });
   expect(st.sawResults).toBe(true);
   await page.goto("/");
@@ -376,7 +380,10 @@ test.describe("e2e-sync · sign-in first", () => {
   test("a guest is offered once, on Results, to save their progress", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
+    await page.clock.install();
     await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+    await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9, maxSteps: 16 });
+    await page.clock.fastForward("11:00");
     const st = await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9 });
     expect(st.sawResults).toBe(true);
     await expect(page.getByText(t.saveTitle)).toBeVisible();

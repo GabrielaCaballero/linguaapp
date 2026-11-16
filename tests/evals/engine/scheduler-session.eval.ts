@@ -110,7 +110,7 @@ const logs = (ok: number, bad: number): ReviewLog[] =>
   [...Array(ok).fill("correct"), ...Array(bad).fill("wrong")].map((v, k) => ({ t: NOW - (20 - k) * 60_000, id: ITEMS[k].id, lang: "it", mode: "recall", verdict: v, rating: v === "wrong" ? 1 : 3, source: "checker" }));
 
 describe("session builder (spec §4.3)", () => {
-  it("fresh beginner: guess-first intros, budget ≤ BASE_NEW+1, follow-up 3–6 tasks later", () => {
+  it("fresh beginner: learn → try at once, budget ≤ BASE_NEW+1, follow-up 3–6 tasks after the try", () => {
     const b = buildSession(input());
     const intros = b.tasks.filter((t) => t.role === "intro");
     expect(intros.length).toBeGreaterThan(0);
@@ -118,9 +118,10 @@ describe("session builder (spec §4.3)", () => {
     for (const t of intros) {
       expect(t.graded).toBe(false);
       const i = b.tasks.indexOf(t);
+      expect(b.tasks[i + 1]).toMatchObject({ role: "try", itemId: t.itemId, graded: true });
       const f = b.tasks.findIndex((x, k) => k > i && x.itemId === t.itemId && x.role === "followup");
-      expect(f - i).toBeGreaterThanOrEqual(3);
-      expect(f - i).toBeLessThanOrEqual(7);
+      expect(f - (i + 1)).toBeGreaterThanOrEqual(3);
+      expect(f - (i + 1)).toBeLessThanOrEqual(8);
     }
   });
   it("beginner's first task carries meaning, not an audio-only sound item (P1-8)", () => {
@@ -188,10 +189,10 @@ describe("session builder (spec §4.3)", () => {
     for (let k = 1; k < types.length; k++) if (types[k] === types[k - 1]) same++;
     expect(same / Math.max(1, types.length - 1)).toBeLessThan(0.35);
   });
-  it("no task item appears twice in a row", () => {
+  it("no task item appears twice in a row (except learn → try, by design)", () => {
     const ids = ITEMS.slice(0, 60).map((i) => i.id);
     const b = buildSession(input({ cards: learned(ids, (k) => -k) }));
-    for (let k = 1; k < b.tasks.length; k++) expect(b.tasks[k].itemId).not.toBe(b.tasks[k - 1].itemId);
+    for (let k = 1; k < b.tasks.length; k++) if (b.tasks[k].role !== "try") expect(b.tasks[k].itemId).not.toBe(b.tasks[k - 1].itemId);
   });
 });
 
@@ -222,20 +223,24 @@ describe("requeue & mode ladder", () => {
     expect(k).toBeGreaterThan(2);
     expect(out[k].role).toBe("requeue");
   });
-  it("requeue cap is 2 per item", () => {
+  it("requeue cap is 1 per item (a miss gets one retry, the lesson doesn't loop)", () => {
     const counts = new Map<string, number>();
     let t = tasks;
     for (let n = 0; n < 5; n++) t = requeue(t, 2, counts);
-    expect(t.filter((x) => x.itemId === "i2").length).toBe(3);
+    expect(t.filter((x) => x.itemId === "i2").length).toBe(2);
   });
   const noun = ITEMS.find((i) => i.pos === "noun" && i.gender)!;
-  it("intro → guess; first follow-up: typing arm one step up, classic arm easiest tier", () => {
+  it("intro → learn card; try = easiest tier; follow-up: typing arm one step up, or typed after a good try; classic arm easiest tier", () => {
     expect(chooseMode(noun, undefined, { canListen: true, shift: 0, role: "intro" })).toBe("guess");
     const nouns = ITEMS.filter((i) => i.pos === "noun" && i.gender);
     const typing = nouns.find((i) => typingArm(i.id) === "typing")!;
     const classic = nouns.find((i) => typingArm(i.id) === "classic")!;
     expect(["tiles", "article", "listen"]).toContain(chooseMode(typing, newCard(typing.id, "it", NOW), { canListen: true, shift: 0, role: "followup" }));
     expect(["recognize", "pick-spelling", "question"]).toContain(chooseMode(classic, newCard(classic.id, "it", NOW), { canListen: true, shift: 0, role: "followup" }));
+    // learners type in their first session: a good try makes the follow-up typed
+    expect(chooseMode(typing, newCard(typing.id, "it", NOW), { canListen: true, shift: 0, role: "followup", tryOk: true })).toBe("recall");
+    // the try right after learning is always the easy step, even when the controller says harder
+    expect(["recognize", "pick-spelling", "question"]).toContain(chooseMode(typing, newCard(typing.id, "it", NOW), { canListen: true, shift: 1, role: "try" }));
   });
   it("typing arm types after one night (stability ≥ 1 day); classic waits for 3 days", () => {
     const words = ITEMS.filter((i) => i.type === "word");

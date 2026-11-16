@@ -10,7 +10,8 @@ import type { BaseLang, GrammarPoint } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { gl } from "@/lib/content";
 
-type Mode = "overview" | "intro" | "mistake";
+//   learn     → the learn card before its first try: one line, table, one example; the rest one tap away
+type Mode = "overview" | "learn" | "intro" | "mistake";
 
 export function GrammarTable({ table, lang, label }: { table: { head: string[]; rows: string[][] }; lang: string; label: string }) {
   return (
@@ -65,17 +66,41 @@ export function GrammarCard({ point, base, t, mode = "intro", onOpen }: { point:
     </details>
   );
   const Heading = mode === "overview" ? "h3" : "h2";
+  const [first, ...rest] = point.examples;
+  const oneExample = first && (
+    <div className="label">
+      <span lang={point.lang} className="display" style={{ fontSize: "1.125rem" }}>{first.target}</span> — <span className="muted">{gl(first.gloss, base)}</span>
+    </div>
+  );
+  const moreExamples = rest.length > 0 && (
+    <div>
+      <div className="label" style={{ fontWeight: 600 }}>{t.examples}</div>
+      <ul style={{ margin: "4px 0 0", paddingLeft: 20 }}>
+        {rest.map((e, k) => (
+          <li key={k} className="label">
+            <span lang={point.lang} className="display">{e.target}</span> — {gl(e.gloss, base)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
     <div className="stack grammar-card" lang={base} style={{ gap: 14, textAlign: "left" }}>
       <div>
-        {mode !== "overview" && <div className="prompt-eyebrow">{t.ruleTitle}</div>}
+        {mode !== "overview" && mode !== "learn" && <div className="prompt-eyebrow">{t.ruleTitle}</div>}
         <Heading className="h2" style={{ margin: mode === "overview" ? 0 : "4px 0 0" }}>{gl(point.title, base)}</Heading>
         <p className="label grammar-short" style={{ margin: "6px 0 0", fontWeight: 600 }}>{gl(point.short, base)}</p>
       </div>
       {mode === "mistake" && pitfall}
       {table}
       {mode === "overview" && more(<>{rule}{steps}{examples}{pitfall}</>)}
+      {mode === "learn" && (
+        <>
+          {oneExample}
+          {more(<>{rule}{steps}{moreExamples}{pitfall}</>)}
+        </>
+      )}
       {mode === "intro" && (
         <>
           {steps}
@@ -86,21 +111,5 @@ export function GrammarCard({ point, base, t, mode = "intro", onOpen }: { point:
       )}
       {mode === "mistake" && more(<>{rule}{steps}{examples}</>)}
     </div>
-  );
-}
-
-/** Full-screen rule card shown once, right before a new pattern's first exercise. */
-export function RuleScreen({ point, base, t, onDone }: { point: GrammarPoint; base: BaseLang; t: Dict; onDone: () => void }) {
-  return (
-    <>
-      <div className="grow" style={{ overflowY: "auto", paddingTop: 8 }}>
-        <GrammarCard point={point} base={base} t={t} mode="intro" />
-      </div>
-      <div className="answer-area">
-        <button type="button" className="btn btn-primary" onClick={onDone} autoFocus>
-          {t.understood}
-        </button>
-      </div>
-    </>
   );
 }

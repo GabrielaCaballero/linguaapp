@@ -3,12 +3,14 @@
 // be able to do, a model dialogue or text in context, the unit's grammar explained with its
 // tables, and the key words. Only then the exercises. Built from the unit's own content.
 import { useState } from "react";
+import Link from "next/link";
 import type { BaseLang, Item, Unit } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { gl, grammarPoint, visible } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
 import { GrammarCard, GrammarTable } from "./lesson/Grammar";
 import { Speaker } from "./lesson/Exercises";
+import { WordHints } from "./lesson/WordHints";
 
 export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: { unit: Unit; base: BaseLang; t: Dict; canListen: boolean; onStart: () => void; startLabel?: string }) {
   const [translate, setTranslate] = useState(false);
@@ -49,7 +51,7 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
               <div key={k} className="row" style={{ alignItems: "flex-start", gap: 8 }}>
                 {model.turns && <b className="caption" style={{ minWidth: 16 }}>{turn.who}</b>}
                 <div className="stack grow" style={{ gap: 2 }}>
-                  <span lang={lang} className="display">{turn.target}</span>
+                  <WordHints text={turn.target} lang={lang} base={base} className="display" />
                   {translate && <span className="caption">{gl(turn.gloss, base)}</span>}
                 </div>
                 {canListen && <Speaker text={turn.spoken ?? turn.target} lang={lang} label={t.listen} />}
@@ -88,6 +90,62 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
         <button type="button" className="btn btn-primary" style={{ width: "100%" }} onClick={onStart}>{startLabel ?? t.startPractising}</button>
       </div>
     </div>
+  );
+}
+
+/**
+ * The unit opener inside a lesson: one screen, not a reading assignment. What you'll be able to do
+ * and the start of the model dialogue to listen to; then "learn a bit, try it" takes over. The full
+ * coursebook page stays one tap away as the unit notes.
+ */
+export function UnitIntro({ unit, base, t, canListen, onStart }: { unit: Unit; base: BaseLang; t: Dict; canListen: boolean; onStart: () => void }) {
+  const [translate, setTranslate] = useState(false);
+  const items = unit.items.filter((i) => visible(i, base));
+  const model = items.find((i) => i.type === "dialogue" && i.turns?.length);
+  const turns = model?.turns?.slice(0, 4) ?? [];
+  const lang = unit.lang;
+  return (
+    <>
+      <div className="grow unit-intro" style={{ overflowY: "auto", paddingTop: 8 }}>
+        <div className="stack" style={{ gap: 16 }}>
+          <header className="stack" style={{ gap: 4 }}>
+            <span className="prompt-eyebrow">{t.thisUnit} · {t.unitN(unit.index)} · {unit.cefr}</span>
+            <h1 className="title" style={{ margin: 0 }}>
+              <span aria-hidden="true">{unit.icon} </span>
+              <span lang={lang} className="display">{unit.title.target}</span>
+            </h1>
+            <span className="muted">{gl(unit.title, base)}</span>
+          </header>
+          <div className="stack" style={{ gap: 6 }}>
+            <span className="label" style={{ fontWeight: 600 }}>{t.youWillLearn}</span>
+            <ul style={{ margin: 0, paddingLeft: 18 }} className="label">
+              {unit.canDo.map((c, k) => <li key={k}>{gl(c, base)}</li>)}
+            </ul>
+          </div>
+          {turns.length > 0 && (
+            <div className="card stack" style={{ gap: 8 }}>
+              {turns.map((turn, k) => (
+                <div key={k} className="row" style={{ alignItems: "flex-start", gap: 8 }}>
+                  <b className="caption" style={{ minWidth: 16 }}>{turn.who}</b>
+                  <div className="stack grow" style={{ gap: 2 }}>
+                    <WordHints text={turn.target} lang={lang} base={base} className="display" />
+                    {translate && <span className="caption">{gl(turn.gloss, base)}</span>}
+                  </div>
+                  {canListen && <Speaker text={turn.spoken ?? turn.target} lang={lang} label={t.listen} />}
+                </div>
+              ))}
+              <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} aria-pressed={translate} onClick={() => setTranslate((x) => !x)}>
+                {translate ? t.hideTranslation : t.showTranslation}
+              </button>
+            </div>
+          )}
+          <Link className="link label" href={`/unit?id=${unit.id}`}>{t.unitNotes} →</Link>
+        </div>
+      </div>
+      <div className="answer-area">
+        <button type="button" className="btn btn-primary" onClick={onStart} autoFocus>{t.letsStart}</button>
+      </div>
+    </>
   );
 }
 

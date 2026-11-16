@@ -5,13 +5,14 @@ import type { BaseLang, Item, Lexicon, TargetLang } from "@/content/schema";
 import type { Confidence, Mode, Verdict } from "@/lib/model";
 import type { Dict } from "@/lib/i18n";
 import { check, type CheckResult } from "@/lib/check";
-import { gl, per } from "@/lib/content";
+import { gl } from "@/lib/content";
 import { speak } from "@/lib/speech";
 import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
 import { TableExercise } from "./Table";
+import { WordHints } from "./WordHints";
 
-export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[] }) => void;
+export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => void;
 
 /** One cell of a table exercise after checking. */
 export interface CellResult {
@@ -38,6 +39,8 @@ export interface ExProps {
   conf: Confidence | undefined;
   setConf: (c: Confidence | undefined) => void;
   showConf: boolean;
+  /** "Can't listen now": switch this lesson to text instead of audio. */
+  onNoAudio?: () => void;
 }
 
 const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] };
@@ -64,6 +67,16 @@ export function Speaker({ text, lang, slow, big, label, auto }: { text: string; 
       ) : (
         <Icon name={slow ? "turtle" : "speaker"} size={big ? 36 : slow ? 26 : 22} />
       )}
+    </button>
+  );
+}
+
+/** "Can't listen now" (like Duolingo): the rest of the lesson shows text instead of audio. */
+export function NoAudio({ t, onNoAudio }: { t: Dict; onNoAudio?: () => void }) {
+  if (!onNoAudio) return null;
+  return (
+    <button type="button" className="link label no-audio" onClick={onNoAudio}>
+      <Icon name="speaker" size={16} /> {t.cantListen}
     </button>
   );
 }
@@ -98,7 +111,7 @@ function CheckBar({ t, disabled, onCheck, conf, setConf, showConf, locked }: { t
   );
 }
 
-function Prompt({ eyebrow, children }: { eyebrow: string; children: ReactNode }) {
+export function Prompt({ eyebrow, children }: { eyebrow: string; children: ReactNode }) {
   return (
     <div className="prompt">
       <div className="prompt-eyebrow">{eyebrow}</div>
@@ -107,10 +120,12 @@ function Prompt({ eyebrow, children }: { eyebrow: string; children: ReactNode })
   );
 }
 
-function TargetWord({ item, canListen, t, size = "hero", auto }: { item: Item; canListen: boolean; t: Dict; size?: "hero" | "title"; auto?: boolean }) {
+export function TargetWord({ item, canListen, t, size = "hero", auto, base }: { item: Item; canListen: boolean; t: Dict; size?: "hero" | "title"; auto?: boolean; base?: BaseLang }) {
+  // Whole sentences get tap-a-word hints; a single word or phrase never does (it would be the answer).
+  const hints = base && (item.type === "sentence" || item.type === "dialogue" || item.type === "listening");
   return (
     <div className="prompt-word">
-      <span className={size} lang={item.lang}>{item.target}</span>
+      {hints ? <WordHints text={item.target} lang={item.lang} base={base} className={size} /> : <span className={size} lang={item.lang}>{item.target}</span>}
       {canListen && <Speaker text={item.spoken} lang={item.lang} slow={item.slow} label={t.listen} auto={auto} />}
     </div>
   );
@@ -188,13 +203,18 @@ function ChoiceExercise(p: ExProps) {
         const o = q.options[k];
         return typeof o === "string" ? <span key={k} lang={item.lang}>{o}</span> : gl(o, base);
       });
-      return { options: idx.map(String), answer: idx.indexOf(q.answer), lang: undefined, labels };
+      const texts = idx.map((k) => {
+        const o = q.options[k];
+        return typeof o === "string" ? o : gl(o, base);
+      });
+      return { options: idx.map(String), answer: idx.indexOf(q.answer), lang: undefined, labels, texts };
     }
     const o = meaningOptions(item, pool, base, taskKey);
     return { ...o, lang: undefined, labels: o.options as ReactNode[] };
   }, [item, mode, pool, base, taskKey]);
 
-  const submit = (k: number) => p.onSubmit({ verdict: k === spec.answer ? "correct" : "wrong", picked: k, text: spec.options[k] });
+  const label = (k: number) => ("texts" in spec && spec.texts ? spec.texts[k] : String(spec.options[k]));
+  const submit = (k: number) => p.onSubmit({ verdict: k === spec.answer ? "correct" : "wrong", picked: k, text: spec.options[k], choice: { picked: label(k), answer: label(spec.answer) } });
   const onSpeed = (k: number) => {
     setPicked(k);
     submit(k);
@@ -208,6 +228,7 @@ function ChoiceExercise(p: ExProps) {
           <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
           <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
         </div>
+        <NoAudio t={t} onNoAudio={p.onNoAudio} />
       </Prompt>
     );
   } else if (mode === "article" && "rest" in spec) {
@@ -226,14 +247,14 @@ function ChoiceExercise(p: ExProps) {
   } else if (mode === "question") {
     prompt = (
       <Prompt eyebrow={t.readAnswer}>
-        <QuestionStem item={item} base={base} t={t} canListen={canListen} />
+        <QuestionStem item={item} base={base} t={t} canListen={canListen} onNoAudio={p.onNoAudio} />
         <div className="h2">{item.question ? gl(item.question.prompt, base) : ""}</div>
       </Prompt>
     );
   } else {
     prompt = (
       <Prompt eyebrow={t.whatMeans}>
-        <TargetWord item={item} canListen={canListen} t={t} auto={p.speed ? false : canListen} />
+        <TargetWord item={item} canListen={canListen} t={t} auto={p.speed ? false : canListen} base={p.speed ? undefined : base} />
       </Prompt>
     );
   }
@@ -250,14 +271,14 @@ function ChoiceExercise(p: ExProps) {
   );
 }
 
-export function QuestionStem({ item, base, t, canListen }: { item: Item; base: BaseLang; t: Dict; canListen: boolean }) {
+export function QuestionStem({ item, base, t, canListen, onNoAudio }: { item: Item; base: BaseLang; t: Dict; canListen: boolean; onNoAudio?: () => void }) {
   if (item.turns?.length)
     return (
       <div className="turns">
         {item.turns.map((x, k) => (
           <div key={k} className={`turn ${x.who}`}>
             <div className="row" style={{ gap: 8 }}>
-              <span lang={item.lang} className="display" style={{ fontSize: "1.125rem" }}>{x.target}</span>
+              <WordHints text={x.target} lang={item.lang} base={base} className="display" style={{ fontSize: "1.125rem" }} />
               {canListen && <Speaker text={x.spoken ?? x.target} lang={item.lang} label={t.listen} />}
             </div>
           </div>
@@ -265,12 +286,17 @@ export function QuestionStem({ item, base, t, canListen }: { item: Item; base: B
       </div>
     );
   if (item.type === "listening")
-    return (
-      <div className="listen-row">
-        <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-        <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
-        {!canListen && <p lang={item.lang} className="title">{item.target}</p>}
-      </div>
+    // Without audio (no voice, or "Can't listen now") the text is shown instead.
+    return canListen ? (
+      <>
+        <div className="listen-row">
+          <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
+          <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
+        </div>
+        <NoAudio t={t} onNoAudio={onNoAudio} />
+      </>
+    ) : (
+      <p className="title" style={{ margin: 0 }}><WordHints text={item.target} lang={item.lang} base={base} /></p>
     );
   if (item.pattern)
     return (
@@ -429,86 +455,6 @@ function Tiles(p: ExProps) {
           ))}
         </div>
         <CheckBar t={t} disabled={!placed.length} onCheck={submit} conf={p.conf} setConf={p.setConf} showConf={p.showConf} locked={locked} />
-      </div>
-    </>
-  );
-}
-
-/** Guess first: an ungraded MCQ before teaching, then a teaching card replaces the options. */
-export function Guess({ item, base, pool, t, canListen, taskKey, onReveal, onDone }: { item: Item; base: BaseLang; pool: Item[]; t: Dict; canListen: boolean; taskKey: string; onReveal: () => void; onDone: () => void }) {
-  const spec = useMemo(() => {
-    if (item.type === "sound") {
-      const o = targetOptions(item, pool, taskKey);
-      return { ...o, labels: o.options as ReactNode[], lang: item.lang as TargetLang | undefined, kind: "sound" as const };
-    }
-    if (item.question && (item.type === "dialogue" || item.type === "listening" || item.type === "pattern")) {
-      const q = item.question;
-      const labels = q.options.map((o, k) => (typeof o === "string" ? <span key={k} lang={item.lang}>{o}</span> : gl(o, base)));
-      return { options: q.options.map((_, k) => String(k)), answer: q.answer, labels, lang: undefined, kind: "question" as const };
-    }
-    const o = meaningOptions(item, pool, base, taskKey);
-    return { ...o, labels: o.options as ReactNode[], lang: undefined, kind: "meaning" as const };
-  }, [item, pool, base, taskKey]);
-  // Transparent cognates (italiano ↔ italiano/a) skip the guess: a quick "same as …" card.
-  const cognate = spec.kind === "meaning" && isCognate(item, base);
-  const [picked, setPicked] = useState<number | null>(() => (cognate ? spec.answer : null));
-  useEffect(() => {
-    if (cognate) onReveal();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cognate]);
-  const revealed = picked !== null;
-  const pick = (k: number) => {
-    if (revealed) return;
-    setPicked(k);
-    onReveal();
-  };
-  const note = per(item.note, base);
-  return (
-    <>
-      <Prompt eyebrow={cognate ? `${t.newWord} · ${t.sameAs[base]}` : spec.kind === "sound" ? `${t.newWord} · ${t.tapWhatYouHear}` : `${t.newWord} · ${t.guessFirst}`}>
-        {spec.kind === "sound" ? (
-          <div className="listen-row">
-            <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-            <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
-          </div>
-        ) : spec.kind === "question" ? (
-          <>
-            <QuestionStem item={item} base={base} t={t} canListen={canListen} />
-            <div className="h2">{gl(item.question!.prompt, base)}</div>
-          </>
-        ) : (
-          <TargetWord item={item} canListen={canListen} t={t} auto={canListen} />
-        )}
-        {!revealed && spec.kind === "sound" && <div className="h2">{gl(item.gloss, base)}</div>}
-        {!revealed && spec.kind === "sound" && !canListen && <div className="title" lang={item.lang}>{item.target}</div>}
-      </Prompt>
-      <div className="answer-area">
-        {!revealed ? (
-          <Choices options={spec.labels} answer={spec.answer} lang={spec.lang} locked={false} picked={null} setPicked={pick} grid={spec.kind === "sound"} />
-        ) : (
-          <div className="teach" role="status">
-            <div className="row" style={{ gap: 8 }}>
-              <span className={picked === spec.answer ? "" : "muted"} style={{ fontWeight: 700, color: picked === spec.answer ? "var(--ok)" : undefined }}>
-                {cognate ? `≈ ${t.sameAs[base]}` : picked === spec.answer ? `✓ ${t.correct}` : `→ ${t.correctAnswer}`}
-              </span>
-            </div>
-            <div className="row" style={{ gap: 10 }}>
-              <span className="title" lang={item.lang}>{item.target}</span>
-              {canListen && <Speaker text={item.spoken} lang={item.lang} slow={item.slow} label={t.listen} />}
-            </div>
-            <div style={{ fontSize: "1.125rem" }}>{gl(item.gloss, base)}</div>
-            {item.plural && <div className="caption" lang={item.lang}>{item.plural}</div>}
-            {note && <div className="label muted">{note}</div>}
-            {item.example && (
-              <div className="label">
-                <span lang={item.lang} className="display">{item.example.target}</span> — <span className="muted">{gl(item.example.gloss, base)}</span>
-              </div>
-            )}
-          </div>
-        )}
-        <button type="button" className="btn btn-primary" disabled={!revealed} onClick={onDone} autoFocus={revealed}>
-          {t.continue}
-        </button>
       </div>
     </>
   );

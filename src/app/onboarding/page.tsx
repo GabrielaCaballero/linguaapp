@@ -18,7 +18,7 @@ import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
 import { Loading, Seal, Toast } from "@/components/ui";
 import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/components/Placement";
-import { GoalPicker } from "@/components/GoalPicker";
+import { SimpleGoal } from "@/components/GoalPicker";
 
 type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "goal" | "anchor";
 interface Step { id: StepId; lang?: TargetLang }
@@ -168,6 +168,10 @@ function Flow() {
       body = (
         <>
           <div className="grow" style={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="brand-logo logo-light" src="/brand/linguina.svg" alt={t.appName} width={180} height={56} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="brand-logo logo-dark" src="/brand/linguina-on-dark.svg" alt={t.appName} width={180} height={56} />
             <div className="orbit" aria-hidden="true">
               <Seal lang="it" size={84} />
               <Seal lang="de" size={84} />
@@ -357,17 +361,17 @@ function Flow() {
             <Seal lang={lang!} size={40} />
             <h1 className="title">{t.goalTitle(t.langName[lang!])}</h1>
           </div>
-          <GoalPicker
+          <SimpleGoal
             key={lang}
             lang={lang!}
             base={d?.explainIn ?? appLang}
             appLang={appLang}
             current={d?.outcome?.cefr ?? initial.profile.courses[lang!]?.placement?.cefr ?? "A0"}
+            startUnit={d?.outcome?.unit ?? initial.profile.courses[lang!]?.unit ?? 1}
             daysPerWeek={initial.profile.settings.daysPerWeek}
             initial={d?.goal ?? initial.profile.courses[lang!]?.goal}
             t={t}
             onSave={onGoal}
-            otherMinutes={(["it", "de"] as TargetLang[]).filter((l) => l !== lang).reduce((n, l) => n + (drafts[l]?.goal?.minutesPerDay ?? (langs.includes(l) ? 0 : initial.profile.courses[l]?.goal?.minutesPerDay ?? 0)), 0)}
           />
         </>
       );

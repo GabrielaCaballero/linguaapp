@@ -67,10 +67,11 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
   }
   await btn(page, t.startFirst).click();
   await page.waitForURL(/\/lesson/);
-  // The first lesson opens with the unit overview (coursebook order); read it and start.
-  await page.locator(".unit-overview, .answer-area, .teach").first().waitFor();
-  if (await page.locator(".unit-overview").isVisible().catch(() => false)) await btn(page, t.startPractising).click();
-  await page.locator(".answer-area, .teach").first().waitFor();
+  // The first lesson opens with a one-screen "This unit" card; start, then learn → try.
+  await page.locator(".unit-intro, .unit-overview, .answer-area").first().waitFor();
+  if (await page.locator(".unit-intro").isVisible().catch(() => false)) await btn(page, t.letsStart).click();
+  else if (await page.locator(".unit-overview").isVisible().catch(() => false)) await btn(page, t.startPractising).click();
+  await page.locator(".answer-area").first().waitFor();
   out.firstAnswerMs = Date.now() - t0;
   void opts;
   return out;
@@ -143,7 +144,11 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
       await fb.getByRole("button", { name: t.continue }).click();
       continue;
     }
-    // unit overview before a unit's first new item: read it, then start practising
+    // "This unit" card before a unit's first new item: start
+    if (await page.locator(".unit-intro").isVisible().catch(() => false)) {
+      await btn(page, t.letsStart).click();
+      continue;
+    }
     if (await page.locator(".unit-overview").isVisible().catch(() => false)) {
       await btn(page, t.startPractising).click();
       continue;
@@ -160,6 +165,11 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     // rule card after a new pattern (content v2.1): read it, carry on
     if (eyebrow === t.ruleTitle) {
       await btn(page, t.understood).click();
+      continue;
+    }
+    // learn card (one new thing): read it, then try it
+    if (eyebrow.startsWith(t.learn)) {
+      await page.locator(".answer-area .btn-primary").click();
       continue;
     }
     // first meeting with a table: study it, carry on
