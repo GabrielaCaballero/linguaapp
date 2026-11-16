@@ -57,6 +57,8 @@ export interface GrammarPoint {
   table?: { head: string[]; rows: string[][] };
   examples: { target: string; gloss: Glossed }[];
   pitfalls?: Glossed;         // typical mistake for Spanish/English speakers
+  /** native-level human review; cards without it are AI drafts (decisions.md 2026-11-16) */
+  reviewed?: { by: string; date: string };
 }
 
 export interface Mcq {

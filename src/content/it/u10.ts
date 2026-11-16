@@ -156,8 +156,8 @@ export const unit: Unit = {
       gloss: { es: "passato prossimo con avere", en: "passato prossimo with avere" },
       pattern: {
         rule: {
-          es: "avere (presente) + participio: -are → -ato, -ere → -uto, -ire → -ito. El participio no cambia: ho mangiato, abbiamo mangiato.",
-          en: "avere (present) + past participle: -are → -ato, -ere → -uto, -ire → -ito. The participle doesn't change: ho mangiato, abbiamo mangiato.",
+          es: "avere (presente) + participio: -are → -ato, -ere → -uto, -ire → -ito. El participio no cambia con el sujeto: ho mangiato, abbiamo mangiato.",
+          en: "avere (present) + past participle: -are → -ato, -ere → -uto, -ire → -ito. The participle doesn't change with the subject: ho mangiato, abbiamo mangiato.",
         },
         table: [["mangiare", "ho mangiato"], ["vendere", "ho venduto"], ["dormire", "ho dormito"]],
       },
@@ -173,8 +173,8 @@ export const unit: Unit = {
       gloss: { es: "passato prossimo con essere", en: "passato prossimo with essere" },
       pattern: {
         rule: {
-          es: "Verbos de movimiento o cambio (andare, venire, uscire, partire, rimanere) y todos los reflexivos van con essere; el participio concuerda: Anna è andata.",
-          en: "Verbs of movement or change (andare, venire, uscire, partire, rimanere) and all reflexive verbs take essere; the participle agrees: Anna è andata.",
+          es: "Verbos de ir a o desde un lugar o de cambio (andare, venire, uscire, partire, rimanere) y todos los reflexivos van con essere; el participio concuerda: Anna è andata.",
+          en: "Verbs of going to or from a place, or of change (andare, venire, uscire, partire, rimanere) and all reflexive verbs take essere; the participle agrees: Anna è andata.",
         },
         table: [["lui", "è andato"], ["lei", "è andata"], ["loro (m)", "sono andati"], ["loro (f)", "sono andate"]],
       },

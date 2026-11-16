@@ -20,7 +20,7 @@ export const grammar2: GrammarPoint[] = [
       { es: "¿Hablas de «un poco de / algunos», sin número exacto? → partitivo.", en: "Are you talking about 'some', with no exact number? → partitive." },
       { es: "Busca el artículo del sustantivo: il pane, la frutta, i pomodori, le mele.", en: "Find the noun's article: il pane, la frutta, i pomodori, le mele." },
       { es: "Une di con ese artículo: di + il = del, di + le = delle.", en: "Merge di with that article: di + il = del, di + le = delle." },
-      { es: "Con un número o una medida, solo di: un chilo di mele, due etti di prosciutto.", en: "With a number or a measure, just di: un chilo di mele, due etti di prosciutto." },
+      { es: "Con una medida o un envase (un chilo, due etti, una bottiglia), solo di: un chilo di mele. Con un número, nada: tre mele.", en: "With a measure or container (un chilo, due etti, una bottiglia), just di: un chilo di mele. With a plain number, nothing: tre mele." },
     ],
     table: {
       head: ["articolo", "partitivo", "esempio"],
@@ -88,12 +88,12 @@ export const grammar2: GrammarPoint[] = [
     cefr: "A2",
     title: { es: "Passato prossimo con avere", en: "Passato prossimo with avere" },
     short: {
-      es: "avere + participio (-ato, -uto, -ito): ho mangiato, hai venduto, abbiamo dormito. El participio no cambia.",
-      en: "avere + participle (-ato, -uto, -ito): ho mangiato, hai venduto, abbiamo dormito. The participle doesn't change.",
+      es: "avere + participio (-ato, -uto, -ito): ho mangiato, hai venduto, abbiamo dormito. El participio no cambia con el sujeto.",
+      en: "avere + participle (-ato, -uto, -ito): ho mangiato, hai venduto, abbiamo dormito. It doesn't change with the subject.",
     },
     rule: {
-      es: "El passato prossimo es el pasado normal de la conversación: se forma con el presente de avere (o essere) + el participio. La mayoría de los verbos, sobre todo los que llevan objeto directo, usan avere, y entonces el participio no cambia según el sujeto.",
-      en: "The passato prossimo is the everyday past tense of conversation: the present of avere (or essere) + the past participle. Most verbs, especially those with a direct object, take avere, and then the participle does not change with the subject.",
+      es: "El passato prossimo es el pasado normal de la conversación: se forma con el presente de avere (o essere) + el participio. La mayoría de los verbos, sobre todo los que llevan objeto directo, usan avere, y entonces el participio no cambia según el sujeto (solo cambia con lo/la/li/le delante: lo verás en la unidad 12).",
+      en: "The passato prossimo is the everyday past tense of conversation: the present of avere (or essere) + the past participle. Most verbs, especially those with a direct object, take avere, and then the participle does not change with the subject (it only changes with lo/la/li/le in front: see unit 12).",
     },
     steps: [
       { es: "¿El verbo usa avere? (casi todos los que tienen objeto: mangiare, visitare, vedere).", en: "Does the verb take avere? (Nearly all verbs with an object: mangiare, visitare, vedere.)" },
@@ -128,15 +128,15 @@ export const grammar2: GrammarPoint[] = [
     cefr: "A2",
     title: { es: "Passato prossimo con essere", en: "Passato prossimo with essere" },
     short: {
-      es: "Movimiento, cambio, quedarse y reflexivos → essere + participio que concuerda: sono andato/a, siamo usciti/e.",
-      en: "Movement, change, staying and reflexive verbs → essere + agreeing participle: sono andato/a, siamo usciti/e.",
+      es: "Ir a o desde un lugar, cambio, quedarse y reflexivos → essere + participio que concuerda: sono andato/a, siamo usciti/e.",
+      en: "Going somewhere, change, staying and reflexives → essere + agreeing participle: sono andato/a, siamo usciti/e.",
     },
     rule: {
-      es: "Algunos verbos forman el passato prossimo con essere: los de movimiento (andare, venire, uscire, partire, tornare), de cambio o permanencia (diventare, rimanere, stare, essere) y todos los reflexivos (divertirsi, riposarsi). Con essere, el participio concuerda con el sujeto como un adjetivo: -o, -a, -i, -e.",
-      en: "Some verbs form the passato prossimo with essere: verbs of movement (andare, venire, uscire, partire, tornare), of change or staying (diventare, rimanere, stare, essere) and all reflexive verbs (divertirsi, riposarsi). With essere, the participle agrees with the subject like an adjective: -o, -a, -i, -e.",
+      es: "Algunos verbos forman el passato prossimo con essere: los de desplazamiento hacia o desde un lugar (andare, venire, uscire, partire, tornare, arrivare), de cambio o permanencia (diventare, rimanere, stare, essere) y todos los reflexivos (divertirsi, riposarsi). Con essere, el participio concuerda con el sujeto como un adjetivo: -o, -a, -i, -e.",
+      en: "Some verbs form the passato prossimo with essere: verbs of going to or from a place (andare, venire, uscire, partire, tornare, arrivare), of change or staying (diventare, rimanere, stare, essere) and all reflexive verbs (divertirsi, riposarsi). With essere, the participle agrees with the subject like an adjective: -o, -a, -i, -e.",
     },
     steps: [
-      { es: "¿Es un verbo de movimiento, cambio o permanencia, o un reflexivo? → essere.", en: "Is it a verb of movement, change or staying, or a reflexive verb? → essere." },
+      { es: "¿Es un verbo de ir a o desde un lugar, de cambio o permanencia, o un reflexivo? → essere. (camminare, viaggiare, nuotare → avere.)", en: "Is it a verb of going to or from a place, of change or staying, or a reflexive? → essere. (camminare, viaggiare, nuotare → avere.)" },
       { es: "Conjuga essere: sono, sei, è, siamo, siete, sono (reflexivos: mi sono, ti sei…).", en: "Conjugate essere: sono, sei, è, siamo, siete, sono (reflexives: mi sono, ti sei…)." },
       { es: "Haz concordar el participio con el sujeto: andato, andata, andati, andate.", en: "Make the participle agree with the subject: andato, andata, andati, andate." },
       { es: "Grupo mixto (hombres y mujeres) → -i: Marco e Anna sono usciti.", en: "Mixed group (men and women) → -i: Marco e Anna sono usciti." },
@@ -159,8 +159,8 @@ export const grammar2: GrammarPoint[] = [
       { target: "È stato bellissimo!", gloss: { es: "¡Fue precioso!", en: "It was wonderful!" } },
     ],
     pitfalls: {
-      es: "En español todo va con «haber» («he ido»), pero «ho andato» es incorrecto → sono andato/a. Y no olvides la concordancia: una mujer dice «sono andata».",
-      en: "English uses 'have' for everything, but 'ho andato' is wrong → sono andato/a. And don't forget agreement: a woman says 'sono andata'.",
+      es: "En español todo va con «haber» («he ido»), pero «ho andato» es incorrecto → sono andato/a. Y no olvides la concordancia: una mujer dice «sono andata». Ojo: no todo movimiento va con essere: camminare, viaggiare, passeggiare y nuotare usan avere (ho camminato).",
+      en: "English uses 'have' for everything, but 'ho andato' is wrong → sono andato/a. And don't forget agreement: a woman says 'sono andata'. Careful: not every movement verb takes essere: camminare, viaggiare, passeggiare and nuotare take avere (ho camminato).",
     },
   },
   {
@@ -697,7 +697,7 @@ export const grammar2: GrammarPoint[] = [
     steps: [
       { es: "Parte del presente de io y quita -o: parlo → parl-, prendo → prend-, vengo → veng-.", en: "Start from the io present and drop -o: parlo → parl-, prendo → prend-, vengo → veng-." },
       { es: "En singular: -are → -i (parli); -ere/-ire → -a (prenda, venga).", en: "Singular: -are → -i (parli); -ere/-ire → -a (prenda, venga)." },
-      { es: "noi -iamo, voi -iate; loro = forma del singular + -no: parlino, prendano.", en: "noi -iamo, voi -iate, loro = singular + -no: parlino, prendano." },
+      { es: "noi = igual que el presente (veniamo, andiamo); voi = raíz de noi + -iate (veniate, andiate); loro = singular + -no (parlino, vengano).", en: "noi = same as the present (veniamo, andiamo); voi = noi stem + -iate (veniate, andiate); loro = singular + -no (parlino, vengano)." },
       { es: "Irregulares: sia, abbia, stia, faccia, vada, possa, debba.", en: "Irregulars: sia, abbia, stia, faccia, vada, possa, debba." },
     ],
     table: {

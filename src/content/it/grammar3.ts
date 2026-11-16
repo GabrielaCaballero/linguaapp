@@ -206,8 +206,8 @@ export const grammar3: GrammarPoint[] = [
       en: "venire + participle = passive of an action (viene chiusa); andare + participle = 'must be done' (va firmato).",
     },
     rule: {
-      es: "venire puede reemplazar a essere en la pasiva para subrayar la acción, pero solo en tiempos simples (presente, imperfetto, futuro). andare + participio añade la idea de obligación: il modulo va firmato = el formulario debe firmarse. En ambos casos el participio concuerda con el sujeto.",
-      en: "venire can replace essere in the passive to stress the action, but only in simple tenses (present, imperfetto, future). andare + participle adds the idea of obligation: il modulo va firmato = the form must be signed. In both, the participle agrees with the subject.",
+      es: "venire puede reemplazar a essere en la pasiva para subrayar la acción, pero solo en tiempos simples (presente, imperfetto, futuro). andare + participio añade la idea de obligación: il modulo va firmato = el formulario debe firmarse (excepción: con perdere o distruggere no hay obligación y vale en tiempos compuestos: il pacco è andato perso). En ambos casos el participio concuerda con el sujeto.",
+      en: "venire can replace essere in the passive to stress the action, but only in simple tenses (present, imperfetto, future). andare + participle adds the idea of obligation: il modulo va firmato = the form must be signed (exception: with perdere or distruggere there is no obligation and compound tenses work: il pacco è andato perso). In both, the participle agrees with the subject.",
     },
     steps: [
       { es: "¿Describes algo que se hace (habitualmente)? → venire. ¿Algo que se debe hacer? → andare.", en: "Describing something that is done (habitually)? → venire. Something that must be done? → andare." },
@@ -313,7 +313,7 @@ export const grammar3: GrammarPoint[] = [
       { target: "Studiando ogni giorno, migliori.", gloss: { es: "Estudiando cada día, mejoras.", en: "By studying every day, you improve." } },
     ],
     pitfalls: {
-      es: "El gerundio no funciona como sustantivo ni va tras preposición: «Nuotando fa bene» y «prima di uscendo» son incorrectos. Usa el infinitivo: «Nuotare fa bene», «prima di uscire».",
+      es: "En español «vi a Marco saliendo del bar» puede significar que Marco salía; en italiano el gerundio se refiere al sujeto: «Ho visto Marco uscendo dal bar» = yo salía. Si salía Marco: «Ho visto Marco che usciva dal bar» o «Ho visto Marco uscire dal bar».",
       en: "English '-ing' as a noun or after a preposition is an infinitive in Italian: not 'Nuotando fa bene' or 'prima di uscendo', but 'Nuotare fa bene', 'prima di uscire'.",
     },
   },
@@ -708,8 +708,8 @@ export const grammar3: GrammarPoint[] = [
       { target: "Questo è il capolavoro più famoso del museo.", gloss: { es: "Esta es la obra maestra más famosa del museo.", en: "This is the most famous masterpiece in the museum." } },
     ],
     pitfalls: {
-      es: "«La città più bella nel mondo» es incorrecto: el grupo va con di, como en español «del mundo». Correcto: «la città più bella del mondo».",
-      en: "'La città più bella nel mondo' is wrong: English 'in the world' is di in Italian. Correct: 'la città più bella del mondo'.",
+      es: "El grupo suele ir con di: «la città più bella del mondo» (también se dice «al mondo»). Lo que sí es incorrecto es repetir el artículo: «la città la più bella» → la città più bella.",
+      en: "The group usually takes di: 'la città più bella del mondo' ('al mondo' is also fine). What is wrong is repeating the article: 'la città la più bella' → la città più bella.",
     },
   },
 

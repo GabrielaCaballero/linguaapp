@@ -465,7 +465,7 @@ export const grammar3: GrammarPoint[] = [
       head: ["", "Gegenwart", "Vergangenheit"],
       rows: [
         ["sollen", "Er soll reich sein.", "Er soll reich gewesen sein."],
-        ["wollen", "Er will Arzt sein.", "Er will es gesehen haben."],
+        ["wollen", "Er will den Chef kennen.", "Er will es gesehen haben."],
         ["sollen + Passiv", "Das Gebäude soll abgerissen werden.", "Das Gebäude soll abgerissen worden sein."],
       ],
     },

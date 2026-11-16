@@ -469,7 +469,10 @@ test.describe("CUJ-31 unit overview first (coursebook order)", () => {
     await expect(ov.locator("[lang=de]").first()).toBeVisible();
     await page.getByRole("button", { name: t.startPractising }).click();
     await expect(page.locator(".prompt-eyebrow").first()).toBeVisible();
-    expect((await readDB(page)).profile.seen?.["unit:de-u01"]).toBeGreaterThan(0);
+    const seen = (await readDB(page)).profile.seen ?? {};
+    expect(seen["unit:de-u01"]).toBeGreaterThan(0);
+    // the unit's textbook card counts as read, so the lesson doesn't show it again
+    expect(seen["g:de-g-du-sie"]).toBeGreaterThan(0);
     // and from the Path, any time
     await page.goto("/path");
     await page.getByRole("link", { name: t.overviewBtn }).first().click();
@@ -477,6 +480,30 @@ test.describe("CUJ-31 unit overview first (coursebook order)", () => {
     await page.goto("/unit?id=de-u04");
     await expect(page.locator(".unit-overview")).toContainText(t.grammarHere);
     await expect(page.locator(".unit-overview table").first()).toBeVisible();
+    // the full textbook cards, not the one-line fallback: one per grammar point of the unit
+    const cards = page.locator(".unit-overview .grammar-card");
+    await expect(cards).toHaveCount(3);
+    await expect(cards.filter({ hasText: "Possessives: mein, meine, meinen" })).toHaveCount(1);
+  });
+
+  test("a wrong answer on a grammar question shows the card's one-line rule and opens the full card", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "de", explainIn: "en", exp: "never" }] });
+    await page.goto("/");
+    const db = await readDB(page);
+    const now = Date.now();
+    db.profile.seen = { ...(db.profile.seen ?? {}), "unit:de-u02": now, "g:de-g-praesens": now };
+    db.cards["de-u02-pat-kommen"] = { id: "de-u02-pat-kommen", lang: "de", due: now - 3600_000, stability: 0.5, difficulty: 5, elapsed_days: 1, scheduled_days: 1, learning_steps: 0, reps: 1, lapses: 0, state: 2, last_review: now - 86400_000, introducedAt: now - 2 * 86400_000 };
+    await writeDB(page, db);
+    await page.goto("/lesson?kind=review");
+    await page.getByText("Marco ___ aus Italien", { exact: false }).first().waitFor();
+    await page.getByRole("button", { name: "kommst", exact: true }).click();
+    const check = page.getByRole("button", { name: t.check, exact: true });
+    if (await check.isVisible()) await check.click();
+    const fb = page.locator(".fb");
+    await expect(fb).toContainText("Stem + ending: ich -e, du -st, er/sie/es -t");
+    await fb.getByRole("button", { name: new RegExp(t.seeRule) }).click();
+    await expect(page.getByRole("dialog", { name: t.ruleTitle })).toContainText("Present tense: regular verbs");
   });
 });
 

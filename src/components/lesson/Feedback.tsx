@@ -79,7 +79,8 @@ export function Feedback({
   const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
   const noteArg = check?.reason === "umlaut" ? umlautPair(check.detail?.got ?? "", check.detail?.want ?? item.target) : check?.detail?.want ?? item.target;
   const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](noteArg) : undefined;
-  const ruleLine = grammar && v !== "correct" ? gl(grammar.short, base) : undefined;
+  // The grammar line is for real mistakes; a typo or missing accent ("almost") gets no rule text.
+  const ruleLine = grammar && v === "wrong" ? gl(grammar.short, base) : undefined;
   const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) ?? ruleLine : undefined);
   const annots = v !== "correct" && item.annot ? Object.entries(item.annot) : [];
   const missed = (cells ?? []).filter((c) => c.verdict !== "correct");
