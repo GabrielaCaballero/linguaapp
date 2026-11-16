@@ -23,11 +23,11 @@ export const grammar3: GrammarPoint[] = [
       { es: "Si el artículo ya tiene terminación propia (einen, einem, einer, keine en plural), el adjetivo lleva -en.", en: "If the article already has its own ending (einen, einem, einer, plural keine), the adjective takes -en." },
     ],
     table: {
-      head: ["", "m", "f", "n", "Plural"],
+      head: ["", "m (Film)", "f (Idee)", "n (Buch)", "Pl. (Filme)"],
       rows: [
-        ["Nom.", "ein guter Film", "eine gute Idee", "ein gutes Buch", "keine guten Filme"],
-        ["Akk.", "einen guten Film", "eine gute Idee", "ein gutes Buch", "keine guten Filme"],
-        ["Dat.", "einem guten Film", "einer guten Idee", "einem guten Buch", "keinen guten Filmen"],
+        ["Nom.", "ein guter", "eine gute", "ein gutes", "keine guten"],
+        ["Akk.", "einen guten", "eine gute", "ein gutes", "keine guten"],
+        ["Dat.", "einem guten", "einer guten", "einem guten", "keinen guten"],
       ],
     },
     examples: [
@@ -775,11 +775,13 @@ export const grammar3: GrammarPoint[] = [
       { es: "Con adjetivo, este lleva -en: wegen des schlechten Wetters, trotz der hohen Kosten.", en: "With an adjective, it takes -en: wegen des schlechten Wetters, trotz der hohen Kosten." },
     ],
     table: {
-      head: ["", "m", "f", "n", "Plural"],
+      head: ["", "m / n", "f / Plural"],
       rows: [
-        ["Artikel", "des …(e)s", "der", "des …(e)s", "der"],
-        ["ohne Adj.", "während des Urlaubs", "trotz der Kälte", "wegen des Wetters", "aufgrund der Kosten"],
-        ["mit Adj.", "trotz des starken Regens", "wegen der langen Pause", "trotz des schlechten Wetters", "aufgrund der hohen Kosten"],
+        ["Artikel", "des …(e)s", "der"],
+        ["wegen", "des Wetters", "der Kosten"],
+        ["trotz", "des Regens", "der Kälte"],
+        ["während", "des Urlaubs", "der Pause"],
+        ["+ Adjektiv", "des starken Regens", "der hohen Kosten"],
       ],
     },
     examples: [

@@ -173,6 +173,8 @@ test.describe("CUJ-5 mistakes", () => {
     const now = Date.now();
     const ids = ["it-u01-ciao", "it-u01-grazie", "it-u01-prego", "it-u01-piacere", "it-u01-arrivederci", "it-u01-buongiorno"];
     for (const id of ids) db0.cards[id] = { id, lang: "it", due: now - 1000, stability: 12, difficulty: 5, elapsed_days: 10, scheduled_days: 10, learning_steps: 0, reps: 4, lapses: 0, state: 2, last_review: now - 10 * 86400000, introducedAt: now - 30 * 86400000 };
+    // this journey is about typed mistakes: the unit's grammar card was already read, so no rule screen takes a step
+    db0.profile.seen = { ...(db0.profile.seen ?? {}), "g:it-g-tu-lei": now };
     await writeDB(page, db0);
     await page.goto("/");
     await page.locator(".btn-primary").click();
@@ -471,8 +473,8 @@ test.describe("CUJ-31 unit overview first (coursebook order)", () => {
     await expect(page.locator(".prompt-eyebrow").first()).toBeVisible();
     const seen = (await readDB(page)).profile.seen ?? {};
     expect(seen["unit:de-u01"]).toBeGreaterThan(0);
-    // the unit's textbook card counts as read, so the lesson doesn't show it again
-    expect(seen["g:de-g-du-sie"]).toBeGreaterThan(0);
+    // a card scrolled past is not "read": it still shows as a rule card before its first exercise
+    expect(seen["g:de-g-du-sie"]).toBeUndefined();
     // and from the Path, any time
     await page.goto("/path");
     await page.getByRole("link", { name: t.overviewBtn }).first().click();
@@ -483,7 +485,16 @@ test.describe("CUJ-31 unit overview first (coursebook order)", () => {
     // the full textbook cards, not the one-line fallback: one per grammar point of the unit
     const cards = page.locator(".unit-overview .grammar-card");
     await expect(cards).toHaveCount(3);
-    await expect(cards.filter({ hasText: "Possessives: mein, meine, meinen" })).toHaveCount(1);
+    const poss = cards.filter({ hasText: "Possessives: mein, meine, meinen" });
+    await expect(poss).toHaveCount(1);
+    // short version first: one-line rule + table; the rest one tap away, and opening it counts as read
+    await expect(poss).toContainText("plural nominative and accusative = meine");
+    await expect(poss.getByText(t.howToWorkOut)).toBeHidden();
+    await poss.getByText(t.fullExplanation).click();
+    await expect(poss.getByText(t.howToWorkOut)).toBeVisible();
+    await expect.poll(async () => (await readDB(page)).profile.seen?.["g:de-g-possessiv"]).toBeGreaterThan(0);
+    // the start button stays on screen without scrolling past the grammar
+    await expect(page.getByRole("button", { name: t.startPractising })).toBeInViewport();
   });
 
   test("a wrong answer on a grammar question shows the card's one-line rule and opens the full card", async ({ page }) => {

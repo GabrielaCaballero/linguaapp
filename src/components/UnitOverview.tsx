@@ -6,7 +6,8 @@ import { useState } from "react";
 import type { BaseLang, Item, Unit } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { gl, grammarPoint, visible } from "@/lib/content";
-import { GrammarCard } from "./lesson/Grammar";
+import { markSeen } from "@/lib/actions";
+import { GrammarCard, GrammarTable } from "./lesson/Grammar";
 import { Speaker } from "./lesson/Exercises";
 
 export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: { unit: Unit; base: BaseLang; t: Dict; canListen: boolean; onStart: () => void; startLabel?: string }) {
@@ -82,7 +83,10 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
         </section>
       )}
 
-      <button type="button" className="btn btn-primary" onClick={onStart}>{startLabel ?? t.startPractising}</button>
+      {/* Pinned, so nobody has to scroll past the grammar to start. */}
+      <div className="goal-bar overview-start">
+        <button type="button" className="btn btn-primary" style={{ width: "100%" }} onClick={onStart}>{startLabel ?? t.startPractising}</button>
+      </div>
     </div>
   );
 }
@@ -92,7 +96,7 @@ function dedupe(items: Item[]): Item[] {
   const seen = new Set<string>();
   return items.filter((i) => {
     const g = i.grammar?.[0];
-    if (!g) return i.type === "pattern";
+    if (!g) return i.type === "pattern" || i.type === "paradigm";
     if (seen.has(g)) return false;
     seen.add(g);
     return true;
@@ -101,14 +105,17 @@ function dedupe(items: Item[]): Item[] {
 
 function GrammarBlock({ item, base, t }: { item: Item; base: BaseLang; t: Dict }) {
   const point = grammarPoint(item.grammar?.[0]);
-  if (point) return <div className="card"><GrammarCard point={point} base={base} t={t} /></div>;
+  // The overview shows the short version; opening "Full explanation" counts as having read the
+  // card. Unopened cards still appear as a rule card right before the pattern's first exercise.
+  if (point) return <div className="card"><GrammarCard point={point} base={base} t={t} mode="overview" onOpen={() => markSeen(`g:${point.id}`)} /></div>;
   const table = item.pattern?.table;
   return (
     <div className="card stack" style={{ gap: 10 }}>
       <b lang={item.lang} className="display">{item.target}</b>
       {item.pattern && <p style={{ margin: 0 }}>{gl(item.pattern.rule, base)}</p>}
-      {table && table.length > 1 && (
-        <div className="gtable-wrap">
+      {table && table.length > 1 && table[0][0] === "" && <GrammarTable table={{ head: table[0], rows: table.slice(1) }} lang={item.lang} label={item.target} />}
+      {table && table.length > 1 && table[0][0] !== "" && (
+        <div className="gtable-wrap" tabIndex={0} role="region" aria-label={item.target}>
           <table className="gtable" lang={item.lang}>
             {/* Content tables have a header row only when its first cell is empty (["", "kommen", "wohnen"]). */}
             {table[0][0] === "" && (
@@ -133,9 +140,8 @@ function GrammarBlock({ item, base, t }: { item: Item; base: BaseLang; t: Dict }
   );
 }
 
-/** Mark a unit's opener and its grammar as seen, so the same rule cards don't pop up again mid-lesson. */
+/** Mark a unit's opener as seen. Its grammar cards count as read only when opened (see GrammarBlock),
+ *  so a card the learner scrolled past still shows right before the pattern's first exercise. */
 export function overviewSeenKeys(unit: Unit): string[] {
-  const keys = [`unit:${unit.id}`];
-  for (const i of unit.items) for (const g of i.grammar ?? []) keys.push(`g:${g}`);
-  return keys;
+  return [`unit:${unit.id}`];
 }

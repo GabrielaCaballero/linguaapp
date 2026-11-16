@@ -37,6 +37,9 @@ for (const [lang, c] of Object.entries(courses)) {
         if (g.table) {
           expect(g.table.head.length, g.id).toBeLessThanOrEqual(5);
           expect(g.table.rows.length, g.id).toBeLessThanOrEqual(7);
+          // Rough width budget for a 375 px phone: wide tables need short cells (UX review 2026-11-16).
+          const longest = g.table.head.map((_, j) => Math.max(...[g.table!.head, ...g.table!.rows].map((r) => r[j].length)));
+          if (g.table.head.length >= 4) expect(Math.max(...longest.slice(1)), `${g.id}: cells too long for ${g.table.head.length} columns`).toBeLessThanOrEqual(g.table.head.length >= 5 ? 14 : 22);
         }
         expect((g.steps ?? []).length, g.id).toBeLessThanOrEqual(4);
       }

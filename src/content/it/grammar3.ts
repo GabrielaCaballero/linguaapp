@@ -63,10 +63,10 @@ export const grammar3: GrammarPoint[] = [
       { es: "Pon la consecuencia en condicional (verrei, farei, girerei). El orden de las partes puede cambiar.", en: "Put the result in the conditional (verrei, farei, girerei). The two parts can swap order." },
     ],
     table: {
-      head: ["tipo", "se + …", "conseguenza", "esempio"],
+      head: ["tipo", "se + …", "conseguenza"],
       rows: [
-        ["reale", "presente", "presente / futuro", "Se ho tempo, vengo."],
-        ["possibile", "congiuntivo imperfetto", "condizionale", "Se avessi tempo, verrei."],
+        ["reale", "presente", "presente / futuro"],
+        ["possibile", "congiuntivo imperfetto", "condizionale"],
       ],
     },
     examples: [
@@ -494,12 +494,12 @@ export const grammar3: GrammarPoint[] = [
       { es: "Elige el auxiliar como en el passato prossimo y haz concordar con essere.", en: "Pick the auxiliary as in the passato prossimo and make it agree with essere." },
     ],
     table: {
-      head: ["tipo", "se + …", "conseguenza", "esempio"],
+      head: ["tipo", "se + …", "conseguenza"],
       rows: [
-        ["reale", "presente", "presente / futuro", "Se piove, resto a casa."],
-        ["possibile", "congiuntivo imperfetto", "condizionale", "Se potessi, verrei."],
-        ["irreale", "congiuntivo trapassato", "condizionale passato", "Se avessi saputo, sarei venuto."],
-        ["misto", "congiuntivo trapassato", "condizionale", "Se avessi studiato, ora avrei un lavoro migliore."],
+        ["reale", "presente", "presente / futuro"],
+        ["possibile", "congiuntivo imperfetto", "condizionale"],
+        ["irreale", "congiuntivo trapassato", "condizionale passato"],
+        ["misto", "congiuntivo trapassato", "condizionale"],
       ],
     },
     examples: [
@@ -606,7 +606,7 @@ export const grammar3: GrammarPoint[] = [
       en: "The passato remoto narrates finished, distant events: it is used mainly in writing, history and biographies, and in everyday speech in parts of the south. Regular verbs have three sets of endings (-are, -ere, -ire). Many irregulars follow a '1-3-3' pattern: only io, lui/lei and loro change; tu, noi and voi are regular.",
     },
     steps: [
-      { es: "Regular: quita -are / -ere / -ire y añade las terminaciones de la tabla.", en: "Regular: drop -are / -ere / -ire and add the endings from the table." },
+      { es: "Regular: quita -are / -ere / -ire y añade las terminaciones de la tabla (en -ere también: credetti, credette, credettero).", en: "Regular: drop -are / -ere / -ire and add the endings from the table (-ere verbs also: credetti, credette, credettero)." },
       { es: "Irregular: aprende la forma de io (ebbi, feci, dissi, presi, vidi, venni, scrissi, nacqui).", en: "Irregular: learn the io form (ebbi, feci, dissi, presi, vidi, venni, scrissi, nacqui)." },
       { es: "De ahí salen lui/lei (-i → -e: ebbe, fece) y loro (+ -ro: ebbero, fecero).", en: "From it you get lui/lei (-i → -e: ebbe, fece) and loro (+ -ro: ebbero, fecero)." },
       { es: "tu, noi y voi son regulares desde la raíz: avesti, avemmo, aveste. essere es aparte: fui, fosti, fu, fummo, foste, furono.", en: "tu, noi and voi are regular from the stem: avesti, avemmo, aveste. essere is separate: fui, fosti, fu, fummo, foste, furono." },
@@ -614,12 +614,12 @@ export const grammar3: GrammarPoint[] = [
     table: {
       head: ["", "parlare", "credere", "dormire", "fare"],
       rows: [
-        ["io", "parlai", "credei / credetti", "dormii", "feci"],
+        ["io", "parlai", "credei", "dormii", "feci"],
         ["tu", "parlasti", "credesti", "dormisti", "facesti"],
-        ["lui / lei", "parlò", "credé / credette", "dormì", "fece"],
+        ["lui / lei", "parlò", "credé", "dormì", "fece"],
         ["noi", "parlammo", "credemmo", "dormimmo", "facemmo"],
         ["voi", "parlaste", "credeste", "dormiste", "faceste"],
-        ["loro", "parlarono", "crederono / credettero", "dormirono", "fecero"],
+        ["loro", "parlarono", "crederono", "dormirono", "fecero"],
       ],
     },
     examples: [

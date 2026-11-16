@@ -29,7 +29,7 @@ export const grammar1: GrammarPoint[] = [
         ["heißen", "Wie heißt du?", "Wie heißen Sie?"],
         ["sein", "Bist du Lena?", "Sind Sie Frau Weber?"],
         ["dir / Ihnen", "Wie geht es dir?", "Wie geht es Ihnen?"],
-        ["Tschüss / Auf Wiedersehen", "Tschüss!", "Auf Wiedersehen!"],
+        ["Gruß", "Tschüss!", "Auf Wiedersehen!"],
       ],
     },
     examples: [
