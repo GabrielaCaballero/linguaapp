@@ -48,8 +48,7 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
   for (const l of plan.langs) await page.locator(".choice-card", { hasText: l.lang === "it" ? "Italiano" : "Deutsch" }).click();
   await btn(page, t.continue).click();
   for (const l of plan.langs) {
-    await page.locator(".choice-card", { hasText: t.baseName[l.explainIn] }).first().click();
-    await btn(page, t.continue).click();
+    // (No "explain in…" step any more: explanations use the app's language.)
     const expTitle = { never: t.expNever, bit: t.expBit, classes: t.expClasses, lived: t.expLived }[l.exp];
     await page.locator(".choice-card", { hasText: expTitle }).first().click();
     await btn(page, t.continue).click();
@@ -69,7 +68,7 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
   await page.waitForURL(/\/lesson/);
   // The first lesson opens with a one-screen "This unit" card; start, then learn → try.
   await page.locator(".unit-intro, .unit-overview, .answer-area").first().waitFor();
-  if (await page.locator(".unit-intro").isVisible().catch(() => false)) await btn(page, t.letsStart).click();
+  if (await page.locator(".unit-intro").isVisible().catch(() => false)) await startUnit(page, t);
   else if (await page.locator(".unit-overview").isVisible().catch(() => false)) await btn(page, t.startPractising).click();
   await page.locator(".answer-area").first().waitFor();
   out.firstAnswerMs = Date.now() - t0;
@@ -146,7 +145,7 @@ export async function playLesson(page: Page, o: { lang: TargetLang; base: BaseLa
     }
     // "This unit" card before a unit's first new item: start
     if (await page.locator(".unit-intro").isVisible().catch(() => false)) {
-      await btn(page, t.letsStart).click();
+      await startUnit(page, t);
       continue;
     }
     if (await page.locator(".unit-overview").isVisible().catch(() => false)) {
@@ -301,4 +300,11 @@ export async function languageLeaks(page: Page, appLang: BaseLang): Promise<stri
     return walk(document.body);
   });
   return [...strings].filter((s) => text.includes(s));
+}
+
+/** "This unit" card: skip the recommended grammar read (tests go straight to practice), or just start. */
+async function startUnit(page: Page, t: (typeof T)["en"]) {
+  const skip = page.getByRole("button", { name: t.skipForNow, exact: true });
+  if (await skip.isVisible().catch(() => false)) await skip.click();
+  else await btn(page, t.letsStart).click();
 }

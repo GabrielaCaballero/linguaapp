@@ -1,6 +1,6 @@
 // Category: e2e-ux — tap targets, horizontal scroll at 375 px, console errors, contrast,
 // reduced motion and localisation, measured in the real browser on every main screen.
-// Also CUJ-10 (offline) and CUJ-11 (backup/restore), which need the browser.
+// Also CUJ-10 (offline), which needs the browser.
 import { expect, test, type Page } from "@playwright/test";
 import { languageLeaks, onboard, playLesson, quitLesson, readDB, T, watchErrors } from "./helpers";
 
@@ -132,29 +132,7 @@ test("correctness is never shown by colour alone (✓/✕ + words) (CUJ-13)", as
   expect(text).toMatch(new RegExp(`${T.en.correct}|${T.en.almost}|${T.en.notQuite}`));
 });
 
-test("CUJ-11 backup: export → reset → import gives the same state; a bad file changes nothing", async ({ page }) => {
-  await setup(page, "en");
-  await quitLesson(page, "en");
-  const before = await readDB(page);
-  await page.goto("/me/settings");
-  const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: /Export/ }).click()]);
-  const file = await dl.path();
-  // bad file first: nothing changes
-  const input = page.locator("input[type=file][accept^=\"application/json\"]");
-  await input.setInputFiles({ name: "bad.json", mimeType: "application/json", buffer: Buffer.from("{nope") });
-  await page.waitForTimeout(500);
-  expect((await readDB(page)).cards).toEqual(before.cards);
-  // reset then import
-  await page.evaluate(() => localStorage.removeItem("lingua:v2"));
-  await page.goto("/me/settings");
-  await page.locator("input[type=file][accept^=\"application/json\"]").setInputFiles(file!);
-  const confirm = page.getByRole("button", { name: /Import|Restore|Replace|Importar|Restaurar/ }).last();
-  if (await confirm.isVisible().catch(() => false)) await confirm.click();
-  await page.waitForTimeout(500);
-  const after = await readDB(page);
-  expect(after.cards).toEqual(before.cards);
-  expect(after.profile.courses).toEqual(before.profile.courses);
-});
+// CUJ-11 (backup/restore) removed with the feature (owner, 2026-11-16): progress lives in the account.
 
 test.describe("CUJ-10 offline", () => {
   test.use({ serviceWorkers: "allow" });

@@ -202,7 +202,7 @@ a { color: inherit; }
   min-height: 56px; padding: 0 var(--s6);
   font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.005em;
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
-  width: 100%;
+  width: 100%; text-align: center; line-height: 1.25;
   transition: transform var(--d-fast) var(--ease-out), box-shadow var(--d-fast) var(--ease-out), background-color var(--d-med);
   user-select: none;
   text-decoration: none;
@@ -348,8 +348,21 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 :root[data-theme="dark"] .logo-light { display: none; }
 :root[data-theme="dark"] .logo-dark { display: block; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo-light { display: none; } :root:not([data-theme="light"]) .logo-dark { display: block; } }
+.lang-switch { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 12px 4px 4px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: var(--t-label); color: var(--text); }
+.lang-switch:active { transform: scale(0.98); }
 .no-audio { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text-2); }
 .answer-area { margin-top: auto; display: flex; flex-direction: column; gap: var(--s3); padding-top: var(--s4); }
+/* Questions about a text: the question sits right above its answers, not at the top of the screen. */
+.answer-area.tight { margin-top: 0; }
+/* Learn cards and "This unit": the buttons stay pinned at the bottom however long the card is. */
+.learn ~ .answer-area, .unit-intro ~ .answer-area { position: sticky; bottom: 0; z-index: 3; background: linear-gradient(to top, var(--bg) 82%, transparent); padding-bottom: calc(env(safe-area-inset-bottom) + var(--s3)); }
+.question-text { margin: 0; }
+/* Sized so text + question + 4 answers + Check fit 375×812 (QA 2026-11-16). */
+.answer-area.tight .opt { min-height: 50px; padding-top: var(--s2); padding-bottom: var(--s2); }
+.answer-area.tight .options { gap: var(--s2); }
+.stem-more { align-self: center; border: 0; background: var(--surface-2); color: var(--text-2); border-radius: var(--r-pill); padding: 4px 14px; min-height: 44px; font-weight: 600; }
+.stem-box:not(.has-more) { -webkit-mask-image: none !important; mask-image: none !important; }
+.stem-box { max-height: 24vh; overflow-y: auto; border-radius: var(--r-md); overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); padding-bottom: 16px; }
 /* Check / Continue never scrolls off a phone screen, however long the question. */
 .answer-area > .btn-primary:last-child { position: sticky; bottom: calc(env(safe-area-inset-bottom) + var(--s3)); z-index: 2; }
 
@@ -455,7 +468,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .node.sm { width: 72px; height: 48px; background: transparent; }
 .node.sm > * { background: var(--bg); border-radius: 50%; }
 .unit-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.unit-row-title { font-size: var(--t-label); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.unit-row-title { font-size: var(--t-label); overflow-wrap: anywhere; }
 .unit-row-title .display { font-size: 1.0625rem; font-weight: 600; }
 .unit-row.done .unit-row-title .display { color: var(--text-2); }
 .node { width: 72px; height: 72px; position: relative; display: grid; place-items: center; font-size: 1.75rem; border-radius: 50%; background: var(--surface); }

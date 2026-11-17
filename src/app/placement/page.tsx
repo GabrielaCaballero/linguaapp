@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
 import { useDB } from "@/lib/store";
@@ -33,12 +33,13 @@ function Retake({ lang }: { lang: TargetLang }) {
   useEffect(() => {
     voicesReady().then(() => setVoices(true));
   }, []);
-  if (!db) return <Loading />;
-  const c = db.profile.courses[lang];
-  if (!c) {
-    router.replace("/");
-    return <Loading />;
-  }
+  const onScreen = usePathname() === "/placement";
+  const c = db?.profile.courses[lang];
+  useEffect(() => {
+    if (onScreen && db && !c) router.replace("/");
+  }, [onScreen, db, c, router]);
+  if (!onScreen) return null;
+  if (!db || !c) return <Loading />;
   return (
     <main className="screen full">
       {!outcome ? (

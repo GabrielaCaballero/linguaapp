@@ -13,7 +13,8 @@ const KEY = "sk-ant-api03-e2e-should-never-leave-000000";
 const t = T.es;
 
 type Row = { db: unknown; rev: number };
-function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean } = {}) {
+/** invited = existing accounts. signupsOff mimics Supabase with "Allow new users to sign up" turned off. */
+function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean } = {}, signupsOff = false) {
   const rows = new Map<string, Row>();
   // user_reviews: one row per answer, keyed like the real primary key.
   const answers = new Map<string, { uid: string; epoch: string; t: number; r: unknown }>();
@@ -58,7 +59,10 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
       authorize.push(url);
       const back = new URL(url.searchParams.get("redirect_to")!);
       if (google.cancel) back.searchParams.set("error", "access_denied");
-      else if (!users.has(google.as ?? "")) {
+      else if (!users.has(google.as ?? "") && !signupsOff && google.as) users.set(google.as, `00000000-0000-4000-8000-0000000000${String(users.size + 10).padStart(2, "0")}`);
+      if (google.cancel) {
+        /* error set above */
+      } else if (!users.has(google.as ?? "")) {
         back.searchParams.set("error", "access_denied");
         back.searchParams.set("error_code", "signup_disabled");
         back.searchParams.set("error_description", "Signups not allowed for this instance");
@@ -73,8 +77,9 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
       return json(route, 200, session(id, email, "google"));
     }
     if (p === "/auth/v1/otp") {
-      const { email } = JSON.parse(body);
-      if (!users.has(email)) return json(route, 422, { code: 422, error_code: "otp_disabled", msg: "Signups not allowed for otp" });
+      const { email, create_user } = JSON.parse(body);
+      if (!users.has(email) && (signupsOff || !create_user)) return json(route, 422, { code: 422, error_code: "otp_disabled", msg: "Signups not allowed for otp" });
+      if (!users.has(email)) users.set(email, `00000000-0000-4000-8000-0000000000${String(users.size + 10).padStart(2, "0")}`);
       return json(route, 200, {});
     }
     if (p === "/auth/v1/verify") {
@@ -279,8 +284,19 @@ test.describe("e2e-sync · with an account", () => {
     await laptopCtx.close();
   });
 
-  test("CUJ-18 not-invited email gets a clear message and no account is created", async ({ page, context }) => {
-    const fake = fakeSupabase(["ana@example.com"]);
+  test("CUJ-18 open sign-up: a new email gets a code and its account is created", async ({ page, context }) => {
+    const fake = fakeSupabase([]);
+    await fake.attach(context);
+    await page.goto("/");
+    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByLabel(t.acctEmail).fill("new@example.com");
+    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await expect(page.getByText(t.acctCodeTitle)).toBeVisible();
+    await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
+  });
+
+  test("CUJ-18 if sign-ups are closed on the server, a new email gets a clear message and no account", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"], {}, true);
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccount }).click();
@@ -468,7 +484,7 @@ test.describe("e2e-sync · sign in with Google", () => {
   });
 
   test("Google account that isn't invited gets the invite message; cancelling shows a soft retry", async ({ page, context }) => {
-    const fake = fakeSupabase(["ana@gmail.com"], { as: "stranger@gmail.com" });
+    const fake = fakeSupabase(["ana@gmail.com"], { as: "stranger@gmail.com" }, true);
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccount }).click();

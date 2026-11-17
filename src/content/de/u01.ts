@@ -8,7 +8,7 @@ export const unit: Unit = {
   cefr: "A0",
   title: { target: "Hallo!", es: "¡Hola!", en: "Hello!" },
   canDo: [
-    { es: "Puedo saludar y despedirme, de «du» y de «Sie».", en: "I can say hello and goodbye, with du and with Sie." },
+    { es: "Puedo saludar y despedirme, tanto de tú («du») como de usted («Sie»).", en: "I can say hello and goodbye, with du and with Sie." },
     { es: "Puedo decir mi nombre y preguntar el de otra persona.", en: "I can say my name and ask someone theirs." },
     { es: "Puedo pronunciar ä, ö, ü y ß.", en: "I can pronounce ä, ö, ü and ß." },
   ],

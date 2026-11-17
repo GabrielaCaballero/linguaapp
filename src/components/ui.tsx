@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { previousPath, recordVisit } from "@/lib/navstack";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { TargetLang } from "@/content/schema";
 import { SEAL } from "@/lib/content";
@@ -11,6 +12,15 @@ import { Icon } from "./icons";
 
 export function useT(db: DB | null): Dict {
   return dict(db?.profile.appLang ?? "es");
+}
+
+/**
+ * Screens about the course you're learning (lessons, unit notes, Path, writing) speak the language
+ * the course is explained in, labels included, so a screen never mixes English and Spanish.
+ */
+export function useCourseT(db: DB | null): Dict {
+  const p = db?.profile;
+  return dict((p && p.courses[p.activeLang]?.explainIn) ?? p?.appLang ?? "es");
 }
 
 export function Seal({ lang, size = 56 }: { lang: TargetLang; size?: number }) {
@@ -94,7 +104,8 @@ export function TabBar({ t }: { t: Dict }) {
     <div className="tabbar">
       <nav aria-label={t.mainNav}>
         {tabs.map((x) => (
-          <Link key={x.href} href={x.href} className="tab" aria-current={x.on ? "page" : undefined}>
+          // replace: switching tabs is not "going somewhere", so Back doesn't hop between tabs.
+          <Link key={x.href} href={x.href} replace className="tab" aria-current={x.on ? "page" : undefined}>
             <span className="tab-ic">
               <Icon name={x.icon} size={22} />
             </span>
@@ -156,10 +167,30 @@ export function WeekDots({ n, goal }: { n: number; goal: number }) {
   );
 }
 
+/** Records each screen visited (for BackHeader). Mounted once in the root layout. */
+export function NavTracker() {
+  const path = usePathname();
+  useEffect(() => {
+    recordVisit(path);
+  }, [path]);
+  return null;
+}
+
 export function BackHeader({ title, href, right, backLabel }: { title: string; href: string; right?: ReactNode; backLabel: string }) {
+  const router = useRouter();
   return (
     <div className="row between" style={{ minHeight: 48, marginLeft: -12 }}>
-      <Link href={href} className="icon-btn" aria-label={backLabel}>
+      <Link
+        href={href}
+        className="icon-btn"
+        aria-label={backLabel}
+        onClick={(e) => {
+          // Go back for real when we came from the parent; otherwise replace this screen with it.
+          e.preventDefault();
+          if (previousPath() === href) router.back();
+          else router.replace(href);
+        }}
+      >
         <Icon name="back" />
       </Link>
       <h1 className="h2" style={{ flex: 1 }}>

@@ -9,7 +9,7 @@ export const unit: Unit = {
   title: { target: "Woher kommst du?", es: "¿De dónde eres?", en: "Where are you from?" },
   canDo: [
     { es: "Puedo decir de dónde soy y dónde vivo.", en: "I can say where I'm from and where I live." },
-    { es: "Puedo decir qué idiomas hablo y preguntarlo, de «du» y de «Sie».", en: "I can say which languages I speak and ask others, with du and Sie." },
+    { es: "Puedo decir qué idiomas hablo y preguntárselo a otros, de tú («du») o de usted («Sie»).", en: "I can say which languages I speak and ask others, with du and Sie." },
     { es: "Sé poner el verbo en segunda posición.", en: "I can put the verb in second position." },
   ],
   icon: "🗺️",

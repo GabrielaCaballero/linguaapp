@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getDB, useDB } from "@/lib/store";
 import { finishGoogle, getEngine, isGoogleEnabled, isSyncConfigured, readOAuthReturn, sendCode, startGoogle, verifyCode, type AccountUser, type AuthError } from "@/lib/sync/client";
@@ -33,6 +33,7 @@ function SignIn({ from }: { from: AccountFrom }) {
   const db = useDB();
   const t = useT(db);
   const router = useRouter();
+  const pathname = usePathname();
   const [step, setStep] = useState<Step>({ id: "email" });
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -74,12 +75,13 @@ function SignIn({ from }: { from: AccountFrom }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  if (!db) return <Loading />;
   const back = from === "welcome" ? onboardingHref() : from === "home" ? "/" : "/me/settings";
-  if (!isSyncConfigured()) {
-    router.replace(back);
-    return <Loading />;
-  }
+  const onScreen = pathname === "/account";
+  useEffect(() => {
+    if (onScreen && !isSyncConfigured()) router.replace(back);
+  }, [onScreen, back, router]);
+  if (!onScreen) return null;
+  if (!db || !isSyncConfigured()) return <Loading />;
 
   const finish = () => {
     // A fresh device that downloaded nothing still needs onboarding; otherwise go home.
@@ -156,7 +158,6 @@ function SignIn({ from }: { from: AccountFrom }) {
           <input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={t.acctEmailPlaceholder} aria-label={t.acctEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
           {errLine}
           <button type="submit" className="btn btn-primary" disabled={busy || !email.includes("@")}>{busy ? t.acctSending : t.acctSendCode}</button>
-          <p className="caption" style={{ margin: 0 }}>{t.acctPrivacy}</p>
         </form>
       )}
 

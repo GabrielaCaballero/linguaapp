@@ -3,11 +3,11 @@
 // then feedback from the AI tutor run by the owner (signed-in learners only, with quotas).
 // Advisory only: grades never change the review schedule, placement or goals.
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useDB } from "@/lib/store";
 import { accountHref } from "@/lib/nav";
-import { BackHeader, Loading, useT } from "@/components/ui";
+import { BackHeader, Loading, useCourseT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { deleteEssay, gradeEssay, isSyncConfigured, myEssays, useAccount, type EssayError, type EssayResult, type EssayRow } from "@/lib/sync/client";
 import { instantChecks, taskById, wordCount, WRITING_TASKS, type InstantCheck, type WritingTask } from "../../../supabase/functions/_shared/writing";
@@ -29,7 +29,7 @@ function WriteRoute() {
 
 function TaskList() {
   const db = useDB();
-  const t = useT(db);
+  const t = useCourseT(db);
   const acct = useAccount();
   const [mine, setMine] = useState<EssayRow[] | null>(null);
   const signedIn = !!acct.user;
@@ -83,14 +83,15 @@ function TaskList() {
           </div>
         </section>
       )}
-      <p className="caption" style={{ marginTop: 24 }}>{t.writePrivacy}</p>
+      {/* Only where feedback is possible: the line says where the text goes. */}
+      {(isSyncConfigured() || ownAiName()) && <p className="caption" style={{ marginTop: 24 }}>{t.writePrivacy}</p>}
     </main>
   );
 }
 
 function Task({ id }: { id: string }) {
   const db = useDB();
-  const t = useT(db);
+  const t = useCourseT(db);
   const router = useRouter();
   const acct = useAccount();
   const task = taskById(id);
@@ -101,11 +102,13 @@ function Task({ id }: { id: string }) {
   // With their own AI key, learners (guests too) get feedback from their own provider.
   const [ownAi] = useState(() => ownAiName());
   const checks = useMemo(() => (task && text.trim() ? instantChecks(task, text) : []), [task, text]);
-  if (!db) return <Loading />;
-  if (!task) {
-    router.replace("/write");
-    return <Loading />;
-  }
+  // Redirect only while on screen and never during render (hidden pages looped; QA 2026-11-16).
+  const onScreen = usePathname() === "/write";
+  useEffect(() => {
+    if (onScreen && !task) router.replace("/write");
+  }, [onScreen, task, router]);
+  if (!onScreen) return null;
+  if (!db || !task) return <Loading />;
   const base = db.profile.courses[task.lang]?.explainIn ?? db.profile.appLang;
   const n = wordCount(text);
   const signedIn = isSyncConfigured() && !!acct.user;
@@ -165,7 +168,7 @@ function Task({ id }: { id: string }) {
             ) : (
               <p className="caption">{t.writeNoServer}</p>
             )}
-            <p className="caption" style={{ margin: 0 }}>{t.writePrivacy}</p>
+            {(isSyncConfigured() || ownAi) && <p className="caption" style={{ margin: 0 }}>{t.writePrivacy}</p>}
           </>
         )}
         {result && <Result result={result} text={text} task={task} t={t} ownAi={ownAi} onAgain={() => { setResult(null); setText(""); }} />}
@@ -174,7 +177,7 @@ function Task({ id }: { id: string }) {
   );
 }
 
-function Checks({ checks, task, t }: { checks: InstantCheck[]; task: WritingTask; t: ReturnType<typeof useT> }) {
+function Checks({ checks, task, t }: { checks: InstantCheck[]; task: WritingTask; t: ReturnType<typeof useCourseT> }) {
   const label = (c: InstantCheck) =>
     c.id === "length"
       ? t.writeCheck.length(task.minWords, task.maxWords)
@@ -198,7 +201,7 @@ function Checks({ checks, task, t }: { checks: InstantCheck[]; task: WritingTask
   );
 }
 
-function Result({ result, text, task, t, ownAi, onAgain }: { result: EssayResult; text: string; task: WritingTask; t: ReturnType<typeof useT>; ownAi: string | null; onAgain: () => void }) {
+function Result({ result, text, task, t, ownAi, onAgain }: { result: EssayResult; text: string; task: WritingTask; t: ReturnType<typeof useCourseT>; ownAi: string | null; onAgain: () => void }) {
   return (
     <div className="stack" style={{ gap: 12 }} role="status">
       <div className="card row between">

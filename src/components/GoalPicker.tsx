@@ -215,7 +215,9 @@ export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWee
       <div className="stack" style={{ gap: 12 }}>
         <p className="label muted" style={{ margin: 0 }}>{t.simpleGoalSub}</p>
         {[5, 10, 15].map((m) => {
-          const [first] = checkpoints(m);
+          // What each pace gets you in about a month: different for each option, so the choice means something.
+          const all = unitCheckpoints(us, startUnit, m, daysPerWeek, base, lang, 8);
+          const first = all.filter((c) => !(c.days > 31)).pop() ?? all[0];
           return (
             <button key={m} className="choice-card" style={{ alignItems: "flex-start" }} aria-pressed={minutes === m} onClick={() => setMinutes(m)}>
               <span className="stack grow" style={{ gap: 2 }}>
@@ -243,18 +245,19 @@ export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWee
 }
 
 /** Rough, honest checkpoints: when the learner will have worked through the next units at this pace. */
-export function unitCheckpoints(us: ReturnType<typeof units>, startUnit: number, minPerDay: number, daysPerWeek: number, base: BaseLang, lang: TargetLang): { unit: number; days: number; canDo: string }[] {
+export function unitCheckpoints(us: ReturnType<typeof units>, startUnit: number, minPerDay: number, daysPerWeek: number, base: BaseLang, lang: TargetLang, all?: number): { unit: number; days: number; canDo: string }[] {
   // About a minute and a half of practice per new item, counting the reviews that follow;
   // closer languages go faster (same multipliers as the level estimates).
   const perItem = 1.5 * MULT[`${base}-${lang}`];
   const out: { unit: number; days: number; canDo: string }[] = [];
   let minutes = 0;
-  for (const u of us.filter((x) => x.index >= startUnit).slice(0, 3)) {
+  for (const u of us.filter((x) => x.index >= startUnit).slice(0, all ?? 3)) {
     minutes += u.items.filter((i) => i.unit === u.id).length * perItem;
     const practiceDays = Math.ceil(minutes / minPerDay);
     const days = Math.max(1, Math.round((practiceDays * 7) / Math.max(1, daysPerWeek)));
     const c = u.canDo[0];
     if (c) out.push({ unit: u.index, days, canDo: c[base] ?? c.en });
   }
+  if (all) return out;
   return [out[0], out[2] ?? out[1]].filter(Boolean) as typeof out;
 }

@@ -4,7 +4,10 @@ import { ageDB, languageLeaks, onboard, playLesson, quitLesson, readDB, T, watch
 import { migrateV1Fixture } from "./v1-fixture";
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.install();
+  // Start every journey at 10:00 today, so lessons never straddle midnight (it splits "yesterday").
+  const ten = new Date();
+  ten.setHours(10, 0, 0, 0);
+  await page.clock.install({ time: ten });
 });
 
 /** Finish the current lesson fast: play a few tasks, jump the clock past the lesson length, play to Results. */
@@ -43,8 +46,6 @@ test.describe("CUJ-1 first open → first lesson", () => {
     await page.locator(".choice-card", { hasText: "English" }).click();
     await page.getByRole("button", { name: t.continue }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
-    await page.getByRole("button", { name: t.continue }).click();
-    await page.locator(".choice-card", { hasText: "English" }).click();
     await page.getByRole("button", { name: t.continue }).click();
     await page.locator(".choice-card", { hasText: t.expClasses }).click();
     await page.getByRole("button", { name: t.continue }).click();
@@ -86,10 +87,11 @@ test.describe("P0-1 lesson re-entry", () => {
     await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
     await finishLesson(page, { lang: "it", base: "en", appLang: "en" });
     await page.getByRole("button", { name: T.en.continue, exact: true }).click();
-    await page.getByRole("button", { name: /Start|Continue|Practise/ }).first().click();
+    await page.waitForURL((u) => u.pathname === "/");
+    await page.locator(".bottom-bar").getByRole("button", { name: /Start|Continue|Practise/ }).first().click();
     await page.waitForURL(/\/lesson/);
     // a fresh lesson: an exercise, or the next unit's overview if the lesson moves on to a new unit
-    await expect(page.locator(".prompt-eyebrow, .unit-overview").first()).toBeVisible();
+    await expect(page.locator(".prompt-eyebrow, .unit-overview, .unit-intro").first()).toBeVisible();
     await expect(page.getByText(T.en.resultsTitle)).toHaveCount(0);
   });
   test("quit → Start again does not show the 'End lesson?' sheet", async ({ page }) => {
@@ -137,21 +139,23 @@ test.describe("CUJ-4 second language (P1 Ana)", () => {
     await page.getByText(T.es.addLanguage).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: T.es.continue }).click();
-    await page.locator(".choice-card", { hasText: "English" }).click();
-    await page.getByRole("button", { name: T.es.continue }).click();
     await page.locator(".choice-card", { hasText: T.es.expNever }).click();
     await page.getByRole("button", { name: T.es.continue }).click();
     await page.getByRole("button", { name: T.es.setGoal }).click();
     await page.waitForURL((u) => !u.pathname.startsWith("/onboarding"));
     const after = await readDB(page);
     for (const id of Object.keys(before.cards)) if (id.startsWith("it-")) expect(after.cards[id]).toEqual(before.cards[id]);
-    expect(after.profile.courses.de.explainIn).toBe("en");
+    // one language for the whole app: German is explained in the app's language too
+    expect(after.profile.courses.de.explainIn).toBe("es");
     await page.goto("/");
     expect(await page.evaluate(() => document.documentElement.dataset.lang)).toBe("de");
-    await expect(page.getByText(/Italiano/).first()).toBeVisible();
+    // one place to switch: the labelled button shows the current language; its sheet lists the other
+    await expect(page.locator(".lang-switch")).toContainText("Deutsch");
+    await page.locator(".lang-switch").click();
+    await expect(page.getByRole("dialog").getByText(/Italiano/).first()).toBeVisible();
   });
   test("starting German right after an Italian lesson shows a German lesson (P0-1)", async ({ page }) => {
-    await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }, { lang: "de", explainIn: "en", exp: "never" }] });
+    await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }, { lang: "de", explainIn: "es", exp: "never" }] });
     await finishLesson(page, { lang: "it", base: "es", appLang: "es" });
     const db = await readDB(page);
     db.profile.activeLang = "de";
@@ -313,8 +317,6 @@ test.describe("CUJ-2b I know my level", () => {
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: "Italiano" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await page.locator(".choice-card", { hasText: t.baseName.es }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expKnown }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await expect(page.getByText(t.levelTitle(t.langName.it))).toBeVisible();
@@ -341,8 +343,6 @@ test.describe("CUJ-2b I know my level", () => {
     await page.locator(".choice-card", { hasText: "English" }).first().click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await page.locator(".choice-card", { hasText: t.baseName.en }).first().click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expBit }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
@@ -461,8 +461,6 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await page.locator(".choice-card", { hasText: t.baseName.en }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expNever }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.getByRole("button", { name: t.setGoal }).click();
@@ -472,10 +470,11 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
     await expect(intro).toBeVisible();
     await expect(intro).toContainText(t.youWillLearn);
     await expect(intro.locator("[lang=de]").first()).toBeVisible();
-    await expect(intro.getByRole("link", { name: new RegExp(t.unitNotes) })).toBeVisible();
-    // one screen: the start button is visible without scrolling
-    await expect(page.getByRole("button", { name: t.letsStart })).toBeInViewport();
-    await page.getByRole("button", { name: t.letsStart }).click();
+    // the unit's grammar is named and reading it first is the recommended (main) button; skipping is possible
+    await expect(intro.locator(".unit-grammar")).toContainText(t.grammarHere);
+    await expect(page.getByRole("button", { name: t.readGrammarFirst })).toBeInViewport();
+    await expect(page.getByRole("button", { name: t.skipForNow })).toBeInViewport();
+    await page.getByRole("button", { name: t.skipForNow }).click();
     expect((await readDB(page)).profile.seen?.["unit:de-u01"]).toBeGreaterThan(0);
     // learn first: the unit's easiest thing (a word), explained, then "Try it"
     const eyebrow = page.locator(".prompt-eyebrow").first();
@@ -527,3 +526,57 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
   });
 });
 
+
+test.describe("Navigation regressions (QA 2026-11-16)", () => {
+  test("Back from the very first lesson lands on Today (not out of the app, not onboarding)", async ({ page }) => {
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await page.goBack();
+    await page.waitForURL((u) => u.pathname === "/");
+    await expect(page.locator(".lang-switch")).toBeVisible();
+  });
+
+  test("unit grammar → back arrow → Path stays put; tabs and practice still work (no redirect loop)", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await quitLesson(page, "en");
+    await page.goto("/path");
+    await page.getByRole("link", { name: t.unitNotes }).first().click();
+    await expect(page.locator(".unit-overview")).toBeVisible();
+    await page.getByRole("link", { name: t.back }).click();
+    await page.waitForURL((u) => u.pathname === "/path");
+    // a hidden page must not keep redirecting: Today stays Today
+    await page.getByRole("link", { name: t.tabToday }).click();
+    await page.waitForURL((u) => u.pathname === "/");
+    await page.waitForTimeout(1500);
+    expect(new URL(page.url()).pathname).toBe("/");
+    // and starting practice from the unit grammar page really starts a lesson
+    await page.goto("/unit?id=it-u01");
+    await page.getByRole("button", { name: t.startPractising }).click();
+    await page.waitForURL(/\/lesson/);
+    await page.waitForTimeout(1500);
+    expect(new URL(page.url()).pathname).toBe("/lesson");
+    await expect(page.locator(".prompt-eyebrow").first()).toBeVisible();
+  });
+
+  test("'Read the grammar' opens the unit grammar inside the lesson, then the same lesson continues", async ({ page }) => {
+    const t = T.en;
+    await page.goto("/");
+    await page.getByRole("button", { name: t.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
+    await page.locator(".choice-card", { hasText: "English" }).first().click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: "Deutsch" }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.locator(".choice-card", { hasText: t.expNever }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.setGoal }).click();
+    await page.getByRole("button", { name: t.startFirst }).click();
+    await page.waitForURL(/\/lesson/);
+    const lessonUrl = page.url();
+    await page.getByRole("button", { name: t.readGrammarFirst }).click();
+    await expect(page.locator(".unit-overview")).toContainText(t.grammarHere);
+    expect(page.url()).toBe(lessonUrl);
+    await page.getByRole("button", { name: t.startPractising }).click();
+    await expect(page.locator(".prompt-eyebrow").first()).toContainText(t.learn);
+    expect(page.url()).toBe(lessonUrl);
+  });
+});

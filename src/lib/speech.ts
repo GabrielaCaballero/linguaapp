@@ -24,9 +24,19 @@ export function canSpeak(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-/** True when the device has a voice for this language (voices load async on some browsers). */
+/**
+ * True when the device can speak this language. Voices load late on some phones (the list is
+ * still empty after the first second): then we assume yes rather than hiding all audio; only a
+ * loaded list without this language means no.
+ */
 export function hasVoice(lang: TargetLang): boolean {
-  return canSpeak() && voicesFor(LOCALE[lang]).length > 0;
+  if (!canSpeak()) return false;
+  try {
+    if (window.speechSynthesis.getVoices().length === 0) return true;
+  } catch {
+    return false;
+  }
+  return voicesFor(LOCALE[lang]).length > 0;
 }
 
 /** Resolve once voices are loaded (or after a short timeout). */
@@ -44,7 +54,10 @@ export function speak(text: string, lang: TargetLang, slow = false) {
   if (!canSpeak()) return;
   try {
     const synth = window.speechSynthesis;
-    synth.cancel();
+    // Cancel only when something is playing: on some phones a cancel right before speak drops it.
+    if (synth.speaking || synth.pending) synth.cancel();
+    // Chrome can leave synthesis paused (e.g. after the tab was in the background).
+    synth.resume();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = LOCALE[lang];
     const v = pickVoice(u.lang);
