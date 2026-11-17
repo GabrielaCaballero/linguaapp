@@ -6,14 +6,14 @@ import { useEffect, useRef } from "react";
 import { useDB } from "@/lib/store";
 import { gl, units, visible } from "@/lib/content";
 import { courseLangs, currentUnit, unitProgress } from "@/lib/stats";
-import { Loading, Ring, Seal, useT } from "@/components/ui";
+import { Loading, Ring, Seal, useCourseT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { setActiveLang } from "@/lib/actions";
 import { lessonHref, onboardingHref } from "@/lib/nav";
 
 export default function PathPage() {
   const db = useDB();
-  const t = useT(db);
+  const t = useCourseT(db);
   const router = useRouter();
   const curRef = useRef<HTMLDivElement>(null);
   const ready = !!db?.profile.onboarded;
@@ -21,7 +21,9 @@ export default function PathPage() {
     if (db && !db.profile.onboarded) router.replace(onboardingHref());
   }, [db, router]);
   useEffect(() => {
-    if (ready) curRef.current?.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+    // Bring the current unit into view, but leave the page at the top when it's already near it.
+    const el = curRef.current;
+    if (ready && el && el.getBoundingClientRect().top > window.innerHeight * 0.6) el.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
   }, [ready]);
   if (!db || !ready) return <Loading />;
   const langs = courseLangs(db);

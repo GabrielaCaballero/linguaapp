@@ -1,13 +1,13 @@
 "use client";
 // /unit?id=it-u04 — a unit's overview, any time, from the Path.
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useDB } from "@/lib/store";
 import { units } from "@/lib/content";
 import { lessonHref } from "@/lib/nav";
 import { markSeen } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
-import { BackHeader, Loading, useT } from "@/components/ui";
+import { BackHeader, Loading, useCourseT } from "@/components/ui";
 import { UnitOverview, overviewSeenKeys } from "@/components/UnitOverview";
 
 export default function UnitPage() {
@@ -21,20 +21,25 @@ export default function UnitPage() {
 function UnitRoute() {
   const sp = useSearchParams();
   const db = useDB();
-  const t = useT(db);
+  const t = useCourseT(db);
   const router = useRouter();
+  const pathname = usePathname();
   const [voices, setVoices] = useState(false);
   useEffect(() => {
     voicesReady().then(() => setVoices(true));
   }, []);
-  if (!db) return <Loading />;
   const id = sp.get("id") ?? "";
   const lang = id.startsWith("de-") ? "de" : "it";
   const unit = units(lang).find((u) => u.id === id);
-  if (!unit) {
-    router.replace("/path");
-    return <Loading />;
-  }
+  // An unknown unit goes to Path — but only while this page is the one on screen. Next keeps
+  // visited pages alive in the background, where the URL has no ?id=; redirecting from there
+  // looped forever (QA 2026-11-16). And never during render.
+  const onScreen = pathname === "/unit";
+  useEffect(() => {
+    if (onScreen && db && !unit) router.replace("/path");
+  }, [onScreen, db, unit, router]);
+  if (!onScreen) return null;
+  if (!db || !unit) return <Loading />;
   const base = db.profile.courses[lang]?.explainIn ?? db.profile.appLang;
   return (
     <main className="screen">

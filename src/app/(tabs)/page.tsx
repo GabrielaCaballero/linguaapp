@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
-import { useDB, getDB } from "@/lib/store";
+import { useDB } from "@/lib/store";
 import { useNow } from "@/lib/hooks";
 import { Icon } from "@/components/icons";
 import { Ring, Seal, Sheet, Toast, WeekDots, Loading, useT } from "@/components/ui";
@@ -13,9 +13,8 @@ import { dueCount, courseComplete, courseLangs, currentUnit, practiceDaysThisWee
 import { lastSessionAt, AWAY_DAYS } from "@/lib/session";
 import { DAY, fmtMonth, startOfWeek } from "@/lib/dates";
 import { checkinChoice, dropLegacyTies, saveGoal, setActiveLang } from "@/lib/actions";
-import { downloadText, exportBackup } from "@/lib/backup";
+import { downloadText } from "@/lib/backup";
 import { localeOf } from "@/lib/i18n";
-import { update } from "@/lib/store";
 import { lessonHref, onboardingHref } from "@/lib/nav";
 
 export default function Today() {
@@ -31,6 +30,18 @@ export default function Today() {
   useEffect(() => {
     if (needsOnboarding) router.replace(onboardingHref());
   }, [needsOnboarding, router]);
+  // Right after onboarding: open the first lesson on top of Today (one time).
+  const ready = !!db && !needsOnboarding;
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      if (sessionStorage.getItem("lingua:autostart") !== "1") return;
+      sessionStorage.removeItem("lingua:autostart");
+    } catch {
+      return;
+    }
+    router.push(lessonHref("auto"));
+  }, [ready, router]);
 
   if (!db || needsOnboarding) return <Loading />;
   const langs = courseLangs(db);
@@ -48,7 +59,6 @@ export default function Today() {
   const hour = new Date(now).getHours();
   const greetBase = hour < 12 ? t.greetMorning : hour < 19 ? t.greetAfternoon : t.greetEvening;
   const greet = db.profile.name ? `${greetBase}, ${db.profile.name}` : greetBase;
-  const other = langs.find((l) => l !== lang);
   const locale = localeOf(db.profile.appLang);
   const last = lastSessionAt(db, lang);
   const away = last !== undefined && now - last >= AWAY_DAYS * DAY && Object.values(db.cards).some((c) => c.lang === lang);
@@ -67,7 +77,6 @@ export default function Today() {
   const wc = weeklyCheck(db, lang, now);
   const fix = toFix(db, lang, now);
   const sleep = sleepReady(db, lang, now);
-  const lastBackup = db.profile.lastBackupAt ?? db.profile.createdAt;
   const complete = courseComplete(db, lang);
   if (db.legacyTies?.length) {
     card = (
@@ -120,18 +129,6 @@ export default function Today() {
     card = <Banner icon="refresh" title={t.toFix(fix.length)} sub={t.toFixSub} />;
   } else if (sleep > 0 && !practicedToday) {
     card = <Banner icon="moon" title={t.sleepHelped} sub={t.sleepHelpedSub} />;
-  } else if (db.sessions.length >= 3 && now - lastBackup > 30 * DAY) {
-    card = (
-      <div className="card row">
-        <div className="grow">
-          <div className="label" style={{ fontWeight: 650 }}>{t.backupReminder}</div>
-          <div className="caption">{t.backupReminderSub}</div>
-        </div>
-        <button className="btn btn-secondary btn-sm" onClick={() => { downloadText(`lingua-backup-${new Date().toISOString().slice(0, 10)}.json`, exportBackup(getDB())); update((d) => ({ ...d, profile: { ...d.profile, lastBackupAt: Date.now() } })); }}>
-          {t.backupNow}
-        </button>
-      </div>
-    );
   }
 
   const anchorLabel = db.profile.anchor ? { morning: t.anchorMorning, commute: t.anchorCommute, lunch: t.anchorLunch, evening: t.anchorEvening }[db.profile.anchor.slot] : null;
@@ -140,9 +137,11 @@ export default function Today() {
   return (
     <main className="screen">
       <header className="row between" style={{ minHeight: 48 }}>
-        <button className="row" style={{ background: "none", border: 0, padding: 0, gap: 8, minHeight: 44 }} onClick={() => setSwitcher(true)} aria-label={t.switchCourse}>
-          <Seal lang={lang} size={40} />
-          <Icon name="down" size={18} className="muted" />
+        {/* The one place to change language: a labelled button, not a bare flag (owner, 2026-11-16). */}
+        <button className="lang-switch" onClick={() => setSwitcher(true)} aria-label={`${t.switchCourse}: ${LANG_NAME[lang]}`}>
+          <Seal lang={lang} size={28} />
+          <span>{LANG_NAME[lang]}</span>
+          <Icon name="down" size={16} className="muted" />
         </button>
         <div className="row" style={{ gap: 8 }} aria-label={t.weekGoal(days, db.profile.settings.daysPerWeek)} role="img">
           <WeekDots n={days} goal={db.profile.settings.daysPerWeek} />
@@ -173,16 +172,6 @@ export default function Today() {
       </section>
 
       {card && <section style={{ marginBottom: 12 }} className="fade-in">{card}</section>}
-
-      {other && (
-        <button className="card card-tap" style={{ padding: "10px 14px", marginBottom: 12 }} onClick={() => setActiveLang(other)}>
-          <Seal lang={other} size={32} />
-          <span className="grow label">
-            {LANG_NAME[other]} · {Math.round(todayMinutes(db, now, other))}/{targetFor(db, other)} {t.min}
-          </span>
-          <Icon name="chevron" size={18} className="muted" />
-        </button>
-      )}
 
       <div className="bottom-bar">
         <div className="row" style={{ gap: 10 }}>

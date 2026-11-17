@@ -54,11 +54,13 @@ export function Speaker({ text, lang, slow, big, label, auto }: { text: string; 
   };
   const did = useRef(false);
   useEffect(() => {
-    if (auto && !did.current) {
+    if (!auto || did.current) return;
+    // Mark as played only when it actually plays (a cancelled timer, e.g. React's dev double-run, retries).
+    const id = setTimeout(() => {
       did.current = true;
-      const id = setTimeout(() => speak(text, lang, slow), 250);
-      return () => clearTimeout(id);
-    }
+      speak(text, lang, slow);
+    }, 250);
+    return () => clearTimeout(id);
   }, [auto, text, lang, slow]);
   return (
     <button type="button" className={`speaker${big ? " big" : ""}${slow ? " slow" : ""}`} onClick={play} aria-label={label}>
@@ -247,8 +249,10 @@ function ChoiceExercise(p: ExProps) {
   } else if (mode === "question") {
     prompt = (
       <Prompt eyebrow={t.readAnswer}>
-        <QuestionStem item={item} base={base} t={t} canListen={canListen} onNoAudio={p.onNoAudio} />
-        <div className="h2">{item.question ? gl(item.question.prompt, base) : ""}</div>
+        {/* A long text scrolls in its own box, so the question and the answers stay on screen together. */}
+        <StemBox t={t}>
+          <QuestionStem item={item} base={base} t={t} canListen={canListen} onNoAudio={p.onNoAudio} />
+        </StemBox>
       </Prompt>
     );
   } else {
@@ -263,10 +267,41 @@ function ChoiceExercise(p: ExProps) {
   return (
     <>
       {prompt}
-      <div className="answer-area">
+      <div className={`answer-area${mode === "question" ? " tight" : ""}`}>
+        {mode === "question" && item.question && <div className="h2 question-text">{gl(item.question.prompt, base)}</div>}
         <Choices options={spec.labels} answer={spec.answer} lang={spec.lang} locked={locked} picked={picked} setPicked={setPicked} speed={p.speed} onSpeed={onSpeed} grid={grid} />
         {!p.speed && <CheckBar t={t} disabled={picked === null} onCheck={() => picked !== null && submit(picked)} conf={p.conf} setConf={p.setConf} showConf={p.showConf} locked={locked} />}
       </div>
+    </>
+  );
+}
+
+/** The text a question is about, capped so the answers stay on screen; says so when there's more to scroll. */
+function StemBox({ t, children }: { t: Dict; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 8);
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, []);
+  return (
+    <>
+      <div ref={ref} className={`stem-box${more ? " has-more" : ""}`} tabIndex={0} role="region" aria-label={t.readAnswer}>
+        {children}
+      </div>
+      {more && (
+        <button type="button" className="stem-more caption" onClick={() => ref.current?.scrollBy({ top: 140, behavior: "smooth" })}>
+          {t.scrollText} ↓
+        </button>
+      )}
     </>
   );
 }

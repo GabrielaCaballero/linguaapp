@@ -9,7 +9,7 @@ export const unit: Unit = {
   title: { target: "Piacere!", es: "¡Mucho gusto!", en: "Nice to meet you!" },
   canDo: [
     { es: "Puedo decir mi nacionalidad, de dónde soy y dónde vivo.", en: "I can say my nationality, where I'm from and where I live." },
-    { es: "Puedo decir qué idiomas hablo y preguntarlo, de «tu» y de «Lei».", en: "I can say which languages I speak and ask others, with tu and Lei." },
+    { es: "Puedo decir qué idiomas hablo y preguntárselo a otros, de tú («tu») o de usted («Lei»).", en: "I can say which languages I speak and ask others, with tu and Lei." },
     { es: "Puedo leer gli, gn y sc.", en: "I can read gli, gn and sc aloud." },
   ],
   icon: "🗺️",

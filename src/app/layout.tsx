@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Inter } from "next/font/google";
 import { Boot } from "@/components/Boot";
 import { SyncRunner } from "@/components/SyncRunner";
 import { AnalyticsTag } from "@/components/AnalyticsTag";
+import { NavTracker } from "@/components/ui";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <Boot />
         <SyncRunner />
+        <NavTracker />
         {/* Only on Vercel: elsewhere (local, tests) the analytics script doesn't exist and would 404. */}
         {process.env.VERCEL ? <AnalyticsTag /> : null}
       </body>

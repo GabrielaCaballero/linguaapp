@@ -2,18 +2,17 @@
 
 import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Anchor, Experience, Goal } from "@/lib/model";
-import { getDB, legacy, replaceDB, useDB } from "@/lib/store";
+import { getDB, useDB } from "@/lib/store";
 import { dict } from "@/lib/i18n";
 import { LANG_NAME, units } from "@/lib/content";
 import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
-import { accountHref, lessonHref } from "@/lib/nav";
+import { accountHref } from "@/lib/nav";
 import { isSyncConfigured } from "@/lib/sync/client";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
-import { parseBackup } from "@/lib/backup";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
 import { Loading, Seal, Toast } from "@/components/ui";
@@ -57,7 +56,6 @@ function Flow() {
   const [idx, setIdx] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [voices, setVoices] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const t = dict(appLang);
   const syncOn = isSyncConfigured();
 
@@ -78,7 +76,8 @@ function Flow() {
   for (const l of langs) {
     const d = drafts[l];
     if (mode !== "goalOnly") {
-      steps.push({ id: "explain", lang: l }, { id: "exp", lang: l });
+      // No separate "explain in…" step: explanations use the app's language (owner, 2026-11-16).
+      steps.push({ id: "exp", lang: l });
       if (d?.known) steps.push({ id: "level", lang: l });
       else if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
     }
@@ -121,16 +120,6 @@ function Flow() {
       commit({ lang, goal: g });
       router.replace("/");
     } else go();
-  };
-
-  const importFile = async (f: File) => {
-    try {
-      const { db } = parseBackup(await f.text(), legacy());
-      replaceDB(db);
-      router.replace("/");
-    } catch {
-      setToast(t.importBad);
-    }
   };
 
   const total = steps.length;
@@ -190,8 +179,6 @@ function Flow() {
             ) : (
               <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
             )}
-            <button className="btn btn-ghost" onClick={() => fileRef.current?.click()}>{t.haveBackup}</button>
-            <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && importFile(e.target.files[0])} />
           </div>
         </>
       );
@@ -402,7 +389,16 @@ function Flow() {
               className="btn btn-primary"
               onClick={() => {
                 commit();
-                router.replace(lessonHref("auto"));
+                // Today becomes the screen under the first lesson, so Back from it lands on Today
+                // instead of leaving the app (onboarding itself is replaced, never returned to).
+                // Today becomes the screen under the first lesson (so Back lands there, not outside
+                // the app): replace onboarding with Today, which then opens the lesson on top.
+                try {
+                  sessionStorage.setItem("lingua:autostart", "1");
+                } catch {
+                  /* no storage: Today just shows its Start button */
+                }
+                router.replace("/");
               }}
             >
               {t.startFirst}

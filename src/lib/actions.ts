@@ -3,14 +3,30 @@
 // All writes to the DB go through these small, named functions.
 import type { BaseLang, Item, TargetLang } from "@/content/schema";
 import type { Anchor, Confidence, Course, Goal, GradeSource, Mode, PlacementResult, Settings, Verdict } from "./model";
-import { update, logEvent } from "./store";
+import { getDB, update, logEvent } from "./store";
 import { newCard, ratingFor, schedule, seededCard } from "./scheduler";
 import { itemById } from "./content";
 import { DAY } from "./dates";
 import { retentionFor } from "./goals";
 
+/**
+ * One language for the whole app: the interface and every course's explanations (owner,
+ * 2026-11-16: separate choices produced screens mixing English and Spanish).
+ */
 export function setAppLang(appLang: BaseLang) {
-  update((db) => ({ ...db, profile: { ...db.profile, appLang } }));
+  update((db) => {
+    const courses = Object.fromEntries(Object.entries(db.profile.courses).map(([l, c]) => [l, c ? { ...c, explainIn: appLang } : c]));
+    return { ...db, profile: { ...db.profile, appLang, courses } };
+  });
+}
+
+/** Older profiles could mix them: settle on the language the current course is explained in. */
+export function unifyLanguage() {
+  const db = getDB();
+  const p = db.profile;
+  const want = p.courses[p.activeLang]?.explainIn ?? p.appLang;
+  const mixed = p.appLang !== want || Object.values(p.courses).some((c) => !!c && (c as Course).explainIn !== want);
+  if (mixed) setAppLang(want);
 }
 
 export function setSettings(patch: Partial<Settings>) {
@@ -28,7 +44,8 @@ export function markSeen(key: string) {
 export function setCourse(lang: TargetLang, patch: Partial<Course>) {
   update((db) => {
     const prev = db.profile.courses[lang] ?? { explainIn: db.profile.appLang, addedAt: Date.now(), unit: 1 };
-    return { ...db, profile: { ...db.profile, courses: { ...db.profile.courses, [lang]: { ...prev, ...patch } } } };
+    // Explanations always follow the app's one language.
+    return { ...db, profile: { ...db.profile, courses: { ...db.profile.courses, [lang]: { ...prev, ...patch, explainIn: db.profile.appLang } } } };
   });
 }
 

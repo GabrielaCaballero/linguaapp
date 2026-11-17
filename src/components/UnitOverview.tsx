@@ -3,7 +3,6 @@
 // be able to do, a model dialogue or text in context, the unit's grammar explained with its
 // tables, and the key words. Only then the exercises. Built from the unit's own content.
 import { useState } from "react";
-import Link from "next/link";
 import type { BaseLang, Item, Unit } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { gl, grammarPoint, visible } from "@/lib/content";
@@ -38,6 +37,13 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
         </ul>
       </section>
 
+      {grammar.length > 0 && (
+        <section id="grammar" className="stack" style={{ gap: 12 }}>
+          <h2 className="h2" style={{ margin: 0 }}>{t.grammarHere}</h2>
+          {dedupe(grammar).map((g) => <GrammarBlock key={g.id} item={g} base={base} t={t} />)}
+        </section>
+      )}
+
       {model && (
         <section className="stack" style={{ gap: 8 }}>
           <div className="row between">
@@ -58,13 +64,6 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
               </div>
             ))}
           </div>
-        </section>
-      )}
-
-      {grammar.length > 0 && (
-        <section className="stack" style={{ gap: 12 }}>
-          <h2 className="h2" style={{ margin: 0 }}>{t.grammarHere}</h2>
-          {dedupe(grammar).map((g) => <GrammarBlock key={g.id} item={g} base={base} t={t} />)}
         </section>
       )}
 
@@ -98,12 +97,14 @@ export function UnitOverview({ unit, base, t, canListen, onStart, startLabel }: 
  * and the start of the model dialogue to listen to; then "learn a bit, try it" takes over. The full
  * coursebook page stays one tap away as the unit notes.
  */
-export function UnitIntro({ unit, base, t, canListen, onStart }: { unit: Unit; base: BaseLang; t: Dict; canListen: boolean; onStart: () => void }) {
+export function UnitIntro({ unit, base, t, canListen, onStart, onReadGrammar }: { unit: Unit; base: BaseLang; t: Dict; canListen: boolean; onStart: () => void; onReadGrammar: () => void }) {
   const [translate, setTranslate] = useState(false);
   const items = unit.items.filter((i) => visible(i, base));
   const model = items.find((i) => i.type === "dialogue" && i.turns?.length);
   const turns = model?.turns?.slice(0, 4) ?? [];
   const lang = unit.lang;
+  // The unit's grammar, by name: the recommended first read.
+  const rules = [...new Set(items.filter((i) => i.type === "pattern" || i.type === "paradigm").map((i) => { const g = grammarPoint(i.grammar?.[0]); return g ? gl(g.title, base) : gl(i.gloss, base); }))];
   return (
     <>
       <div className="grow unit-intro" style={{ overflowY: "auto", paddingTop: 8 }}>
@@ -139,11 +140,27 @@ export function UnitIntro({ unit, base, t, canListen, onStart }: { unit: Unit; b
               </button>
             </div>
           )}
-          <Link className="link label" href={`/unit?id=${unit.id}`}>{t.unitNotes} →</Link>
+          {rules.length > 0 && (
+            <div className="card stack unit-grammar" style={{ gap: 8 }}>
+              <span className="label" style={{ fontWeight: 600 }}>{t.grammarHere}</span>
+              <ul style={{ margin: 0, paddingLeft: 18 }} className="label">
+                {rules.map((r) => <li key={r}>{r}</li>)}
+              </ul>
+              <span className="caption">{t.grammarFirstWhy}</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="answer-area">
-        <button type="button" className="btn btn-primary" onClick={onStart} autoFocus>{t.letsStart}</button>
+        {rules.length > 0 ? (
+          <>
+            {/* Reading first is the recommended path; skipping stays possible, and each rule still shows before its first exercise. */}
+            <button type="button" className="btn btn-primary" onClick={onReadGrammar} autoFocus>{t.readGrammarFirst}</button>
+            <button type="button" className="btn btn-ghost" onClick={onStart}>{t.skipForNow}</button>
+          </>
+        ) : (
+          <button type="button" className="btn btn-primary" onClick={onStart} autoFocus>{t.letsStart}</button>
+        )}
       </div>
     </>
   );

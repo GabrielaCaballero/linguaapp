@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import type { TargetLang } from "@/content/schema";
-import type { DB, Settings } from "@/lib/model";
-import { getDB, legacy, replaceDB, resetDB, update, useDB } from "@/lib/store";
+import type { Settings } from "@/lib/model";
+import { resetDB, useDB } from "@/lib/store";
 import { LANG_NAME } from "@/lib/content";
-import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
-import { downloadText, exportBackup, parseBackup, type BackupPreview } from "@/lib/backup";
+import { removeCourse, saveGoal, setAppLang, setSettings } from "@/lib/actions";
 import { getConfig, subscribeConfig, tutorName } from "@/lib/llm/provider";
 import { ProfileEditor } from "@/components/ProfileEditor";
 import { courseLangs, targetFor } from "@/lib/stats";
@@ -25,13 +24,11 @@ export default function SettingsPage() {
   const router = useRouter();
   const tutor = useSyncExternalStore(subscribeConfig, () => (getConfig() ? tutorName() : ""), () => "");
   const [toast, setToast] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ db: DB; preview: BackupPreview } | null>(null);
   const [reset, setReset] = useState(false);
   const [resetText, setResetText] = useState("");
   const [removing, setRemoving] = useState<TargetLang | null>(null);
   const [goalFor, setGoalFor] = useState<TargetLang | null>(null);
   const [about, setAbout] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const acct = useAccount();
   const sync = useSyncStatus();
   const [outOpen, setOutOpen] = useState(false);
@@ -45,19 +42,6 @@ export default function SettingsPage() {
   const s = db.profile.settings;
   const set = (p: Partial<Settings>) => setSettings(p);
   const langs = courseLangs(db);
-
-  const exportNow = () => {
-    downloadText(`lingua-backup-${new Date().toISOString().slice(0, 10)}.json`, exportBackup(getDB()));
-    update((d) => ({ ...d, profile: { ...d.profile, lastBackupAt: Date.now() } }));
-    setToast(t.exported);
-  };
-  const onFile = async (f: File) => {
-    try {
-      setPreview(parseBackup(await f.text(), legacy()));
-    } catch {
-      setToast(t.importBad);
-    }
-  };
 
   return (
     <main className="screen">
@@ -101,19 +85,12 @@ export default function SettingsPage() {
       <div className="group-title">{t.sCourses}</div>
       <div className="group">
         {langs.map((l) => {
-          const c = db.profile.courses[l]!;
           return (
             <div key={l} style={{ padding: "12px 16px", borderBottom: "1px solid var(--line)" }} className="stack">
               <div className="row">
                 <Seal lang={l} size={36} />
                 <span className="grow" style={{ fontWeight: 650 }}>{LANG_NAME[l]}</span>
                 <button className="icon-btn" aria-label={t.sRemove} onClick={() => setRemoving(l)}><Icon name="trash" size={20} /></button>
-              </div>
-              <div className="row between">
-                <span className="label">{t.sExplainIn}</span>
-                <div style={{ width: 180 }}>
-                  <Seg label={t.sExplainIn} value={c.explainIn} options={[{ v: "es", label: "Español" }, { v: "en", label: "English" }]} onChange={(v) => setCourse(l, { explainIn: v })} />
-                </div>
               </div>
               <div className="row" style={{ gap: 8 }}>
                 <button className="btn btn-secondary btn-sm" onClick={() => setGoalFor(l)}>{t.sGoal}</button>
@@ -182,32 +159,15 @@ export default function SettingsPage() {
 
       <div className="group-title">{t.sData}</div>
       <div className="group">
-        <button className="cell" onClick={exportNow}><Icon name="download" size={20} /><span className="grow">{t.sExport}</span></button>
-        <button className="cell" onClick={() => fileRef.current?.click()}><Icon name="upload" size={20} /><span className="grow">{t.sImport}</span></button>
         <button className="cell" onClick={() => setReset(true)} style={{ color: "var(--miss)" }}><Icon name="trash" size={20} /><span className="grow">{t.sReset}</span></button>
-        <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { if (e.target.files?.[0]) onFile(e.target.files[0]); e.target.value = ""; }} />
       </div>
+      <p className="caption" style={{ margin: "8px 4px 0" }}>{t.acctPrivacy}</p>
 
       <div className="group" style={{ marginTop: 24 }}>
         <button className="cell" onClick={() => setAbout(true)}><Icon name="book" size={20} /><span className="grow">{t.sAbout}</span><Icon name="chevron" size={18} className="muted" /></button>
       </div>
       <p className="caption center" style={{ marginTop: 24 }}>Linguina</p>
 
-      <Sheet open={!!preview} onClose={() => setPreview(null)} label={t.importPreview}>
-        {preview && (
-          <div className="stack">
-            <h2 className="h2">{t.importPreview}</h2>
-            <p className="muted" style={{ margin: 0 }}>{t.importReplace}</p>
-            <div className="card stack" style={{ gap: 6 }}>
-              <div className="row between"><span className="caption">{t.importLangs}</span><span>{preview.preview.langs.map((l) => LANG_NAME[l]).join(", ") || "—"}</span></div>
-              <div className="row between"><span className="caption">{t.importItems}</span><span className="tabular">{preview.preview.cards}</span></div>
-              <div className="row between" style={{ alignItems: "flex-start" }}><span className="caption">{t.importGoals}</span><span style={{ textAlign: "right" }}>{preview.preview.goals.map((g) => <div key={g}>{g}</div>)}</span></div>
-            </div>
-            <button className="btn btn-primary" onClick={() => { replaceDB(preview.db); if (signedIn) void getEngine()?.startOver(); setPreview(null); setToast(t.importDone); }}>{t.importDo}</button>
-            <button className="btn btn-ghost" onClick={() => setPreview(null)}>{t.cancel}</button>
-          </div>
-        )}
-      </Sheet>
 
       <Sheet open={reset} onClose={() => setReset(false)} label={t.sReset}>
         <div className="stack">
@@ -272,7 +232,6 @@ export default function SettingsPage() {
         <div className="stack">
           <h2 className="h2">{t.acctDelete}</h2>
           <p className="muted" style={{ margin: 0 }}>{t.acctDeleteSub}</p>
-          <button className="btn btn-secondary" onClick={exportNow}><Icon name="download" size={20} /> {t.sExport}</button>
           <p className="label" style={{ margin: 0 }}>{t.acctDeleteType(t.acctDeleteWord)}</p>
           <input className="input" value={delText} onChange={(e) => setDelText(e.target.value)} autoCapitalize="characters" aria-label={t.acctDeleteWord} />
           <button className="btn btn-primary" disabled={busy || delText.trim().toUpperCase() !== t.acctDeleteWord} style={{ background: delText.trim().toUpperCase() === t.acctDeleteWord ? "var(--miss)" : undefined }} onClick={async () => {

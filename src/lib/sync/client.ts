@@ -104,10 +104,10 @@ function classify(e: { message?: string; status?: number; code?: string } | null
   return "network";
 }
 
-/** Email a 6-digit code. Unknown emails can't create an account (invite only). */
+/** Email a 6-digit code. A new email creates its account (open sign-up, owner 2026-11-16). */
 export async function sendCode(email: string): Promise<AuthError | null> {
   try {
-    const { error } = await getClient().auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    const { error } = await getClient().auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
     if (error) console.warn("sign-in code:", error.status, (error as { code?: string }).code, error.message);
     return error ? classify(error) : null;
   } catch {
@@ -130,8 +130,8 @@ export async function verifyCode(email: string, token: string): Promise<{ user: 
 // ---- sign in with Google (optional) ---------------------------------------------------
 /**
  * Leave for Google's consent screen. Google returns to /account on this same origin with
- * ?code=… (or ?error=…), handled by finishGoogle. Invite-only still holds: Supabase refuses
- * any Google account whose email the owner hasn't added (signups are off).
+ * ?code=… (or ?error=…), handled by finishGoogle. New Google accounts are created on first
+ * sign-in, as long as sign-ups are on in Supabase (Authentication → Sign In / Providers).
  */
 export async function startGoogle(from: "welcome" | "settings" | "home"): Promise<AuthError | null> {
   try {

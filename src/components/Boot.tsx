@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDB, requestPersistence } from "@/lib/store";
+import { unifyLanguage } from "@/lib/actions";
 import { dict } from "@/lib/i18n";
 import { Icon } from "./icons";
 
@@ -9,6 +10,11 @@ import { Icon } from "./icons";
 export function Boot() {
   const db = useDB();
   const [online, setOnline] = useState(true);
+
+  const ready = !!db;
+  useEffect(() => {
+    if (ready) unifyLanguage();
+  }, [ready]);
 
   useEffect(() => {
     if (!db) return;

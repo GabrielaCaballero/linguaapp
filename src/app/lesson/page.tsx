@@ -1,25 +1,26 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Item, TargetLang } from "@/content/schema";
 import type { CardV2, Confidence, Mode, Verdict } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
 import { itemById, itemsFor, lexicon, units } from "@/lib/content";
-import { buildSession, chooseMode, lastSessionAt, requeue, type Built, type SessionKind, type Task } from "@/lib/session";
+import { BASE_NEW, buildSession, chooseMode, lastSessionAt, requeue, type Built, type SessionKind, type Task } from "@/lib/session";
 import { toFix } from "@/lib/stats";
 import { startOfDay } from "@/lib/dates";
 import { lessonHref } from "@/lib/nav";
+import { previousPath } from "@/lib/navstack";
 import { endSession, introduce, recordAnswer, regrade, sessionStart } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { feel } from "@/lib/feel";
 import type { CheckResult } from "@/lib/check";
 import { Icon } from "@/components/icons";
-import { Loading, Sheet, useT } from "@/components/ui";
+import { Loading, Sheet, useCourseT } from "@/components/ui";
 import { Exercise, type CellResult } from "@/components/lesson/Exercises";
 import { GrammarCard } from "@/components/lesson/Grammar";
 import { Learn } from "@/components/lesson/Learn";
-import { UnitIntro, overviewSeenKeys } from "@/components/UnitOverview";
+import { UnitIntro, UnitOverview, overviewSeenKeys } from "@/components/UnitOverview";
 import { TableStudy } from "@/components/lesson/Table";
 import { grammarPoint, unitOf } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
@@ -43,6 +44,7 @@ interface FB {
 }
 
 const SPEED_SECONDS = 60;
+const MAX_NEW_PER_LESSON = 10;
 
 export default function LessonPage() {
   return (
@@ -55,12 +57,15 @@ export default function LessonPage() {
 /** Keyed on the URL (which carries a per-visit nonce): every visit is a fresh session. */
 function LessonRoute() {
   const sp = useSearchParams();
+  // Next keeps visited pages alive in the background; a hidden lesson must not rebuild itself
+  // (and start a phantom session) every time the URL changes elsewhere (QA 2026-11-16).
+  if (usePathname() !== "/lesson") return null;
   return <LessonEntry key={sp.toString()} kindParam={sp.get("kind")} unitParam={sp.get("unit")} />;
 }
 
 function LessonEntry({ kindParam, unitParam }: { kindParam: string | null; unitParam: string | null }) {
   const db = useDB();
-  const t = useT(db);
+  const t = useCourseT(db);
   const router = useRouter();
   const [canListen, setCanListen] = useState<boolean | null>(null);
   const kind: SessionKind = kindParam === "review" || kindParam === "new" || kindParam === "speed" ? kindParam : "auto";
@@ -78,15 +83,15 @@ function LessonEntry({ kindParam, unitParam }: { kindParam: string | null; unitP
     };
   }, []);
 
-  if (!db || canListen === null) return <Loading />;
-  if (!db.profile.courses[db.profile.activeLang]) {
-    router.replace("/");
-    return <Loading />;
-  }
+  const noCourse = !!db && !db.profile.courses[db.profile.activeLang];
+  useEffect(() => {
+    if (noCourse) router.replace("/");
+  }, [noCourse, router]);
+  if (!db || canListen === null || noCourse) return <Loading />;
   return <Player kind={kind} unit={u > 0 ? u : undefined} canListen={canListen} t={t} />;
 }
 
-function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKind; unit?: number; canListen: boolean; t: ReturnType<typeof useT> }) {
+function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKind; unit?: number; canListen: boolean; t: ReturnType<typeof useCourseT> }) {
   // "Can't listen now": the rest of this lesson uses text instead of audio.
   const [noAudio, setNoAudio] = useState(false);
   const canListen = deviceCanListen && !noAudio;
@@ -99,7 +104,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
   const settings = db.profile.settings;
   const lex = lexicon(lang);
 
-  const make = (exclude?: Set<string>): Built => {
+  const make = (exclude?: Set<string>, onlyReview?: boolean): Built => {
     const d = getDB();
     const items = itemsFor(lang, d, base).filter((i) => (settings.bridgeTips || i.type !== "bridge") && (kind !== "speed" || i.type !== "paradigm"));
     const idx = new Map(units(lang).map((u) => [u.id, u.index]));
@@ -114,7 +119,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       unitIndexOf: (i) => idx.get(i.unit) ?? 0,
       now,
       minutes: settings.sessionMinutes,
-      kind,
+      kind: onlyReview && kind === "auto" ? "review" : kind,
       priority: exclude ? undefined : [...new Set([...d.sessions.filter((x) => x.lang === lang && x.t >= startOfDay(now)).flatMap((x) => x.toFix), ...toFix(d, lang, now)])],
       exclude,
     });
@@ -141,6 +146,8 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
   const counts = useRef(new Map<string, number>());
   const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 });
   const finished = useRef(false);
+  const leaving = useRef(false);
+  const [readingGrammar, setReadingGrammar] = useState(false);
   const extensions = useRef(0);
   const speed = kind === "speed";
 
@@ -212,7 +219,13 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
     // Out of tasks before the time is up: keep the "5 minutes" honest with another chunk.
     if (!speed && extensions.current < 8) {
       extensions.current++;
-      const more = make(new Set(tasks.map((x) => x.itemId))).tasks;
+      // Enough new words for one sitting: after MAX_NEW_PER_LESSON, extra rounds are review only.
+      // A round adds up to BASE_NEW + 1 new items, so stop adding new ones early enough to stay ≤ the cap.
+      const capped = stats.current.newItems.size + BASE_NEW + 1 > MAX_NEW_PER_LESSON;
+      let more = make(new Set(tasks.map((x) => x.itemId)), capped).tasks;
+      // Capped and nothing else waiting (e.g. a beginner's first lessons): practise this session's
+      // words again, weakest first, so "5 minutes" stays 5 minutes without more new words.
+      if (!more.length && capped) more = make(new Set(), true).tasks;
       if (more.length) {
         setTasks((ts) => [...ts, ...more.map((m) => ({ ...m, key: `x${extensions.current}-${m.key}` }))]);
         setIdx((i) => i + 1);
@@ -223,7 +236,15 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, tasks, finish, speed, settings.sessionMinutes, startedAt]);
 
-  if (summary) return <Results t={t} summary={summary} onDone={() => router.replace("/")} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
+  // Leaving a lesson goes *back* to Today when we came from it, so Back/swipe never re-opens it.
+  // Once only: a double tap on Continue must not go back twice.
+  const goHome = () => {
+    if (leaving.current) return;
+    leaving.current = true;
+    if (previousPath() === "/") router.back();
+    else router.replace("/");
+  };
+  if (summary) return <Results t={t} summary={summary} onDone={goHome} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
   if (!task || !item || !mode) return <Loading />;
 
   const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => {
@@ -314,7 +335,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
 
   const progress = speed && settings.speedTimer ? 1 - speedLeft / SPEED_SECONDS : idx / Math.max(1, tasks.length);
   // "How sure?" costs a row: ask on about one review in four, never on a try.
-  const showConf = !speed && task.role !== "intro" && task.role !== "try" && mode !== "guess" && idx % 4 === 2;
+  const showConf = !speed && task.role !== "intro" && task.role !== "try" && mode !== "guess" && mode !== "question" && idx % 4 === 2;
 
   return (
     <main className={`lesson${speed ? " speed" : ""}`} data-lesson>
@@ -326,19 +347,39 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
         <div className={`progress${combo >= 3 ? " combo" : ""}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <i style={{ width: `${Math.max(3, progress * 100)}%` }} />
         </div>
-        <span className="combo-chip tabular" aria-label={combo >= 3 ? `${combo} in a row` : undefined}>
+        <span className="combo-chip tabular" aria-label={combo >= 3 ? t.inARow(combo) : undefined}>
           {speed && settings.speedTimer ? t.speedLeft(Math.max(0, speedLeft)) : combo >= 3 ? <><Icon name="flame" size={16} />{combo}</> : null}
         </span>
       </div>
       {built.welcomeBack && idx === 0 && !fb && <div className="card-soft label fade-in" style={{ marginTop: 8 }}>{t.welcomeBack}</div>}
 
       <div key={task.key} className="fade-in" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        {opener ? (
+        {opener && readingGrammar ? (
+          // "Read the grammar first": the unit grammar right here, then on with this same lesson.
+          // Page scroll (not an inner scroller), so the pinned "Start practising" stays on screen.
+          <div style={{ paddingTop: 8 }}>
+            <UnitOverview
+              unit={opener}
+              base={base}
+              t={t}
+              canListen={canListen}
+              onStart={() => {
+                for (const k of overviewSeenKeys(opener)) markSeen(k);
+                setReadingGrammar(false);
+                window.scrollTo(0, 0);
+              }}
+            />
+          </div>
+        ) : opener ? (
           <UnitIntro
             unit={opener}
             base={base}
             t={t}
             canListen={canListen}
+            onReadGrammar={() => {
+              setReadingGrammar(true);
+              window.scrollTo(0, 0);
+            }}
             onStart={() => {
               for (const k of overviewSeenKeys(opener)) markSeen(k);
             }}
@@ -445,7 +486,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
             className="btn btn-ghost"
             onClick={() => {
               if (stats.current.graded > 0 || stats.current.newItems.size > 0) finish();
-              router.replace("/");
+              goHome();
             }}
           >
             {t.endLesson}

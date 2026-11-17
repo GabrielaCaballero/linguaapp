@@ -26,10 +26,13 @@ codes) and paste two values into **Vercel**. No coding.
    (Already ran an older version? Run the new file again: it's safe to re-run. It now also
    creates the `user_reviews` table, where every answer is kept.)
 
-## 3. Make it invite-only (2 min)
+## 3. Let anyone sign up (1 min) — changed 2026-11-16, was invite-only
 
 1. Left menu → **Authentication** → **Sign In / Providers** (sometimes under *Configuration*).
-2. Turn **Allow new users to sign up** → **OFF**. ← the important one.
+2. Turn **Allow new users to sign up** → **ON**. Anyone can now create an account with their
+   email (or Google). Writing feedback stays capped per person and per month (step 12), so
+   cost can't run away. To go back to invite-only, turn it OFF again: the app then shows
+   "New accounts can't be created right now" to new emails.
 3. Under **Email**: keep it enabled, keep **Confirm email** on.
 4. Leave every other provider off for now (Google is optional, step 11).
 
