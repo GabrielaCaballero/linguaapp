@@ -133,7 +133,7 @@ export async function verifyCode(email: string, token: string): Promise<{ user: 
  * ?code=… (or ?error=…), handled by finishGoogle. New Google accounts are created on first
  * sign-in, as long as sign-ups are on in Supabase (Authentication → Sign In / Providers).
  */
-export async function startGoogle(from: "welcome" | "settings" | "home" | "me"): Promise<AuthError | null> {
+export async function startGoogle(from: "welcome" | "settings" | "home" | "me" | "required"): Promise<AuthError | null> {
   try {
     const { error } = await getClient().auth.signInWithOAuth({
       provider: "google",

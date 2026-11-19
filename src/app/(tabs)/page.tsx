@@ -16,6 +16,8 @@ import { checkinChoice, dropLegacyTies, saveGoal, setActiveLang } from "@/lib/ac
 import { downloadText } from "@/lib/backup";
 import { localeOf } from "@/lib/i18n";
 import { lessonHref, onboardingHref } from "@/lib/nav";
+import { useMustSignIn } from "@/components/AccountGate";
+import { useAccount } from "@/lib/sync/client";
 
 export default function Today() {
   const db = useDB();
@@ -31,7 +33,10 @@ export default function Today() {
     if (needsOnboarding) router.replace(onboardingHref());
   }, [needsOnboarding, router]);
   // Right after onboarding: open the first lesson on top of Today (one time).
-  const ready = !!db && !needsOnboarding;
+  const mustSignIn = useMustSignIn();
+  const acct = useAccount();
+  // With accounts on, wait to know who's signed in: a guest is sent to sign up first.
+  const ready = !!db && !needsOnboarding && !mustSignIn && (!acct.configured || acct.ready);
   useEffect(() => {
     if (!ready) return;
     try {

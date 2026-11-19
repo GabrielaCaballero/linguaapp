@@ -33,16 +33,19 @@ export interface Plan {
   langs: { lang: TargetLang; explainIn: BaseLang; exp: "never" | "bit" | "classes" | "lived"; canDo?: ("yes" | "partly" | "no")[]; placementAccuracy?: number; beginnerAt?: number }[];
 }
 
-export interface OnboardResult { placementItems: Record<string, number>; firstAnswerMs?: number }
+export interface OnboardResult { placementItems: Record<string, number>; firstAnswerMs?: number; gated?: boolean }
 
 /** Drive onboarding through the UI exactly like a learner. Ends on the first lesson. */
-export async function onboard(page: Page, plan: Plan, opts: { startLesson?: boolean } = {}): Promise<OnboardResult> {
+/**
+ * Set up a course and open the first lesson. With accounts on, the first lesson needs an account:
+ * pass `signUp` to create it at that point; without it, onboarding stops on the sign-up screen.
+ */
+export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: string; code: string } } = {}): Promise<OnboardResult> {
   const out: OnboardResult = { placementItems: {} };
   const t = T[plan.appLang];
   const t0 = Date.now();
   await page.goto("/");
-  // Accounts-on builds lead with "Sign in"; the guest path is "Try it first".
-  await btn(page, T.en.getStarted).or(btn(page, T.es.getStarted)).or(btn(page, T.en.tryFirst)).or(btn(page, T.es.tryFirst)).first().click();
+  await btn(page, T.en.getStarted).or(btn(page, T.es.getStarted)).first().click();
   await page.locator(".choice-card", { hasText: T.en.baseName[plan.appLang] }).first().click();
   await btn(page, t.continue).click();
   for (const l of plan.langs) await page.locator(".choice-card", { hasText: l.lang === "it" ? "Italiano" : "Deutsch" }).click();
@@ -65,14 +68,24 @@ export async function onboard(page: Page, plan: Plan, opts: { startLesson?: bool
     await btn(page, t.setGoal).click();
   }
   await btn(page, t.startFirst).click();
-  await page.waitForURL(/\/lesson/);
+  await page.waitForURL(/\/(lesson|account)/);
+  if (new URL(page.url()).pathname === "/account") {
+    out.gated = true;
+    if (!opts.signUp) return out;
+    await page.getByLabel(t.acctEmail).fill(opts.signUp.email);
+    await btn(page, t.acctSendCode).click();
+    await page.getByLabel(t.acctCode).fill(opts.signUp.code);
+    await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
+    await page.getByRole("status").filter({ hasText: t.acctDone }).waitFor();
+    await btn(page, t.continue).click();
+    await page.waitForURL(/\/lesson/);
+  }
   // The first lesson opens with a one-screen "This unit" card; start, then learn → try.
   await page.locator(".unit-intro, .unit-overview, .answer-area").first().waitFor();
   if (await page.locator(".unit-intro").isVisible().catch(() => false)) await startUnit(page, t);
   else if (await page.locator(".unit-overview").isVisible().catch(() => false)) await btn(page, t.startPractising).click();
   await page.locator(".answer-area").first().waitFor();
   out.firstAnswerMs = Date.now() - t0;
-  void opts;
   return out;
 }
 

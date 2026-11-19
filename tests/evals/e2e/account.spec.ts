@@ -194,10 +194,11 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   };
 }
 
-async function learnABit(page: Page) {
+async function learnABit(page: Page, email = "ana@example.com") {
   // Lessons end at their time limit; jump the clock past it after a few steps (as the CUJ journeys do).
+  // With accounts on, the account is created right before the first lesson (as every learner does).
   await page.clock.install();
-  await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+  await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] }, { signUp: { email, code: CODE } });
   await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9, maxSteps: 16 });
   await page.clock.fastForward("11:00");
   const st = await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9 });
@@ -205,14 +206,14 @@ async function learnABit(page: Page) {
   await page.goto("/");
 }
 
-async function signIn(page: Page, email: string, from: "settings" | "welcome") {
-  if (from === "settings") {
-    await page.goto("/me/settings");
-    await page.getByRole("link", { name: new RegExp(t.acctSync) }).click();
-  } else {
-    await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
-  }
+/** A returning learner on a new device: "I already have an account" on the welcome screen. */
+async function signIn(page: Page, email: string) {
+  await page.goto("/");
+  await page.getByRole("button", { name: t.haveAccountYes }).click();
+  await enterCode(page, email);
+}
+
+async function enterCode(page: Page, email: string) {
   await page.getByLabel(t.acctEmail).fill(email);
   await page.getByRole("button", { name: t.acctSendCode }).click();
   await page.getByLabel(t.acctCode).fill(CODE);
@@ -228,7 +229,7 @@ test.describe("e2e-sync · accounts hidden when not configured", () => {
     });
     await page.goto("/");
     await expect(page.getByRole("button", { name: T.es.getStarted }).or(page.getByRole("button", { name: T.en.getStarted })).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: T.es.haveAccount }).or(page.getByRole("button", { name: T.en.haveAccount }))).toHaveCount(0);
+    await expect(page.getByRole("button", { name: T.es.haveAccountYes }).or(page.getByRole("button", { name: T.en.haveAccountYes }))).toHaveCount(0);
     await learnABit(page);
     await page.goto("/me/settings");
     await expect(page.getByText(t.acctSync)).toHaveCount(0);
@@ -239,10 +240,82 @@ test.describe("e2e-sync · accounts hidden when not configured", () => {
   });
 });
 
+test.describe("e2e-sync · an account before the first lesson", () => {
+  test.use({ baseURL: SYNC, locale: "es-ES" });
+
+  test("Welcome leads with Start; returning learners have 'I already have an account'", async ({ page, context }) => {
+    const fake = fakeSupabase([]);
+    await fake.attach(context);
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: t.getStarted })).toHaveClass(/btn-primary/);
+    await expect(page.getByRole("button", { name: t.haveAccountYes })).toBeVisible();
+  });
+
+  test("the level test needs no account; the first lesson does, and nothing else opens until then", async ({ page, context }) => {
+    const errs = watchErrors(page);
+    const fake = fakeSupabase([]);
+    await fake.attach(context);
+    const r = await onboard(page, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "bit", placementAccuracy: 0.5 }] });
+    expect(r.gated).toBe(true);
+    expect(r.placementItems.de).toBeGreaterThan(0);
+    await expect(page.getByRole("heading", { name: t.acctRequiredTitle })).toBeVisible();
+    await expect(page.getByText(t.acctRequiredSub)).toBeVisible();
+    await expect(page.getByRole("link", { name: t.back })).toHaveCount(0);
+    // The result is kept on the device meanwhile; every other screen leads back here.
+    expect((await readDB(page)).profile.courses.de?.placement).toBeTruthy();
+    for (const path of ["/", "/path", "/me", "/lesson?kind=auto", "/write"]) {
+      await page.goto(path);
+      await page.waitForURL(/\/account\?from=required/);
+    }
+    // Sign up → the first lesson opens, with Today underneath.
+    await enterCode(page, "nuevo@example.com");
+    await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+    await expect.poll(() => fake.rows.size).toBe(1);
+    await page.getByRole("button", { name: t.continue }).click();
+    await page.waitForURL(/\/lesson/);
+    expect(errs).toEqual([]);
+  });
+
+  test("phone → computer: the test on the phone, sign-up before the first lesson, and the computer has it all (field report 2026-11-17)", async ({ browser }) => {
+    const fake = fakeSupabase([]);
+    const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
+    // 1. Computer first (as the friend did): a new, empty account; it says why and waits.
+    const laptopCtx = await browser.newContext({ ...opts, viewport: { width: 1280, height: 800 } });
+    await fake.attach(laptopCtx);
+    const laptop = await laptopCtx.newPage();
+    const laptopErrs = watchErrors(laptop);
+    await signIn(laptop, "amigo@example.com");
+    await expect(laptop.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
+    await laptop.getByRole("button", { name: t.acctFetch }).click();
+    await expect(laptop.locator("main").getByRole("alert")).toHaveText(t.acctStillEmpty);
+
+    // 2. Phone: the German test, then the same email before the first lesson.
+    const phoneCtx = await browser.newContext(opts);
+    await fake.attach(phoneCtx);
+    const phone = await phoneCtx.newPage();
+    const phoneErrs = watchErrors(phone);
+    await onboard(phone, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "bit", placementAccuracy: 0.5 }] }, { signUp: { email: "amigo@example.com", code: CODE } });
+    const mine = await readDB(phone);
+
+    // 3. Computer: comes in by itself, with the German test result and starting unit.
+    await expect(laptop.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible({ timeout: 15_000 });
+    await laptop.getByRole("button", { name: t.continue }).click();
+    await laptop.waitForURL((u) => u.pathname === "/");
+    const theirs = await readDB(laptop);
+    expect(theirs.profile.onboarded).toBe(true);
+    expect(theirs.profile.courses.de?.placement).toEqual(mine.profile.courses.de?.placement);
+    expect(theirs.profile.courses.de?.unit).toBe(mine.profile.courses.de?.unit);
+    expect(phoneErrs).toEqual([]);
+    expect(laptopErrs).toEqual([]);
+    await phoneCtx.close();
+    await laptopCtx.close();
+  });
+});
+
 test.describe("e2e-sync · with an account", () => {
   test.use({ baseURL: SYNC, locale: "es-ES" });
 
-  test("CUJ-15 progress follows you: phone signs in and uploads, a second device downloads the same progress", async ({ browser }) => {
+  test("CUJ-15 progress follows you: phone signs up and uploads, a second device downloads the same progress", async ({ browser }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     const phoneCtx = await browser.newContext({ baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } });
     await fake.attach(phoneCtx);
@@ -252,23 +325,18 @@ test.describe("e2e-sync · with an account", () => {
     await phone.evaluate((k) => localStorage.setItem("lingua:llm", JSON.stringify({ provider: "anthropic", apiKey: k })), KEY);
     const mine = await readDB(phone);
     expect(mine.reviews.length).toBeGreaterThan(0);
-
-    await signIn(phone, "ana@example.com", "settings");
-    await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+    await expect.poll(() => fake.answers.size).toBe(mine.reviews.length);
     expect(fake.rows.size).toBe(1);
     const stored = [...fake.rows.values()][0].db as { reviews: unknown[]; events: unknown[] };
     expect(stored.reviews).toEqual([]); // answers travel in their own table, each once
-    expect(fake.answers.size).toBe(mine.reviews.length);
     expect(stored.events).toEqual([]);
-
-    await phone.getByRole("button", { name: t.continue }).click();
     await phone.goto("/me/settings");
     await expect(phone.getByText(t.acctSignedInAs("ana@example.com"))).toBeVisible();
 
     const laptopCtx = await browser.newContext({ baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } });
     await fake.attach(laptopCtx);
     const laptop = await laptopCtx.newPage();
-    await signIn(laptop, "ana@example.com", "welcome");
+    await signIn(laptop, "ana@example.com");
     await expect(laptop.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
     await laptop.getByRole("button", { name: t.continue }).click();
     await laptop.waitForURL((u) => u.pathname === "/");
@@ -288,7 +356,7 @@ test.describe("e2e-sync · with an account", () => {
     const fake = fakeSupabase([]);
     await fake.attach(context);
     await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByRole("button", { name: t.haveAccountYes }).click();
     await page.getByLabel(t.acctEmail).fill("new@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await expect(page.getByText(t.acctCodeTitle)).toBeVisible();
@@ -299,7 +367,7 @@ test.describe("e2e-sync · with an account", () => {
     const fake = fakeSupabase(["ana@example.com"], {}, true);
     await fake.attach(context);
     await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByRole("button", { name: t.haveAccountYes }).click();
     await page.getByLabel(t.acctEmail).fill("stranger@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.notInvited);
@@ -310,7 +378,7 @@ test.describe("e2e-sync · with an account", () => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByRole("button", { name: t.haveAccountYes }).click();
     await page.getByLabel(t.acctEmail).fill("ana@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await page.getByLabel(t.acctCode).fill("000000");
@@ -322,114 +390,26 @@ test.describe("e2e-sync · with an account", () => {
   });
 
   test("a new account on a fresh computer gets into the app, not back to the welcome (field report 2026-11-17)", async ({ page, context }) => {
-    // A friend started on the phone as a guest, then signed up on the computer: the code worked
-    // but "Continue" led back to the welcome screen, whose main button is "Sign in" again.
+    // The code worked but "Continue" led back to the welcome screen, whose main button was "Sign in".
     const errs = watchErrors(page);
     const fake = fakeSupabase([]);
     await fake.attach(context);
-    await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
-    await page.getByLabel(t.acctEmail).fill("amigo@example.com");
-    await page.getByRole("button", { name: t.acctSendCode }).click();
-    await page.getByLabel(t.acctCode).fill(CODE);
-    await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
-    // Says the account is empty and where guest progress lives.
+    await signIn(page, "amigo@example.com");
+    // Says the account is empty and where other progress would come from.
     await expect(page.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
     await expect(page.getByText(t.acctEmptySub)).toBeVisible();
     await page.getByRole("button", { name: t.acctStartHere }).click();
     await page.waitForURL((u) => u.pathname === "/onboarding");
     // Straight into setup: no welcome, no second "Sign in".
-    await expect(page.getByRole("button", { name: t.haveAccount })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: t.tryFirst })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: t.haveAccountYes })).toHaveCount(0);
     await expect(page.getByText(t.appLangTitle)).toBeVisible();
     expect(errs).toEqual([]);
-  });
-
-  test("phone → computer: guest on the phone takes the German test, signs up on the computer, then on the phone; the computer comes in by itself (field report 2026-11-17)", async ({ browser }) => {
-    const fake = fakeSupabase([]);
-    const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
-    // 1. Phone, as a guest: the placement test in German, nothing else.
-    const phoneCtx = await browser.newContext(opts);
-    await fake.attach(phoneCtx);
-    const phone = await phoneCtx.newPage();
-    const phoneErrs = watchErrors(phone);
-    await onboard(phone, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "bit", placementAccuracy: 0.5 }] }, { startLesson: false });
-    const before = await readDB(phone);
-    expect(before.profile.courses.de).toBeTruthy();
-
-    // 2. Computer: a new account, which is empty — it says why, and waits.
-    const laptopCtx = await browser.newContext({ ...opts, viewport: { width: 1280, height: 800 } });
-    await fake.attach(laptopCtx);
-    const laptop = await laptopCtx.newPage();
-    const laptopErrs = watchErrors(laptop);
-    await signIn(laptop, "amigo@example.com", "welcome");
-    await expect(laptop.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
-    // Asking too early says so, and stays.
-    await laptop.getByRole("button", { name: t.acctFetch }).click();
-    await expect(laptop.locator("main").getByRole("alert")).toHaveText(t.acctStillEmpty);
-
-    // 3. Phone: "Continue on another device" is right on Me; sign in with the same email.
-    await phone.goto("/me");
-    await phone.getByRole("link", { name: new RegExp(t.moveTitle) }).click();
-    await phone.getByLabel(t.acctEmail).fill("amigo@example.com");
-    await phone.getByRole("button", { name: t.acctSendCode }).click();
-    await phone.getByLabel(t.acctCode).fill(CODE);
-    await phone.getByRole("button", { name: t.acctVerify, exact: true }).click();
-    await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
-    await expect.poll(() => fake.rows.size).toBe(1);
-
-    // 4. Computer: picks it up without a click, then lands in the app with the German course.
-    await expect(laptop.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible({ timeout: 15_000 });
-    await laptop.getByRole("button", { name: t.continue }).click();
-    await laptop.waitForURL((u) => u.pathname === "/");
-    const after = await readDB(laptop);
-    expect(after.profile.onboarded).toBe(true);
-    // The test result and starting unit came across.
-    expect(after.profile.courses.de?.placement).toEqual(before.profile.courses.de?.placement);
-    expect(after.profile.courses.de?.unit).toBe(before.profile.courses.de?.unit);
-    await expect(laptop.getByRole("button", { name: t.haveAccount })).toHaveCount(0);
-    expect(phoneErrs).toEqual([]);
-    expect(laptopErrs).toEqual([]);
-    await phoneCtx.close();
-    await laptopCtx.close();
-  });
-
-  test("computer signs up and starts setting up; the phone's guest progress still goes up to the account", async ({ browser }) => {
-    const fake = fakeSupabase([]);
-    const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
-    const phoneCtx = await browser.newContext(opts);
-    await fake.attach(phoneCtx);
-    const phone = await phoneCtx.newPage();
-    await learnABit(phone);
-    const phoneReviews = (await readDB(phone)).reviews.length;
-
-    const laptopCtx = await browser.newContext(opts);
-    await fake.attach(laptopCtx);
-    const laptop = await laptopCtx.newPage();
-    await signIn(laptop, "amigo@example.com", "welcome");
-    await laptop.getByRole("button", { name: t.acctStartHere }).click();
-    await laptop.waitForURL((u) => u.pathname === "/onboarding");
-    await expect(laptop.getByText(t.appLangTitle)).toBeVisible();
-
-    await phone.goto("/me");
-    await phone.getByRole("link", { name: new RegExp(t.moveTitle) }).click();
-    await phone.getByLabel(t.acctEmail).fill("amigo@example.com");
-    await phone.getByRole("button", { name: t.acctSendCode }).click();
-    await phone.getByLabel(t.acctCode).fill(CODE);
-    await phone.getByRole("button", { name: t.acctVerify, exact: true }).click();
-    // The account is still empty (the computer hasn't finished setting up): the phone's progress goes up.
-    await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
-    await expect.poll(() => fake.answers.size).toBe(phoneReviews);
-    await phoneCtx.close();
-    await laptopCtx.close();
   });
 
   test("CUJ-16 offline: changes made while the server is unreachable upload on reconnect", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await learnABit(page);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
     await page.goto("/me/settings");
     fake.setDown(true);
     await page.getByRole("button", { name: "10′" }).click(); // lesson length → profile change
@@ -447,8 +427,7 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await learnABit(page);
     await page.evaluate((k) => localStorage.setItem("lingua:llm", JSON.stringify({ provider: "anthropic", apiKey: k })), KEY);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
+    await expect.poll(() => fake.answers.size).toBeGreaterThan(0);
     await page.goto("/me/settings");
     await page.getByRole("button", { name: t.acctSignOut }).click();
     await expect(page.getByText(t.acctSignOutSub)).toBeVisible();
@@ -463,67 +442,30 @@ test.describe("e2e-sync · with an account", () => {
     expect(fake.answers.size).toBeGreaterThan(0);
   });
 
-  test("CUJ-20 delete account removes the server copy; the device keeps its progress as a guest", async ({ page, context }) => {
+  test("CUJ-20 delete account removes the server copy; the device keeps its progress and asks for an account to go on", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await learnABit(page);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
+    await expect.poll(() => fake.rows.size).toBe(1);
     await page.goto("/me/settings");
     await page.getByRole("button", { name: t.acctDelete }).click();
     await page.getByRole("textbox", { name: t.acctDeleteWord }).fill(t.acctDeleteWord);
     await page.locator(".sheet").getByRole("button", { name: t.acctDelete }).click();
-    await expect(page.getByText(t.acctDeleted)).toBeVisible();
-    expect(fake.rows.size).toBe(0);
-    await expect(page.getByText(t.acctSync)).toBeVisible();
+    await expect.poll(() => fake.rows.size).toBe(0);
+    await page.waitForURL(/\/account\?from=required/);
     const db = await readDB(page);
     expect(db.reviews.length).toBeGreaterThan(0);
-  });
-});
-
-test.describe("e2e-sync · sign-in first", () => {
-  test.use({ baseURL: SYNC, locale: "es-ES" });
-
-  test("Welcome leads with Sign in; trying without an account is still one tap", async ({ page, context }) => {
-    const fake = fakeSupabase(["ana@example.com"]);
-    await fake.attach(context);
-    await page.goto("/");
-    const signInBtn = page.getByRole("button", { name: t.haveAccount });
-    const tryBtn = page.getByRole("button", { name: t.tryFirst });
-    await expect(signInBtn).toBeVisible();
-    await expect(tryBtn).toBeVisible();
-    await expect(signInBtn).toHaveClass(/btn-primary/);
-    await expect(page.getByRole("button", { name: t.getStarted })).toHaveCount(0);
-  });
-
-  test("a guest is offered once, on Results, to save their progress", async ({ page, context }) => {
-    const fake = fakeSupabase(["ana@example.com"]);
-    await fake.attach(context);
-    await page.clock.install();
-    await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
-    await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9, maxSteps: 16 });
-    await page.clock.fastForward("11:00");
-    const st = await playLesson(page, { lang: "it", base: "es", appLang: "es", accuracy: 0.9 });
-    expect(st.sawResults).toBe(true);
-    await expect(page.getByText(t.saveTitle)).toBeVisible();
-    await expect(page.getByRole("link", { name: t.saveDo })).toHaveAttribute("href", /\/account\?from=home/);
-    // Offered once: it's recorded as shown, so no later Results offers it again.
-    expect((await readDB(page)).profile.seen?.saveOffer).toBeGreaterThan(0);
-    await page.getByRole("button", { name: t.notNow }).click();
-    await expect(page.getByText(t.saveTitle)).toHaveCount(0);
   });
 });
 
 test.describe("e2e-sync · after the first sign-in (no reload)", () => {
   test.use({ baseURL: SYNC, locale: "es-ES" });
 
-  test("background sync starts right after signing in, without restarting the app (P1-1)", async ({ page, context }) => {
-    const fake = fakeSupabase(["ana@example.com"]);
+  test("background sync starts right after signing up, without restarting the app (P1-1)", async ({ page, context }) => {
+    const fake = fakeSupabase([]);
     await fake.attach(context);
-    await learnABit(page);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click(); // client-side navigation, same JS session
-    await page.waitForURL((u) => u.pathname === "/");
+    // Sign-up happens inside onboarding; the lesson opens by client-side navigation (same JS session).
+    await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] }, { signUp: { email: "ana@example.com", code: CODE } });
     const before = fake.reads.length;
     // Leaving the app (switching away) must trigger an upload attempt.
     await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
@@ -534,14 +476,13 @@ test.describe("e2e-sync · after the first sign-in (no reload)", () => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await learnABit(page);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
+    await expect.poll(() => fake.answers.size).toBeGreaterThan(0);
     const revBefore = [...fake.rows.values()][0].rev;
 
     const ctx2 = await browser.newContext({ locale: "es-ES", baseURL: SYNC });
     await fake.attach(ctx2);
     const p2 = await ctx2.newPage();
-    await signIn(p2, "ana@example.com", "welcome");
+    await signIn(p2, "ana@example.com");
     await p2.getByRole("button", { name: t.continue }).click();
     await expect.poll(async () => (await readDB(p2)).reviews.length).toBeGreaterThan(0);
 
@@ -563,24 +504,24 @@ test.describe("e2e-sync · after the first sign-in (no reload)", () => {
 test.describe("e2e-sync · sign in with Google", () => {
   test.use({ baseURL: SYNC, locale: "es-ES" });
 
-  test("CUJ-17 invited Google account: progress uploads, the code never stays in the URL", async ({ page, context }) => {
+  test("CUJ-17 Google before the first lesson: the account is created, the code never stays in the URL", async ({ page, context }) => {
     const errs = watchErrors(page);
     const fake = fakeSupabase(["ana@gmail.com"], { as: "ana@gmail.com" });
     await fake.attach(context);
-    await learnABit(page);
-    await page.goto("/me/settings");
-    await page.getByRole("link", { name: new RegExp(t.acctSync) }).click();
+    const r = await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+    expect(r.gated).toBe(true);
     await page.getByRole("button", { name: t.acctGoogle }).click();
     await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
     expect(page.url()).not.toContain("code=");
-    expect(page.url()).toContain("/account?from=settings");
+    expect(page.url()).toContain("/account?from=required");
     // The app asked for PKCE and to come back to its own origin.
     const a = fake.authorize[0];
     expect(a.searchParams.get("provider")).toBe("google");
     expect(a.searchParams.get("code_challenge")).toBeTruthy();
     expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
     await expect.poll(() => fake.rows.size).toBe(1);
-    expect(fake.answers.size).toBeGreaterThan(0);
+    await page.getByRole("button", { name: t.continue }).click();
+    await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/lesson");
     await page.goto("/me/settings");
     await expect(page.getByText(t.acctSignedInAs("ana@gmail.com"))).toBeVisible();
     expect(errs).toEqual([]);
@@ -590,7 +531,7 @@ test.describe("e2e-sync · sign in with Google", () => {
     const fake = fakeSupabase(["ana@gmail.com"], { as: "stranger@gmail.com" }, true);
     await fake.attach(context);
     await page.goto("/");
-    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByRole("button", { name: t.haveAccountYes }).click();
     await page.getByRole("button", { name: t.acctGoogle }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.notInvited);
     expect(page.url()).not.toContain("error=");
@@ -601,7 +542,7 @@ test.describe("e2e-sync · sign in with Google", () => {
     await cancel.attach(ctx2);
     const p2 = await ctx2.newPage();
     await p2.goto("/");
-    await p2.getByRole("button", { name: t.haveAccount }).click();
+    await p2.getByRole("button", { name: t.haveAccountYes }).click();
     await p2.getByRole("button", { name: t.acctGoogle }).click();
     await expect(p2.locator("main").getByRole("alert")).toHaveText(t.acctErr.google);
     // The email path is still right there.
@@ -616,13 +557,7 @@ test.describe("e2e-sync · writing practice", () => {
   test("CUJ-28 write a short text, get feedback, find it in 'Your texts', delete it", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
-    await onboard(page, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "never" }] });
-    await page.goto("/");
-    // guest: the task works, but feedback asks to sign in
-    await page.goto("/write?task=de-w-geburtstag");
-    await expect(page.getByText(t.writeSignIn)).toBeVisible();
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
+    await onboard(page, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "never" }] }, { signUp: { email: "ana@example.com", code: CODE } });
     await page.goto("/path");
     await page.getByRole("link", { name: new RegExp(t.writeOpen) }).click();
     await page.getByRole("link", { name: /cumpleaños/ }).click();
@@ -649,8 +584,6 @@ test.describe("e2e-sync · profile photo follows you", () => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await learnABit(page);
-    await signIn(page, "ana@example.com", "settings");
-    await page.getByRole("button", { name: t.continue }).click();
     await page.goto("/me/settings");
     await page.getByRole("textbox", { name: t.yourName }).fill("Ana");
     await page.getByRole("textbox", { name: t.yourName }).press("Enter");
@@ -669,7 +602,7 @@ test.describe("e2e-sync · profile photo follows you", () => {
     const ctx2 = await browser.newContext({ locale: "es-ES", baseURL: SYNC });
     await fake.attach(ctx2);
     const laptop = await ctx2.newPage();
-    await signIn(laptop, "ana@example.com", "welcome");
+    await signIn(laptop, "ana@example.com");
     await laptop.getByRole("button", { name: t.continue }).click();
     await laptop.goto("/me");
     await expect(laptop.getByRole("heading", { level: 1 })).toHaveText("Ana");
@@ -677,4 +610,3 @@ test.describe("e2e-sync · profile photo follows you", () => {
     await ctx2.close();
   });
 });
-

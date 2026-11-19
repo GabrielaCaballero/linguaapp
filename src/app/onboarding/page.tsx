@@ -11,7 +11,7 @@ import { LANG_NAME, units } from "@/lib/content";
 import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref } from "@/lib/nav";
-import { isSyncConfigured } from "@/lib/sync/client";
+import { isSyncConfigured, useAccount } from "@/lib/sync/client";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
@@ -59,6 +59,7 @@ function Flow({ signedIn }: { signedIn: boolean }) {
   const [voices, setVoices] = useState(false);
   const t = dict(appLang);
   const syncOn = isSyncConfigured();
+  const acct = useAccount();
 
   useEffect(() => {
     voicesReady().then(() => setVoices(true));
@@ -176,9 +177,9 @@ function Flow({ signedIn }: { signedIn: boolean }) {
           <div className="bottom-bar">
             {syncOn ? (
               <>
-                {/* Accounts on: progress belongs in the account, so signing in comes first. */}
-                <button className="btn btn-primary" onClick={() => router.push(accountHref("welcome"))}>{t.haveAccount}</button>
-                <button className="btn btn-secondary" onClick={go}>{t.tryFirst}</button>
+                {/* New people start (the level test needs no account; saving it does); returning ones sign in. */}
+                <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
+                <button className="btn btn-secondary" onClick={() => router.push(accountHref("welcome"))}>{t.haveAccountYes}</button>
               </>
             ) : (
               <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
@@ -393,16 +394,16 @@ function Flow({ signedIn }: { signedIn: boolean }) {
               className="btn btn-primary"
               onClick={() => {
                 commit();
-                // Today becomes the screen under the first lesson, so Back from it lands on Today
-                // instead of leaving the app (onboarding itself is replaced, never returned to).
                 // Today becomes the screen under the first lesson (so Back lands there, not outside
                 // the app): replace onboarding with Today, which then opens the lesson on top.
+                // Without an account, saving the progress comes first (AccountGate); Today then
+                // opens the lesson after signing in.
                 try {
                   sessionStorage.setItem("lingua:autostart", "1");
                 } catch {
                   /* no storage: Today just shows its Start button */
                 }
-                router.replace("/");
+                router.replace(syncOn && !acct.user ? accountHref("required") : "/");
               }}
             >
               {t.startFirst}
