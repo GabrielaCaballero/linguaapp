@@ -4,6 +4,7 @@ import { Boot } from "@/components/Boot";
 import { SyncRunner } from "@/components/SyncRunner";
 import { AnalyticsTag } from "@/components/AnalyticsTag";
 import { NavTracker } from "@/components/ui";
+import { AccountGate } from "@/components/AccountGate";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Boot />
         <SyncRunner />
         <NavTracker />
+        <AccountGate />
         {/* Only on Vercel: elsewhere (local, tests) the analytics script doesn't exist and would 404. */}
         {process.env.VERCEL ? <AnalyticsTag /> : null}
       </body>

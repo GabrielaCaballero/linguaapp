@@ -21,7 +21,7 @@ export default function AccountPage() {
 function AccountRoute() {
   const sp = useSearchParams();
   const f = sp.get("from");
-  const from: AccountFrom = f === "welcome" || f === "home" || f === "me" ? f : "settings";
+  const from: AccountFrom = f === "welcome" || f === "home" || f === "me" || f === "required" ? f : "settings";
   // Keyed on `from` only: Google's ?code=… is stripped from the URL once read, and that
   // must not reset the screen.
   return <SignIn key={from} from={from} />;
@@ -76,7 +76,9 @@ function SignIn({ from }: { from: AccountFrom }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  const back = from === "welcome" ? onboardingHref() : from === "home" ? "/" : from === "me" ? "/me" : "/me/settings";
+  const back = from === "welcome" ? onboardingHref() : from === "home" || from === "required" ? "/" : from === "me" ? "/me" : "/me/settings";
+  // Before the first lesson an account is required: no way back past this screen (AccountGate).
+  const required = from === "required";
   const onScreen = pathname === "/account";
   useEffect(() => {
     if (onScreen && !isSyncConfigured()) router.replace(back);
@@ -169,11 +171,12 @@ function SignIn({ from }: { from: AccountFrom }) {
 
   return (
     <main className="screen">
-      <BackHeader title={t.acct} backLabel={t.back} href={back} />
+      {required ? <div style={{ minHeight: 48 }} /> : <BackHeader title={t.acct} backLabel={t.back} href={back} />}
 
       {step.id === "email" && (
         <form className="stack" style={{ marginTop: 8, gap: 16 }} onSubmit={(e) => { e.preventDefault(); void send(); }}>
-          <h2 className="title">{t.acctSignInTitle}</h2>
+          <h2 className="title">{required ? t.acctRequiredTitle : t.acctSignInTitle}</h2>
+          {required && <p style={{ margin: 0 }}>{t.acctRequiredSub}</p>}
           {isGoogleEnabled() && (
             <>
               <button type="button" className="btn btn-secondary" disabled={busy || !online} onClick={() => void google()}>

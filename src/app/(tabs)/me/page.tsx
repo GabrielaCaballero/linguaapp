@@ -11,8 +11,7 @@ import { avgMinutes, calibration, courseLangs, rememberedAfterWeek, targetFor, t
 import { fmtMonth, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
 import { saveGoal, setActiveLang } from "@/lib/actions";
-import { accountHref, onboardingHref } from "@/lib/nav";
-import { useAccount } from "@/lib/sync/client";
+import { onboardingHref } from "@/lib/nav";
 import { Loading, Ring, Seal, Sheet, Toast, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { GoalPicker } from "@/components/GoalPicker";
@@ -24,7 +23,6 @@ export default function MePage() {
   const now = useNow();
   const [editGoal, setEditGoal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const acct = useAccount();
   useEffect(() => {
     if (db && !db.profile.onboarded) router.replace(onboardingHref());
   }, [db, router]);
@@ -74,17 +72,6 @@ export default function MePage() {
       <p className="caption" style={{ margin: "8px 0 0" }}>{t.learningSince(fmtMonth(new Date(course.addedAt), locale))}</p>
 
       <section className="stack" style={{ marginTop: 20 }}>
-        {/* Guests: the way to the computer, where they'd look for it (field report 2026-11-17). */}
-        {acct.configured && acct.ready && !acct.user && (
-          <Link href={accountHref("me")} className="card row" style={{ gap: 12, textDecoration: "none", color: "inherit", alignItems: "flex-start" }}>
-            <span className="accent" style={{ marginTop: 2 }}><Icon name="refresh" size={22} /></span>
-            <span className="stack grow" style={{ gap: 2 }}>
-              <span className="label" style={{ fontWeight: 600 }}>{t.moveTitle}</span>
-              <span className="caption">{t.moveSub}</span>
-            </span>
-            <span className="caption accent" aria-hidden="true">›</span>
-          </Link>
-        )}
         <div className="card stack" style={{ gap: 10 }}>
           <div className="row between">
             <div>
