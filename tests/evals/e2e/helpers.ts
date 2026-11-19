@@ -45,9 +45,9 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
   const t = T[plan.appLang];
   const t0 = Date.now();
   await page.goto("/");
-  await btn(page, T.en.getStarted).or(btn(page, T.es.getStarted)).first().click();
-  await page.locator(".choice-card", { hasText: T.en.baseName[plan.appLang] }).first().click();
-  await btn(page, t.continue).click();
+  // The app's language is a switch on the welcome screen (no separate step).
+  await page.getByRole("button", { name: plan.appLang === "es" ? "Español" : "English", exact: true }).click();
+  await btn(page, t.getStarted).click();
   for (const l of plan.langs) await page.locator(".choice-card", { hasText: l.lang === "it" ? "Italiano" : "Deutsch" }).click();
   await btn(page, t.continue).click();
   for (const l of plan.langs) {
@@ -73,7 +73,7 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
     out.gated = true;
     if (!opts.signUp) return out;
     await page.getByLabel(t.acctEmail).fill(opts.signUp.email);
-    await btn(page, t.acctSendCode).click();
+    await btn(page, t.acctSendCodeNew).click();
     await page.getByLabel(t.acctCode).fill(opts.signUp.code);
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
     await page.getByRole("status").filter({ hasText: t.acctDone }).waitFor();

@@ -56,7 +56,9 @@ describe("privacy · no server secrets in the app", () => {
     for (const line of read(".env.example").split("\n").filter((l) => /^[A-Z_]+=/.test(l))) expect(line).toMatch(/=$/);
   });
   it("open sign-up: a new email can create its account (shouldCreateUser: true; owner, 2026-11-16)", () => {
-    expect(read("src/lib/sync/client.ts")).toMatch(/shouldCreateUser:\s*true/);
+    // Sign up creates the account; sign in with an unknown email says "no account" (2026-11-19).
+    expect(read("src/lib/sync/client.ts")).toMatch(/sendCode\(email: string, create = true\)/);
+    expect(read("src/lib/sync/client.ts")).toMatch(/shouldCreateUser:\s*create/);
   });
   it("Google sign-in uses PKCE and only returns to this app's own origin", () => {
     const src = read("src/lib/sync/client.ts");

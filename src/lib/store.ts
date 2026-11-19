@@ -17,9 +17,19 @@ export function legacy(): LegacyIndex {
   return legacyIndex;
 }
 
-function defaultAppLang(): "es" | "en" {
+/**
+ * The app's first language, from the phone/browser's preferred languages in order (e.g. a
+ * German phone with Spanish second gets Spanish). Neither listed: English. Changeable on the
+ * welcome screen and in Settings.
+ */
+export function defaultAppLang(): "es" | "en" {
   if (typeof navigator === "undefined") return "es";
-  return /^en\b/i.test(navigator.language) ? "en" : /^es\b/i.test(navigator.language) ? "es" : "en";
+  const list = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const l of list) {
+    if (/^es\b/i.test(l)) return "es";
+    if (/^en\b/i.test(l)) return "en";
+  }
+  return "en";
 }
 
 /** Load the DB from storage, migrating v1 on first run. Exported for tests. */
