@@ -15,7 +15,7 @@ import { isSyncConfigured, useAccount } from "@/lib/sync/client";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
-import { Loading, Seal, Toast } from "@/components/ui";
+import { Loading, Seal, Seg, Toast } from "@/components/ui";
 import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/components/Placement";
 import { SimpleGoal } from "@/components/GoalPicker";
 
@@ -74,8 +74,9 @@ function Flow({ signedIn }: { signedIn: boolean }) {
 
   const steps: Step[] = [];
   if (mode === "new") {
+    // The welcome screen has the language switch; signed in (no welcome) asks it as a step.
     if (!signedIn) steps.push({ id: "welcome" });
-    steps.push({ id: "appLang" });
+    else steps.push({ id: "appLang" });
   }
   if (mode !== "goalOnly") steps.push({ id: "langs" });
   for (const l of langs) {
@@ -161,6 +162,10 @@ function Flow({ signedIn }: { signedIn: boolean }) {
     case "welcome":
       body = (
         <>
+          <div className="row" style={{ justifyContent: "flex-end", minHeight: 48 }}>
+            {/* Saved at once, so "I already have an account" opens in this language too. */}
+            <Seg label={t.sAppLang} value={appLang} options={[{ v: "es" as BaseLang, label: "Español" }, { v: "en" as BaseLang, label: "English" }]} onChange={(b) => { setAppLangDraft(b); setAppLang(b); }} />
+          </div>
           <div className="grow" style={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="brand-logo logo-light" src="/brand/linguina.svg" alt={t.appName} width={180} height={56} />

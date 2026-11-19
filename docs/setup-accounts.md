@@ -33,7 +33,11 @@ codes) and paste two values into **Vercel**. No coding.
    email (or Google). Writing feedback stays capped per person and per month (step 12), so
    cost can't run away. To go back to invite-only, turn it OFF again: the app then shows
    "New accounts can't be created right now" to new emails.
-3. Under **Email**: keep it enabled, keep **Confirm email** on.
+3. Turn **Confirm email** → **OFF**, then *Save changes*. With it on, a new account first gets a
+   "Confirm your email" message (Supabase's *Confirm signup* template, a link) and then the
+   code, so people get two emails and the link opens the browser, not the app. The 6-digit
+   code already proves the email belongs to them, so the confirm step adds nothing.
+   (If you ever turn it back on, put `{{ .Token }}` in the **Confirm signup** template too.)
 4. Leave every other provider off for now (Google is optional, step 11).
 
 ## 4. Email sending (10 min) — do this before the template

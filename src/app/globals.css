@@ -215,6 +215,8 @@ a { color: inherit; }
 .btn-secondary:active { transform: scale(0.98); }
 .btn-ghost { background: transparent; color: var(--text-2); min-height: 44px; font-weight: 600; font-size: var(--t-label); }
 .btn-ghost:active { color: var(--text); }
+.link-btn { background: none; border: 0; padding: 8px 2px; min-height: 44px; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link-btn:disabled { opacity: .5; }
 .btn-ok { background: var(--ok); color: var(--on-state); box-shadow: 0 6px 16px color-mix(in srgb, var(--ok) 25%, transparent); }
 .btn-almost { background: var(--almost); color: var(--on-state); box-shadow: 0 6px 16px color-mix(in srgb, var(--almost) 25%, transparent); }
 .btn-ok:active, .btn-almost:active { transform: scale(0.98); }

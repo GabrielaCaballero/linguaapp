@@ -92,7 +92,7 @@ export function useAccount(): AccountState & { configured: boolean } {
 }
 
 // ---- sign in ------------------------------------------------------------------------
-export type AuthError = "notInvited" | "badCode" | "tooMany" | "network" | "google" | "googleOtherBrowser" | "emailSend";
+export type AuthError = "notInvited" | "noAccount" | "badCode" | "tooMany" | "network" | "google" | "googleOtherBrowser" | "emailSend";
 
 function classify(e: { message?: string; status?: number; code?: string } | null): AuthError {
   const m = `${e?.code ?? ""} ${e?.message ?? ""}`.toLowerCase();
@@ -104,12 +104,17 @@ function classify(e: { message?: string; status?: number; code?: string } | null
   return "network";
 }
 
-/** Email a 6-digit code. A new email creates its account (open sign-up, owner 2026-11-16). */
-export async function sendCode(email: string): Promise<AuthError | null> {
+/**
+ * Email a 6-digit code. `create`: a new email creates its account (sign up, open since
+ * owner 2026-11-16); without it an unknown email answers "noAccount" (sign in).
+ */
+export async function sendCode(email: string, create = true): Promise<AuthError | null> {
   try {
-    const { error } = await getClient().auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    const { error } = await getClient().auth.signInWithOtp({ email, options: { shouldCreateUser: create } });
     if (error) console.warn("sign-in code:", error.status, (error as { code?: string }).code, error.message);
-    return error ? classify(error) : null;
+    if (!error) return null;
+    const kind = classify(error);
+    return kind === "notInvited" && !create ? "noAccount" : kind;
   } catch {
     return "network";
   }

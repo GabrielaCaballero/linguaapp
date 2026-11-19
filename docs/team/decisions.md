@@ -129,3 +129,15 @@ Format: date · who · decision · why
 - 2026-11-16 · owner · Live bug fixes after release: audio no longer hidden when phone voices load late, and speech isn't cancelled-then-dropped; tabs switch without adding history and back arrows go back to their parent (no Back loops), lesson exits go back to Today; an error screen that reloads once after a new deploy; open sign-up (shouldCreateUser: true; Supabase "Allow new users to sign up" ON); course screens (lesson, unit grammar, Path, Write) use the explanation language for every label; the unit's first screen recommends reading the unit grammar (skippable); questions sit right above their answers with long texts in a scrolling box; backup export/import and the "progress follows you" note removed (privacy facts moved to Settings); one labelled language switch on Today; Next.js 16.4.2 → 16.4.6 (security advisory GHSA-mfr8-8qww-v76h). New eval: no English inside Spanish text and vice versa.
 - 2026-11-17 · owner · Field report: a guest who took the German test on the phone signed up on the computer and "Continue" looped back to the welcome. Fixed: an empty account on a fresh device says so, keeps checking, and comes in by itself once the other device signs in; "Start here" skips the welcome.
 - 2026-11-19 · owner · An account is required before the first lesson (no long-term guests): the welcome leads with "Get started", the level test and course setup need no account, then "Save your progress" (email code or Google) before the first lesson; every other screen leads back there until signed in. Why: guest progress lived on one device only (stranded when switching devices; Safari can wipe storage after days unused). The end-of-lesson "save your progress" offer and the guest card on Me are gone. Needs custom SMTP in Supabase (built-in email sends only a few per hour). Builds without accounts are unchanged.
+
+## 2026-11-19 · Sign in vs. create account; language from the device
+
+- Field report: a new user got two emails ("Confirm your email", then the code). Cause: Supabase's
+  **Confirm email** was on, so a new account got the *Confirm signup* link first. Fix: turn it off
+  (docs/setup-accounts.md step 3). The emailed code already proves the address.
+- The account screen now says which it is: **Crea tu cuenta** (from "Guarda tu progreso") or
+  **Entrar** (from "Ya tengo cuenta"), with a link to switch. Signing in with an email that has no
+  account says so and offers "Crear una cuenta con este correo" instead of quietly creating one.
+- The app's language is a switch on the welcome screen (Español / English), preset from the
+  device's preferred languages in order (`navigator.languages`; neither listed → English). The
+  separate "which language" step is gone, except after signing in to an empty account.

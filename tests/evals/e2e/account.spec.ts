@@ -206,16 +206,29 @@ async function learnABit(page: Page, email = "ana@example.com") {
   await page.goto("/");
 }
 
-/** A returning learner on a new device: "I already have an account" on the welcome screen. */
-async function signIn(page: Page, email: string) {
+/**
+ * A returning learner on a new device: "I already have an account" on the welcome screen.
+ * `create`: the email has no account yet, so take the offer to create one with it.
+ */
+async function signIn(page: Page, email: string, o: { create?: boolean } = {}) {
   await page.goto("/");
   await page.getByRole("button", { name: t.haveAccountYes }).click();
+  if (o.create) {
+    await page.getByLabel(t.acctEmail).fill(email);
+    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
+    await page.getByRole("button", { name: t.acctCreateWithThis }).click();
+    await page.getByLabel(t.acctCode).fill(CODE);
+    await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
+    return;
+  }
   await enterCode(page, email);
 }
 
 async function enterCode(page: Page, email: string) {
   await page.getByLabel(t.acctEmail).fill(email);
-  await page.getByRole("button", { name: t.acctSendCode }).click();
+  // "Send code" signing in, "Create account" signing up.
+  await page.getByRole("button", { name: t.acctSendCode }).or(page.getByRole("button", { name: t.acctSendCodeNew })).click();
   await page.getByLabel(t.acctCode).fill(CODE);
   await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
 }
@@ -284,7 +297,7 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     await fake.attach(laptopCtx);
     const laptop = await laptopCtx.newPage();
     const laptopErrs = watchErrors(laptop);
-    await signIn(laptop, "amigo@example.com");
+    await signIn(laptop, "amigo@example.com", { create: true });
     await expect(laptop.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
     await laptop.getByRole("button", { name: t.acctFetch }).click();
     await expect(laptop.locator("main").getByRole("alert")).toHaveText(t.acctStillEmpty);
@@ -306,7 +319,8 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     expect(theirs.profile.courses.de?.placement).toEqual(mine.profile.courses.de?.placement);
     expect(theirs.profile.courses.de?.unit).toBe(mine.profile.courses.de?.unit);
     expect(phoneErrs).toEqual([]);
-    expect(laptopErrs).toEqual([]);
+    // 422 = the expected "no account with this email" answer before "Create an account with this email".
+    expect(laptopErrs.filter((e) => !/status of 422/.test(e))).toEqual([]);
     await phoneCtx.close();
     await laptopCtx.close();
   });
@@ -357,8 +371,9 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
+    await page.getByRole("button", { name: t.acctSwitchSignUp, exact: true }).click();
     await page.getByLabel(t.acctEmail).fill("new@example.com");
-    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await page.getByRole("button", { name: t.acctSendCodeNew }).click();
     await expect(page.getByText(t.acctCodeTitle)).toBeVisible();
     await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
   });
@@ -370,8 +385,26 @@ test.describe("e2e-sync · with an account", () => {
     await page.getByRole("button", { name: t.haveAccountYes }).click();
     await page.getByLabel(t.acctEmail).fill("stranger@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
+    // Signing in with an unknown email says so (and offers to create one) instead of creating it.
+    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
+    await page.getByRole("button", { name: t.acctCreateWithThis }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.notInvited);
     expect(fake.rows.size).toBe(0);
+  });
+
+  test("sign in and sign up are told apart: an unknown email on 'Sign in' creates nothing until asked", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"]);
+    await fake.attach(context);
+    await page.goto("/");
+    await page.getByRole("button", { name: t.haveAccountYes }).click();
+    await expect(page.getByRole("heading", { name: t.acctSignInTitle })).toBeVisible();
+    await page.getByLabel(t.acctEmail).fill("nueva@example.com");
+    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
+    await page.getByRole("button", { name: t.acctSwitchSignUp, exact: true }).click();
+    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
+    await page.getByRole("button", { name: t.acctSendCodeNew }).click();
+    await expect(page.getByRole("heading", { name: t.acctCodeTitle })).toBeVisible();
   });
 
   test("CUJ-18 wrong code is rejected, the right one works", async ({ page, context }) => {
@@ -394,7 +427,7 @@ test.describe("e2e-sync · with an account", () => {
     const errs = watchErrors(page);
     const fake = fakeSupabase([]);
     await fake.attach(context);
-    await signIn(page, "amigo@example.com");
+    await signIn(page, "amigo@example.com", { create: true });
     // Says the account is empty and where other progress would come from.
     await expect(page.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
     await expect(page.getByText(t.acctEmptySub)).toBeVisible();
@@ -403,7 +436,7 @@ test.describe("e2e-sync · with an account", () => {
     // Straight into setup: no welcome, no second "Sign in".
     await expect(page.getByRole("button", { name: t.haveAccountYes })).toHaveCount(0);
     await expect(page.getByText(t.appLangTitle)).toBeVisible();
-    expect(errs).toEqual([]);
+    expect(errs.filter((e) => !/status of 422/.test(e))).toEqual([]);
   });
 
   test("CUJ-16 offline: changes made while the server is unreachable upload on reconnect", async ({ page, context }) => {

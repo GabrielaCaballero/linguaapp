@@ -46,9 +46,8 @@ test.describe("CUJ-1 first open → first lesson", () => {
   test("placement result offers Start lower / Start higher one unit at a time (P0-2)", async ({ page }) => {
     const t = T.en;
     await page.goto("/");
+    await page.getByRole("button", { name: "English", exact: true }).click();
     await page.getByRole("button", { name: t.getStarted }).click();
-    await page.locator(".choice-card", { hasText: "English" }).click();
-    await page.getByRole("button", { name: t.continue }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue }).click();
     await page.locator(".choice-card", { hasText: t.expClasses }).click();
@@ -317,9 +316,8 @@ test.describe("CUJ-2b I know my level", () => {
   test("Ana skips the test, picks B1 in Italian, and starts at the first B1 unit", async ({ page }) => {
     const t = T.es;
     await page.goto("/");
-    await page.getByRole("button", { name: T.en.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
-    await page.locator(".choice-card", { hasText: "Español" }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: "Español", exact: true }).click();
+    await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Italiano" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expKnown }).click();
@@ -344,9 +342,8 @@ test.describe("CUJ-2b I know my level", () => {
   test("from the test intro, 'I know my level' replaces the test", async ({ page }) => {
     const t = T.en;
     await page.goto("/");
+    await page.getByRole("button", { name: "English", exact: true }).click();
     await page.getByRole("button", { name: t.getStarted }).click();
-    await page.locator(".choice-card", { hasText: "English" }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expBit }).click();
@@ -461,9 +458,8 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
   test("a new unit opens with a one-screen 'This unit' card, then each new thing is learned and tried at once; the full overview is on Path", async ({ page }) => {
     const t = T.en;
     await page.goto("/");
-    await page.getByRole("button", { name: t.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
-    await page.locator(".choice-card", { hasText: "English" }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: "English", exact: true }).click();
+    await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expNever }).click();
@@ -566,9 +562,8 @@ test.describe("Navigation regressions (QA 2026-11-16)", () => {
   test("'Read the grammar' opens the unit grammar inside the lesson, then the same lesson continues", async ({ page }) => {
     const t = T.en;
     await page.goto("/");
-    await page.getByRole("button", { name: t.getStarted }).or(page.getByRole("button", { name: T.es.getStarted })).first().click();
-    await page.locator(".choice-card", { hasText: "English" }).first().click();
-    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: "English", exact: true }).click();
+    await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.locator(".choice-card", { hasText: t.expNever }).click();

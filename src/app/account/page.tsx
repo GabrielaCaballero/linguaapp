@@ -35,6 +35,9 @@ function SignIn({ from }: { from: AccountFrom }) {
   const router = useRouter();
   const pathname = usePathname();
   const [step, setStep] = useState<Step>({ id: "email" });
+  // Sign up (new account) or sign in (existing one). Same emailed code; the copy says which, and
+  // signing in with an unknown email says so instead of quietly creating an account.
+  const [mode, setMode] = useState<"signup" | "signin">(from === "required" ? "signup" : "signin");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -118,12 +121,12 @@ function SignIn({ from }: { from: AccountFrom }) {
     router.replace(getDB().profile.onboarded ? "/" : `${onboardingHref()}&signedIn=1`);
   };
 
-  const send = async () => {
+  const send = async (as = mode) => {
     const e = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return;
     setBusy(true);
     setErr(null);
-    const r = await sendCode(e);
+    const r = await sendCode(e, as === "signup");
     setBusy(false);
     if (r) setErr(r);
     else {
@@ -175,8 +178,8 @@ function SignIn({ from }: { from: AccountFrom }) {
 
       {step.id === "email" && (
         <form className="stack" style={{ marginTop: 8, gap: 16 }} onSubmit={(e) => { e.preventDefault(); void send(); }}>
-          <h2 className="title">{required ? t.acctRequiredTitle : t.acctSignInTitle}</h2>
-          {required && <p style={{ margin: 0 }}>{t.acctRequiredSub}</p>}
+          <h2 className="title">{mode === "signup" ? (required ? t.acctRequiredTitle : t.acctSignUpTitle) : t.acctSignInTitle}</h2>
+          {mode === "signup" && required && <p style={{ margin: 0 }}>{t.acctRequiredSub}</p>}
           {isGoogleEnabled() && (
             <>
               <button type="button" className="btn btn-secondary" disabled={busy || !online} onClick={() => void google()}>
@@ -188,7 +191,16 @@ function SignIn({ from }: { from: AccountFrom }) {
           <p className="muted" style={{ margin: 0 }}>{t.acctSignInSub}</p>
           <input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={t.acctEmailPlaceholder} aria-label={t.acctEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
           {errLine}
-          <button type="submit" className="btn btn-primary" disabled={busy || !email.includes("@")}>{busy ? t.acctSending : t.acctSendCode}</button>
+          {err === "noAccount" && (
+            <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => { setMode("signup"); void send("signup"); }}>{t.acctCreateWithThis}</button>
+          )}
+          <button type="submit" className="btn btn-primary" disabled={busy || !email.includes("@")}>{busy ? t.acctSending : mode === "signup" ? t.acctSendCodeNew : t.acctSendCode}</button>
+          <p className="center" style={{ margin: 0 }}>
+            <span className="muted">{mode === "signup" ? t.acctHaveOne : t.acctNoneYet}</span>{" "}
+            <button type="button" className="link-btn" disabled={busy} onClick={() => { setErr(null); setMode(mode === "signup" ? "signin" : "signup"); }}>
+              {mode === "signup" ? t.acctSwitchSignIn : t.acctSwitchSignUp}
+            </button>
+          </p>
         </form>
       )}
 
