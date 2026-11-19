@@ -36,10 +36,11 @@ function OnboardingRoute() {
   const db = useDB();
   const sp = useSearchParams();
   if (!db) return <Loading />;
-  return <Flow key={sp.toString()} />;
+  return <Flow key={sp.toString()} signedIn={sp.has("signedIn")} />;
 }
 
-function Flow() {
+/** `signedIn`: arriving from a new, empty account — skip the welcome, whose main button is "Sign in". */
+function Flow({ signedIn }: { signedIn: boolean }) {
   const router = useRouter();
   const [initial] = useState(() => getDB());
   const mode: "new" | "add" | "goalOnly" = !initial.profile.onboarded ? "new" : (initial.profile.pendingGoal?.length ?? 0) > 0 ? "goalOnly" : "add";
@@ -71,7 +72,10 @@ function Flow() {
   }, [langs]);
 
   const steps: Step[] = [];
-  if (mode === "new") steps.push({ id: "welcome" }, { id: "appLang" });
+  if (mode === "new") {
+    if (!signedIn) steps.push({ id: "welcome" });
+    steps.push({ id: "appLang" });
+  }
   if (mode !== "goalOnly") steps.push({ id: "langs" });
   for (const l of langs) {
     const d = drafts[l];
