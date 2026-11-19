@@ -10,10 +10,15 @@ export function lessonHref(kind: string = "auto", unit?: number): string {
 export function onboardingHref(): string {
   return `/onboarding?n=${nonce()}`;
 }
+/** Back from the sign-up step in setup: the step before it. */
+export function setupBackHref(): string {
+  return `/onboarding?back=1&n=${nonce()}`;
+}
 export function placementHref(lang: string): string {
   return `/placement?lang=${lang}&n=${nonce()}`;
 }
-export type AccountFrom = "welcome" | "settings" | "home" | "me" | "required";
+/** "setup": the sign-up step in the middle of setup, right after the level step. */
+export type AccountFrom = "welcome" | "settings" | "home" | "me" | "required" | "setup";
 export function accountHref(from: AccountFrom = "settings"): string {
   return `/account?from=${from}&n=${nonce()}`;
 }

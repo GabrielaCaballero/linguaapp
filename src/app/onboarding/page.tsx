@@ -2,7 +2,7 @@
 
 import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
 import type { Anchor, Experience, Goal } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
@@ -11,7 +11,8 @@ import { LANG_NAME, units } from "@/lib/content";
 import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref } from "@/lib/nav";
-import { isSyncConfigured, useAccount } from "@/lib/sync/client";
+import { clearSetupDraft, loadSetupDraft, saveSetupDraft } from "@/lib/setupDraft";
+import { getEngine, isSyncConfigured, useAccount } from "@/lib/sync/client";
 import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
@@ -19,7 +20,7 @@ import { Loading, Seal, Seg, Toast } from "@/components/ui";
 import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/components/Placement";
 import { SimpleGoal } from "@/components/GoalPicker";
 
-type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "goal" | "anchor";
+type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "account" | "goal" | "anchor";
 interface Step { id: StepId; lang?: TargetLang }
 interface LangDraft { explainIn: BaseLang; exp?: Experience; canDo: (number | null)[]; outcome?: PlacementOutcome; goal?: Goal; /** "I know my level": pick it instead of taking the test. */ known?: boolean }
 
@@ -36,18 +37,24 @@ function OnboardingRoute() {
   const db = useDB();
   const sp = useSearchParams();
   if (!db) return <Loading />;
-  return <Flow key={sp.toString()} signedIn={sp.has("signedIn")} />;
+  return <Flow key={sp.toString()} signedIn={sp.has("signedIn")} backFromAccount={sp.has("back")} />;
 }
 
-/** `signedIn`: arriving from a new, empty account — skip the welcome, whose main button is "Sign in". */
-function Flow({ signedIn }: { signedIn: boolean }) {
+/**
+ * `signedIn`: arriving from a new, empty account — skip the welcome, whose main button is "Sign in".
+ * `backFromAccount`: Back on the mid-setup sign-up screen.
+ */
+function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccount: boolean }) {
   const router = useRouter();
   const [initial] = useState(() => getDB());
   const mode: "new" | "add" | "goalOnly" = !initial.profile.onboarded ? "new" : (initial.profile.pendingGoal?.length ?? 0) > 0 ? "goalOnly" : "add";
+  // Answers from before the sign-up step (setup continues where it was).
+  const [saved] = useState(() => (mode === "new" ? loadSetupDraft<LangDraft>() : null));
   const existing = Object.keys(initial.profile.courses) as TargetLang[];
-  const [appLang, setAppLangDraft] = useState<BaseLang>(initial.profile.appLang);
-  const [langs, setLangs] = useState<TargetLang[]>(mode === "goalOnly" ? initial.profile.pendingGoal! : []);
+  const [appLang, setAppLangDraft] = useState<BaseLang>(saved?.appLang ?? initial.profile.appLang);
+  const [langs, setLangs] = useState<TargetLang[]>(mode === "goalOnly" ? initial.profile.pendingGoal! : (saved?.langs ?? []));
   const [drafts, setDrafts] = useState<Partial<Record<TargetLang, LangDraft>>>(() => {
+    if (saved) return saved.drafts;
     if (mode !== "goalOnly") return {};
     const out: Partial<Record<TargetLang, LangDraft>> = {};
     for (const l of initial.profile.pendingGoal!) out[l] = { explainIn: initial.profile.courses[l]?.explainIn ?? "es", canDo: [] };
@@ -79,16 +86,18 @@ function Flow({ signedIn }: { signedIn: boolean }) {
     else steps.push({ id: "appLang" });
   }
   if (mode !== "goalOnly") steps.push({ id: "langs" });
-  for (const l of langs) {
-    const d = drafts[l];
-    if (mode !== "goalOnly") {
+  // Where each language starts first (no account needed), then the account, then goals:
+  // there is nothing to plan for before there's somewhere to keep it (owner, 2026-11-19).
+  if (mode !== "goalOnly")
+    for (const l of langs) {
+      const d = drafts[l];
       // No separate "explain in…" step: explanations use the app's language (owner, 2026-11-16).
       steps.push({ id: "exp", lang: l });
       if (d?.known) steps.push({ id: "level", lang: l });
       else if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
     }
-    steps.push({ id: "goal", lang: l });
-  }
+  if (mode === "new" && syncOn && !acct.user && langs.length) steps.push({ id: "account" });
+  for (const l of langs) steps.push({ id: "goal", lang: l });
   if (mode === "new") steps.push({ id: "anchor" });
   const step = steps[Math.min(idx, steps.length - 1)];
   const lang = step.lang;
@@ -97,7 +106,27 @@ function Flow({ signedIn }: { signedIn: boolean }) {
   const back = () => setIdx((i) => Math.max(0, i - 1));
   const patch = (l: TargetLang, p: Partial<LangDraft>) => setDrafts((x) => ({ ...x, [l]: { ...(x[l] ?? { explainIn: appLang, canDo: [] }), ...p } }));
 
+  // Coming back to setup with saved answers: straight to the sign-up step (Back: the step
+  // before it), or, signed in by now, to the first goal. Once the account state is known.
+  const resumed = useRef(false);
+  const settled = !syncOn || acct.ready;
+  useEffect(() => {
+    if (resumed.current || !saved || !settled) return;
+    resumed.current = true;
+    const at = steps.findIndex((s) => s.id === "account");
+    setIdx(at >= 0 ? (backFromAccount ? at - 1 : at) : Math.max(0, steps.findIndex((s) => s.id === "goal")));
+  });
+  // The sign-up step: keep the answers, then the account screen (it comes back here).
+  const atAccount = step.id === "account";
+  useEffect(() => {
+    if (!atAccount) return;
+    saveSetupDraft<LangDraft>({ appLang, langs, drafts });
+    setAppLang(appLang);
+    router.replace(accountHref("setup"));
+  }, [atAccount, appLang, langs, drafts, router]);
+
   const commit = (lastGoal?: { lang: TargetLang; goal: Goal }) => {
+    clearSetupDraft();
     const all = { ...drafts };
     if (lastGoal) all[lastGoal.lang] = { ...(all[lastGoal.lang] as LangDraft), goal: lastGoal.goal };
     if (mode === "new") setAppLang(appLang);
@@ -171,12 +200,20 @@ function Flow({ signedIn }: { signedIn: boolean }) {
             <img className="brand-logo logo-light" src="/brand/linguina.svg" alt={t.appName} width={180} height={56} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="brand-logo logo-dark" src="/brand/linguina-on-dark.svg" alt={t.appName} width={180} height={56} />
-            <div className="orbit" aria-hidden="true">
-              <Seal lang="it" size={84} />
-              <Seal lang="de" size={84} />
-            </div>
-            <h1 className="hero" style={{ fontSize: "2.25rem" }}>{t.welcomeTitle}</h1>
-            <p className="muted" style={{ marginTop: 12 }}>{syncOn ? t.welcomeSubSync : t.welcomeSub}</p>
+            <h1 className="hero" style={{ fontSize: "2.25rem", marginTop: 32, whiteSpace: "pre-line" }}>{t.welcomeTitle}</h1>
+            <p className="muted" style={{ marginTop: 12 }}>{t.welcomeSub}</p>
+            {/* How it works: the test is free; the account keeps what comes after. */}
+            <ol className="how">
+              {(syncOn ? t.welcomeSteps : t.welcomeSteps.slice(0, 2)).map((s, k) => (
+                <li key={k}>
+                  <span className="how-n" aria-hidden="true">{k + 1}</span>
+                  <span>
+                    {s}
+                    {k === 0 && syncOn && <span className="how-free"> · {t.welcomeStepFree}</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
             <InstallHint t={t} />
           </div>
           <div className="bottom-bar">
@@ -351,6 +388,9 @@ function Flow({ signedIn }: { signedIn: boolean }) {
     case "pResult":
       body = d?.outcome ? <PlacementResult lang={lang!} base={d.explainIn} outcome={d.outcome} t={t} onChange={(o) => patch(lang!, { outcome: o })} onContinue={go} /> : null;
       break;
+    case "account":
+      body = <Loading />;
+      break;
     case "goal":
       body = (
         <>
@@ -399,6 +439,8 @@ function Flow({ signedIn }: { signedIn: boolean }) {
               className="btn btn-primary"
               onClick={() => {
                 commit();
+                // Signed up mid-setup: upload the finished setup now (other devices wait for it).
+                void getEngine()?.syncNow();
                 // Today becomes the screen under the first lesson (so Back lands there, not outside
                 // the app): replace onboarding with Today, which then opens the lesson on top.
                 // Without an account, saving the progress comes first (AccountGate); Today then

@@ -53,13 +53,20 @@ export function Ring({ value, size = 200, stroke = 16, gold = false, children, l
 
 export function Sheet({ open, onClose, children, label }: { open: boolean; onClose: () => void; children: ReactNode; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Callers pass a fresh onClose every render. Depending on it re-ran this effect on each
+  // keystroke, pulling focus back to the sheet: a typed field lost focus (and the phone
+  // keyboard closed) after every letter. Focus the sheet only when it opens.
+  const close = useRef(onClose);
+  useEffect(() => {
+    close.current = onClose;
+  });
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close.current();
     window.addEventListener("keydown", onKey);
     ref.current?.focus();
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   return (
     <>

@@ -264,29 +264,46 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     await expect(page.getByRole("button", { name: t.haveAccountYes })).toBeVisible();
   });
 
-  test("the level test needs no account; the first lesson does, and nothing else opens until then", async ({ page, context }) => {
+  test("the level test needs no account; the account comes right after it, then goals and the first lesson", async ({ page, context }) => {
     const errs = watchErrors(page);
     const fake = fakeSupabase([]);
     await fake.attach(context);
     const r = await onboard(page, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "bit", placementAccuracy: 0.5 }] });
     expect(r.gated).toBe(true);
     expect(r.placementItems.de).toBeGreaterThan(0);
-    await expect(page.getByRole("heading", { name: t.acctRequiredTitle })).toBeVisible();
-    await expect(page.getByText(t.acctRequiredSub)).toBeVisible();
-    await expect(page.getByRole("link", { name: t.back })).toHaveCount(0);
-    // The result is kept on the device meanwhile; every other screen leads back here.
-    expect((await readDB(page)).profile.courses.de?.placement).toBeTruthy();
-    for (const path of ["/", "/path", "/me", "/lesson?kind=auto", "/write"]) {
-      await page.goto(path);
-      await page.waitForURL(/\/account\?from=required/);
-    }
-    // Sign up → the first lesson opens, with Today underneath.
+    await page.waitForURL(/\/account\?from=setup/);
+    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
+    await expect(page.getByText(t.acctSetupSub)).toBeVisible();
+    // Leaving and coming back lands on this same step, with the test result kept.
+    await page.goto("/");
+    await page.waitForURL(/\/account\?from=setup/);
+    // Back goes to the result, which is still there.
+    await page.getByRole("link", { name: t.back }).click();
+    await expect(page.getByText(t.startLower)).toBeVisible();
+    await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.waitForURL(/\/account\?from=setup/);
+    // Sign up → setup goes on at the goal (no welcome, no test again) → the first lesson.
     await enterCode(page, "nuevo@example.com");
     await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
-    await expect.poll(() => fake.rows.size).toBe(1);
     await page.getByRole("button", { name: t.continue }).click();
+    await page.getByRole("button", { name: t.setGoal, exact: true }).click();
+    await page.getByRole("button", { name: t.startFirst }).click();
     await page.waitForURL(/\/lesson/);
+    // The finished setup is in the account right away.
+    await expect.poll(() => fake.rows.size).toBe(1);
+    const db = await readDB(page);
+    expect(db.profile.courses.de?.placement).toBeTruthy();
+    expect(db.profile.courses.de?.goal).toBeTruthy();
     expect(errs).toEqual([]);
+  });
+
+  test("never studied it: the account comes right after that answer, before any planning", async ({ page, context }) => {
+    const fake = fakeSupabase([]);
+    await fake.attach(context);
+    const r = await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+    expect(r.gated).toBe(true);
+    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.setGoal })).toHaveCount(0);
   });
 
   test("phone → computer: the test on the phone, sign-up before the first lesson, and the computer has it all (field report 2026-11-17)", async ({ browser }) => {
@@ -482,7 +499,12 @@ test.describe("e2e-sync · with an account", () => {
     await expect.poll(() => fake.rows.size).toBe(1);
     await page.goto("/me/settings");
     await page.getByRole("button", { name: t.acctDelete }).click();
-    await page.getByRole("textbox", { name: t.acctDeleteWord }).fill(t.acctDeleteWord);
+    // Typed letter by letter, like a person: the field must keep focus (it used to lose it per letter).
+    const word = page.getByRole("textbox", { name: t.acctDeleteWord });
+    await word.click();
+    await page.keyboard.type(t.acctDeleteWord, { delay: 30 });
+    await expect(word).toBeFocused();
+    await expect(word).toHaveValue(t.acctDeleteWord);
     await page.locator(".sheet").getByRole("button", { name: t.acctDelete }).click();
     await expect.poll(() => fake.rows.size).toBe(0);
     await page.waitForURL(/\/account\?from=required/);
@@ -546,15 +568,17 @@ test.describe("e2e-sync · sign in with Google", () => {
     await page.getByRole("button", { name: t.acctGoogle }).click();
     await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
     expect(page.url()).not.toContain("code=");
-    expect(page.url()).toContain("/account?from=required");
+    expect(page.url()).toContain("/account?from=setup");
     // The app asked for PKCE and to come back to its own origin.
     const a = fake.authorize[0];
     expect(a.searchParams.get("provider")).toBe("google");
     expect(a.searchParams.get("code_challenge")).toBeTruthy();
     expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
-    await expect.poll(() => fake.rows.size).toBe(1);
     await page.getByRole("button", { name: t.continue }).click();
-    await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/lesson");
+    await page.getByRole("button", { name: t.setGoal, exact: true }).click();
+    await page.getByRole("button", { name: t.startFirst }).click();
+    await page.waitForURL(/\/lesson/);
+    await expect.poll(() => fake.rows.size).toBe(1);
     await page.goto("/me/settings");
     await expect(page.getByText(t.acctSignedInAs("ana@gmail.com"))).toBeVisible();
     expect(errs).toEqual([]);

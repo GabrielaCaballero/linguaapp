@@ -5,7 +5,8 @@ import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "rea
 import { getDB, useDB } from "@/lib/store";
 import { finishGoogle, getEngine, isGoogleEnabled, isSyncConfigured, readOAuthReturn, sendCode, startGoogle, verifyCode, type AccountUser, type AuthError } from "@/lib/sync/client";
 import { BadRemoteError, type Choice, type FirstLogin } from "@/lib/sync/engine";
-import { onboardingHref, type AccountFrom } from "@/lib/nav";
+import { onboardingHref, setupBackHref, type AccountFrom } from "@/lib/nav";
+import { clearSetupDraft } from "@/lib/setupDraft";
 import { BackHeader, Loading, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 
@@ -21,7 +22,7 @@ export default function AccountPage() {
 function AccountRoute() {
   const sp = useSearchParams();
   const f = sp.get("from");
-  const from: AccountFrom = f === "welcome" || f === "home" || f === "me" || f === "required" ? f : "settings";
+  const from: AccountFrom = f === "welcome" || f === "home" || f === "me" || f === "required" || f === "setup" ? f : "settings";
   // Keyed on `from` only: Google's ?code=… is stripped from the URL once read, and that
   // must not reset the screen.
   return <SignIn key={from} from={from} />;
@@ -37,7 +38,7 @@ function SignIn({ from }: { from: AccountFrom }) {
   const [step, setStep] = useState<Step>({ id: "email" });
   // Sign up (new account) or sign in (existing one). Same emailed code; the copy says which, and
   // signing in with an unknown email says so instead of quietly creating an account.
-  const [mode, setMode] = useState<"signup" | "signin">(from === "required" ? "signup" : "signin");
+  const [mode, setMode] = useState<"signup" | "signin">(from === "required" || from === "setup" ? "signup" : "signin");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,7 +53,8 @@ function SignIn({ from }: { from: AccountFrom }) {
       setBusy(false);
       if (first.kind === "choose") setStep({ id: "choose", info: first });
       // A new account on a fresh device: nothing came down, so say why and where the progress is.
-      else setStep({ id: "done", empty: first.kind === "empty" && !getDB().profile.onboarded });
+      // (Not in the middle of setup: there the empty account is expected, and setup goes on.)
+      else setStep({ id: "done", empty: from !== "setup" && first.kind === "empty" && !getDB().profile.onboarded });
     } catch (e) {
       setBusy(false);
       setErr(e instanceof BadRemoteError ? t.acctBadRemote : "network");
@@ -79,7 +81,7 @@ function SignIn({ from }: { from: AccountFrom }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  const back = from === "welcome" ? onboardingHref() : from === "home" || from === "required" ? "/" : from === "me" ? "/me" : "/me/settings";
+  const back = from === "setup" ? setupBackHref() : from === "welcome" ? onboardingHref() : from === "home" || from === "required" ? "/" : from === "me" ? "/me" : "/me/settings";
   // Before the first lesson an account is required: no way back past this screen (AccountGate).
   const required = from === "required";
   const onScreen = pathname === "/account";
@@ -118,7 +120,11 @@ function SignIn({ from }: { from: AccountFrom }) {
   const finish = () => {
     // A fresh device that downloaded nothing still needs onboarding (from its second step: the
     // welcome screen would offer "Sign in" again, a loop; field report 2026-11-17); otherwise home.
-    router.replace(getDB().profile.onboarded ? "/" : `${onboardingHref()}&signedIn=1`);
+    // Mid-setup, onboarding picks up its saved answers and goes on to the goal.
+    if (getDB().profile.onboarded) {
+      clearSetupDraft();
+      router.replace("/");
+    } else router.replace(`${onboardingHref()}&signedIn=1`);
   };
 
   const send = async (as = mode) => {
@@ -180,6 +186,7 @@ function SignIn({ from }: { from: AccountFrom }) {
         <form className="stack" style={{ marginTop: 8, gap: 16 }} onSubmit={(e) => { e.preventDefault(); void send(); }}>
           <h2 className="title">{mode === "signup" ? (required ? t.acctRequiredTitle : t.acctSignUpTitle) : t.acctSignInTitle}</h2>
           {mode === "signup" && required && <p style={{ margin: 0 }}>{t.acctRequiredSub}</p>}
+          {mode === "signup" && from === "setup" && <p style={{ margin: 0 }}>{t.acctSetupSub}</p>}
           {isGoogleEnabled() && (
             <>
               <button type="button" className="btn btn-secondary" disabled={busy || !online} onClick={() => void google()}>
