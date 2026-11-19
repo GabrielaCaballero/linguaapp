@@ -318,7 +318,110 @@ test.describe("e2e-sync · with an account", () => {
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.badCode);
     await page.getByLabel(t.acctCode).fill(CODE);
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
-    await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
+  });
+
+  test("a new account on a fresh computer gets into the app, not back to the welcome (field report 2026-11-17)", async ({ page, context }) => {
+    // A friend started on the phone as a guest, then signed up on the computer: the code worked
+    // but "Continue" led back to the welcome screen, whose main button is "Sign in" again.
+    const errs = watchErrors(page);
+    const fake = fakeSupabase([]);
+    await fake.attach(context);
+    await page.goto("/");
+    await page.getByRole("button", { name: t.haveAccount }).click();
+    await page.getByLabel(t.acctEmail).fill("amigo@example.com");
+    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await page.getByLabel(t.acctCode).fill(CODE);
+    await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
+    // Says the account is empty and where guest progress lives.
+    await expect(page.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
+    await expect(page.getByText(t.acctEmptySub)).toBeVisible();
+    await page.getByRole("button", { name: t.acctStartHere }).click();
+    await page.waitForURL((u) => u.pathname === "/onboarding");
+    // Straight into setup: no welcome, no second "Sign in".
+    await expect(page.getByRole("button", { name: t.haveAccount })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: t.tryFirst })).toHaveCount(0);
+    await expect(page.getByText(t.appLangTitle)).toBeVisible();
+    expect(errs).toEqual([]);
+  });
+
+  test("phone → computer: guest on the phone takes the German test, signs up on the computer, then on the phone; the computer comes in by itself (field report 2026-11-17)", async ({ browser }) => {
+    const fake = fakeSupabase([]);
+    const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
+    // 1. Phone, as a guest: the placement test in German, nothing else.
+    const phoneCtx = await browser.newContext(opts);
+    await fake.attach(phoneCtx);
+    const phone = await phoneCtx.newPage();
+    const phoneErrs = watchErrors(phone);
+    await onboard(phone, { appLang: "es", langs: [{ lang: "de", explainIn: "es", exp: "bit", placementAccuracy: 0.5 }] }, { startLesson: false });
+    const before = await readDB(phone);
+    expect(before.profile.courses.de).toBeTruthy();
+
+    // 2. Computer: a new account, which is empty — it says why, and waits.
+    const laptopCtx = await browser.newContext({ ...opts, viewport: { width: 1280, height: 800 } });
+    await fake.attach(laptopCtx);
+    const laptop = await laptopCtx.newPage();
+    const laptopErrs = watchErrors(laptop);
+    await signIn(laptop, "amigo@example.com", "welcome");
+    await expect(laptop.getByRole("status").filter({ hasText: t.acctEmptyTitle })).toBeVisible();
+    // Asking too early says so, and stays.
+    await laptop.getByRole("button", { name: t.acctFetch }).click();
+    await expect(laptop.locator("main").getByRole("alert")).toHaveText(t.acctStillEmpty);
+
+    // 3. Phone: "Continue on another device" is right on Me; sign in with the same email.
+    await phone.goto("/me");
+    await phone.getByRole("link", { name: new RegExp(t.moveTitle) }).click();
+    await phone.getByLabel(t.acctEmail).fill("amigo@example.com");
+    await phone.getByRole("button", { name: t.acctSendCode }).click();
+    await phone.getByLabel(t.acctCode).fill(CODE);
+    await phone.getByRole("button", { name: t.acctVerify, exact: true }).click();
+    await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+    await expect.poll(() => fake.rows.size).toBe(1);
+
+    // 4. Computer: picks it up without a click, then lands in the app with the German course.
+    await expect(laptop.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible({ timeout: 15_000 });
+    await laptop.getByRole("button", { name: t.continue }).click();
+    await laptop.waitForURL((u) => u.pathname === "/");
+    const after = await readDB(laptop);
+    expect(after.profile.onboarded).toBe(true);
+    // The test result and starting unit came across.
+    expect(after.profile.courses.de?.placement).toEqual(before.profile.courses.de?.placement);
+    expect(after.profile.courses.de?.unit).toBe(before.profile.courses.de?.unit);
+    await expect(laptop.getByRole("button", { name: t.haveAccount })).toHaveCount(0);
+    expect(phoneErrs).toEqual([]);
+    expect(laptopErrs).toEqual([]);
+    await phoneCtx.close();
+    await laptopCtx.close();
+  });
+
+  test("computer signs up and starts setting up; the phone's guest progress still goes up to the account", async ({ browser }) => {
+    const fake = fakeSupabase([]);
+    const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
+    const phoneCtx = await browser.newContext(opts);
+    await fake.attach(phoneCtx);
+    const phone = await phoneCtx.newPage();
+    await learnABit(phone);
+    const phoneReviews = (await readDB(phone)).reviews.length;
+
+    const laptopCtx = await browser.newContext(opts);
+    await fake.attach(laptopCtx);
+    const laptop = await laptopCtx.newPage();
+    await signIn(laptop, "amigo@example.com", "welcome");
+    await laptop.getByRole("button", { name: t.acctStartHere }).click();
+    await laptop.waitForURL((u) => u.pathname === "/onboarding");
+    await expect(laptop.getByText(t.appLangTitle)).toBeVisible();
+
+    await phone.goto("/me");
+    await phone.getByRole("link", { name: new RegExp(t.moveTitle) }).click();
+    await phone.getByLabel(t.acctEmail).fill("amigo@example.com");
+    await phone.getByRole("button", { name: t.acctSendCode }).click();
+    await phone.getByLabel(t.acctCode).fill(CODE);
+    await phone.getByRole("button", { name: t.acctVerify, exact: true }).click();
+    // The account is still empty (the computer hasn't finished setting up): the phone's progress goes up.
+    await expect(phone.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+    await expect.poll(() => fake.answers.size).toBe(phoneReviews);
+    await phoneCtx.close();
+    await laptopCtx.close();
   });
 
   test("CUJ-16 offline: changes made while the server is unreachable upload on reconnect", async ({ page, context }) => {

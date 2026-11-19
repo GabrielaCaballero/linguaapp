@@ -4,11 +4,15 @@ import { ageDB, languageLeaks, onboard, playLesson, quitLesson, readDB, T, watch
 import { migrateV1Fixture } from "./v1-fixture";
 
 test.beforeEach(async ({ page }) => {
-  // Start every journey at 10:00 today, so lessons never straddle midnight (it splits "yesterday").
-  const ten = new Date();
-  ten.setHours(10, 0, 0, 0);
-  await page.clock.install({ time: ten });
+  // Every journey starts at 10:00 on one fixed day: lessons never straddle midnight (it splits
+  // "yesterday"), and the day-seeded lesson order is the same on every run — with "today" the
+  // suite passed one day and failed the next (2026-11-18).
+  await page.clock.install({ time: new Date(2026, 10, 17, 10, 0, 0) });
 });
+
+/** The app's clock, not this computer's: "due an hour ago" must be in the app's past. Using the
+ *  real clock made five journeys fail whenever the suite ran after 11:00 at night. */
+const appNow = (page: Page) => page.evaluate(() => Date.now());
 
 /** Finish the current lesson fast: play a few tasks, jump the clock past the lesson length, play to Results. */
 async function finishLesson(page: Page, o: Parameters<typeof playLesson>[1], firstSteps = 6) {
@@ -119,7 +123,8 @@ test.describe("CUJ-3 daily return + P1-1 lesson length", () => {
     const s = await finishLesson(page, { lang: "it", base: "es", appLang: "es" });
     expect(s.sawResults).toBe(true);
     const db = await readDB(page);
-    expect(db.reviews.some((r: { t: number }) => r.t > Date.now() - 3_600_000 * 2)).toBe(true);
+    const since = (await appNow(page)) - 3_600_000 * 2;
+    expect(db.reviews.some((r: { t: number }) => r.t > since)).toBe(true);
     expect(page.url()).not.toMatch(/\/lesson.*kind=auto.*auto/);
   });
   test("a '5 min' lesson is ≥18 graded tasks or keeps going until 5 real minutes (P1-1)", async ({ page }) => {
@@ -174,7 +179,7 @@ test.describe("CUJ-5 mistakes", () => {
     await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
     const db0 = await readDB(page);
     // give the learner known cards so typed recall appears
-    const now = Date.now();
+    const now = await appNow(page);
     const ids = ["it-u01-ciao", "it-u01-grazie", "it-u01-prego", "it-u01-piacere", "it-u01-arrivederci", "it-u01-buongiorno"];
     for (const id of ids) db0.cards[id] = { id, lang: "it", due: now - 1000, stability: 12, difficulty: 5, elapsed_days: 10, scheduled_days: 10, learning_steps: 0, reps: 4, lapses: 0, state: 2, last_review: now - 10 * 86400000, introducedAt: now - 30 * 86400000 };
     // this journey is about typed mistakes: the unit's grammar card was already read, so no rule screen takes a step
@@ -203,7 +208,7 @@ test.describe("CUJ-5 mistakes", () => {
   test("feedback sheet shows the correct answer and 'I was right' counts as Good", async ({ page }) => {
     await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
     const db0 = await readDB(page);
-    const now = Date.now();
+    const now = await appNow(page);
     db0.cards["it-u01-grazie"] = { id: "it-u01-grazie", lang: "it", due: now - 1000, stability: 12, difficulty: 5, elapsed_days: 10, scheduled_days: 10, learning_steps: 0, reps: 4, lapses: 0, state: 2, last_review: now - 864e6, introducedAt: now - 30 * 864e5 };
     await writeDB(page, db0);
     await page.goto("/");
@@ -287,7 +292,7 @@ test.describe("CUJ-27 tables and grammar", () => {
     await onboard(page, { appLang: "en", langs: [{ lang: "de", explainIn: "en", exp: "never" }] });
     await page.goto("/");
     const db = await readDB(page);
-    const now = Date.now();
+    const now = await appNow(page);
     // kommen table, learnt a while ago and due now (stability ≥ 1 → full table, no stems)
     db.cards["de-u02-tab-kommen"] = { id: "de-u02-tab-kommen", lang: "de", due: now - 3600_000, stability: 4, difficulty: 5, elapsed_days: 4, scheduled_days: 4, learning_steps: 0, reps: 2, lapses: 0, state: 2, last_review: now - 4 * 86400_000, introducedAt: now - 8 * 86400_000 };
     await writeDB(page, db);
@@ -510,7 +515,7 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
     await onboard(page, { appLang: "en", langs: [{ lang: "de", explainIn: "en", exp: "never" }] });
     await page.goto("/");
     const db = await readDB(page);
-    const now = Date.now();
+    const now = await appNow(page);
     db.profile.seen = { ...(db.profile.seen ?? {}), "unit:de-u02": now, "g:de-g-praesens": now };
     db.cards["de-u02-pat-kommen"] = { id: "de-u02-pat-kommen", lang: "de", due: now - 3600_000, stability: 0.5, difficulty: 5, elapsed_days: 1, scheduled_days: 1, learning_steps: 0, reps: 1, lapses: 0, state: 2, last_review: now - 86400_000, introducedAt: now - 2 * 86400_000 };
     await writeDB(page, db);

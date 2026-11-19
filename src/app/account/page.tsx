@@ -21,13 +21,13 @@ export default function AccountPage() {
 function AccountRoute() {
   const sp = useSearchParams();
   const f = sp.get("from");
-  const from: AccountFrom = f === "welcome" || f === "home" ? f : "settings";
+  const from: AccountFrom = f === "welcome" || f === "home" || f === "me" ? f : "settings";
   // Keyed on `from` only: Google's ?code=… is stripped from the URL once read, and that
   // must not reset the screen.
   return <SignIn key={from} from={from} />;
 }
 
-type Step = { id: "email" } | { id: "code" } | { id: "choose"; info: Extract<FirstLogin, { kind: "choose" }> } | { id: "done" };
+type Step = { id: "email" } | { id: "code" } | { id: "choose"; info: Extract<FirstLogin, { kind: "choose" }> } | { id: "done"; empty?: boolean };
 
 function SignIn({ from }: { from: AccountFrom }) {
   const db = useDB();
@@ -48,7 +48,8 @@ function SignIn({ from }: { from: AccountFrom }) {
       const first = await getEngine()!.beginLogin(user.id);
       setBusy(false);
       if (first.kind === "choose") setStep({ id: "choose", info: first });
-      else setStep({ id: "done" });
+      // A new account on a fresh device: nothing came down, so say why and where the progress is.
+      else setStep({ id: "done", empty: first.kind === "empty" && !getDB().profile.onboarded });
     } catch (e) {
       setBusy(false);
       setErr(e instanceof BadRemoteError ? t.acctBadRemote : "network");
@@ -75,17 +76,44 @@ function SignIn({ from }: { from: AccountFrom }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  const back = from === "welcome" ? onboardingHref() : from === "home" ? "/" : "/me/settings";
+  const back = from === "welcome" ? onboardingHref() : from === "home" ? "/" : from === "me" ? "/me" : "/me/settings";
   const onScreen = pathname === "/account";
   useEffect(() => {
     if (onScreen && !isSyncConfigured()) router.replace(back);
   }, [onScreen, back, router]);
+  // An empty account: keep looking for progress another device uploads (sign in on the phone,
+  // the computer follows by itself; field report 2026-11-17).
+  const waiting = step.id === "done" && !!step.empty;
+  useEffect(() => {
+    if (!waiting) return;
+    let live = true;
+    const look = () => void lookForProgress().then((found) => live && found && setStep({ id: "done" }));
+    const id = window.setInterval(look, 5000);
+    window.addEventListener("focus", look);
+    document.addEventListener("visibilitychange", look);
+    return () => {
+      live = false;
+      window.clearInterval(id);
+      window.removeEventListener("focus", look);
+      document.removeEventListener("visibilitychange", look);
+    };
+  }, [waiting]);
   if (!onScreen) return null;
   if (!db || !isSyncConfigured()) return <Loading />;
 
+  const fetchNow = async () => {
+    setBusy(true);
+    setErr(null);
+    const found = await lookForProgress();
+    setBusy(false);
+    if (found) setStep({ id: "done" });
+    else setErr(t.acctStillEmpty);
+  };
+
   const finish = () => {
-    // A fresh device that downloaded nothing still needs onboarding; otherwise go home.
-    router.replace(getDB().profile.onboarded ? "/" : onboardingHref());
+    // A fresh device that downloaded nothing still needs onboarding (from its second step: the
+    // welcome screen would offer "Sign in" again, a loop; field report 2026-11-17); otherwise home.
+    router.replace(getDB().profile.onboarded ? "/" : `${onboardingHref()}&signedIn=1`);
   };
 
   const send = async () => {
@@ -188,7 +216,18 @@ function SignIn({ from }: { from: AccountFrom }) {
         </div>
       )}
 
-      {step.id === "done" && (
+      {step.id === "done" && step.empty && (
+        <div className="stack" style={{ marginTop: 32, gap: 16 }}>
+          <span className="accent"><Icon name="check" size={48} /></span>
+          <h2 className="title" role="status">{t.acctEmptyTitle}</h2>
+          <p className="muted" style={{ margin: 0 }}>{t.acctEmptySub}</p>
+          {errLine}
+          <button className="btn btn-primary" disabled={busy} onClick={() => void fetchNow()}>{t.acctFetch}</button>
+          <button className="btn btn-secondary" disabled={busy} onClick={finish}>{t.acctStartHere}</button>
+        </div>
+      )}
+
+      {step.id === "done" && !step.empty && (
         <div className="stack center" style={{ marginTop: 48, gap: 16, alignItems: "center" }}>
           <span className="accent"><Icon name="check" size={48} /></span>
           <h2 className="title" role="status">{t.acctDone}</h2>
@@ -199,6 +238,12 @@ function SignIn({ from }: { from: AccountFrom }) {
   );
 }
 
+
+/** Sync once; true when the account brought this device a set-up course. */
+async function lookForProgress(): Promise<boolean> {
+  await getEngine()?.syncNow();
+  return getDB().profile.onboarded;
+}
 
 function subscribeOnline(l: () => void) {
   window.addEventListener("online", l);
