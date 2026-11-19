@@ -141,3 +141,18 @@ Format: date · who · decision · why
 - The app's language is a switch on the welcome screen (Español / English), preset from the
   device's preferred languages in order (`navigator.languages`; neither listed → English). The
   separate "which language" step is gone, except after signing in to an empty account.
+
+## 2026-11-19 · Account right after the level step; new welcome; delete-account typing
+
+- Setup order is now: language(s) → where you start (level test, "I know my level", or "never
+  studied") → **create your account** → goals → time of day → first lesson. Planning a goal
+  before there's an account to keep it in was wasted effort, most visibly for "never studied".
+  The answers before sign-up are kept on the device (`lingua:setup`), so leaving for Google or
+  the email code, or closing the app, resumes at the same step. Back on the sign-up screen goes
+  to the step before. The end-of-setup gate (`from=required`) stays as a fallback for older guests.
+- Welcome: headline from the strategy ("memory, not engagement"): "Cinco minutos al día. Y no se
+  te olvida." Sub: Italian and German building on the language you already know. Three short
+  steps: test (no account) → where to start → account keeps your progress. "Works offline, no
+  account" removed.
+- Bug: the delete-account sheet lost focus on every letter (phone keyboard closed). The sheet
+  re-focused itself whenever its parent re-rendered. It now focuses only when it opens.

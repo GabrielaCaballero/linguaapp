@@ -37,8 +37,8 @@ export interface OnboardResult { placementItems: Record<string, number>; firstAn
 
 /** Drive onboarding through the UI exactly like a learner. Ends on the first lesson. */
 /**
- * Set up a course and open the first lesson. With accounts on, the first lesson needs an account:
- * pass `signUp` to create it at that point; without it, onboarding stops on the sign-up screen.
+ * Set up a course and open the first lesson. With accounts on, an account is created right after
+ * the level step (before goals): pass `signUp` to create it; without it, onboarding stops there.
  */
 export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: string; code: string } } = {}): Promise<OnboardResult> {
   const out: OnboardResult = { placementItems: {} };
@@ -65,10 +65,9 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
       await expect(page.getByText(t.startLower)).toBeVisible();
       await btn(page, t.continue).click();
     }
-    await btn(page, t.setGoal).click();
   }
-  await btn(page, t.startFirst).click();
-  await page.waitForURL(/\/(lesson|account)/);
+  // Every language's starting point first, then (accounts on) sign-up, then goals.
+  await btn(page, t.setGoal).or(page.getByLabel(t.acctEmail)).first().waitFor();
   if (new URL(page.url()).pathname === "/account") {
     out.gated = true;
     if (!opts.signUp) return out;
@@ -78,8 +77,11 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
     await page.getByRole("status").filter({ hasText: t.acctDone }).waitFor();
     await btn(page, t.continue).click();
-    await page.waitForURL(/\/lesson/);
+    await page.waitForURL(/\/onboarding/);
   }
+  for (let k = 0; k < plan.langs.length; k++) await btn(page, t.setGoal).click();
+  await btn(page, t.startFirst).click();
+  await page.waitForURL(/\/lesson/);
   // The first lesson opens with a one-screen "This unit" card; start, then learn → try.
   await page.locator(".unit-intro, .unit-overview, .answer-area").first().waitFor();
   if (await page.locator(".unit-intro").isVisible().catch(() => false)) await startUnit(page, t);

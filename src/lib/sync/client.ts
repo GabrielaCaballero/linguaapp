@@ -1,4 +1,5 @@
 "use client";
+import type { AccountFrom } from "@/lib/nav";
 // Browser wiring for accounts: the Supabase client, sign-in with an emailed 6-digit code,
 // and the app-wide sync engine. Everything here is inert when the two NEXT_PUBLIC_ env
 // vars are missing (forks, local dev, CI): the app is then exactly the guest-only app.
@@ -138,7 +139,7 @@ export async function verifyCode(email: string, token: string): Promise<{ user: 
  * ?code=… (or ?error=…), handled by finishGoogle. New Google accounts are created on first
  * sign-in, as long as sign-ups are on in Supabase (Authentication → Sign In / Providers).
  */
-export async function startGoogle(from: "welcome" | "settings" | "home" | "me" | "required"): Promise<AuthError | null> {
+export async function startGoogle(from: AccountFrom): Promise<AuthError | null> {
   try {
     const { error } = await getClient().auth.signInWithOAuth({
       provider: "google",
