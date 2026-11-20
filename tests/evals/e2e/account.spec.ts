@@ -214,6 +214,7 @@ async function signIn(page: Page, email: string, o: { create?: boolean } = {}) {
   await page.goto("/");
   await page.getByRole("button", { name: t.haveAccountYes }).click();
   if (o.create) {
+    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill(email);
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
@@ -225,7 +226,13 @@ async function signIn(page: Page, email: string, o: { create?: boolean } = {}) {
   await enterCode(page, email);
 }
 
+/** Google is the main way in; the emailed code is behind "Use my email". */
+async function useEmail(page: Page) {
+  await page.getByRole("button", { name: t.acctUseEmail }).click();
+}
+
 async function enterCode(page: Page, email: string) {
+  await useEmail(page);
   await page.getByLabel(t.acctEmail).fill(email);
   // "Send code" signing in, "Create account" signing up.
   await page.getByRole("button", { name: t.acctSendCode }).or(page.getByRole("button", { name: t.acctSendCodeNew })).click();
@@ -388,6 +395,7 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
+    await useEmail(page);
     await page.getByRole("button", { name: t.acctSwitchSignUp, exact: true }).click();
     await page.getByLabel(t.acctEmail).fill("new@example.com");
     await page.getByRole("button", { name: t.acctSendCodeNew }).click();
@@ -400,6 +408,7 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
+    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill("stranger@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     // Signing in with an unknown email says so (and offers to create one) instead of creating it.
@@ -415,6 +424,7 @@ test.describe("e2e-sync · with an account", () => {
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
     await expect(page.getByRole("heading", { name: t.acctSignInTitle })).toBeVisible();
+    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill("nueva@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
@@ -429,6 +439,7 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
+    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill("ana@example.com");
     await page.getByRole("button", { name: t.acctSendCode }).click();
     await page.getByLabel(t.acctCode).fill("000000");
@@ -602,7 +613,8 @@ test.describe("e2e-sync · sign in with Google", () => {
     await p2.getByRole("button", { name: t.haveAccountYes }).click();
     await p2.getByRole("button", { name: t.acctGoogle }).click();
     await expect(p2.locator("main").getByRole("alert")).toHaveText(t.acctErr.google);
-    // The email path is still right there.
+    // The email path is still one tap away.
+    await p2.getByRole("button", { name: t.acctUseEmail }).click();
     await expect(p2.getByLabel(t.acctEmail)).toBeVisible();
     await ctx2.close();
   });

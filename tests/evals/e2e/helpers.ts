@@ -51,7 +51,10 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
   for (const l of plan.langs) await page.locator(".choice-card", { hasText: l.lang === "it" ? "Italiano" : "Deutsch" }).click();
   await btn(page, t.continue).click();
   for (const l of plan.langs) {
-    // (No "explain in…" step any more: explanations use the app's language.)
+    // Which language explains this one (Spanish or English).
+    await expect(page.getByText(t.explainInTitle(t.langName[l.lang]))).toBeVisible();
+    await page.locator(".choice-card", { hasText: t.baseName[l.explainIn] }).click();
+    await btn(page, t.continue).click();
     const expTitle = { never: t.expNever, bit: t.expBit, classes: t.expClasses, lived: t.expLived }[l.exp];
     await page.locator(".choice-card", { hasText: expTitle }).first().click();
     await btn(page, t.continue).click();
@@ -67,10 +70,11 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
     }
   }
   // Every language's starting point first, then (accounts on) sign-up, then goals.
-  await btn(page, t.setGoal).or(page.getByLabel(t.acctEmail)).first().waitFor();
+  await btn(page, t.setGoal).or(btn(page, t.acctGoogle)).first().waitFor();
   if (new URL(page.url()).pathname === "/account") {
     out.gated = true;
     if (!opts.signUp) return out;
+    await btn(page, t.acctUseEmail).click();
     await page.getByLabel(t.acctEmail).fill(opts.signUp.email);
     await btn(page, t.acctSendCodeNew).click();
     await page.getByLabel(t.acctCode).fill(opts.signUp.code);

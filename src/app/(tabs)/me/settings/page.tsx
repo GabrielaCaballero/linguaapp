@@ -7,7 +7,7 @@ import type { TargetLang } from "@/content/schema";
 import type { Settings } from "@/lib/model";
 import { resetDB, useDB } from "@/lib/store";
 import { LANG_NAME } from "@/lib/content";
-import { removeCourse, saveGoal, setAppLang, setSettings } from "@/lib/actions";
+import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
 import { getConfig, subscribeConfig, tutorName } from "@/lib/llm/provider";
 import { ProfileEditor } from "@/components/ProfileEditor";
 import { courseLangs, targetFor } from "@/lib/stats";
@@ -111,6 +111,14 @@ export default function SettingsPage() {
       <div className="group" style={{ padding: 12 }}>
         <Seg label={t.sAppLang} value={db.profile.appLang} options={[{ v: "es", label: "Español" }, { v: "en", label: "English" }]} onChange={setAppLang} />
       </div>
+      {langs.map((l) => (
+        <div key={l}>
+          <div className="group-title">{t.explainInTitle(t.langName[l])}</div>
+          <div className="group" style={{ padding: 12 }}>
+            <Seg label={t.explainInTitle(t.langName[l])} value={db.profile.courses[l]!.explainIn} options={[{ v: "es", label: "Español" }, { v: "en", label: "English" }]} onChange={(b) => setCourse(l, { explainIn: b })} />
+          </div>
+        </div>
+      ))}
 
       <div className="group-title">{t.sLearning}</div>
       <div className="group">
