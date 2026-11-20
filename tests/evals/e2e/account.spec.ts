@@ -204,7 +204,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
     setDown: (v: boolean) => void (down = v),
     /** `gsi: false`: Google's script can't load, so the app falls back to the redirect. */
     attach: async (ctx: BrowserContext, o: { gsi?: boolean } = {}) => {
-      await ctx.route("https://accounts.google.com/gsi/client", (route) =>
+      await ctx.route(/^https:\/\/accounts\.google\.com\/gsi\/client/, (route) =>
         o.gsi === false
           ? route.abort("blockedbyclient")
           : route.fulfill({ status: 200, contentType: "text/javascript", body: gsiStub(google.as ?? "") }),
@@ -242,34 +242,17 @@ async function learnABit(page: Page, email = "ana@example.com") {
 
 /**
  * A returning learner on a new device: "I already have an account" on the welcome screen.
- * `create`: the email has no account yet, so take the offer to create one with it.
+ * One screen signs in or signs up: an email without an account gets one (`_o` kept for callers).
  */
-async function signIn(page: Page, email: string, o: { create?: boolean } = {}) {
+async function signIn(page: Page, email: string, _o: { create?: boolean } = {}) {
   await page.goto("/");
   await page.getByRole("button", { name: t.haveAccountYes }).click();
-  if (o.create) {
-    await useEmail(page);
-    await page.getByLabel(t.acctEmail).fill(email);
-    await page.getByRole("button", { name: t.acctSendCode }).click();
-    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
-    await page.getByRole("button", { name: t.acctCreateWithThis }).click();
-    await page.getByLabel(t.acctCode).fill(CODE);
-    await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
-    return;
-  }
   await enterCode(page, email);
 }
 
-/** Google is the main way in; the emailed code is behind "Use my email". */
-async function useEmail(page: Page) {
-  await page.getByRole("button", { name: t.acctUseEmail }).click();
-}
-
 async function enterCode(page: Page, email: string) {
-  await useEmail(page);
   await page.getByLabel(t.acctEmail).fill(email);
-  // "Send code" signing in, "Create account" signing up.
-  await page.getByRole("button", { name: t.acctSendCode }).or(page.getByRole("button", { name: t.acctSendCodeNew })).click();
+  await page.getByRole("button", { name: t.acctContinueEmail }).click();
   await page.getByLabel(t.acctCode).fill(CODE);
   await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
 }
@@ -313,7 +296,7 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     expect(r.gated).toBe(true);
     expect(r.placementItems.de).toBeGreaterThan(0);
     await page.waitForURL(/\/account\?from=setup/);
-    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
+    await expect(page.getByRole("heading", { name: t.acctRequiredTitle })).toBeVisible();
     await expect(page.getByText(t.acctSetupSub)).toBeVisible();
     // Leaving and coming back lands on this same step, with the test result kept.
     await page.goto("/");
@@ -343,7 +326,7 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     await fake.attach(context);
     const r = await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
     expect(r.gated).toBe(true);
-    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
+    await expect(page.getByRole("heading", { name: t.acctRequiredTitle })).toBeVisible();
     await expect(page.getByRole("button", { name: t.setGoal })).toHaveCount(0);
   });
 
@@ -445,9 +428,8 @@ test.describe("e2e-sync · with an account", () => {
       expect(r.gated).toBe(true);
       if (via === "google") await laptop.getByRole("button", { name: t.acctGoogle }).click();
       else {
-        await useEmail(laptop);
         await laptop.getByLabel(t.acctEmail).fill("ana@gmail.com");
-        await laptop.getByRole("button", { name: t.acctSendCodeNew }).click();
+        await laptop.getByRole("button", { name: t.acctContinueEmail }).click();
         await laptop.getByLabel(t.acctCode).fill(CODE);
         await laptop.getByRole("button", { name: t.acctVerify, exact: true }).click();
       }
@@ -473,10 +455,8 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
-    await useEmail(page);
-    await page.getByRole("button", { name: t.acctSwitchSignUp, exact: true }).click();
     await page.getByLabel(t.acctEmail).fill("new@example.com");
-    await page.getByRole("button", { name: t.acctSendCodeNew }).click();
+    await page.getByRole("button", { name: t.acctContinueEmail }).click();
     await expect(page.getByText(t.acctCodeTitle)).toBeVisible();
     await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
   });
@@ -486,30 +466,33 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
-    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill("stranger@example.com");
-    await page.getByRole("button", { name: t.acctSendCode }).click();
-    // Signing in with an unknown email says so (and offers to create one) instead of creating it.
-    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
-    await page.getByRole("button", { name: t.acctCreateWithThis }).click();
+    await page.getByRole("button", { name: t.acctContinueEmail }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.notInvited);
     expect(fake.rows.size).toBe(0);
   });
 
-  test("sign in and sign up are told apart: an unknown email on 'Sign in' creates nothing until asked", async ({ page, context }) => {
+  test("one screen signs in or signs up: Google first, then the email, and the privacy policy", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@example.com"]);
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
-    await expect(page.getByRole("heading", { name: t.acctSignInTitle })).toBeVisible();
-    await useEmail(page);
+    await expect(page.getByRole("heading", { name: t.acctWelcomeTitle })).toBeVisible();
+    await expect(page.getByText(t.acctWelcomeSub)).toBeVisible();
+    // Google above the email, both on screen at once (no extra step)
+    const g = await page.getByRole("button", { name: t.acctGoogle }).boundingBox();
+    const e = await page.getByLabel(t.acctEmail).boundingBox();
+    expect(g!.y).toBeLessThan(e!.y);
+    // "Continue with email" waits for a real address
+    await expect(page.getByRole("button", { name: t.acctContinueEmail })).toBeDisabled();
+    await page.getByLabel(t.acctEmail).fill("nueva@");
+    await expect(page.getByRole("button", { name: t.acctContinueEmail })).toBeDisabled();
     await page.getByLabel(t.acctEmail).fill("nueva@example.com");
-    await page.getByRole("button", { name: t.acctSendCode }).click();
-    await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.noAccount);
-    await page.getByRole("button", { name: t.acctSwitchSignUp, exact: true }).click();
-    await expect(page.getByRole("heading", { name: t.acctSignUpTitle })).toBeVisible();
-    await page.getByRole("button", { name: t.acctSendCodeNew }).click();
+    await page.getByRole("button", { name: t.acctContinueEmail }).click();
     await expect(page.getByRole("heading", { name: t.acctCodeTitle })).toBeVisible();
+    await page.getByRole("button", { name: t.acctOtherEmail }).click();
+    await page.getByRole("link", { name: t.privacyPolicy }).click();
+    await page.waitForURL(/\/privacy/);
   });
 
   test("CUJ-18 wrong code is rejected, the right one works", async ({ page, context }) => {
@@ -517,9 +500,8 @@ test.describe("e2e-sync · with an account", () => {
     await fake.attach(context);
     await page.goto("/");
     await page.getByRole("button", { name: t.haveAccountYes }).click();
-    await useEmail(page);
     await page.getByLabel(t.acctEmail).fill("ana@example.com");
-    await page.getByRole("button", { name: t.acctSendCode }).click();
+    await page.getByRole("button", { name: t.acctContinueEmail }).click();
     await page.getByLabel(t.acctCode).fill("000000");
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
     await expect(page.locator("main").getByRole("alert")).toHaveText(t.acctErr.badCode);
@@ -702,8 +684,7 @@ test.describe("e2e-sync · sign in with Google", () => {
     await p2.getByRole("button", { name: t.haveAccountYes }).click();
     await p2.getByRole("button", { name: t.acctGoogle }).click();
     await expect(p2.locator("main").getByRole("alert")).toHaveText(t.acctErr.google);
-    // The email path is still one tap away.
-    await p2.getByRole("button", { name: t.acctUseEmail }).click();
+    // The email is right there too.
     await expect(p2.getByLabel(t.acctEmail)).toBeVisible();
     await ctx2.close();
   });

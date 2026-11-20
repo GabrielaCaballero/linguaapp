@@ -1,5 +1,6 @@
 // Derived, on-device progress metrics. Nothing here leaves the device.
 import type { TargetLang, Unit } from "@/content/schema";
+import { TARGET_LANGS } from "@/content/schema";
 import type { DB } from "./model";
 import { DAY, startOfDay, startOfWeek } from "./dates";
 import { dailyMinutes, projectedDate, nextLevel } from "./goals";
@@ -7,7 +8,7 @@ import { itemsFor, units, visible, itemById } from "./content";
 import type { GoalLevel } from "./model";
 
 export function courseLangs(db: DB): TargetLang[] {
-  return (["it", "de"] as TargetLang[]).filter((l) => db.profile.courses[l]);
+  return [...TARGET_LANGS].filter((l) => db.profile.courses[l]);
 }
 
 export function minutesBetween(db: DB, from: number, to: number, lang?: TargetLang): number {

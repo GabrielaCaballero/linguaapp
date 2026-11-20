@@ -199,3 +199,29 @@ Format: date · who · decision · why
   is closed or left anyway, the next lesson of the same kind resumes with "Picking up where you
   left off" and the same summary. Answers were already saved as they happened; ending the lesson
   or finishing it clears the saved place. Speed rounds aren't kept.
+
+## 2026-11-21 · Sign-in screen redesign; new brand (option 1, Warm Terracotta)
+
+- Sign in / sign up is one centred screen (inspired by a reference the owner liked): logo, title
+  ("Welcome to Linguina" / "Save your progress"), "Log in or sign up to continue", Google, "or",
+  the email field shown right away, "Continue with email" (disabled until the address is valid),
+  "By continuing, you agree to the Privacy Policy". The separate "Sign in"/"Create account" modes
+  are gone: an existing email or Google account simply signs in ("You already had an account").
+- Brand: option 1 of `linguina_brand_assets` (speech bubble that turns into a linguina noodle).
+  Chosen over option 2 (Mediterranean blue) because it matches the existing cream/sand/terracotta
+  palette and keeps German's blue distinct. `--brand` is now terracotta #B33F26 (dark #FF8B6B),
+  `--plum` #5A2349 as the small accent; logos with transparent backgrounds (light and dark),
+  app icons from the mark. Fonts were already Bricolage Grotesque + Inter.
+
+## 2026-11-21 · Ready for more languages; welcome shows routes and a sample
+
+- One language registry: `TARGET_LANGS` (schema.ts) + `LANG_INFO` (content/languages.ts: name,
+  seal, speech locale, tagline, can-do questions). Screens iterate the registry instead of a fixed
+  Italian/German pair; copy says "new languages" instead of "Italian and German". How to add one:
+  `docs/team/adding-a-language.md`.
+- Welcome stays minimal: the sub-line explains why it sticks ("Each word comes back just before
+  you'd forget it"); step 2 states the value ("Real grammar and practice, no games or streaks").
+  No language icons or "from Spanish or English" copy (more languages, maybe more bases, later):
+  a small "Supported languages" link at the bottom opens the list (tap, or hover on a computer),
+  next to Privacy. A sample-exercise card was tried and dropped (owner). No invented
+  testimonials, store badges or numbers.

@@ -1,5 +1,6 @@
 "use client";
 
+import { TARGET_LANGS } from "@/content";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
@@ -221,7 +222,7 @@ export default function Today() {
               {l === lang && <Icon name="check" size={20} className="accent" />}
             </button>
           ))}
-          {langs.length < 2 && (
+          {langs.length < TARGET_LANGS.length && (
             <button className="cell" onClick={() => { setSwitcher(false); router.push(onboardingHref()); }}>
               <span className="icon-btn" style={{ background: "var(--surface-2)" }}><Icon name="plus" size={20} /></span>
               <span className="grow" style={{ fontWeight: 600 }}>{t.addLanguage}</span>

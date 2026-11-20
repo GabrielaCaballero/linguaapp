@@ -13,7 +13,7 @@ const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variabl
 
 export const metadata: Metadata = {
   title: "Linguina",
-  description: "Italian and German, a few minutes a day. Works offline.",
+  description: "Learn a new language a few minutes a day. Works offline.",
   appleWebApp: { capable: true, title: "Linguina", statusBarStyle: "default" },
 };
 

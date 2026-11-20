@@ -6,12 +6,13 @@ import { emptyDB, MAX_EVENTS, MAX_REVIEWS, type AppEvent, type DB } from "./mode
 import { migrateAny, type LegacyIndex } from "./migrate";
 import { KEYS, localAdapter, type StorageAdapter } from "./storage-adapter";
 import type { TargetLang } from "@/content/schema";
+import { TARGET_LANGS } from "@/content/schema";
 
 let legacyIndex: LegacyIndex | null = null;
 export function legacy(): LegacyIndex {
   if (!legacyIndex) {
     legacyIndex = new Map();
-    for (const lang of ["it", "de"] as TargetLang[])
+    for (const lang of TARGET_LANGS)
       for (const u of COURSES[lang].units) for (const i of u.items) if (i.legacyId) legacyIndex.set(i.legacyId, { id: i.id, lang });
   }
   return legacyIndex;

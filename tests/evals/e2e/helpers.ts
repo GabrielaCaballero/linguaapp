@@ -78,9 +78,8 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
   if (new URL(page.url()).pathname === "/account") {
     out.gated = true;
     if (!opts.signUp) return out;
-    await btn(page, t.acctUseEmail).click();
     await page.getByLabel(t.acctEmail).fill(opts.signUp.email);
-    await btn(page, t.acctSendCodeNew).click();
+    await btn(page, t.acctContinueEmail).click();
     await page.getByLabel(t.acctCode).fill(opts.signUp.code);
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
     await page.getByRole("status").filter({ hasText: t.acctDone }).waitFor();

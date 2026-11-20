@@ -1,6 +1,6 @@
 // Engine-side content helpers. The engine reads course packs ONLY through `@/content`
 // (src/content/index.ts, written by the content stream). Tests use tests/fixtures/mini-course.ts.
-import { courses } from "@/content";
+import { courses, LANG_INFO, TARGET_LANGS } from "@/content";
 import type { BaseLang, CoursePack, Glossed, Item, Lexicon, TargetLang, Unit, GrammarPoint } from "@/content/schema";
 import type { DB } from "./model";
 
@@ -22,7 +22,7 @@ let builtInIndex: Map<string, Item> | null = null;
 function builtIn(): Map<string, Item> {
   if (!builtInIndex) {
     builtInIndex = new Map();
-    for (const lang of ["it", "de"] as TargetLang[]) for (const u of COURSES[lang].units) for (const i of u.items) builtInIndex.set(i.id, i);
+    for (const lang of TARGET_LANGS) for (const u of COURSES[lang].units) for (const i of u.items) builtInIndex.set(i.id, i);
   }
   return builtInIndex;
 }
@@ -65,14 +65,15 @@ export function shown(i: Item): string {
   return i.target;
 }
 
-export const LANG_NAME: Record<TargetLang, string> = { it: "Italiano", de: "Deutsch" };
-export const SEAL: Record<TargetLang, string> = { it: "IT", de: "DE" };
-export const LOCALE: Record<TargetLang, string> = { it: "it-IT", de: "de-DE" };
+const byLang = <T,>(f: (l: TargetLang) => T) => Object.fromEntries(TARGET_LANGS.map((l) => [l, f(l)])) as Record<TargetLang, T>;
+export const LANG_NAME: Record<TargetLang, string> = byLang((l) => LANG_INFO[l].native);
+export const SEAL: Record<TargetLang, string> = byLang((l) => LANG_INFO[l].seal);
+export const LOCALE: Record<TargetLang, string> = byLang((l) => LANG_INFO[l].locale);
 
 /** A grammar point by id (content v2.1), or undefined. */
 export function grammarPoint(id: string | undefined): GrammarPoint | undefined {
   if (!id) return undefined;
-  const lang = id.startsWith("de-") ? "de" : id.startsWith("it-") ? "it" : undefined;
+  const lang = TARGET_LANGS.find((l) => id.startsWith(`${l}-`));
   return lang ? COURSES[lang].grammar?.find((g) => g.id === id) : undefined;
 }
 

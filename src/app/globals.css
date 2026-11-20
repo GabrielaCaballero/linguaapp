@@ -5,7 +5,7 @@
    pair is checked in contrast.md (WCAG AA).
    Existing names are unchanged. NEW names: --line-strong, --gold-soft, --gold-ink, --on-state,
    --brand, --brand-press, --brand-soft, --on-brand, --semola, --on-semola, --seal-it, --seal-de, --spring-soft, --t-display.
-   Model: one shared brand colour (Melanzana plum + Semola yellow) for identity surfaces (logo, splash,
+   Model (brand updated 2026-11-21 to terracotta + plum, see --brand): one shared brand colour for identity surfaces (logo, splash,
    sign-in, onboarding before a language is chosen, share card), and a per-language tint in --accent for
    everything inside a course. layout.tsx always sets data-lang, so the :root accent (= brand) only shows
    when no course is active. */
@@ -14,7 +14,7 @@
   --bg: #faf7f2;
   --surface: #ffffff;
   --surface-2: #f1ece4;
-  --text: #1c1a17;
+  --text: #1c1917;
   --text-2: #5f5950;
   --line: #e4ddd1;
   --line-strong: #8f8678;
@@ -30,10 +30,13 @@
   --gold-ink: #8f5f00;
   --on-state: #ffffff;
   --focus: #1a73e8;
-  --brand: #7a2f62;
-  --brand-press: #5e2249;
-  --brand-soft: #f5e6ef;
+  /* Brand 2026-11-21 (linguina_brand_assets, option 1 "Warm Terracotta"): terracotta primary,
+     deep plum as the small supporting accent (the dots of the wordmark). */
+  --brand: #b33f26;
+  --brand-press: #8f3019;
+  --brand-soft: #fbe6df;
   --on-brand: #ffffff;
+  --plum: #5a2349;
   --semola: #f2c14e;
   --on-semola: #1c1a17;
   --seal-it: #b33f26;
@@ -91,10 +94,11 @@
     --gold-ink: #ffc94a;
     --on-state: #121110;
     --focus: #8ab4f8;
-    --brand: #c993b6;
-    --brand-press: #b07a9d;
-    --brand-soft: #3a1f33;
+    --brand: #ff8b6b;
+    --brand-press: #ff6f4a;
+    --brand-soft: #3a211a;
     --on-brand: #121110;
+    --plum: #c478aa;
     --semola: #f2c14e;
     --on-semola: #1c1a17;
     --e1: 0 0 0 1px var(--line); --e2: none; --e3: none;
@@ -122,10 +126,11 @@
   --gold-ink: #ffc94a;
   --on-state: #121110;
   --focus: #8ab4f8;
-  --brand: #c993b6;
-  --brand-press: #b07a9d;
-  --brand-soft: #3a1f33;
+  --brand: #ff8b6b;
+  --brand-press: #ff6f4a;
+  --brand-soft: #3a211a;
   --on-brand: #121110;
+  --plum: #c478aa;
   --semola: #f2c14e;
   --on-semola: #1c1a17;
   --e1: 0 0 0 1px var(--line); --e2: none; --e3: none;
@@ -353,7 +358,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .gw:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .gw-pop { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 20; width: max-content; max-width: 220px; padding: 6px 10px; border-radius: var(--r-sm); background: var(--text); color: var(--bg); font: 500 var(--t-caption) / 1.35 var(--font-ui); box-shadow: var(--e2); pointer-events: none; white-space: normal; text-align: center; }
 /* Linguina wordmark (Il filo); the dark version on dark themes. */
-.brand-logo { display: block; margin: 0 auto var(--s4); height: 48px; width: auto; }
+.brand-logo { display: block; margin: 0 auto var(--s2); height: 88px; width: auto; }
 .logo-dark { display: none; }
 :root[data-theme="dark"] .logo-light { display: none; }
 :root[data-theme="dark"] .logo-dark { display: block; }
@@ -594,3 +599,21 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 /* Google's button is a cross-origin frame in light mode: matching its color-scheme keeps the
    browser from painting an opaque white box behind it on a dark page. */
 .google-btn iframe { color-scheme: light; }
+
+/* Sign in / sign up: one centred column — logo, title, Google, "or", email, legal line. */
+.auth { display: flex; flex-direction: column; gap: var(--s4); align-items: stretch; text-align: center; max-width: 420px; width: 100%; margin: var(--s4) auto 0; }
+.auth-logo { align-self: center; height: 84px; width: auto; margin-bottom: 0; }
+.auth-title { font-family: var(--font-display); font-size: 2rem; line-height: 1.1; font-weight: 700; letter-spacing: -0.025em; margin: var(--s4) 0 0; }
+.auth-sub { margin: 0 0 var(--s2); }
+.auth .input { text-align: left; }
+.auth-or { display: flex; align-items: center; gap: var(--s3); color: var(--text-2); font-size: var(--t-caption); }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.auth-legal { margin: var(--s2) 0 0; color: var(--text-2); }
+.auth-legal a { color: var(--text); }
+
+/* Welcome footer: supported languages (tap to open) and the privacy link. */
+.welcome-foot { display: flex; justify-content: center; align-items: flex-start; gap: var(--s4); }
+.footer-link { display: flex; align-items: center; justify-content: center; min-height: 44px; color: var(--text-2); }
+.langs-list summary { list-style: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.langs-list summary::-webkit-details-marker { display: none; }
+.langs-list ul { list-style: none; margin: 0 0 var(--s2); padding: 0; display: flex; gap: var(--s3); justify-content: center; font-size: var(--t-caption); color: var(--text); font-weight: 600; }

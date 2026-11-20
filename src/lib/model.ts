@@ -2,6 +2,7 @@
 // (localStorage key "lingua:v2"). The AI-tutor key lives elsewhere ("lingua:llm") and is
 // never part of this object, so it can never end up in a backup file.
 import type { BaseLang, Cefr, Item, TargetLang } from "@/content/schema";
+import { TARGET_LANGS } from "@/content/schema";
 
 export type { BaseLang, Cefr, Item, TargetLang };
 
@@ -230,4 +231,4 @@ export function emptyDB(now = Date.now(), appLang: BaseLang = "es"): DB {
   };
 }
 
-export const LANGS: TargetLang[] = ["it", "de"];
+export const LANGS: TargetLang[] = [...TARGET_LANGS];
