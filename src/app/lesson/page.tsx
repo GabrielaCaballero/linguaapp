@@ -345,7 +345,8 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
           <Icon name="close" />
         </button>
         <div className={`progress${combo >= 3 ? " combo" : ""}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
-          <i style={{ width: `${Math.max(3, progress * 100)}%` }} />
+          {/* A small pop on each right answer (p0/p1 alternate so the animation restarts). */}
+          <i className={hist.length && hist[hist.length - 1] ? `p${hist.filter(Boolean).length % 2}` : undefined} style={{ width: `${Math.max(3, progress * 100)}%` }} />
         </div>
         <span className="combo-chip tabular" aria-label={combo >= 3 ? t.inARow(combo) : undefined}>
           {speed && settings.speedTimer ? t.speedLeft(Math.max(0, speedLeft)) : combo >= 3 ? <><Icon name="flame" size={16} />{combo}</> : null}

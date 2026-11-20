@@ -180,3 +180,13 @@ Format: date · who · decision · why
   - A typo-only "almost" is scheduled like a right answer (Good), not Hard.
   - A miss rests two days before it comes back (it was already practised again in the lesson;
     once per lesson, REQUEUE_CAP = 1). "I was right" already removed the repeat.
+
+## 2026-11-21 · Design polish, round 1 (from a Duolingo principles audit)
+
+- Mistakes are a calm slate ink (`--miss` #475467 / dark #b7c3d3), not red; ✕ and words stay.
+  Red also clashed with the Italian accent.
+- One subtle press style: solid buttons and answer options have a 3px ledge in their own darker
+  shade that sinks 2px when pressed. Replaces the flat buttons with glow (2026-11-16), kept shallow.
+- The progress bar pops briefly on each right answer; exercises enter a little faster (220ms);
+  target-language sentences on prompts are a bit larger (2rem).
+- Not copied: no mascot, no Duolingo green, no hearts, streak warnings or XP.

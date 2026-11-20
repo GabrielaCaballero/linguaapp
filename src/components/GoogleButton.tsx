@@ -75,7 +75,8 @@ export function GoogleButton({ lang, busy, onStart, onDone, fallback }: { lang: 
         box.current.replaceChildren();
         g.accounts.id.renderButton(box.current, {
           type: "standard",
-          theme: "outline",
+          // Dark page → Google's dark button (follows the app's theme switch, not only the OS).
+          theme: getComputedStyle(document.documentElement).colorScheme.includes("dark") ? "filled_black" : "outline",
           size: "large",
           shape: "pill",
           text: "continue_with",
