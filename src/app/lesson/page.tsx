@@ -11,6 +11,7 @@ import { toFix } from "@/lib/stats";
 import { startOfDay } from "@/lib/dates";
 import { lessonHref } from "@/lib/nav";
 import { previousPath } from "@/lib/navstack";
+import { clearLessonDraft, loadLessonDraft, saveLessonDraft } from "@/lib/lessonDraft";
 import { endSession, introduce, recordAnswer, regrade, sessionStart } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { feel } from "@/lib/feel";
@@ -124,40 +125,69 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       exclude,
     });
   };
-  const [built] = useState<Built>(() => make());
+  // A lesson left by mistake (Back, a swipe, the app closed) picks up where it was.
+  const [draft] = useState(() => (kind === "speed" ? null : loadLessonDraft({ lang, kind, unit, exists: (id) => !!itemById(getDB(), id) })));
+  const [built] = useState<Built>(() => (draft ? { tasks: draft.tasks, welcomeBack: false, reviewCount: 0, newCount: 0, shift: 0 } : make()));
   const pool = useMemo(() => itemsFor(lang, getDB(), base), [lang, base]);
 
   const [tasks, setTasks] = useState<Task[]>(built.tasks);
-  const [idx, setIdx] = useState(0);
+  const [idx, setIdx] = useState(draft?.at ?? 0);
   const [fb, setFb] = useState<FB | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [conf, setConf] = useState<Confidence | undefined>(undefined);
   const [confirmClose, setConfirmClose] = useState(false);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
-  const [combo, setCombo] = useState(0);
-  const [startedAt] = useState(() => Date.now());
+  const [combo, setCombo] = useState(draft?.combo ?? 0);
+  const [startedAt] = useState(() => Date.now() - (draft?.elapsed ?? 0) * 1000);
   const [taskStart, setTaskStart] = useState(() => Date.now());
   const [speedLeft, setSpeedLeft] = useState(SPEED_SECONDS);
-  const [hist, setHist] = useState<boolean[]>([]);
+  const [hist, setHist] = useState<boolean[]>(draft?.hist ?? []);
   // Grammar: the full rule in a sheet (from a mistake). New patterns are taught on their learn card.
   const [ruleOpen, setRuleOpen] = useState<GrammarPoint | null>(null);
   // How the "try" right after each learn card went: decides whether its follow-up is typed.
-  const [tries, setTries] = useState<Record<string, boolean>>({});
-  const counts = useRef(new Map<string, number>());
-  const stats = useRef({ graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 });
+  const [tries, setTries] = useState<Record<string, boolean>>(draft?.tries ?? {});
+  const counts = useRef(new Map<string, number>(draft?.counts ?? []));
+  const stats = useRef(
+    draft
+      ? { ...draft.stats, newItems: new Set(draft.stats.newItems), stronger: new Set(draft.stats.stronger), toFix: new Set(draft.stats.toFix) }
+      : { graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 },
+  );
   const finished = useRef(false);
   const leaving = useRef(false);
   const [readingGrammar, setReadingGrammar] = useState(false);
-  const extensions = useRef(0);
+  const extensions = useRef(draft?.extensions ?? 0);
   const speed = kind === "speed";
 
   useEffect(() => {
-    sessionStart(lang, kind);
-  }, [lang, kind]);
+    if (!draft) sessionStart(lang, kind);
+  }, [lang, kind, draft]);
+
+  // Keep the lesson's place on the device after every step (answered → the next task).
+  useEffect(() => {
+    if (speed || summary || finished.current) return;
+    const at = fb ? idx + 1 : idx;
+    if (at >= tasks.length) return clearLessonDraft();
+    const st = stats.current;
+    saveLessonDraft({
+      lang,
+      kind,
+      unit,
+      tasks,
+      at,
+      elapsed: Math.round((Date.now() - startedAt) / 1000),
+      hist,
+      combo,
+      tries,
+      counts: [...counts.current],
+      extensions: extensions.current,
+      stats: { ...st, newItems: [...st.newItems], stronger: [...st.stronger], toFix: [...st.toFix] },
+    });
+  }, [speed, summary, fb, idx, tasks, hist, combo, tries, lang, kind, unit, startedAt]);
 
   const finish = useCallback(() => {
     if (finished.current) return;
     finished.current = true;
+    clearLessonDraft();
     const s = stats.current;
     const seconds = Math.round((Date.now() - startedAt) / 1000);
     endSession({ lang, seconds, tasks: idx + 1, graded: s.graded, correct: s.correct, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], startedAt });
@@ -236,15 +266,54 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, tasks, finish, speed, settings.sessionMinutes, startedAt]);
 
+  // Back / the swipe-back gesture mid-lesson asks first ("End lesson?") instead of leaving: a
+  // history entry of our own sits on top of the lesson and catches it (owner, 2026-11-21).
+  const guarded = useRef(false);
+  const afterPop = useRef<(() => void) | null>(null);
+  const goHomeRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    const push = () => {
+      if (window.history.state?.lessonGuard) return;
+      window.history.pushState({ ...window.history.state, lessonGuard: true }, "", window.location.href);
+    };
+    push();
+    guarded.current = true;
+    const onPop = () => {
+      if (afterPop.current) {
+        const go = afterPop.current;
+        afterPop.current = null;
+        return go();
+      }
+      if (leaving.current) return;
+      guarded.current = false;
+      // Lesson over (Results on screen): Back just leaves.
+      if (finished.current) return goHomeRef.current();
+      push();
+      guarded.current = true;
+      setConfirmClose(true);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  /** Run a navigation once our guard entry is gone, so it never stays behind in history. */
+  const leave = (go: () => void) => {
+    if (!guarded.current) return go();
+    guarded.current = false;
+    afterPop.current = go;
+    window.history.back();
+  };
+
   // Leaving a lesson goes *back* to Today when we came from it, so Back/swipe never re-opens it.
   // Once only: a double tap on Continue must not go back twice.
   const goHome = () => {
     if (leaving.current) return;
     leaving.current = true;
-    if (previousPath() === "/") router.back();
-    else router.replace("/");
+    leave(() => (previousPath() === "/" ? router.back() : router.replace("/")));
   };
-  if (summary) return <Results t={t} summary={summary} onDone={goHome} onMore={speed ? undefined : () => router.replace(lessonHref("auto"))} />;
+  useEffect(() => {
+    goHomeRef.current = goHome;
+  });
+  if (summary) return <Results t={t} summary={summary} onDone={goHome} onMore={speed ? undefined : () => leave(() => router.replace(lessonHref("auto")))} />;
   if (!task || !item || !mode) return <Loading />;
 
   const onSubmit = (r: { verdict: Verdict; check?: CheckResult; text?: string; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => {
@@ -353,6 +422,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
         </span>
       </div>
       {built.welcomeBack && idx === 0 && !fb && <div className="card-soft label fade-in" style={{ marginTop: 8 }}>{t.welcomeBack}</div>}
+      {draft && idx === draft.at && !fb && <div className="card-soft label fade-in" role="status" style={{ marginTop: 8 }}>{t.lessonResumed}</div>}
 
       <div key={task.key} className="fade-in" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
         {opener && readingGrammar ? (
@@ -487,6 +557,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
             className="btn btn-ghost"
             onClick={() => {
               if (stats.current.graded > 0 || stats.current.newItems.size > 0) finish();
+              clearLessonDraft();
               goHome();
             }}
           >

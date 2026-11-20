@@ -12,8 +12,12 @@ const ITEMS: Item[] = (["it", "de"] as TargetLang[]).flatMap((l) => courses[l].u
 export async function readDB(page: Page) {
   return page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? "null"), KEY);
 }
+/** Replace the stored data (a test's setup). A lesson saved in progress is dropped too: the next lesson is built from the new data. */
 export async function writeDB(page: Page, db: unknown) {
-  await page.evaluate(([k, v]) => localStorage.setItem(k as string, JSON.stringify(v)), [KEY, db] as const);
+  await page.evaluate(([k, v]) => {
+    localStorage.setItem(k as string, JSON.stringify(v));
+    localStorage.removeItem("lingua:lesson");
+  }, [KEY, db] as const);
 }
 
 /** Collect console errors and page errors for the whole test. */

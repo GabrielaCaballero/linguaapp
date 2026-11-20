@@ -544,11 +544,45 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
 
 
 test.describe("Navigation regressions (QA 2026-11-16)", () => {
-  test("Back from the very first lesson lands on Today (not out of the app, not onboarding)", async ({ page }) => {
+  test("Back from the very first lesson asks first, then lands on Today (not out of the app, not onboarding)", async ({ page }) => {
+    const t = T.en;
     await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    // Back / swipe mid-lesson: "End lesson?" instead of losing the lesson (owner, 2026-11-21).
     await page.goBack();
+    await expect(page.getByRole("dialog", { name: t.closeLesson })).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe("/lesson");
+    await page.getByRole("button", { name: t.keepGoing }).click();
+    await expect(page.getByRole("dialog", { name: t.closeLesson })).toBeHidden();
+    // Asked again on the next Back; ending it goes to Today.
+    await page.goBack();
+    await page.getByRole("button", { name: t.endLesson }).click();
     await page.waitForURL((u) => u.pathname === "/");
     await expect(page.locator(".lang-switch")).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("lingua:lesson"))).toBeNull();
+  });
+
+  test("a lesson left by mistake (app closed) picks up where it was", async ({ page }) => {
+    const t = T.en;
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
+    await playLesson(page, { lang: "it", base: "en", appLang: "en", maxSteps: 8 });
+    const bar = page.getByRole("progressbar");
+    const before = Number(await bar.getAttribute("aria-valuenow"));
+    expect(before).toBeGreaterThan(0);
+    // Closed without "End lesson" (no confirmation): the next lesson resumes.
+    await page.goto("/");
+    await page.goto("/lesson?kind=auto&n=resume");
+    await expect(page.getByRole("status").filter({ hasText: t.lessonResumed })).toBeVisible();
+    // Same place (one task on if the last one was already answered: it isn't asked twice).
+    const after = Number(await page.getByRole("progressbar").getAttribute("aria-valuenow"));
+    expect(after).toBeGreaterThanOrEqual(before);
+    expect(after).toBeLessThan(before + 10);
+    // Ending it clears the saved place: the lesson after is a fresh one.
+    await quitLesson(page, "en");
+    await page.waitForURL((u) => u.pathname === "/");
+    expect(await page.evaluate(() => localStorage.getItem("lingua:lesson"))).toBeNull();
+    await page.goto("/lesson?kind=auto&n=fresh");
+    await page.getByRole("progressbar").waitFor();
+    await expect(page.getByText(t.lessonResumed)).toHaveCount(0);
   });
 
   test("unit grammar → back arrow → Path stays put; tabs and practice still work (no redirect loop)", async ({ page }) => {

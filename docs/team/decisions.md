@@ -190,3 +190,12 @@ Format: date · who · decision · why
 - The progress bar pops briefly on each right answer; exercises enter a little faster (220ms);
   target-language sentences on prompts are a bit larger (2rem).
 - Not copied: no mascot, no Duolingo green, no hearts, streak warnings or XP.
+
+## 2026-11-21 · Back mid-lesson no longer loses the lesson
+
+- Back / the swipe-back gesture during a lesson opens "End lesson?" (a history entry of the
+  lesson's own catches it); "Keep going" stays. On the Results screen Back just leaves.
+- The lesson's place is saved on the device after every step (`lingua:lesson`, 3 h). If the app
+  is closed or left anyway, the next lesson of the same kind resumes with "Picking up where you
+  left off" and the same summary. Answers were already saved as they happened; ending the lesson
+  or finishing it clears the saved place. Speed rounds aren't kept.
