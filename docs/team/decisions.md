@@ -156,3 +156,14 @@ Format: date · who · decision · why
   account" removed.
 - Bug: the delete-account sheet lost focus on every letter (phone keyboard closed). The sheet
   re-focused itself whenever its parent re-rendered. It now focuses only when it opens.
+
+## 2026-11-20 · "Explain in…" per language is back; Google is the main sign-in
+
+- Reverses 2026-11-16 ("one language for everything"). Setup asks, for each language, whether it
+  is explained in Spanish or English (e.g. Italian from Spanish, German from English). The app's
+  own language (welcome switch, Settings) no longer overwrites any course; Settings has one
+  "Explain … in" switch per course. Course screens (lessons, Path, unit notes, writing) already
+  speak the course's language (`useCourseT`), so a screen still never mixes the two.
+- Sign-in: when Google is on (`NEXT_PUBLIC_AUTH_GOOGLE=1`), "Continue with Google" is the one
+  main button; the emailed code is behind "Use my email" (people without Gmail, or if Google
+  fails inside the installed iPhone app). With Google off, the screen is the email form as before.

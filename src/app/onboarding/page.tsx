@@ -91,8 +91,8 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
   if (mode !== "goalOnly")
     for (const l of langs) {
       const d = drafts[l];
-      // No separate "explain in…" step: explanations use the app's language (owner, 2026-11-16).
-      steps.push({ id: "exp", lang: l });
+      // Which language explains this one: Spanish or English, per language (owner, 2026-11-20).
+      steps.push({ id: "explain", lang: l }, { id: "exp", lang: l });
       if (d?.known) steps.push({ id: "level", lang: l });
       else if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
     }

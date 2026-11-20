@@ -50,6 +50,7 @@ test.describe("CUJ-1 first open → first lesson", () => {
     await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expClasses }).click();
     await page.getByRole("button", { name: t.continue }).click();
     for (let k = 0; k < 3; k++) await page.locator(".seg").nth(k).getByRole("button", { name: t.yes, exact: true }).click();
@@ -82,6 +83,16 @@ test.describe("CUJ-2 absolute beginner", () => {
     const db = await readDB(page);
     expect(db.profile.courses.de.placement).toBeFalsy();
     expect(Object.keys(db.cards).filter((k) => db.cards[k].seeded)).toHaveLength(0);
+  });
+});
+
+test.describe("explain in… per language", () => {
+  test("English app, German explained in Spanish and Italian in English: each course keeps its own", async ({ page }) => {
+    await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }, { lang: "de", explainIn: "es", exp: "never" }] });
+    const db = await readDB(page);
+    expect(db.profile.appLang).toBe("en");
+    expect(db.profile.courses.it.explainIn).toBe("en");
+    expect(db.profile.courses.de.explainIn).toBe("es");
   });
 });
 
@@ -143,6 +154,7 @@ test.describe("CUJ-4 second language (P1 Ana)", () => {
     await page.getByText(T.es.addLanguage).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: T.es.continue }).click();
+    await page.getByRole("button", { name: T.es.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: T.es.expNever }).click();
     await page.getByRole("button", { name: T.es.continue }).click();
     await page.getByRole("button", { name: T.es.setGoal }).click();
@@ -320,6 +332,7 @@ test.describe("CUJ-2b I know my level", () => {
     await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Italiano" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expKnown }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await expect(page.getByText(t.levelTitle(t.langName.it))).toBeVisible();
@@ -346,6 +359,7 @@ test.describe("CUJ-2b I know my level", () => {
     await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expBit }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     for (let k = 0; k < 3; k++) await page.locator(".seg").nth(k).getByRole("button", { name: t.partly, exact: true }).click();
@@ -462,6 +476,7 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
     await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expNever }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.getByRole("button", { name: t.setGoal }).click();
@@ -566,6 +581,7 @@ test.describe("Navigation regressions (QA 2026-11-16)", () => {
     await page.getByRole("button", { name: t.getStarted }).click();
     await page.locator(".choice-card", { hasText: "Deutsch" }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
+    await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expNever }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
     await page.getByRole("button", { name: t.setGoal }).click();
