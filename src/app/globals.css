@@ -582,3 +582,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .gtable th, .gtable td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
 .gtable thead th { color: var(--text-2); font-weight: 600; }
 .gtable td { font-family: var(--font-display); }
+
+/* Google's button is a cross-origin frame in light mode: matching its color-scheme keeps the
+   browser from painting an opaque white box behind it on a dark page. */
+.google-btn iframe { color-scheme: light; }
