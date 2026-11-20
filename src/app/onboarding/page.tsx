@@ -86,7 +86,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     else steps.push({ id: "appLang" });
   }
   if (mode !== "goalOnly") steps.push({ id: "langs" });
-  // Where each language starts first (no account needed), then the account, then goals:
+  // Where each language starts first, then the account, then goals:
   // there is nothing to plan for before there's somewhere to keep it (owner, 2026-11-19).
   if (mode !== "goalOnly")
     for (const l of langs) {
@@ -202,14 +202,13 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
             <img className="brand-logo logo-dark" src="/brand/linguina-on-dark.svg" alt={t.appName} width={180} height={56} />
             <h1 className="hero" style={{ fontSize: "2.25rem", marginTop: 32, whiteSpace: "pre-line" }}>{t.welcomeTitle}</h1>
             <p className="muted" style={{ marginTop: 12 }}>{t.welcomeSub}</p>
-            {/* How it works: the test is free; the account keeps what comes after. */}
+            {/* How it works: test, where to start, account. */}
             <ol className="how">
               {(syncOn ? t.welcomeSteps : t.welcomeSteps.slice(0, 2)).map((s, k) => (
                 <li key={k}>
                   <span className="how-n" aria-hidden="true">{k + 1}</span>
                   <span>
                     {s}
-                    {k === 0 && syncOn && <span className="how-free"> · {t.welcomeStepFree}</span>}
                   </span>
                 </li>
               ))}

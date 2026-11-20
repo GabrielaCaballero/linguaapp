@@ -514,7 +514,6 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .how { list-style: none; margin: var(--s6) auto 0; padding: 0; display: flex; flex-direction: column; gap: 12px; text-align: left; max-width: 340px; width: fit-content; }
 .how li { display: flex; align-items: center; gap: 12px; font-size: var(--t-label); line-height: 1.35; }
 .how-n { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); font-weight: 700; font-size: 0.875rem; }
-.how-free { color: var(--accent); font-weight: 600; }
 .orbit { position: relative; width: 180px; height: 140px; margin: var(--s8) auto var(--s4); }
 .orbit .seal { position: absolute; --size: 84px; animation: float 5s ease-in-out infinite; }
 .orbit .seal:first-child { left: 10px; top: 10px; }

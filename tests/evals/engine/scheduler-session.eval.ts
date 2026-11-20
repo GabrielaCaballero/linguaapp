@@ -45,6 +45,14 @@ describe("scheduler: FSRS behaviour", () => {
     expect(d[1]).toBeLessThanOrEqual(d[2]);
     expect(d[2]).toBeLessThanOrEqual(d[3]);
   });
+  it("a miss rests two days (not back the very next morning), new or known", () => {
+    const fresh = schedule(c0, 1, NOW);
+    // 04:00 two calendar days later
+    expect(fresh.due).toBe(rollTo4am(NOW + 2 * DAY, NOW));
+    const t = NOW + 10 * DAY;
+    const known = schedule(schedule(schedule(c0, 3, NOW), 3, NOW + 3 * DAY), 1, t);
+    expect(known.due).toBeGreaterThanOrEqual(rollTo4am(t + 2 * DAY, t));
+  });
   it("Again on a review card counts a lapse", () => {
     const base = schedule(schedule(c0, 3, NOW), 3, NOW + 3 * DAY);
     expect(schedule(base, 1, NOW + 10 * DAY).lapses).toBe(base.lapses + 1);

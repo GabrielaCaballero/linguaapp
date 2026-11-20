@@ -118,7 +118,7 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
   });
   it("pages send a CSP that limits where data can be sent", () => {
     const cfg = read("next.config.ts");
-    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/api\.anthropic\.com https:\/\/api\.openai\.com https:\/\/generativelanguage\.googleapis\.com`/);
+    expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/accounts\.google\.com https:\/\/api\.anthropic\.com https:\/\/api\.openai\.com https:\/\/generativelanguage\.googleapis\.com`/);
     expect(cfg).toMatch(/frame-ancestors 'none'/);
   });
   it("answers table: row-level security, read/insert own only, never update or delete", () => {

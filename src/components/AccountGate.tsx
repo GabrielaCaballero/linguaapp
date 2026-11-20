@@ -9,8 +9,8 @@ import { useDB } from "@/lib/store";
 import { useAccount } from "@/lib/sync/client";
 import { accountHref } from "@/lib/nav";
 
-/** Screens open without an account: setting up a course and signing in. */
-const OPEN = ["/onboarding", "/account"];
+/** Screens open without an account: setting up a course, signing in, the privacy page. */
+const OPEN = ["/onboarding", "/account", "/privacy"];
 
 /** True when this device has a course but nobody is signed in (accounts on). */
 export function useMustSignIn(): boolean {

@@ -183,7 +183,7 @@ export function interleave(ids: string[], byId: Map<string, Item>, strict = true
   return out;
 }
 
-/** After a miss: requeue the item 3 tasks later (max 2 times per item per session). */
+/** After a miss: requeue the item 3 tasks later (once per item per session, REQUEUE_CAP). */
 export function requeue(tasks: Task[], index: number, counts: Map<string, number>): Task[] {
   const t = tasks[index];
   const n = counts.get(t.itemId) ?? 0;

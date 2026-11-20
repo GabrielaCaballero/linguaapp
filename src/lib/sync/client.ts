@@ -21,9 +21,21 @@ export function isSyncConfigured(): boolean {
   return !!URL_ && !!ANON;
 }
 
+// Google's OAuth client ID (public by design; the client *secret* lives only in Supabase).
+const GOOGLE_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
 /** "Continue with Google" is shown only when the owner has set up a Google OAuth client too. */
 export function isGoogleEnabled(): boolean {
-  return isSyncConfigured() && process.env.NEXT_PUBLIC_AUTH_GOOGLE === "1";
+  return isSyncConfigured() && (process.env.NEXT_PUBLIC_AUTH_GOOGLE === "1" || !!GOOGLE_ID);
+}
+
+/**
+ * With the client ID set, the app shows Google's own button (Google Identity Services), so
+ * Google's screen names linguina.app instead of the Supabase project address. Without it (or
+ * if Google's script can't load) the redirect through Supabase below is used.
+ */
+export function googleClientId(): string | null {
+  return isGoogleEnabled() && GOOGLE_ID ? GOOGLE_ID : null;
 }
 
 let client: SupabaseClient | null = null;
@@ -148,6 +160,27 @@ export async function startGoogle(from: AccountFrom): Promise<AuthError | null> 
     return error ? "network" : null;
   } catch {
     return "network";
+  }
+}
+
+/** A one-time nonce: Google gets its SHA-256, Supabase the original, so a token can't be replayed. */
+export async function googleNonce(): Promise<{ raw: string; hashed: string }> {
+  const raw = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  const hashed = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+  return { raw, hashed };
+}
+
+/** Google's button handed back an ID token: open the Supabase session with it. */
+export async function finishGoogleToken(token: string, nonce: string): Promise<{ user: AccountUser } | { error: AuthError }> {
+  try {
+    const { data, error } = await getClient().auth.signInWithIdToken({ provider: "google", token, nonce });
+    if (error || !data.user) return { error: error && classify(error) === "notInvited" ? "notInvited" : "google" };
+    const user = { id: data.user.id, email: data.user.email ?? "" };
+    setUser(user);
+    return { user };
+  } catch {
+    return { error: "network" };
   }
 }
 

@@ -156,6 +156,9 @@ const it: Case[] = [
   { id: "it-typo-06", item: W("it", "informazione"), input: "imfornazone", verdict: "wrong", tag: "3 edits = wrong" },
   { id: "it-typo-07", item: I("it-u03-tre"), input: "tra", verdict: "wrong", tag: "no typo on short words" },
   { id: "it-typo-08", item: I("it-u03-sei"), input: "sie", verdict: "wrong", tag: "no typo on short words" },
+  { id: "it-typo-12", item: I("it-u01-ciao"), input: "caio", verdict: "almost", reason: "typo", tag: "swapped letters on a 4-letter word" },
+  { id: "it-typo-13", item: I("it-u01-ciao"), input: "cieo", verdict: "wrong", tag: "4 letters: only a swap is forgiven" },
+  { id: "it-typo-14", item: I("it-u02-parlare"), input: "palrare", verdict: "almost", reason: "typo", tag: "a swap is one slip" },
   { id: "it-typo-09", item: I("it-u04-quanto-costa"), input: "Quando costa?", verdict: "wrong", tag: "real-word confusion quanto/quando" },
   // ── word order ───────────────────────────────────────────────────────────────
   { id: "it-ord-01", item: W("it", "Sono andato al bar."), input: "Al bar sono andato.", verdict: "wrong", tag: "word order (not listed)" },
