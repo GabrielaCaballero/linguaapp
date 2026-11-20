@@ -78,9 +78,15 @@ export function schedule(c: CardV2, rating: Rating, now: number, retention = 0.9
   const f = engine(retention);
   const { card } = f.next(toCard(c), new Date(now), rating as Grade);
   const next = fromCard(card, c);
+  // A miss comes back in two days, not the very next morning: it was already practised again in
+  // the lesson, and the next day it felt like the same exercise over and over (owner, 2026-11-20).
+  if (rating === 1) next.due = Math.max(next.due, now + MISS_GAP);
   next.due = rollTo4am(next.due, now);
   return next;
 }
+
+/** How long a missed item rests before it comes back. */
+export const MISS_GAP = 2 * DAY;
 
 /** Current probability of recall (0..1). New cards: 0. */
 export function retrievability(c: CardV2, now: number): number {

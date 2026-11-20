@@ -117,6 +117,20 @@ export function lev(a: string, b: string): number {
   return prev[n];
 }
 
+/** Like lev, but two neighbouring letters swapped ("caio" for "ciao") count as one edit. */
+export function osa(a: string, b: string): number {
+  if (a === b) return 0;
+  const d: number[][] = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++) {
+      const c = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+    }
+  return d[a.length][b.length];
+}
+
 const IT_ACCENT_MEANING = new Set(["e|è", "si|sì", "da|dà", "la|là", "li|lì", "ne|né", "se|sé"]);
 
 const IT_CONTRACTIONS: Record<string, string> = {
@@ -196,9 +210,13 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   const base = lang === "de" ? deFold(w) : stripMarks(w);
   const len = [...bareTok(w)].length;
   const allowed = len >= 10 ? 2 : len >= 5 ? 1 : 0;
-  if (allowed > 0 && item.type !== "sound") {
-    const d = lev(lang === "de" ? deFold(g) : stripMarks(g), base);
+  if (item.type !== "sound") {
+    const gg = lang === "de" ? deFold(g) : stripMarks(g);
+    // Phone typing: swapped neighbours count as one slip. Words of 4 letters forgive only a swap
+    // ("caio", "nien"); a changed letter there too often makes another word (owner, 2026-11-20).
+    const d = osa(gg, base);
     if (d <= allowed) return { v: "almost", reason: "typo" };
+    if (len === 4 && d === 1 && gg.length === base.length && lev(gg, base) === 2) return { v: "almost", reason: "typo" };
   }
   return { v: "wrong", reason: "wrong" };
 }

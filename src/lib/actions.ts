@@ -124,6 +124,8 @@ export interface AnswerInput {
   hinted?: boolean;
   /** The "try" right after learning: logged as practice, never "to fix". */
   practice?: boolean;
+  /** "Almost" only because of a typing slip: scheduled like a right answer (owner, 2026-11-20). */
+  typo?: boolean;
 }
 
 /** Grade one answer: FSRS update + review log + metrics event. Returns the stability change. */
@@ -133,7 +135,7 @@ export function recordAnswer(a: AnswerInput): { before: number; after: number } 
   let after = 0;
   update((db) => {
     const prev = db.cards[a.item.id] ?? newCard(a.item.id, a.item.lang, now);
-    const r0 = ratingFor(a.verdict, a.confidence, a.source);
+    const r0 = ratingFor(a.typo && a.verdict === "almost" ? "correct" : a.verdict, a.confidence, a.source);
     const rating = a.hinted && r0 > 2 ? 2 : r0;
     const retention = db.profile.courses[a.item.lang]?.goal?.retention ?? 0.9;
     const gap = prev.last_review ? (now - prev.last_review) / DAY : undefined;

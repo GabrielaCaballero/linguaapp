@@ -256,7 +256,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
     // isn't requeued and isn't "to fix". The spaced follow-up a few tasks later is the real check.
     const isTry = task.role === "try";
     if (isTry) setTries((x) => ({ ...x, [item.id]: r.verdict !== "wrong" }));
-    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed && !isTry, hinted: r.hinted, practice: isTry });
+    recordAnswer({ item, mode, verdict: r.verdict, confidence: conf, source: "checker", ms: Date.now() - taskStart, reschedule: !speed && !isTry, hinted: r.hinted, practice: isTry, typo: r.check?.reason === "typo" });
     const s = stats.current;
     s.graded++;
     if (conf) s.confUsed++;

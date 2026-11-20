@@ -167,3 +167,16 @@ Format: date · who · decision · why
 - Sign-in: when Google is on (`NEXT_PUBLIC_AUTH_GOOGLE=1`), "Continue with Google" is the one
   main button; the emailed code is behind "Use my email" (people without Gmail, or if Google
   fails inside the installed iPhone app). With Google off, the screen is the email form as before.
+
+## 2026-11-20 · Google's own button, privacy page, kinder typing
+
+- Google sign-in uses Google's own button (Identity Services + `signInWithIdToken`, with a
+  one-time nonce) when `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is set, so Google's screen names
+  linguina.app, not the Supabase address. The redirect through Supabase stays as the fallback.
+  New `/privacy` page (needed for Google's brand verification). "No account needed" removed.
+- Typing (owner: "the same exercises over and over because I mistype them"):
+  - Swapped neighbouring letters count as one slip; 4-letter words forgive a swap ("caio").
+    3-letter words, closed-class words, minimal pairs and German endings stay strict.
+  - A typo-only "almost" is scheduled like a right answer (Good), not Hard.
+  - A miss rests two days before it comes back (it was already practised again in the lesson;
+    once per lesson, REQUEUE_CAP = 1). "I was right" already removed the repeat.

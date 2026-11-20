@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getDB, useDB } from "@/lib/store";
@@ -8,6 +9,7 @@ import { BadRemoteError, type Choice, type FirstLogin } from "@/lib/sync/engine"
 import { onboardingHref, setupBackHref, type AccountFrom } from "@/lib/nav";
 import { clearSetupDraft } from "@/lib/setupDraft";
 import { BackHeader, Loading, useT } from "@/components/ui";
+import { GoogleButton } from "@/components/GoogleButton";
 import { Icon } from "@/components/icons";
 
 /** Sign in with an emailed 6-digit code (or Google), then settle where the progress comes from. */
@@ -28,7 +30,7 @@ function AccountRoute() {
   return <SignIn key={from} from={from} />;
 }
 
-type Step = { id: "email" } | { id: "code" } | { id: "choose"; info: Extract<FirstLogin, { kind: "choose" }> } | { id: "done"; empty?: boolean };
+type Step = { id: "email" } | { id: "code" } | { id: "choose"; info: Extract<FirstLogin, { kind: "choose" }> } | { id: "done"; empty?: boolean; existing?: boolean };
 
 function SignIn({ from }: { from: AccountFrom }) {
   const db = useDB();
@@ -56,7 +58,14 @@ function SignIn({ from }: { from: AccountFrom }) {
       if (first.kind === "choose") setStep({ id: "choose", info: first });
       // A new account on a fresh device: nothing came down, so say why and where the progress is.
       // (Not in the middle of setup: there the empty account is expected, and setup goes on.)
-      else setStep({ id: "done", empty: from !== "setup" && first.kind === "empty" && !getDB().profile.onboarded });
+      else
+        setStep({
+          id: "done",
+          empty: from !== "setup" && first.kind === "empty" && !getDB().profile.onboarded,
+          // Signing up with an email (or Google account) that already has progress is a sign-in:
+          // say so; Continue goes home with that progress, not on to setting goals again.
+          existing: (from === "setup" || from === "required") && first.kind === "downloaded" && getDB().profile.onboarded,
+        });
     } catch (e) {
       setBusy(false);
       setErr(e instanceof BadRemoteError ? t.acctBadRemote : "network");
@@ -191,9 +200,25 @@ function SignIn({ from }: { from: AccountFrom }) {
           {mode === "signup" && from === "setup" && <p style={{ margin: 0 }}>{t.acctSetupSub}</p>}
           {!byEmail ? (
             <>
-              <button type="button" className="btn btn-primary" disabled={busy || !online} onClick={() => void google()}>
-                <GoogleMark /> {t.acctGoogle}
-              </button>
+              <GoogleButton
+                lang={db.profile.appLang}
+                busy={busy}
+                onStart={() => {
+                  setBusy(true);
+                  setErr(null);
+                }}
+                onDone={(r) => {
+                  if ("error" in r) {
+                    setBusy(false);
+                    setErr(r.error);
+                  } else void afterSignIn(r.user);
+                }}
+                fallback={
+                  <button type="button" className="btn btn-primary" disabled={busy || !online} onClick={() => void google()}>
+                    <GoogleMark /> {t.acctGoogle}
+                  </button>
+                }
+              />
               {errLine}
               <button type="button" className="link-btn" style={{ alignSelf: "center" }} disabled={busy} onClick={() => { setErr(null); setByEmail(true); }}>{t.acctUseEmail}</button>
             </>
@@ -217,6 +242,7 @@ function SignIn({ from }: { from: AccountFrom }) {
               )}
             </>
           )}
+          <Link href="/privacy" className="caption center" style={{ marginTop: 8 }}>{t.privacy}</Link>
         </form>
       )}
 
@@ -261,7 +287,8 @@ function SignIn({ from }: { from: AccountFrom }) {
       {step.id === "done" && !step.empty && (
         <div className="stack center" style={{ marginTop: 48, gap: 16, alignItems: "center" }}>
           <span className="accent"><Icon name="check" size={48} /></span>
-          <h2 className="title" role="status">{t.acctDone}</h2>
+          <h2 className="title" role="status">{step.existing ? t.acctWelcomeBack : t.acctDone}</h2>
+          {step.existing && <p className="muted" style={{ margin: 0 }}>{t.acctWelcomeBackSub}</p>}
           <button className="btn btn-primary" onClick={finish}>{t.continue}</button>
         </div>
       )}

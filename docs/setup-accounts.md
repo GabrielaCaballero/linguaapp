@@ -157,13 +157,24 @@ can sign in with Google, and they must use that same Gmail address.
 4. **Supabase → Authentication → Sign In / Providers → Google** → Enable → paste Client ID and
    Client secret → Save. ⚠️ The client secret goes **only here**, never into Vercel or the repo.
 5. **Supabase → Authentication → URL Configuration → Redirect URLs** → add
-   `https://linguaapp.vercel.app/account*` (your real Vercel address). Add your preview address
+   `https://linguina.app/account*` (the app's real address). Add your preview address
    too if you want to test Google on PR previews.
 6. **Vercel → Settings → Environment Variables** → add `NEXT_PUBLIC_AUTH_GOOGLE` = `1`
    (Production and Preview) → **Redeploy**.
 7. Test on your **iPhone, installed app**: Sign in → Continue with Google. You should land back in
    the app signed in. If it opens Safari and stays there, tell me and I'll hide the Google button
    inside the installed iPhone app (the email code always works).
+
+8. **Google's own button (so Google's screen says linguina.app, not the Supabase address):**
+   - Google Cloud → **Credentials** → your OAuth client → **Authorized JavaScript origins** → add
+     `https://linguina.app` (and `http://localhost:3100` to try it locally) → Save.
+   - Vercel → Environment Variables → add `NEXT_PUBLIC_GOOGLE_CLIENT_ID` = the **Client ID**
+     (public, ends in `.apps.googleusercontent.com`; never the secret) → Redeploy.
+   - If Google's script can't load, the app falls back to the redirect through Supabase.
+9. **Show "Linguina" instead of the address** (Google reviews it, a few days): Google Auth Platform
+   → **Branding**: app name `Linguina`, logo, home page `https://linguina.app`, privacy policy
+   `https://linguina.app/privacy`, authorized domain `linguina.app` (verify it in Google Search
+   Console) → **Submit for verification**.
 
 To turn Google off again: delete `NEXT_PUBLIC_AUTH_GOOGLE` in Vercel and redeploy.
 

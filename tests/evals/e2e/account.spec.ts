@@ -24,6 +24,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   const files = new Map<string, Buffer>();
   const essays: { id: string; uid: string; task_id: string; lang: string; text: string; result: unknown; created_at: string }[] = [];
   const authorize: URL[] = [];
+  const idTokens: { provider: string; nonce: string }[] = [];
   const reads: string[] = [];
   const bodies: string[] = [];
   let down = false;
@@ -74,6 +75,16 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
       const email = String(auth_code).replace(/^g-/, "");
       const id = users.get(email);
       if (!id || !code_verifier) return json(route, 400, { code: 400, error_code: "bad_code_verifier", msg: "invalid flow state" });
+      return json(route, 200, session(id, email, "google"));
+    }
+    if (p === "/auth/v1/token" && url.searchParams.get("grant_type") === "id_token") {
+      // Google's own button: the ID token stands for the Google account ("gis-<email>").
+      const { id_token, nonce, provider } = JSON.parse(body);
+      idTokens.push({ provider, nonce });
+      const email = String(id_token).replace(/^gis-/, "");
+      if (!users.has(email) && !signupsOff) users.set(email, `00000000-0000-4000-8000-0000000000${String(users.size + 10).padStart(2, "0")}`);
+      const id = users.get(email);
+      if (!id) return json(route, 422, { code: 422, error_code: "signup_disabled", msg: "Signups not allowed for this instance" });
       return json(route, 200, session(id, email, "google"));
     }
     if (p === "/auth/v1/otp") {
@@ -188,10 +199,33 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
     files,
     bodies,
     authorize,
+    idTokens,
     reads,
     setDown: (v: boolean) => void (down = v),
-    attach: (ctx: BrowserContext) => ctx.route(`${FAKE}/**`, handle),
+    /** `gsi: false`: Google's script can't load, so the app falls back to the redirect. */
+    attach: async (ctx: BrowserContext, o: { gsi?: boolean } = {}) => {
+      await ctx.route("https://accounts.google.com/gsi/client", (route) =>
+        o.gsi === false
+          ? route.abort("blockedbyclient")
+          : route.fulfill({ status: 200, contentType: "text/javascript", body: gsiStub(google.as ?? "") }),
+      );
+      await ctx.route(`${FAKE}/**`, handle);
+    },
   };
+}
+
+/** Stands in for Google's script: a "Continue with Google" button that picks `as` at once. */
+function gsiStub(as: string) {
+  return `window.google = { accounts: { id: {
+    initialize(o) { window.__gsi = o; },
+    renderButton(el) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = ${JSON.stringify(t.acctGoogle)};
+      b.onclick = () => window.__gsi.callback({ credential: ${JSON.stringify("gis-" + as)} });
+      el.appendChild(b);
+    },
+  } } };`;
 }
 
 async function learnABit(page: Page, email = "ana@example.com") {
@@ -390,6 +424,50 @@ test.describe("e2e-sync · with an account", () => {
     await laptopCtx.close();
   });
 
+  for (const via of ["email", "google"] as const)
+    test(`an existing account that signs up again (${via}) is signed in: its progress, home, no goal setup`, async ({ browser }) => {
+      const fake = fakeSupabase(["ana@gmail.com"], { as: "ana@gmail.com" });
+      const opts = { baseURL: SYNC, locale: "es-ES", viewport: { width: 390, height: 844 } };
+      // Ana already learns Italian on her phone.
+      const phoneCtx = await browser.newContext(opts);
+      await fake.attach(phoneCtx);
+      const phone = await phoneCtx.newPage();
+      await onboard(phone, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] }, { signUp: { email: "ana@gmail.com", code: CODE } });
+      await expect.poll(() => fake.rows.size).toBe(1);
+      const mine = await readDB(phone);
+
+      // New laptop: she doesn't say she has an account, takes the setup again and "creates" one.
+      const laptopCtx = await browser.newContext(opts);
+      await fake.attach(laptopCtx);
+      const laptop = await laptopCtx.newPage();
+      const errs = watchErrors(laptop);
+      const r = await onboard(laptop, { appLang: "es", langs: [{ lang: "de", explainIn: "en", exp: "never" }] });
+      expect(r.gated).toBe(true);
+      if (via === "google") await laptop.getByRole("button", { name: t.acctGoogle }).click();
+      else {
+        await useEmail(laptop);
+        await laptop.getByLabel(t.acctEmail).fill("ana@gmail.com");
+        await laptop.getByRole("button", { name: t.acctSendCodeNew }).click();
+        await laptop.getByLabel(t.acctCode).fill(CODE);
+        await laptop.getByRole("button", { name: t.acctVerify, exact: true }).click();
+      }
+      await expect(laptop.getByRole("status").filter({ hasText: t.acctWelcomeBack })).toBeVisible();
+      await laptop.getByRole("button", { name: t.continue }).click();
+      await laptop.waitForURL((u) => u.pathname === "/");
+      await expect(laptop.getByRole("button", { name: t.setGoal })).toHaveCount(0);
+      const theirs = await readDB(laptop);
+      expect(Object.keys(theirs.profile.courses)).toEqual(Object.keys(mine.profile.courses));
+      expect(theirs.profile.courses.it?.unit).toBe(mine.profile.courses.it?.unit);
+      // The German setup on the laptop was dropped for the account's own progress.
+      expect(theirs.profile.courses.de).toBeUndefined();
+      // Still one account, and the setup draft is gone (no resuming setup later).
+      expect(fake.rows.size).toBe(1);
+      expect(await laptop.evaluate(() => localStorage.getItem("lingua:setup"))).toBeNull();
+      expect(errs).toEqual([]);
+      await phoneCtx.close();
+      await laptopCtx.close();
+    });
+
   test("CUJ-18 open sign-up: a new email gets a code and its account is created", async ({ page, context }) => {
     const fake = fakeSupabase([]);
     await fake.attach(context);
@@ -570,30 +648,41 @@ test.describe("e2e-sync · after the first sign-in (no reload)", () => {
 test.describe("e2e-sync · sign in with Google", () => {
   test.use({ baseURL: SYNC, locale: "es-ES" });
 
-  test("CUJ-17 Google before the first lesson: the account is created, the code never stays in the URL", async ({ page, context }) => {
-    const errs = watchErrors(page);
-    const fake = fakeSupabase(["ana@gmail.com"], { as: "ana@gmail.com" });
-    await fake.attach(context);
-    const r = await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
-    expect(r.gated).toBe(true);
-    await page.getByRole("button", { name: t.acctGoogle }).click();
-    await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
-    expect(page.url()).not.toContain("code=");
-    expect(page.url()).toContain("/account?from=setup");
-    // The app asked for PKCE and to come back to its own origin.
-    const a = fake.authorize[0];
-    expect(a.searchParams.get("provider")).toBe("google");
-    expect(a.searchParams.get("code_challenge")).toBeTruthy();
-    expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
-    await page.getByRole("button", { name: t.continue }).click();
-    await page.getByRole("button", { name: t.setGoal, exact: true }).click();
-    await page.getByRole("button", { name: t.startFirst }).click();
-    await page.waitForURL(/\/lesson/);
-    await expect.poll(() => fake.rows.size).toBe(1);
-    await page.goto("/me/settings");
-    await expect(page.getByText(t.acctSignedInAs("ana@gmail.com"))).toBeVisible();
-    expect(errs).toEqual([]);
-  });
+  for (const gsi of [true, false])
+    test(`CUJ-17 Google before the first lesson (${gsi ? "Google's own button" : "fallback redirect"}): the account is created, no code in the URL`, async ({ page, context }) => {
+      const errs = watchErrors(page);
+      const fake = fakeSupabase(["ana@gmail.com"], { as: "ana@gmail.com" });
+      await fake.attach(context, { gsi });
+      const r = await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
+      expect(r.gated).toBe(true);
+      await page.getByRole("button", { name: t.acctGoogle }).click();
+      await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
+      expect(page.url()).not.toContain("code=");
+      expect(page.url()).toContain("/account?from=setup");
+      if (gsi) {
+        // Google's button on our own page (Google names linguina.app): no trip through Supabase,
+        // and the token is bound to a one-time nonce.
+        expect(fake.authorize).toHaveLength(0);
+        expect(fake.idTokens).toHaveLength(1);
+        expect(fake.idTokens[0].provider).toBe("google");
+        expect(fake.idTokens[0].nonce).toMatch(/^[0-9a-f]{32}$/);
+      } else {
+        // The app asked for PKCE and to come back to its own origin.
+        const a = fake.authorize[0];
+        expect(a.searchParams.get("provider")).toBe("google");
+        expect(a.searchParams.get("code_challenge")).toBeTruthy();
+        expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
+      }
+      await page.getByRole("button", { name: t.continue }).click();
+      await page.getByRole("button", { name: t.setGoal, exact: true }).click();
+      await page.getByRole("button", { name: t.startFirst }).click();
+      await page.waitForURL(/\/lesson/);
+      await expect.poll(() => fake.rows.size).toBe(1);
+      await page.goto("/me/settings");
+      await expect(page.getByText(t.acctSignedInAs("ana@gmail.com"))).toBeVisible();
+      // (The fallback run blocks Google's script on purpose.)
+      expect(errs.filter((e) => !/ERR_BLOCKED_BY_CLIENT/.test(e))).toEqual([]);
+    });
 
   test("Google account that isn't invited gets the invite message; cancelling shows a soft retry", async ({ page, context }) => {
     const fake = fakeSupabase(["ana@gmail.com"], { as: "stranger@gmail.com" }, true);
@@ -607,7 +696,7 @@ test.describe("e2e-sync · sign in with Google", () => {
 
     const ctx2 = await context.browser()!.newContext({ locale: "es-ES", baseURL: SYNC });
     const cancel = fakeSupabase(["ana@gmail.com"], { cancel: true });
-    await cancel.attach(ctx2);
+    await cancel.attach(ctx2, { gsi: false });
     const p2 = await ctx2.newPage();
     await p2.goto("/");
     await p2.getByRole("button", { name: t.haveAccountYes }).click();

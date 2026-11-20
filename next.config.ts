@@ -1,11 +1,11 @@
 import type { NextConfig } from "next";
 
-// The page may only talk to itself, the Supabase project and the AI tutor providers (Anthropic, OpenAI, Google). The
+// The page may only talk to itself, the Supabase project, Google sign-in and the AI tutor providers (Anthropic, OpenAI, Google). The
 // sign-in session and the AI key live in localStorage, so this limits where an injected
 // script could send them. Scripts/styles aren't restricted here (Next inlines bootstrap code).
 const SUPABASE = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const CSP = [
-  `connect-src 'self' ${SUPABASE} https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com`.replace(/\s+/g, " ").trim(),
+  `connect-src 'self' ${SUPABASE} https://accounts.google.com https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com`.replace(/\s+/g, " ").trim(),
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
