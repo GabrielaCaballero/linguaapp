@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Linguina · Italian & German",
     short_name: "Linguina",
-    description: "Italian and German, a few minutes a day. Works offline.",
+    description: "Learn a new language a few minutes a day. Works offline.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

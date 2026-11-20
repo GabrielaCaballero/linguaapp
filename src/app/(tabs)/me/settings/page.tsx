@@ -1,5 +1,6 @@
 "use client";
 
+import { TARGET_LANGS } from "@/content";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
@@ -99,7 +100,7 @@ export default function SettingsPage() {
             </div>
           );
         })}
-        {langs.length < 2 && (
+        {langs.length < TARGET_LANGS.length && (
           <button className="cell" onClick={() => router.push(onboardingHref())}>
             <Icon name="plus" size={20} className="accent" />
             <span className="grow">{t.addLanguage}</span>

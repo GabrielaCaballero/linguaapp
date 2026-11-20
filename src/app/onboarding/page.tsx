@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -8,6 +9,7 @@ import type { Anchor, Experience, Goal } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
 import { dict } from "@/lib/i18n";
 import { LANG_NAME, units } from "@/lib/content";
+import { LANG_INFO, TARGET_LANGS } from "@/content";
 import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref } from "@/lib/nav";
@@ -197,11 +199,12 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
           </div>
           <div className="grow" style={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="brand-logo logo-light" src="/brand/linguina.svg" alt={t.appName} width={180} height={56} />
+            <img className="brand-logo logo-light" src="/brand/linguina-logo.png" alt={t.appName} width={124} height={88} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="brand-logo logo-dark" src="/brand/linguina-on-dark.svg" alt={t.appName} width={180} height={56} />
-            <h1 className="hero" style={{ fontSize: "2.25rem", marginTop: 32, whiteSpace: "pre-line" }}>{t.welcomeTitle}</h1>
-            <p className="muted" style={{ marginTop: 12 }}>{t.welcomeSub}</p>
+            <img className="brand-logo logo-dark" src="/brand/linguina-logo-dark.png" alt={t.appName} width={124} height={88} />
+            <h1 className="hero" style={{ fontSize: "2.25rem", marginTop: 24, whiteSpace: "pre-line" }}>{t.welcomeTitle}</h1>
+            {/* Why "it sticks", in one line: spaced review. */}
+            <p className="muted" style={{ margin: "12px 0 0" }}>{t.welcomeSub}</p>
             {/* How it works: test, where to start, account. */}
             <ol className="how">
               {(syncOn ? t.welcomeSteps : t.welcomeSteps.slice(0, 2)).map((s, k) => (
@@ -225,6 +228,19 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
             ) : (
               <button className="btn btn-primary" onClick={go}>{t.getStarted}</button>
             )}
+            <div className="welcome-foot">
+              {/* Supported languages, from the course registry: a new language shows up by itself. */}
+              {/* Opens on tap (phones) and on hover (computers). */}
+              <details className="langs-list" onMouseEnter={(e) => (e.currentTarget.open = true)} onMouseLeave={(e) => (e.currentTarget.open = false)}>
+                <summary className="caption footer-link">{t.supportedLangs}</summary>
+                <ul>
+                  {TARGET_LANGS.map((l) => (
+                    <li key={l} lang={l}>{LANG_NAME[l]}</li>
+                  ))}
+                </ul>
+              </details>
+              <Link href="/privacy" className="caption footer-link">{t.privacy}</Link>
+            </div>
           </div>
         </>
       );
@@ -239,7 +255,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
       );
       break;
     case "langs": {
-      const avail = (["it", "de"] as TargetLang[]).filter((l) => !existing.includes(l));
+      const avail = TARGET_LANGS.filter((l) => !existing.includes(l));
       body = (
         <Question title={t.learnWhatTitle} sub={t.learnWhatSub} next={go} disabled={!langs.length} t={t}>
           {avail.map((l) => (
@@ -251,7 +267,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
                 if (!drafts[l]) patch(l, { explainIn: appLang, canDo: [null, null, null] });
               }}
               title={LANG_NAME[l]}
-              sub={l === "it" ? t.itTag : t.deTag}
+              sub={LANG_INFO[l].tag[appLang]}
               seal={l}
               multi
             />
@@ -311,7 +327,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
       break;
     }
     case "cando": {
-      const qs = lang === "it" ? t.canDoIt : t.canDoDe;
+      const qs = LANG_INFO[lang!].canDo[appLang];
       const vals = d?.canDo ?? [null, null, null];
       body = (
         <Question title={t.canDoTitle} next={go} disabled={vals.some((v) => v === null)} t={t} seal={lang}>
@@ -502,3 +518,4 @@ function Choice({ on, onClick, title, sub, seal }: { on: boolean; onClick: () =>
     </button>
   );
 }
+

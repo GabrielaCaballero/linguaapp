@@ -38,11 +38,6 @@ function SignIn({ from }: { from: AccountFrom }) {
   const router = useRouter();
   const pathname = usePathname();
   const [step, setStep] = useState<Step>({ id: "email" });
-  // Sign up (new account) or sign in (existing one). Same emailed code; the copy says which, and
-  // signing in with an unknown email says so instead of quietly creating an account.
-  const [mode, setMode] = useState<"signup" | "signin">(from === "required" || from === "setup" ? "signup" : "signin");
-  // Google is the way in; the emailed code stays one tap away (no Gmail, or Google fails).
-  const [byEmail, setByEmail] = useState(!isGoogleEnabled());
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -138,12 +133,13 @@ function SignIn({ from }: { from: AccountFrom }) {
     } else router.replace(`${onboardingHref()}&signedIn=1`);
   };
 
-  const send = async (as = mode) => {
+  const send = async () => {
     const e = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return;
     setBusy(true);
     setErr(null);
-    const r = await sendCode(e, as === "signup");
+    // Signs in an existing account, or creates one: the same emailed code either way.
+    const r = await sendCode(e, true);
     setBusy(false);
     if (r) setErr(r);
     else {
@@ -191,14 +187,19 @@ function SignIn({ from }: { from: AccountFrom }) {
 
   return (
     <main className="screen">
-      {required ? <div style={{ minHeight: 48 }} /> : <BackHeader title={t.acct} backLabel={t.back} href={back} />}
+      {required ? <div style={{ minHeight: 48 }} /> : <BackHeader title={step.id === "email" ? "" : t.acct} backLabel={t.back} href={back} />}
 
       {step.id === "email" && (
-        <form className="stack" style={{ marginTop: 8, gap: 16 }} onSubmit={(e) => { e.preventDefault(); void send(); }}>
-          <h2 className="title">{mode === "signup" ? (required ? t.acctRequiredTitle : t.acctSignUpTitle) : t.acctSignInTitle}</h2>
-          {mode === "signup" && required && <p style={{ margin: 0 }}>{t.acctRequiredSub}</p>}
-          {mode === "signup" && from === "setup" && <p style={{ margin: 0 }}>{t.acctSetupSub}</p>}
-          {!byEmail ? (
+        // One screen for signing in and signing up: Google first, then the email code. An email or
+        // Google account that already exists simply signs in (owner, 2026-11-21).
+        <form className="auth" onSubmit={(e) => { e.preventDefault(); void send(); }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="brand-logo logo-light auth-logo" src="/brand/linguina-logo.png" alt={t.appName} width={118} height={84} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="brand-logo logo-dark auth-logo" src="/brand/linguina-logo-dark.png" alt={t.appName} width={118} height={84} />
+          <h2 className="auth-title">{required || from === "setup" ? t.acctRequiredTitle : t.acctWelcomeTitle}</h2>
+          <p className="muted auth-sub">{required ? t.acctRequiredSub : from === "setup" ? t.acctSetupSub : t.acctWelcomeSub}</p>
+          {isGoogleEnabled() && (
             <>
               <GoogleButton
                 lang={db.profile.appLang}
@@ -214,35 +215,21 @@ function SignIn({ from }: { from: AccountFrom }) {
                   } else void afterSignIn(r.user);
                 }}
                 fallback={
-                  <button type="button" className="btn btn-primary" disabled={busy || !online} onClick={() => void google()}>
+                  <button type="button" className="btn btn-secondary" disabled={busy || !online} onClick={() => void google()}>
                     <GoogleMark /> {t.acctGoogle}
                   </button>
                 }
               />
-              {errLine}
-              <button type="button" className="link-btn" style={{ alignSelf: "center" }} disabled={busy} onClick={() => { setErr(null); setByEmail(true); }}>{t.acctUseEmail}</button>
-            </>
-          ) : (
-            <>
-              <p className="muted" style={{ margin: 0 }}>{t.acctSignInSub}</p>
-              <input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={t.acctEmailPlaceholder} aria-label={t.acctEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
-              {errLine}
-              {err === "noAccount" && (
-                <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => { setMode("signup"); void send("signup"); }}>{t.acctCreateWithThis}</button>
-              )}
-              <button type="submit" className="btn btn-primary" disabled={busy || !email.includes("@")}>{busy ? t.acctSending : mode === "signup" ? t.acctSendCodeNew : t.acctSendCode}</button>
-              <p className="center" style={{ margin: 0 }}>
-                <span className="muted">{mode === "signup" ? t.acctHaveOne : t.acctNoneYet}</span>{" "}
-                <button type="button" className="link-btn" disabled={busy} onClick={() => { setErr(null); setMode(mode === "signup" ? "signin" : "signup"); }}>
-                  {mode === "signup" ? t.acctSwitchSignIn : t.acctSwitchSignUp}
-                </button>
-              </p>
-              {isGoogleEnabled() && (
-                <button type="button" className="link-btn" style={{ alignSelf: "center" }} disabled={busy} onClick={() => { setErr(null); setByEmail(false); }}>{t.acctUseGoogle}</button>
-              )}
+              <div className="auth-or" aria-hidden="true"><span>{t.acctOr}</span></div>
             </>
           )}
-          <Link href="/privacy" className="caption center" style={{ marginTop: 8 }}>{t.privacy}</Link>
+          <input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={t.acctEmailPlaceholder} aria-label={t.acctEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
+          {errLine}
+          <button type="submit" className="btn btn-primary" disabled={busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())}>{busy ? t.acctSending : t.acctContinueEmail}</button>
+          <p className="caption center" style={{ margin: 0 }}>{t.acctCodeNote}</p>
+          <p className="caption center auth-legal">
+            {t.acctAgree} <Link href="/privacy">{t.privacyPolicy}</Link>
+          </p>
         </form>
       )}
 

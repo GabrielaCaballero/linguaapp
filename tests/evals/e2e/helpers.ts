@@ -12,8 +12,12 @@ const ITEMS: Item[] = (["it", "de"] as TargetLang[]).flatMap((l) => courses[l].u
 export async function readDB(page: Page) {
   return page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? "null"), KEY);
 }
+/** Replace the stored data (a test's setup). A lesson saved in progress is dropped too: the next lesson is built from the new data. */
 export async function writeDB(page: Page, db: unknown) {
-  await page.evaluate(([k, v]) => localStorage.setItem(k as string, JSON.stringify(v)), [KEY, db] as const);
+  await page.evaluate(([k, v]) => {
+    localStorage.setItem(k as string, JSON.stringify(v));
+    localStorage.removeItem("lingua:lesson");
+  }, [KEY, db] as const);
 }
 
 /** Collect console errors and page errors for the whole test. */
@@ -74,9 +78,8 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
   if (new URL(page.url()).pathname === "/account") {
     out.gated = true;
     if (!opts.signUp) return out;
-    await btn(page, t.acctUseEmail).click();
     await page.getByLabel(t.acctEmail).fill(opts.signUp.email);
-    await btn(page, t.acctSendCodeNew).click();
+    await btn(page, t.acctContinueEmail).click();
     await page.getByLabel(t.acctCode).fill(opts.signUp.code);
     await page.getByRole("button", { name: t.acctVerify, exact: true }).click();
     await page.getByRole("status").filter({ hasText: t.acctDone }).waitFor();

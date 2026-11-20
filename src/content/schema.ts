@@ -1,6 +1,8 @@
 // Lingua content contract v2.1 — FROZEN. Change only via docs/team/decisions.md.
 // v2.1 (2026-11-14): grammar points, paradigm tables, sentence annotations, ruleId on errors. All optional.
-export type TargetLang = "it" | "de";
+/** Every course on offer. Adding a language starts here: docs/team/adding-a-language.md (decisions.md 2026-11-21). */
+export const TARGET_LANGS = ["it", "de"] as const;
+export type TargetLang = (typeof TARGET_LANGS)[number];
 export type BaseLang = "es" | "en";
 export type Cefr = "A0" | "A1.1" | "A1.2" | "A2" | "B1" | "B2"; // B2 added 2026-11-13 (decisions.md)
 export type Register = "formal" | "informal";

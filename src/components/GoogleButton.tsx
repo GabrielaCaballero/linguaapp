@@ -19,13 +19,14 @@ type Gsi = {
 
 const SRC = "https://accounts.google.com/gsi/client";
 let loading: Promise<Gsi> | null = null;
-function loadGsi(): Promise<Gsi> {
+function loadGsi(lang: string): Promise<Gsi> {
   const w = window as unknown as { google?: Gsi };
   if (w.google?.accounts?.id) return Promise.resolve(w.google);
   if (!loading)
     loading = new Promise<Gsi>((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = SRC;
+      // hl: the button's language (the `locale` option alone is ignored by some browsers).
+      s.src = `${SRC}?hl=${encodeURIComponent(lang)}`;
       s.async = true;
       const timer = window.setTimeout(() => reject(new Error("timeout")), 8000);
       s.onload = () => {
@@ -60,7 +61,7 @@ export function GoogleButton({ lang, busy, onStart, onDone, fallback }: { lang: 
     let live = true;
     void (async () => {
       try {
-        const [g, nonce] = await Promise.all([loadGsi(), googleNonce()]);
+        const [g, nonce] = await Promise.all([loadGsi(lang), googleNonce()]);
         if (!live || !box.current) return;
         g.accounts.id.initialize({
           client_id: id,

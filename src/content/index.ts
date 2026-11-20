@@ -6,3 +6,5 @@ import { course as de } from "./de/index";
 export const courses: Record<TargetLang, CoursePack> = { it, de };
 
 export type * from "./schema";
+export { TARGET_LANGS } from "./schema";
+export { LANG_INFO, type LangInfo } from "./languages";
