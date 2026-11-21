@@ -175,3 +175,65 @@ grant execute on function public.push_state(bigint, jsonb, text) to authenticate
 grant execute on function public.delete_me() to authenticated;
 grant execute on function public.forget_other_answers(text) to authenticated;
 grant execute on function public.essay_quota() to authenticated;
+
+-- ── Size and volume limits (2026-11-21) ──────────────────────────────────────────────────
+-- Everything a learner can write is their own (row-level security), but the app runs on their
+-- device, so the server also caps how much they can store: a modified app can't fill the
+-- database with junk. Real use is far below every limit. "not valid" = existing rows aren't
+-- re-checked, only new writes. Safe to run again.
+
+-- Progress row: at most 2 MB of JSON (real: ~50–300 KB). The original cap measured the
+-- *compressed* size, which let ~30 MB through.
+alter table public.user_state drop constraint if exists user_state_db_text_size;
+alter table public.user_state add constraint user_state_db_text_size check (octet_length(db::text) <= 2000000) not valid;
+alter table public.user_state drop constraint if exists user_state_device_len;
+alter table public.user_state add constraint user_state_device_len check (device is null or char_length(device) <= 100) not valid;
+
+-- Answers: short ids only.
+alter table public.user_reviews drop constraint if exists user_reviews_text_len;
+alter table public.user_reviews add constraint user_reviews_text_len check (char_length(epoch) <= 40 and char_length(item) <= 120 and char_length(mode) <= 24) not valid;
+
+-- Answers per learner per day: at most 3000 (a long study day is a few hundred). A counter per
+-- day keeps the check cheap. Only the trigger (security definer) touches the counter table.
+create table if not exists public.answer_quota (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  day     date not null default current_date,
+  n       integer not null default 0,
+  primary key (user_id, day)
+);
+alter table public.answer_quota enable row level security;
+revoke all on public.answer_quota from anon, authenticated, public;
+
+create or replace function public.count_answer()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  used integer;
+begin
+  -- The caller's own counter (row-level security already makes new.user_id = auth.uid()).
+  if auth.uid() is null then
+    return new;
+  end if;
+  insert into public.answer_quota as q (user_id, day, n)
+  values (auth.uid(), current_date, 1)
+  on conflict (user_id, day) do update set n = q.n + 1
+  returning q.n into used;
+  -- First answer of the day: drop this learner's counters older than a week.
+  if used = 1 then
+    delete from public.answer_quota where user_id = auth.uid() and day < current_date - 7;
+  end if;
+  if used > 3000 then
+    raise exception 'daily answer limit reached' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.count_answer() from anon, authenticated, public;
+
+drop trigger if exists user_reviews_quota on public.user_reviews;
+create trigger user_reviews_quota before insert on public.user_reviews
+  for each row execute function public.count_answer();
+

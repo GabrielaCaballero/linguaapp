@@ -31,6 +31,7 @@ export const unit: Unit = {
     {
       id: "ich-komme", legacyId: "de-komme", type: "sentence", target: "Ich komme aus Spanien.",
       gloss: { es: "Soy de España.", en: "I come from Spain." },
+      accept: [{ text: "Ich bin aus Spanien." }],
       errors: [
         { text: "Komme aus Spanien.", feedback: { es: "En alemán el pronombre es obligatorio: Ich komme…", en: "German needs the subject pronoun: Ich komme…" } },
         { text: "Ich komme von Spanien.", feedback: { es: "Para países y ciudades se usa «aus»: Ich komme aus Spanien.", en: "For countries and cities use 'aus': Ich komme aus Spanien." } },

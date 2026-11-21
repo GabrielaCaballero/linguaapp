@@ -107,7 +107,7 @@ export const unit: Unit = {
     },
     {
       id: "mi-ha-chiesto-se", type: "sentence", target: "Mi ha chiesto se volevo uscire.",
-      gloss: { es: "Me preguntó si quería salir.", en: "She asked me if I wanted to go out." },
+      gloss: { es: "Me preguntó si quería salir.", en: "He or she asked me if I wanted to go out." },
       distractors: ["voglio", "che", "chiesta"],
       tags: ["reported-speech"],
     },
@@ -251,6 +251,22 @@ export const unit: Unit = {
       },
       note: { es: "En italiano «incidente» es sobre todo un accidente (incidente stradale); «un imprevisto» es un contratiempo." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "news"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "giornale", type: "word", pos: "noun", target: "il giornale", gender: "m", plural: "i giornali",
+      gloss: { es: "el diario (periódico)", en: "the newspaper" },
+      distractors: ["la giornata", "il giornalaio", "il giornalista"],
+      note: { es: "Ojo: el diario íntimo es «il diario»; il telegiornale = el noticiero.", en: "il telegiornale (il TG) = the TV news." },
+      tags: ["news"],
+    },
+    {
+      id: "notizia", type: "word", pos: "noun", target: "la notizia", gender: "f", plural: "le notizie",
+      gloss: { es: "la noticia", en: "the (piece of) news" },
+      distractors: ["la nozione", "la notifica", "la nostalgia"],
+      note: { es: "Una noticia = una notizia; las noticias = le notizie.", en: "Countable: una notizia = a piece of news; le notizie = the news." },
+      tags: ["news"],
     },
   ]),
 };

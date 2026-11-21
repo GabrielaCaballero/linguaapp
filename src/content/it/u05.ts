@@ -253,12 +253,28 @@ export const unit: Unit = {
           { es: "mirar", en: "to look at" },
           { es: "guardar", en: "to keep" },
           { es: "esperar", en: "to wait" },
-          { es: "cuidar", en: "to look after" },
+          { es: "guiar", en: "to guide" },
         ],
         answer: 0,
       },
       note: { es: "guardare = mirar (guardare la TV). Guardar algo es «mettere via»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "parenti", type: "word", pos: "noun", target: "i parenti", gender: "m", plural: "i parenti",
+      gloss: { es: "los parientes (familiares)", en: "the relatives" },
+      distractors: ["i genitori", "i pazienti", "i pareti"],
+      note: { es: "Como en español: i parenti = los parientes (tíos, primos…).", en: "False friend: i parenti = relatives; parents = i genitori." },
+      tags: ["family", "false-friend"],
+    },
+    {
+      id: "come-si-chiama-tua-sorella", type: "sentence", register: "informal", target: "Come si chiama tua sorella?",
+      gloss: { es: "¿Cómo se llama tu hermana?", en: "What's your sister's name?" },
+      errors: [{ text: "Come si chiama la tua sorella?", feedback: { es: "Con un familiar en singular, sin artículo: tua sorella.", en: "With a singular family member, no article: tua sorella." } }],
+      distractors: ["ti", "chiami", "la"],
+      tags: ["family", "possessive"],
     },
   ]),
 };

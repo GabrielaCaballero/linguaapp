@@ -85,7 +85,7 @@ export const unit: Unit = {
     {
       id: "davvero", type: "word", pos: "adv", target: "davvero",
       gloss: { es: "de verdad, realmente", en: "really" },
-      distractors: ["davanti", "dovere", "da vero"],
+      distractors: ["davanti", "dovere", "davanzale"],
       tags: ["opinion"],
     },
     {

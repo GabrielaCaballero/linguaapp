@@ -127,6 +127,13 @@ export const unit: Unit = {
       tags: ["verb-preposition"],
     },
     {
+      id: "kennen-uns-seit", type: "sentence", target: "Wir kennen uns seit der Schule.",
+      gloss: { es: "Nos conocemos desde la escuela.", en: "We've known each other since school." },
+      errors: [{ text: "Wir kennen uns seit die Schule.", feedback: { es: "seit + dativo: seit der Schule.", en: "seit takes the dative: seit der Schule." } }],
+      distractors: ["die", "kannten", "wissen"],
+      tags: ["relationships", "seit", "dative"],
+    },
+    {
       id: "wir-haben-uns-getrennt", type: "sentence", target: "Wir haben uns getrennt.",
       gloss: { es: "Nos separamos.", en: "We've split up." },
       distractors: ["sind", "getrennen", "euch"],

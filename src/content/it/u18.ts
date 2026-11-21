@@ -89,6 +89,8 @@ export const unit: Unit = {
     {
       id: "vietato", type: "word", pos: "adj", target: "vietato",
       gloss: { es: "prohibido/a", en: "forbidden" },
+      forms: { m: "vietato", f: "vietata", mpl: "vietati", fpl: "vietate" },
+      accept: [{ text: "vietata" }],
       distractors: ["evitato", "vestito", "votato"],
       note: { es: "Vietato fumare = prohibido fumar.", en: "Vietato fumare = no smoking." },
       tags: ["rules"],

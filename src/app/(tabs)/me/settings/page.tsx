@@ -138,6 +138,7 @@ export default function SettingsPage() {
         <Row label={t.sListening} on={s.listening} onChange={(v) => set({ listening: v })} />
         <Row label={t.sSpeaking} sub={t.sSpeakingSoon} on={false} onChange={() => {}} disabled />
         <Row label={t.sBridge} on={s.bridgeTips} onChange={(v) => set({ bridgeTips: v })} />
+        {db.profile.courses.de && <Row label={t.sRegionTips} on={s.regionTips !== false} onChange={(v) => set({ regionTips: v })} />}
         <Row label={t.sSpeed} on={s.speedTimer} onChange={(v) => set({ speedTimer: v })} />
       </div>
 

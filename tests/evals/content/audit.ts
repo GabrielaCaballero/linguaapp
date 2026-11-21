@@ -41,4 +41,12 @@ export const AUDITOR = "QA lead (eval phase), 2026-11-12";
 // it-u09-tab-di-articolo, sentence de-u05-ich-besuche-meine-brueder (+ known errors meinen/mein Brüder),
 // and grammar links added to de-u02-pat-kommen, de-u04-pat-mein-meine, it-u02-pat-essere,
 // it-u09-pat-prep-articolate — read against the rubric (forms, accents, glosses) before re-pinning.
+// 2026-11-21 · Italian linguist review of all 24 units (AI reviewer): every changed or new it-* item read
+// against the rubric. NOT re-pinned yet: the changed/new it-* items show as STALE / "not audited yet"
+// until a human re-grades them and re-pins with AUDIT_WRITE=1. Fixed: it-u05-br-guardare option «cuidar / to look after»
+// (arguably correct) → «guiar»; it-u14-capo distractor «la capo» (accepted usage) → «il capello»;
+// it-u15-davvero distractor «da vero» (old variant spelling) → «davanzale»; it-p-16 option «era»
+// (grammatical trapassato) → «sono»; gender-neutral glosses in it-u17-come-se, it-u17-lis-insegnante,
+// it-u20-mi-ha-chiesto-se; neutral Spanish in it-u24-essere-al-verde / br-al-verde («peso», «plata»).
+// ~40 new items in units 1, 3–9, 11, 12, 16, 17, 20–22, 24.
 export const FAILS: Record<string, Finding> = {};

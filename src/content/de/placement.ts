@@ -191,7 +191,7 @@ const bank: PlacementItem[] = [
     id: "de-p-16", lang: "de", cefr: "A1.2", b: -0.2, skill: "grammar", kind: "cloze", stem: "Gestern ___ ich ins Kino gegangen.",
     mcq: {
       prompt: { es: "Completa la frase.", en: "Complete the sentence." },
-      options: ["bin", "habe", "hat", "war"],
+      options: ["bin", "habe", "hat", "ist"],
       answer: 0,
     },
   },

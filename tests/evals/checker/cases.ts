@@ -174,6 +174,15 @@ const it: Case[] = [
   { id: "it-es-02", item: I("it-u01-grazie"), input: "gracias", verdict: "wrong", tag: "Spanish word" },
   { id: "it-es-03", item: I("it-u02-spagnolo"), input: "español", verdict: "wrong", tag: "Spanish word" },
   { id: "it-es-04", item: I("it-u01-arrivederci"), input: "adiós", verdict: "wrong", tag: "Spanish word" },
+  // ── linguist content review 2026-11-21: alternatives and known errors added to Italian items ──
+  { id: "it-rev-01", item: I("it-u07-mi-alzo-alle-sette"), input: "Io mi alzo alle sette.", verdict: "correct", tag: "optional subject pronoun" },
+  { id: "it-rev-02", item: I("it-u08-mi-piace-leggere"), input: "A me piace leggere", verdict: "correct", tag: "a me piace" },
+  { id: "it-rev-03", item: I("it-u05-come-si-chiama-tua-sorella"), input: "Come si chiama la tua sorella?", verdict: "wrong", feedback: true, tag: "no article with singular family member" },
+  { id: "it-rev-04", item: I("it-u08-esco-con-gli-amici"), input: "Il sabato usco con gli amici.", verdict: "wrong", feedback: true, tag: "uscire stem: esco" },
+  { id: "it-rev-05", item: I("it-u09-due-etti-prosciutto"), input: "Vorrei due etti del prosciutto.", verdict: "wrong", tag: "quantity + di, no article" },
+  { id: "it-rev-06", item: I("it-u04-bicchiere-acqua"), input: "Un bicchiere di acqua, per favore.", verdict: "correct", tag: "d'acqua / di acqua" },
+  { id: "it-rev-07", item: I("it-u21-nessuno-se-ne-e-accorto"), input: "Per fortuna nessuno se ne è accorto.", verdict: "correct", tag: "optional elision n'è" },
+  { id: "it-rev-08", item: I("it-u17-se-potessi-partirei"), input: "Se potrei, partirei domani.", verdict: "wrong", tag: "no conditional after se" },
 ];
 
 const de: Case[] = [
@@ -302,6 +311,10 @@ const de: Case[] = [
   // ── typos only on content words ─────────────────────────────────────────────────
   { id: "de-typo-01", item: I("de-u01-guten-abend"), input: "Guten Abent", verdict: "almost", reason: "typo", tag: "Abent (judge)" },
   { id: "de-typo-02", item: I("de-u01-entschuldigung"), input: "Entschuldigun", verdict: "almost", reason: "typo", tag: "typo" },
+  { id: "de-ch-01", item: I("de-u09-krankenhaus"), input: "das Spital", verdict: "correct", tag: "Swiss Standard German word is accepted" },
+  { id: "de-ch-02", item: I("de-u09-fahrkarte"), input: "das Billett", verdict: "correct", tag: "Swiss Standard German word is accepted" },
+  { id: "de-ch-03", item: I("de-u01-hallo"), input: "Hoi", verdict: "wrong", tag: "Swiss dialect is a tip, not a standard answer" },
+  { id: "de-ch-04", item: I("de-u01-guten-tag"), input: "Grüezi", verdict: "correct", tag: "Grüezi stays accepted" },
   { id: "de-typo-03", item: I("de-u01-entschuldigung"), input: "Entshuldigung", verdict: "almost", reason: "typo", tag: "typo" },
   { id: "de-typo-04", item: I("de-u03-buchstabieren"), input: "buchstabiren", verdict: "almost", reason: "typo", tag: "typo" },
   { id: "de-typo-05", item: I("de-u03-buchstabieren"), input: "buchstabirn", verdict: "almost", reason: "typo", tag: "2 typos in ≥10 letters" },

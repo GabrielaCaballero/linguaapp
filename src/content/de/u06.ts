@@ -79,6 +79,20 @@ export const unit: Unit = {
 
     // ── Adjectives ───────────────────────────────────────────
     {
+      id: "fenster", type: "word", pos: "noun", target: "das Fenster", gender: "n", plural: "die Fenster",
+      gloss: { es: "la ventana", en: "the window" },
+      distractors: ["der Fenster", "die Fenster", "das Futter"],
+      note: { es: "Neutro, y el plural no cambia: die Fenster.", en: "Neuter, and the plural doesn't change: die Fenster." },
+      tags: ["home", "goethe-a1"],
+    },
+    {
+      id: "balkon", type: "word", pos: "noun", target: "der Balkon", gender: "m", plural: "die Balkone",
+      gloss: { es: "el balcón", en: "the balcony" },
+      distractors: ["die Balkon", "das Balkon", "der Ballon"],
+      note: { es: "Plural: die Balkone o die Balkons; las dos formas son correctas.", en: "Plural: die Balkone or die Balkons; both are correct." },
+      tags: ["home", "goethe-a1"],
+    },
+    {
       id: "gross", type: "word", pos: "adj", target: "groß",
       gloss: { es: "grande", en: "big / large" },
       distractors: ["grob", "grau", "klein"],

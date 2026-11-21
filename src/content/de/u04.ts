@@ -101,6 +101,19 @@ export const unit: Unit = {
       tags: ["family", "goethe-a1"],
     },
     {
+      id: "onkel", type: "word", pos: "noun", target: "der Onkel", gender: "m", plural: "die Onkel",
+      gloss: { es: "el tío", en: "the uncle" },
+      distractors: ["die Onkel", "der Enkel", "die Tante"],
+      note: { es: "Ojo: der Enkel = el nieto; die Enkelin = la nieta.", en: "Careful: der Enkel = grandson; die Enkelin = granddaughter." },
+      tags: ["family", "goethe-a1"],
+    },
+    {
+      id: "tante", type: "word", pos: "noun", target: "die Tante", gender: "f", plural: "die Tanten",
+      gloss: { es: "la tía", en: "the aunt" },
+      distractors: ["der Tante", "die Tanne", "der Onkel"],
+      tags: ["family", "goethe-a1"],
+    },
+    {
       id: "mann", type: "word", pos: "noun", target: "der Mann", gender: "m", plural: "die Männer",
       gloss: { es: "el hombre / el marido", en: "the man / the husband" },
       distractors: ["die Mann", "der Mond", "die Männer"],

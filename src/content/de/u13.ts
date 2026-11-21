@@ -136,6 +136,7 @@ export const unit: Unit = {
     {
       id: "er-sagt-dass", type: "sentence", target: "Er sagt, dass er morgen kommt.",
       gloss: { es: "Dice que viene mañana.", en: "He says he's coming tomorrow." },
+      accept: [{ text: "Er sagt, er kommt morgen." }],
       errors: [{ text: "Er sagt, dass er kommt morgen.", feedback: { es: "Tras dass, el verbo va al final: dass er morgen kommt.", en: "After dass, the verb goes last: dass er morgen kommt." } }],
       distractors: ["das", "kommen", "morgens"],
       tags: ["dass", "word-order"],

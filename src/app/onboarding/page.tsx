@@ -203,15 +203,15 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="brand-logo logo-dark" src="/brand/linguina-logo-dark.png" alt={t.appName} width={124} height={88} />
             <h1 className="hero" style={{ fontSize: "2.25rem", marginTop: 24, whiteSpace: "pre-line" }}>{t.welcomeTitle}</h1>
-            {/* Why "it sticks", in one line: spaced review. */}
-            <p className="muted" style={{ margin: "12px 0 0" }}>{t.welcomeSub}</p>
-            {/* How it works: test, where to start, account. */}
+            {/* What Linguina is, in three points (owner's prototype merged with ours, 2026-11-21). */}
+            <h2 className="why-title">{t.welcomeWhyTitle}</h2>
             <ol className="how">
-              {(syncOn ? t.welcomeSteps : t.welcomeSteps.slice(0, 2)).map((s, k) => (
+              {t.welcomePoints.map(([title, desc], k) => (
                 <li key={k}>
                   <span className="how-n" aria-hidden="true">{k + 1}</span>
                   <span>
-                    {s}
+                    <strong>{title}</strong>
+                    <span className="how-desc">{desc}</span>
                   </span>
                 </li>
               ))}

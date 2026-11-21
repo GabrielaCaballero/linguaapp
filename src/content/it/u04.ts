@@ -319,5 +319,21 @@ export const unit: Unit = {
       note: { es: "gamba = pierna. El camarón es «il gamberetto»; «il gambero» = langostino." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "food"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "bicchiere", type: "word", pos: "noun", target: "il bicchiere", gender: "m", plural: "i bicchieri",
+      gloss: { es: "el vaso", en: "the glass (for drinking)" },
+      distractors: ["la bicchiera", "il biscotto", "la bottiglia"],
+      note: { es: "un bicchiere d'acqua = un vaso de agua; el vidrio (material) es «il vetro».", en: "un bicchiere d'acqua = a glass of water; glass as a material is 'il vetro'." },
+      tags: ["bar"],
+    },
+    {
+      id: "bicchiere-acqua", type: "sentence", target: "Un bicchiere d'acqua, per favore.",
+      gloss: { es: "Un vaso de agua, por favor.", en: "A glass of water, please." },
+      accept: [{ text: "Un bicchiere di acqua, per favore." }, { text: "Vorrei un bicchiere d'acqua, per favore." }],
+      distractors: ["una", "del", "acque"],
+      tags: ["bar", "drink"],
+    },
   ]),
 };

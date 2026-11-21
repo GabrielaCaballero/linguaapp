@@ -1,5 +1,6 @@
 "use client";
 
+import { RegionTips } from "./RegionTips";
 import { useEffect, useRef, useState } from "react";
 import type { BaseLang, GrammarPoint, Item } from "@/content/schema";
 import type { Verdict } from "@/lib/model";
@@ -133,6 +134,7 @@ export function Feedback({
           )}
         </div>
       )}
+      <RegionTips item={item} base={base} t={t} />
       {missed.length > 0 && (
         <ul className="fb-note" style={{ margin: 0, paddingLeft: 18 }}>
           {missed.map((c) => (

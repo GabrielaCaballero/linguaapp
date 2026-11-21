@@ -18,12 +18,18 @@ export const unit: Unit = {
     {
       id: "hallo", legacyId: "de-hallo", type: "phrase", pos: "phrase", target: "Hallo",
       gloss: { es: "Hola", en: "Hello / Hi" },
+      variants: [
+        { region: "CH", text: "Hoi", dialect: true, note: { es: "Entre amigos; también «Sali».", en: "Among friends; also 'Sali'." } },
+      ],
       distractors: ["Tschüss", "Danke", "Bitte"],
       tags: ["greeting", "chunk"],
     },
     {
       id: "guten-morgen", legacyId: "de-morgen", type: "phrase", pos: "phrase", target: "Guten Morgen",
       gloss: { es: "Buenos días (por la mañana)", en: "Good morning" },
+      variants: [
+        { region: "CH", text: "Guete Morge", dialect: true, note: { es: "Así suena en suizo alemán.", en: "How it sounds in Swiss German." } },
+      ],
       distractors: ["Guten Abend", "Gute Nacht", "Guten Tag"],
       note: {
         es: "Hasta las diez u once de la mañana; después se dice «Guten Tag».",
@@ -74,6 +80,7 @@ export const unit: Unit = {
       variants: [
         { region: "AT", text: "Servus" },
         { region: "S-DE", text: "Servus" },
+        { region: "CH", text: "Tschau", dialect: true, note: { es: "En Suiza se oye más «Tschau» (o «Ciao») que «Tschüss».", en: "In Switzerland you hear 'Tschau' (or 'Ciao') more than 'Tschüss'." } },
       ],
       distractors: ["Hallo", "Danke", "Bitte"],
       note: {
@@ -85,7 +92,11 @@ export const unit: Unit = {
     {
       id: "auf-wiedersehen", legacyId: "de-wiedersehen", type: "phrase", pos: "phrase", target: "Auf Wiedersehen", register: "formal",
       gloss: { es: "Adiós (formal)", en: "Goodbye (formal)" },
-      variants: [{ region: "AT", text: "Auf Wiederschauen" }, { region: "S-DE", text: "Auf Wiederschauen" }],
+      variants: [
+        { region: "AT", text: "Auf Wiederschauen" },
+        { region: "S-DE", text: "Auf Wiederschauen" },
+        { region: "CH", text: "Uf Widerluege", dialect: true, note: { es: "La despedida formal en suizo alemán.", en: "The polite goodbye in Swiss German." } },
+      ],
       distractors: ["Auf Wiederhören", "Guten Abend", "Tschüss"],
       note: {
         es: "Por teléfono se dice «Auf Wiederhören» (hören = oír).",
@@ -105,7 +116,7 @@ export const unit: Unit = {
     {
       id: "danke", legacyId: "de-danke", type: "phrase", pos: "phrase", target: "Danke",
       gloss: { es: "Gracias", en: "Thank you / Thanks" },
-      accept: [{ text: "Danke schön" }, { text: "Vielen Dank" }, { text: "Danke sehr" }],
+      accept: [{ text: "Danke schön" }, { text: "Dankeschön" }, { text: "Vielen Dank" }, { text: "Danke sehr" }],
       variants: [{ region: "CH", text: "Merci" }, { region: "CH", text: "Merci vielmal" }],
       distractors: ["Bitte", "Hallo", "Tschüss"],
       note: { es: "En Suiza: «Merci vielmal».", en: "Switzerland: 'Merci vielmal'." },
@@ -114,7 +125,10 @@ export const unit: Unit = {
     {
       id: "bitte", legacyId: "de-bitte", type: "phrase", pos: "phrase", target: "Bitte",
       gloss: { es: "Por favor / De nada", en: "Please / You're welcome" },
-      accept: [{ text: "Bitte schön" }, { text: "Bitte sehr" }],
+      accept: [{ text: "Bitte schön" }, { text: "Bitteschön" }, { text: "Bitte sehr" }],
+      variants: [
+        { region: "CH", text: "Gern gschee", dialect: true, note: { es: "«De nada» en suizo alemán (después de un «Merci»).", en: "'You're welcome' in Swiss German (after a 'Merci')." } },
+      ],
       distractors: ["Danke", "Bitter", "Hallo"],
       note: {
         es: "Una palabra, tres usos: por favor, de nada y «aquí tienes».",
@@ -125,6 +139,9 @@ export const unit: Unit = {
     {
       id: "entschuldigung", legacyId: "de-entschuldigung", type: "phrase", pos: "phrase", target: "Entschuldigung",
       gloss: { es: "Perdón / Disculpe", en: "Excuse me / Sorry" },
+      variants: [
+        { region: "CH", text: "Exgüsi", dialect: true, note: { es: "Muy suizo: viene del francés «excusez».", en: "Very Swiss: from French 'excusez'." } },
+      ],
       distractors: ["Entscheidung", "Danke", "Bitte"],
       note: {
         es: "Sirve para llamar la atención («Disculpe…») y para pedir perdón.",
@@ -137,6 +154,13 @@ export const unit: Unit = {
       gloss: { es: "Sí", en: "Yes" },
       distractors: ["Nein", "Jein", "Na"],
       note: { es: "No = «Nein». La j alemana suena como «y»: ja ≈ «ya».", en: "No = 'Nein'. German j sounds like English 'y': ja ≈ 'yah'." },
+      tags: ["basic"],
+    },
+    {
+      id: "nein", type: "word", pos: "adv", target: "Nein",
+      gloss: { es: "No", en: "No" },
+      distractors: ["Ja", "Neun", "Nie"],
+      note: { es: "No la confundas con neun (nueve). «Nein, danke» = no, gracias.", en: "Don't mix it up with neun (nine). 'Nein, danke' = no, thanks." },
       tags: ["basic"],
     },
 
@@ -184,7 +208,7 @@ export const unit: Unit = {
     {
       id: "freut-mich", type: "phrase", pos: "phrase", target: "Freut mich.",
       gloss: { es: "Mucho gusto.", en: "Nice to meet you." },
-      accept: [{ text: "Freut mich sehr." }, { text: "Sehr erfreut." }],
+      accept: [{ text: "Freut mich sehr." }, { text: "Es freut mich." }, { text: "Sehr erfreut." }],
       distractors: ["Bitte schön.", "Gute Nacht.", "Wie bitte?"],
       note: {
         es: "Abreviatura de «Es freut mich» (me alegra). Respuesta: «Freut mich auch».",

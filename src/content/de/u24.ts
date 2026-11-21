@@ -99,7 +99,7 @@ export const unit: Unit = {
     {
       id: "entscheidung-bald", type: "sentence", target: "Wir müssen bald eine Entscheidung treffen.",
       gloss: { es: "Tenemos que tomar una decisión pronto.", en: "We need to make a decision soon." },
-      errors: [{ text: "Wir müssen bald eine Entscheidung machen.", feedback: { es: "En alemán una decisión se «encuentra»: eine Entscheidung treffen.", en: "German 'hits' a decision: eine Entscheidung treffen." } }],
+      errors: [{ text: "Wir müssen bald eine Entscheidung machen.", feedback: { es: "La combinación fija es «eine Entscheidung treffen» (no «machen»), como «tomar» en español.", en: "German 'hits' a decision: eine Entscheidung treffen." } }],
       distractors: ["machen", "nehmen", "treffe"],
       tags: ["collocations"],
     },

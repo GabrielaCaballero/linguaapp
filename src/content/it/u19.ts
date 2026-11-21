@@ -136,7 +136,7 @@ export const unit: Unit = {
     {
       id: "finito-il-progetto", type: "sentence", target: "Finito il progetto, siamo andati a cena.",
       gloss: { es: "Una vez terminado el proyecto, fuimos a cenar.", en: "Once the project was finished, we went out to dinner." },
-      accept: [{ text: "Dopo aver finito il progetto, siamo andati a cena." }],
+      accept: [{ text: "Dopo aver finito il progetto, siamo andati a cena." }, { text: "Finito il progetto, siamo andate a cena." }],
       distractors: ["Finendo", "abbiamo", "cenare"],
       tags: ["participio"],
     },

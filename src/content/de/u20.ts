@@ -109,6 +109,7 @@ export const unit: Unit = {
     {
       id: "laut-polizei", type: "sentence", target: "Laut Polizei wurde niemand verletzt.",
       gloss: { es: "Según la policía, nadie resultó herido.", en: "According to the police, nobody was injured." },
+      accept: [{ text: "Laut der Polizei wurde niemand verletzt." }],
       distractors: ["Laute", "wird", "verletzte"],
       tags: ["news", "passive"],
     },

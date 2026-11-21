@@ -124,6 +124,7 @@ export const unit: Unit = {
     {
       id: "nessuno-se-ne-e-accorto", type: "sentence", target: "Per fortuna nessuno se n'è accorto.",
       gloss: { es: "Por suerte nadie se dio cuenta.", en: "Luckily nobody noticed." },
+      accept: [{ text: "Per fortuna nessuno se ne è accorto." }, { text: "Fortunatamente nessuno se n'è accorto." }],
       distractors: ["ne", "accorgeva", "ha"],
       note: { es: "se ne = de eso (accorgersi di qualcosa → accorgersene).", en: "se ne = of it (accorgersi di qualcosa → accorgersene)." },
       tags: ["regret", "pronouns"],
@@ -240,6 +241,29 @@ export const unit: Unit = {
       },
       note: { es: "Además de «oportunidad», un'occasione es una ganga; d'occasione = de segunda mano." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "meno-male", type: "phrase", pos: "phrase", target: "Meno male!",
+      gloss: { es: "¡Menos mal!", en: "Thank goodness!" },
+      distractors: ["Meno mali!", "Più male!", "Male meno!"],
+      note: { es: "Igual que en español: Meno male che sei arrivato! = ¡Menos mal que llegaste!", en: "Meno male che sei arrivato! = Thank goodness you've arrived!" },
+      tags: ["connectors", "chunk"],
+    },
+    {
+      id: "rimprovero", type: "word", pos: "noun", target: "il rimprovero", gender: "m", plural: "i rimproveri",
+      gloss: { es: "el reproche, el regaño", en: "the reproach / telling-off" },
+      distractors: ["il rimborso", "il rimedio", "il riparo"],
+      note: { es: "rimproverare qualcuno = regañar o reprochar a alguien.", en: "rimproverare qualcuno = to tell someone off." },
+      tags: ["regret"],
+    },
+    {
+      id: "avresti-dovuto-dirmelo", type: "sentence", register: "informal", target: "Avresti dovuto dirmelo.",
+      gloss: { es: "Deberías habérmelo dicho.", en: "You should have told me." },
+      accept: [{ text: "Me l'avresti dovuto dire." }, { text: "Me lo avresti dovuto dire." }],
+      distractors: ["Dovresti", "detto", "mi"],
+      tags: ["regret", "conditional", "pronouns"],
     },
   ]),
 };

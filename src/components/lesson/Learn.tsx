@@ -9,6 +9,7 @@ import type { Dict } from "@/lib/i18n";
 import { gl, grammarPoint, per } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
 import { GrammarCard } from "./Grammar";
+import { RegionTips } from "./RegionTips";
 import { WordHints } from "./WordHints";
 import { NoAudio, Prompt, QuestionStem, Speaker, TargetWord, isCognate } from "./Exercises";
 
@@ -81,6 +82,7 @@ export function Learn({ item, base, t, canListen, onLearned, onDone, onNoAudio }
         <div className="title" lang={item.lang}>{item.target}</div>
         <div style={{ fontSize: "1.125rem" }}>{gl(item.gloss, base)}</div>
         {note && <div className="label muted">{note}</div>}
+        <RegionTips item={item} base={base} t={t} />
       </>
     );
   } else {
@@ -91,6 +93,7 @@ export function Learn({ item, base, t, canListen, onLearned, onDone, onNoAudio }
         <div style={{ fontSize: "1.25rem" }}>{gl(item.gloss, base)}</div>
         {item.plural && <div className="caption" lang={item.lang}>{item.plural}</div>}
         {note && <div className="label muted">{note}</div>}
+        <RegionTips item={item} base={base} t={t} />
         {item.example && <Example item={item} base={base} />}
       </>
     );

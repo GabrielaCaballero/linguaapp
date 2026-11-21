@@ -265,5 +265,21 @@ export const unit: Unit = {
       note: { es: "l'albergo = el hotel (también «l'hotel»); el albergue juvenil es «l'ostello»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "travel"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "binario", type: "word", pos: "noun", target: "il binario", gender: "m", plural: "i binari",
+      gloss: { es: "la vía (en la estación de tren)", en: "the platform (track)" },
+      distractors: ["il bancario", "il binocolo", "il diario"],
+      note: { es: "Il treno parte dal binario tre = el tren sale de la vía tres.", en: "Il treno parte dal binario tre = the train leaves from platform three." },
+      tags: ["travel", "transport"],
+    },
+    {
+      id: "nevica", type: "word", pos: "verb", target: "nevica",
+      gloss: { es: "nieva / está nevando", en: "it's snowing" },
+      distractors: ["neve", "naviga", "nevicata"],
+      note: { es: "nevicare: nevica, è nevicato (o ha nevicato). La nieve = la neve.", en: "nevicare: nevica, è nevicato (or ha nevicato). Snow = la neve." },
+      tags: ["weather"],
+    },
   ]),
 };

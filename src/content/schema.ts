@@ -80,7 +80,10 @@ export interface Item {
   gloss: Glossed;             // meaning; neutral Latin-American tú (es), international English (en)
   accept?: Alt[];
   errors?: KnownError[];
-  variants?: { region: Region; text: string; note?: PerBase }[]; // regional forms: always accepted as correct
+  /** Regional forms: accepted as correct, and shown as a tip ("CH · In Switzerland: …").
+   *  `dialect`: a spoken dialect form (Swiss German "Hoi") — shown as a tip only, never accepted
+   *  as a standard answer (decisions.md 2026-11-21). */
+  variants?: { region: Region; text: string; note?: PerBase; dialect?: true }[];
   register?: Register;        // only when it matters (tu/Lei, du/Sie)
   pos?: "noun" | "verb" | "adj" | "adv" | "prep" | "pron" | "num" | "phrase" | "other";
   gender?: "m" | "f" | "n";   // nouns

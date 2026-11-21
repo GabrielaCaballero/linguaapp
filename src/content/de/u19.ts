@@ -139,6 +139,7 @@ export const unit: Unit = {
     {
       id: "zum-monatsende-gekuendigt", type: "sentence", target: "Ich habe zum Ende des Monats gekündigt.",
       gloss: { es: "Renuncié con efecto a fin de mes.", en: "I've handed in my notice for the end of the month." },
+      accept: [{ text: "Ich habe zum Monatsende gekündigt." }],
       distractors: ["zur", "am", "gekündet"],
       tags: ["work", "genitive"],
     },
@@ -227,13 +228,13 @@ export const unit: Unit = {
       gloss: { es: "Me pondré en contacto con usted.", en: "I'll get back to you." },
       turns: [
         { who: "A", target: "Haben Sie die Unterlagen schon bekommen?", gloss: { es: "¿Ya recibió los documentos?", en: "Have you received the documents yet?" } },
-        { who: "B", target: "Ja, vielen Dank. Ich melde mich bis Ende der Woche bei Ihnen.", gloss: { es: "Sí, muchas gracias. Me pondré en contacto con usted antes del fin de semana.", en: "Yes, thank you. I'll get back to you by the end of the week." } },
+        { who: "B", target: "Ja, vielen Dank. Ich melde mich bis Ende der Woche bei Ihnen.", gloss: { es: "Sí, muchas gracias. Me pondré en contacto con usted antes de que termine la semana.", en: "Yes, thank you. I'll get back to you by the end of the week." } },
         { who: "A", target: "Prima, dann warte ich auf Ihre Rückmeldung.", gloss: { es: "Perfecto, entonces espero su respuesta.", en: "Great, I'll wait to hear from you then." } },
       ],
       question: {
         prompt: { es: "¿Cuándo dará B una respuesta?", en: "When will B get back to A?" },
         options: [
-          { es: "Antes del fin de semana", en: "By the end of the week" },
+          { es: "Antes de que termine la semana", en: "By the end of the week" },
           { es: "Hoy mismo", en: "Today" },
           { es: "El mes que viene", en: "Next month" },
           { es: "Cuando reciba los documentos", en: "When the documents arrive" },

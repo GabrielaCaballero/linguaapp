@@ -313,5 +313,27 @@ export const unit: Unit = {
       note: { es: "La «ch» española que viene de un «ct» latino → tt: noche → notte, ocho → otto." },
       exercises: ["guess", "recall"], tags: ["bridge", "cognate-pattern"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "a-presto", type: "phrase", pos: "phrase", target: "A presto!",
+      gloss: { es: "¡Hasta pronto!", en: "See you soon!" },
+      distractors: ["A prima!", "Presto!", "Al presto!"],
+      note: {
+        es: "«A presto» = hasta pronto; ojo: «pronto» en italiano significa «listo».",
+        en: "For when you'll see someone again soon, but not later today (that's 'a dopo').",
+      },
+      tags: ["greeting", "chunk"],
+    },
+    {
+      id: "salve", type: "phrase", pos: "phrase", target: "Salve",
+      gloss: { es: "Hola (neutro, ni muy formal ni informal)", en: "Hello (neutral, polite)" },
+      distractors: ["Salute", "Saluti", "Salvo"],
+      note: {
+        es: "Útil cuando no sabes si tratar de «tu» o de «Lei»: en tiendas, oficinas o con desconocidos.",
+        en: "Handy when you're not sure whether to use tu or Lei: in shops, offices or with strangers.",
+      },
+      tags: ["greeting", "chunk", "register"],
+    },
   ]),
 };

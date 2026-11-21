@@ -60,6 +60,8 @@ export interface Settings {
   vibration: boolean;
   reduceMotion: "system" | "on";
   theme: "system" | "light" | "dark";
+  /** Swiss forms on German words ("CH · In Switzerland: Grüezi"). Missing = on. */
+  regionTips?: boolean;
 }
 
 export interface Profile {

@@ -19,6 +19,9 @@ export const unit: Unit = {
   icon: "🔢",
   items: build("de", 3, "A1.1", [
     // ── Numbers ──────────────────────────────────────────────
+    num("null", "null", "cero (0)", "zero (0)", ["nur", "voll", "neun"], {
+      note: { es: "Los números de teléfono se dicen cifra por cifra: null eins sieben…", en: "Phone numbers are read digit by digit: null eins sieben…" },
+    }),
     num("eins", "eins", "uno (1)", "one (1)", ["eis", "elf", "einst"], {
       note: { es: "Al contar: eins; delante de un sustantivo: ein/eine (ein Kaffee).", en: "Counting: eins; before a noun: ein/eine (ein Kaffee)." },
     }),
@@ -84,6 +87,10 @@ export const unit: Unit = {
     num("dreissig", "dreißig", "treinta (30)", "thirty (30)", ["dreizig", "dreizehn", "dreißigste"], {
       note: { es: "Es la única decena con ß; las demás terminan en -zig: vierzig.", en: "The only tens word with ß; the others end in -zig: vierzig." },
     }),
+    num("vierzig", "vierzig", "cuarenta (40)", "forty (40)", ["vierzehn", "vierte", "fünfzig"]),
+    num("fuenfzig", "fünfzig", "cincuenta (50)", "fifty (50)", ["fünfzehn", "fünfte", "sechzig"], {
+      note: { es: "Ojo: sechzig (sin -s) y siebzig (sin -en), como en sechzehn y siebzehn.", en: "Watch out: sechzig (no -s) and siebzig (no -en), as in sechzehn and siebzehn." },
+    }),
     num("hundert", "hundert", "cien (100)", "a hundred (100)", ["tausend", "hundertste", "hunderte"], {
       accept: [{ text: "einhundert" }],
     }),
@@ -137,6 +144,9 @@ export const unit: Unit = {
     {
       id: "handy", legacyId: "de-f-handy", type: "word", pos: "noun", target: "das Handy", gender: "n", plural: "die Handys",
       gloss: { es: "el celular (móvil)", en: "the mobile / cell phone" },
+      variants: [
+        { region: "CH", text: "das Natel", note: { es: "Palabra suiza, algo anticuada; hoy también se dice «Handy».", en: "Swiss word, a bit dated; 'Handy' is common too." } },
+      ],
       distractors: ["die Hand", "das Hemd", "der Handschuh"],
       note: {
         es: "También «das Smartphone».",

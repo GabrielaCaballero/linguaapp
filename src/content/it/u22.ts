@@ -259,5 +259,21 @@ export const unit: Unit = {
       note: { es: "il romanzo = la novela; una historia de amor es «una storia d'amore»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "books"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "pittore", type: "word", pos: "noun", target: "il pittore", gender: "m", plural: "i pittori",
+      gloss: { es: "el pintor / la pintora", en: "the painter" },
+      accept: [{ text: "la pittrice" }],
+      distractors: ["il pittura", "il pettine", "il pittoresco"],
+      tags: ["art"],
+    },
+    {
+      id: "scultura", type: "word", pos: "noun", target: "la scultura", gender: "f", plural: "le sculture",
+      gloss: { es: "la escultura", en: "the sculpture" },
+      distractors: ["la scrittura", "la cultura", "la scultore"],
+      note: { es: "lo scultore / la scultrice = el escultor / la escultora.", en: "lo scultore / la scultrice = the sculptor." },
+      tags: ["art"],
+    },
   ]),
 };

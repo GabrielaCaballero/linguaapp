@@ -277,5 +277,28 @@ export const unit: Unit = {
       },
       tags: ["grammar", "prepositions", "table"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "carne", type: "word", pos: "noun", target: "la carne", gender: "f", plural: "le carni",
+      gloss: { es: "la carne", en: "the meat" },
+      distractors: ["il carne", "la cena", "la carta"],
+      tags: ["food"],
+    },
+    {
+      id: "pesce", type: "word", pos: "noun", target: "il pesce", gender: "m", plural: "i pesci",
+      gloss: { es: "el pescado / el pez", en: "the fish" },
+      distractors: ["la pesca", "il peso", "la pesce"],
+      note: { es: "Una sola palabra para el pez y el pescado. Ojo: la pesca = el durazno (melocotón) o la pesca.", en: "One word for the animal and the food. Careful: la pesca = peach (or fishing)." },
+      tags: ["food"],
+    },
+    {
+      id: "due-etti-prosciutto", type: "sentence", target: "Vorrei due etti di prosciutto.",
+      gloss: { es: "Quisiera doscientos gramos de jamón.", en: "I'd like two hundred grams of ham." },
+      accept: [{ text: "Vorrei due etti di prosciutto, per favore." }, { text: "Due etti di prosciutto, per favore." }],
+      errors: [{ text: "Vorrei due etti del prosciutto.", feedback: { es: "Tras una cantidad va «di» sin artículo: due etti di prosciutto.", en: "After a quantity, plain 'di' with no article: due etti di prosciutto." } }],
+      distractors: ["del", "etto", "dei"],
+      tags: ["shopping", "quantities"],
+    },
   ]),
 };
