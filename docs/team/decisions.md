@@ -255,3 +255,13 @@ Format: date · who · decision · why
 - Later (step 2, if it works): a listening-only "Schwiizerdütsch to understand" module on top of
   German, with recorded audio. A full Swiss German course isn't planned (no standard spelling, no
   phone voices, one dialect would have to be chosen).
+
+## 2026-11-21 · One colour for every course; flags; typing layout
+
+- No per-language accent colours any more (German was blue): the app keeps one look, the brand
+  terracotta, in every course. The round "IT"/"DE" seals became flags as postage stamps
+  (perforated edge, slight tilt: "learning a language = travelling"; picked over a round flag, a
+  typical-object illustration and a colour ribbon). Stripes come from the language registry, so a
+  new language brings its own.
+- Typing exercises: the answer box sits right under the prompt (no gap pushing it to the bottom),
+  so the phone keyboard no longer covers the word you're translating.

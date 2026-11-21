@@ -6,8 +6,11 @@ import type { BaseLang, TargetLang } from "./schema";
 export interface LangInfo {
   /** The language's own name ("Italiano", "Deutsch"): shown on course pickers. */
   native: string;
-  /** Two letters on the round seal. */
+  /** Two letters (screen readers, fallbacks). */
   seal: string;
+  /** The round flag shown next to the course name: stripes, top-to-bottom ("h") or left-to-right ("v").
+   *  A language isn't a country: pick the flag learners expect (owner, 2026-11-21). */
+  flag: { dir: "h" | "v"; colors: string[] };
   /** Speech-synthesis locale. */
   locale: string;
   /** One line under the name when choosing what to learn. */
@@ -20,6 +23,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
   it: {
     native: "Italiano",
     seal: "IT",
+    flag: { dir: "v", colors: ["#009246", "#ffffff", "#ce2b37"] },
     locale: "it-IT",
     tag: { en: "Bright, musical, close to Spanish", es: "Luminoso, musical, cercano al español" },
     canDo: {
@@ -30,6 +34,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
   de: {
     native: "Deutsch",
     seal: "DE",
+    flag: { dir: "h", colors: ["#000000", "#dd0000", "#ffce00"] },
     locale: "de-DE",
     tag: { en: "Precise, logical, spoken across central Europe", es: "Preciso, lógico, se habla en media Europa" },
     canDo: {

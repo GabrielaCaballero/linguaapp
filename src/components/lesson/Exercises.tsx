@@ -411,7 +411,8 @@ function Recall(p: ExProps) {
           </div>
         )}
       </Prompt>
-      <div className="answer-area">
+      {/* Typing: the box sits right under the word, so the phone keyboard never hides the prompt. */}
+      <div className="answer-area typing">
         <input
           ref={ref}
           className="input big"
