@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { previousPath, recordVisit } from "@/lib/navstack";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { TargetLang } from "@/content/schema";
-import { SEAL } from "@/lib/content";
+import { LANG_INFO, TARGET_LANGS } from "@/content";
 import { dict, type Dict } from "@/lib/i18n";
 import type { DB } from "@/lib/model";
 import { Icon } from "./icons";
@@ -23,10 +23,45 @@ export function useCourseT(db: DB | null): Dict {
   return dict((p && p.courses[p.activeLang]?.explainIn) ?? p?.appLang ?? "es");
 }
 
+/**
+ * The course's flag as a postage stamp: white paper with perforated edges, the flag inset, a
+ * slight tilt (owner, 2026-11-21: "learning a language = travelling"). Stripes come from the
+ * language registry, so a new language brings its own. Decorative: the name is always beside it.
+ */
+const STAMP_W = 50;
+const STAMP_H = 58;
+const STAMP_HOLES: [number, number][] = (() => {
+  const step = 7.2;
+  const out: [number, number][] = [];
+  for (let x = step / 2; x < STAMP_W; x += step) out.push([x, 0], [x, STAMP_H]);
+  for (let y = step / 2; y < STAMP_H; y += step) out.push([0, y], [STAMP_W, y]);
+  return out;
+})();
+
 export function Seal({ lang, size = 56 }: { lang: TargetLang; size?: number }) {
+  const id = useId().replace(/:/g, "");
+  const { dir, colors } = LANG_INFO[lang].flag;
+  const n = colors.length;
+  const [x0, y0, w, h] = [7, 7, 36, 44];
+  // Alternate the tilt between languages so two stamps side by side don't look copy-pasted.
+  const tilt = TARGET_LANGS.indexOf(lang) % 2 ? 4 : -5;
   return (
-    <span className="seal" data-l={lang} style={{ ["--size" as string]: `${size}px` }} aria-hidden="true">
-      {SEAL[lang]}
+    <span className="seal" data-l={lang} style={{ ["--size" as string]: `${size}px`, ["--tilt" as string]: `${tilt}deg` }} aria-hidden="true">
+      <svg viewBox={`0 0 ${STAMP_W} ${STAMP_H}`} width="100%" height="100%">
+        <mask id={`st${id}`}>
+          <rect width={STAMP_W} height={STAMP_H} fill="#fff" />
+          {STAMP_HOLES.map(([cx, cy], k) => (
+            <circle key={k} cx={cx} cy={cy} r={2.6} fill="#000" />
+          ))}
+        </mask>
+        <g mask={`url(#st${id})`}>
+          <rect width={STAMP_W} height={STAMP_H} fill="#fff" />
+          {colors.map((c, k) =>
+            dir === "v" ? <rect key={k} x={x0 + (w / n) * k} y={y0} width={w / n + 0.3} height={h} fill={c} /> : <rect key={k} x={x0} y={y0 + (h / n) * k} width={w} height={h / n + 0.3} fill={c} />,
+          )}
+          <rect x={x0} y={y0} width={w} height={h} fill="none" stroke="rgb(0 0 0 / 0.12)" />
+        </g>
+      </svg>
     </span>
   );
 }

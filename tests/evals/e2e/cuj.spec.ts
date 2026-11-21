@@ -145,7 +145,7 @@ test.describe("CUJ-3 daily return + P1-1 lesson length", () => {
 });
 
 test.describe("CUJ-4 second language (P1 Ana)", () => {
-  test("add Deutsch from Today: blue accent, chip for the other language, Italian untouched", async ({ page }) => {
+  test("add Deutsch from Today: same brand colour with a German flag, chip for the other language, Italian untouched", async ({ page }) => {
     await onboard(page, { appLang: "es", langs: [{ lang: "it", explainIn: "es", exp: "never" }] });
     await finishLesson(page, { lang: "it", base: "es", appLang: "es" });
     const before = await readDB(page);
@@ -165,6 +165,11 @@ test.describe("CUJ-4 second language (P1 Ana)", () => {
     expect(after.profile.courses.de.explainIn).toBe("es");
     await page.goto("/");
     expect(await page.evaluate(() => document.documentElement.dataset.lang)).toBe("de");
+    // One brand colour for every course (owner, 2026-11-21); the flag says which language.
+    const accent = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
+    const brand = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand").trim());
+    expect(accent).toBe(brand);
+    await expect(page.locator('.lang-switch .seal[data-l="de"] svg')).toBeVisible();
     // one place to switch: the labelled button shows the current language; its sheet lists the other
     await expect(page.locator(".lang-switch")).toContainText("Deutsch");
     await page.locator(".lang-switch").click();

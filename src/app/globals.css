@@ -7,7 +7,7 @@
    --brand, --brand-press, --brand-soft, --on-brand, --semola, --on-semola, --seal-it, --seal-de, --spring-soft, --t-display.
    Model (brand updated 2026-11-21 to terracotta + plum, see --brand): one shared brand colour for identity surfaces (logo, splash,
    sign-in, onboarding before a language is chosen, share card), and a per-language tint in --accent for
-   everything inside a course. layout.tsx always sets data-lang, so the :root accent (= brand) only shows
+   everything inside a course. Since 2026-11-21 every course uses the brand accent (no per-language colours); this shows
    when no course is active. */
 
 :root {
@@ -39,8 +39,6 @@
   --plum: #5a2349;
   --semola: #f2c14e;
   --on-semola: #1c1a17;
-  --seal-it: #b33f26;
-  --seal-de: #2e5bd8;
 
   /* language tint — defaults to the brand until a course is picked */
   --accent: var(--brand);
@@ -71,8 +69,6 @@
   color-scheme: light;
 }
 
-[data-lang="it"] { --accent: #b33f26; --accent-press: #8f3019; --accent-soft: #fbe6df; --on-accent: #ffffff; }
-[data-lang="de"] { --accent: #2e5bd8; --accent-press: #2349b3; --accent-soft: #e3eafc; --on-accent: #ffffff; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -104,8 +100,6 @@
     --e1: 0 0 0 1px var(--line); --e2: none; --e3: none;
     color-scheme: dark;
   }
-  :root:not([data-theme="light"])[data-lang="it"] { --accent: #ff8b6b; --accent-press: #ff6f4a; --accent-soft: #3a211a; --on-accent: #121110; }
-  :root:not([data-theme="light"])[data-lang="de"] { --accent: #8ea8ff; --accent-press: #7090ff; --accent-soft: #1b2340; --on-accent: #121110; }
 }
 :root[data-theme="dark"] {
   --bg: #121110;
@@ -136,8 +130,6 @@
   --e1: 0 0 0 1px var(--line); --e2: none; --e3: none;
   color-scheme: dark;
 }
-:root[data-theme="dark"][data-lang="it"] { --accent: #ff8b6b; --accent-press: #ff6f4a; --accent-soft: #3a211a; --on-accent: #121110; }
-:root[data-theme="dark"][data-lang="de"] { --accent: #8ea8ff; --accent-press: #7090ff; --accent-soft: #1b2340; --on-accent: #121110; }
 
 
 * { box-sizing: border-box; }
@@ -281,16 +273,16 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .input.big { font-family: var(--font-display); font-size: 1.5rem; min-height: 64px; }
 
 /* ── seal ─────────────────────────────────────────────────────────────── */
+/* The course's flag as a postage stamp (Seal in ui.tsx). One brand colour everywhere (no
+   per-language accents, owner 2026-11-21); the stamp says which language. --size = its height. */
 .seal {
   --size: 56px;
-  width: var(--size); height: var(--size); border-radius: 50%; flex: none;
-  display: grid; place-items: center; font-family: var(--font-display); font-weight: 650;
-  font-size: calc(var(--size) * 0.36); letter-spacing: 0.02em;
-  color: #fff; background: var(--seal, var(--accent));
-  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.12);
+  height: var(--size); width: calc(var(--size) * 0.862); flex: none;
+  display: inline-block; vertical-align: middle;
+  transform: rotate(var(--tilt, -5deg));
+  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.18));
 }
-.seal[data-l="it"] { --seal: var(--seal-it); }
-.seal[data-l="de"] { --seal: var(--seal-de); }
+.seal svg { display: block; }
 
 /* ── tab bar ──────────────────────────────────────────────────────────── */
 .tabbar {
@@ -369,6 +361,9 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .answer-area { margin-top: auto; display: flex; flex-direction: column; gap: var(--s3); padding-top: var(--s4); }
 /* Questions about a text: the question sits right above its answers, not at the top of the screen. */
 .answer-area.tight { margin-top: 0; }
+/* Typed answers: no gap between the prompt and the box (the keyboard covers the bottom half). */
+.answer-area.typing { margin-top: 0; padding-top: 0; }
+.prompt:has(+ .answer-area.typing) { padding-top: var(--s4); padding-bottom: var(--s3); }
 /* Learn cards and "This unit": the buttons stay pinned at the bottom however long the card is. */
 .learn ~ .answer-area, .unit-intro ~ .answer-area { position: sticky; bottom: 0; z-index: 3; background: linear-gradient(to top, var(--bg) 82%, transparent); padding-bottom: calc(env(safe-area-inset-bottom) + var(--s3)); }
 .question-text { margin: 0; }
