@@ -117,6 +117,7 @@ export const unit: Unit = {
     {
       id: "mi-piace-leggere", type: "sentence", target: "Mi piace leggere.",
       gloss: { es: "Me gusta leer.", en: "I like reading." },
+      accept: [{ text: "A me piace leggere." }],
       errors: [{ text: "Io piace leggere.", feedback: { es: "Como en español: mi piace (me gusta), no «io piace».", en: "Literally 'it pleases me': mi piace, not 'io piace'." } }],
       distractors: ["piacciono", "Io", "leggo"],
       tags: ["hobbies", "piacere"],
@@ -274,6 +275,23 @@ export const unit: Unit = {
       },
       note: { es: "salir = uscire (esco); «salire» es subir. La salida = l'uscita." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "ballare", type: "word", pos: "verb", target: "ballare",
+      gloss: { es: "bailar", en: "to dance" },
+      forms: { io: "ballo", tu: "balli", lui: "balla" },
+      distractors: ["bollire", "bagnare", "balbettare"],
+      tags: ["hobbies"],
+    },
+    {
+      id: "esco-con-gli-amici", type: "sentence", target: "Il sabato esco con gli amici.",
+      gloss: { es: "Los sábados salgo con mis amigos.", en: "On Saturdays I go out with my friends." },
+      accept: [{ text: "Esco con gli amici il sabato." }, { text: "Il sabato esco con i miei amici." }],
+      errors: [{ text: "Il sabato usco con gli amici.", feedback: { es: "uscire cambia la raíz: esco, esci, esce.", en: "uscire changes its stem: esco, esci, esce." } }],
+      distractors: ["usciamo", "i", "amico"],
+      tags: ["hobbies", "irregular"],
     },
   ]),
 };

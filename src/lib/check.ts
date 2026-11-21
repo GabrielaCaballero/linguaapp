@@ -266,7 +266,7 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
   const exactTargets: { text: string; reason: Reason }[] = [
     { text: item.target, reason: "exact" },
     ...(item.accept ?? []).filter((x) => x.verdict !== "almost").map((x) => ({ text: x.text, reason: "accept" as Reason })),
-    ...(item.variants ?? []).map((x) => ({ text: x.text, reason: "variant" as Reason })),
+    ...(item.variants ?? []).filter((x) => !x.dialect).map((x) => ({ text: x.text, reason: "variant" as Reason })),
   ];
   for (const t of exactTargets) {
     if (norm(t.text) === a) {

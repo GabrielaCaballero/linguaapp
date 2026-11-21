@@ -190,7 +190,7 @@ const bank: PlacementItem[] = [
     id: "it-p-16", lang: "it", cefr: "A1.2", b: -0.2, skill: "grammar", kind: "cloze", stem: "Ieri Marco ___ andato al cinema.",
     mcq: {
       prompt: { es: "Completa la frase.", en: "Complete the sentence." },
-      options: ["è", "ha", "hanno", "era"],
+      options: ["è", "ha", "hanno", "sono"],
       answer: 0,
     },
   },

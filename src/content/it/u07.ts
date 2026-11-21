@@ -165,6 +165,7 @@ export const unit: Unit = {
     {
       id: "mi-alzo-alle-sette", type: "sentence", target: "Mi alzo alle sette.",
       gloss: { es: "Me levanto a las siete.", en: "I get up at seven." },
+      accept: [{ text: "Io mi alzo alle sette." }],
       errors: [{ text: "Alzo alle sette.", feedback: { es: "Falta el reflexivo: mi alzo.", en: "The reflexive pronoun is missing: mi alzo." } }],
       distractors: ["ci", "alzi", "a"],
       tags: ["routine", "time", "reflexive"],
@@ -294,6 +295,23 @@ export const unit: Unit = {
       },
       note: { es: "El español «tarde» son dos palabras en italiano: tardi (no temprano) e il pomeriggio (la tarde del día)." },
       exercises: ["guess", "question"], tags: ["bridge", "transfer-tip"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "sera", type: "word", pos: "noun", target: "la sera", gender: "f", plural: "le sere",
+      gloss: { es: "la noche (desde el atardecer hasta la hora de dormir)", en: "the evening" },
+      distractors: ["la serra", "la cera", "il sera"],
+      note: { es: "stasera = esta noche; «la notte» es la noche tarde, cuando se duerme.", en: "stasera = this evening / tonight; 'la notte' is late night, when you sleep." },
+      tags: ["time"],
+    },
+    {
+      id: "vado-a-letto", type: "sentence", target: "Vado a letto alle undici.",
+      gloss: { es: "Me acuesto a las once.", en: "I go to bed at eleven." },
+      accept: [{ text: "Io vado a letto alle undici." }],
+      errors: [{ text: "Vado al letto alle undici.", feedback: { es: "Se dice «andare a letto», sin artículo.", en: "Italian says 'andare a letto', with no article." } }],
+      distractors: ["al", "dormo", "le"],
+      tags: ["routine", "time"],
     },
   ]),
 };

@@ -233,7 +233,7 @@ export const unit: Unit = {
       id: "dlg-rapporto", type: "dialogue", register: "informal", target: "Me la caverò.",
       gloss: { es: "Me las arreglaré.", en: "I'll manage." },
       turns: [
-        { who: "A", target: "Allora, ce la fai a finire il rapporto entro venerdì?", gloss: { es: "Entonces, ¿llegas a terminar el informe para el viernes?", en: "So, can you manage to finish the report by Friday?" } },
+        { who: "A", target: "Allora, ce la fai a finire la relazione entro venerdì?", gloss: { es: "Entonces, ¿llegas a terminar el informe para el viernes?", en: "So, can you manage to finish the report by Friday?" } },
         { who: "B", target: "Ci provo, ma non te lo garantisco.", gloss: { es: "Lo intento, pero no te lo garantizo.", en: "I'll try, but I can't promise." } },
         { who: "A", target: "Se hai bisogno di aiuto, dimmelo.", gloss: { es: "Si necesitas ayuda, dímelo.", en: "If you need help, tell me." } },
         { who: "B", target: "Grazie, me la caverò.", gloss: { es: "Gracias, me las arreglaré.", en: "Thanks, I'll manage." } },

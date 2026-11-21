@@ -39,7 +39,7 @@ export const unit: Unit = {
     {
       id: "capo", type: "word", pos: "noun", target: "il capo", gender: "m", plural: "i capi",
       gloss: { es: "el jefe / la jefa", en: "the boss" },
-      distractors: ["la capo", "il campo", "il capitale"],
+      distractors: ["il capello", "il campo", "il capitale"],
       tags: ["work"],
     },
     {
@@ -231,7 +231,7 @@ export const unit: Unit = {
         { who: "A", target: "Perché vorrebbe lavorare con noi?", gloss: { es: "¿Por qué querría trabajar con nosotros?", en: "Why would you like to work with us?" } },
         { who: "B", target: "Perché mi piacerebbe crescere in un'azienda internazionale.", gloss: { es: "Porque me gustaría crecer en una empresa internacional.", en: "Because I'd like to grow in an international company." } },
         { who: "A", target: "Quando sarebbe disponibile?", gloss: { es: "¿Cuándo estaría disponible?", en: "When would you be available?" } },
-        { who: "B", target: "Potrei cominciare dal primo settembre.", gloss: { es: "Podría empezar el primero de septiembre.", en: "I could start on the first of September." } },
+        { who: "B", target: "Potrei cominciare dal primo settembre.", gloss: { es: "Podría empezar a partir del primero de septiembre.", en: "I could start from the first of September." } },
       ],
       question: {
         prompt: { es: "¿Cuándo podría empezar B?", en: "When could B start?" },

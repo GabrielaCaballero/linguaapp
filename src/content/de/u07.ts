@@ -143,7 +143,7 @@ export const unit: Unit = {
     {
       id: "ich-stehe-auf", type: "sentence", target: "Ich stehe um sieben Uhr auf.",
       gloss: { es: "Me levanto a las siete.", en: "I get up at seven." },
-      accept: [{ text: "Ich stehe um sieben auf." }],
+      accept: [{ text: "Ich stehe um sieben auf." }, { text: "Um sieben Uhr stehe ich auf." }, { text: "Um sieben stehe ich auf." }],
       errors: [{ text: "Ich aufstehe um sieben Uhr.", feedback: { es: "El prefijo va al final: ich stehe … auf.", en: "The prefix goes to the end: ich stehe … auf." } }],
       distractors: ["aufstehe", "am", "stehen"],
       tags: ["routine", "separable"],
@@ -173,6 +173,7 @@ export const unit: Unit = {
     {
       id: "ich-rufe-dich-an", type: "sentence", register: "informal", target: "Ich rufe dich morgen an.",
       gloss: { es: "Te llamo mañana.", en: "I'll call you tomorrow." },
+      accept: [{ text: "Morgen rufe ich dich an." }],
       errors: [{ text: "Ich anrufe dich morgen.", feedback: { es: "anrufen es separable: ich rufe dich … an.", en: "anrufen is separable: ich rufe dich … an." } }],
       distractors: ["anrufe", "dir", "ruft"],
       tags: ["routine", "separable"],

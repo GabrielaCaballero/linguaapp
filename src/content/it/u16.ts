@@ -95,7 +95,7 @@ export const unit: Unit = {
     {
       id: "che-cosa-e-successo", type: "sentence", target: "Che cosa è successo?",
       gloss: { es: "¿Qué pasó?", en: "What happened?" },
-      accept: [{ text: "Cos'è successo?" }, { text: "Che è successo?" }, { text: "Cosa è successo?" }],
+      accept: [{ text: "Cos'è successo?" }, { text: "Che è successo?" }, { text: "Cosa è successo?" }, { text: "Che cos'è successo?" }],
       errors: [{ text: "Che cosa ha successo?", feedback: { es: "succedere va con essere: è successo.", en: "succedere takes essere: è successo." } }],
       distractors: ["ha", "successa", "succede"],
       tags: ["stories"],
@@ -249,6 +249,28 @@ export const unit: Unit = {
       },
       note: { es: "contare = contar números (conto fino a dieci); raccontare = contar una historia." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "racconto", type: "word", pos: "noun", target: "il racconto", gender: "m", plural: "i racconti",
+      gloss: { es: "el relato, el cuento", en: "the short story / tale" },
+      distractors: ["il raccolto", "il riscontro", "la racconta"],
+      tags: ["stories", "books"],
+    },
+    {
+      id: "fiaba", type: "word", pos: "noun", target: "la fiaba", gender: "f", plural: "le fiabe",
+      gloss: { es: "el cuento de hadas", en: "the fairy tale" },
+      accept: [{ text: "la favola" }],
+      distractors: ["la fibbia", "la fiamma", "la fama"],
+      note: { es: "Las fiabe se cuentan en passato remoto: il lupo mangiò la nonna.", en: "Fairy tales are told in the passato remoto: il lupo mangiò la nonna." },
+      tags: ["stories", "passato-remoto"],
+    },
+    {
+      id: "cera-una-volta", type: "sentence", target: "C'era una volta un re.",
+      gloss: { es: "Había una vez un rey.", en: "Once upon a time there was a king." },
+      distractors: ["c'è", "fu", "regina"],
+      tags: ["stories", "imperfetto"],
     },
   ]),
 };

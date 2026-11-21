@@ -243,5 +243,29 @@ export const unit: Unit = {
       note: { es: "En español «era» sirve para yo y él; en italiano no: io ero, lui era (y todo el imperfetto distingue -vo / -va)." },
       exercises: ["guess", "question"], tags: ["bridge", "transfer-tip", "imperfetto"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "campagna", type: "word", pos: "noun", target: "la campagna", gender: "f", plural: "le campagne",
+      gloss: { es: "el campo (la zona rural)", en: "the countryside" },
+      distractors: ["la campana", "la compagna", "il campagno"],
+      note: { es: "in campagna = en el campo. También es «la campaña» (campagna elettorale).", en: "in campagna = in the country. It also means 'campaign' (campagna elettorale)." },
+      tags: ["childhood", "places"],
+    },
+    {
+      id: "bambino", type: "word", pos: "noun", target: "il bambino", gender: "m", plural: "i bambini",
+      gloss: { es: "el niño / la niña", en: "the child (boy / girl)" },
+      accept: [{ text: "la bambina" }],
+      distractors: ["la bambola", "il bambù", "il babbo"],
+      note: { es: "da bambino/a = de niño/a. La muñeca es «la bambola».", en: "da bambino/a = as a child. A doll is 'la bambola'." },
+      tags: ["childhood", "family"],
+    },
+    {
+      id: "giocavo-in-piazza", type: "sentence", target: "Da piccolo giocavo sempre in piazza.",
+      gloss: { es: "De pequeño siempre jugaba en la plaza.", en: "As a child I always played in the square." },
+      accept: [{ text: "Da piccola giocavo sempre in piazza." }, { text: "Da bambino giocavo sempre in piazza." }, { text: "Da bambina giocavo sempre in piazza." }],
+      distractors: ["gioco", "giocato", "nella"],
+      tags: ["childhood", "imperfetto", "habit"],
+    },
   ]),
 };

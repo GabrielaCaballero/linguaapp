@@ -64,6 +64,13 @@ export const unit: Unit = {
 
     // ── Modal verbs ──────────────────────────────────────────
     {
+      id: "kino", type: "word", pos: "noun", target: "das Kino", gender: "n", plural: "die Kinos",
+      gloss: { es: "el cine", en: "the cinema (movie theater)" },
+      distractors: ["der Kino", "die Kinos", "das Kinn"],
+      note: { es: "ins Kino gehen = ir al cine.", en: "ins Kino gehen = to go to the cinema." },
+      tags: ["hobbies", "goethe-a1"],
+    },
+    {
       id: "koennen", type: "word", pos: "verb", target: "können",
       gloss: { es: "poder / saber (hacer algo)", en: "can / to be able to" },
       forms: { ich: "kann", du: "kannst", er: "kann", wir: "können" },

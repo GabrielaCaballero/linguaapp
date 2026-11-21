@@ -61,6 +61,16 @@ export const unit: Unit = {
       tags: ["food", "goethe-a1"],
     },
     {
+      id: "broetchen", type: "word", pos: "noun", target: "das Brötchen", gender: "n", plural: "die Brötchen",
+      gloss: { es: "el pancito (panecillo)", en: "the bread roll" },
+      variants: [
+        { region: "CH", text: "s Brötli", dialect: true, note: { es: "En suizo alemán: «es Brötli» o un «Weggli».", en: "In Swiss German: 'es Brötli' or a 'Weggli'." } },
+      ],
+      distractors: ["der Brötchen", "die Brötchen", "das Brot"],
+      note: { es: "-chen siempre es «das». En Austria y el sur de Alemania: die Semmel.", en: "-chen nouns are always 'das'. Austria and southern Germany say die Semmel." },
+      tags: ["food", "goethe-a1"],
+    },
+    {
       id: "kaese", type: "word", pos: "noun", target: "der Käse", gender: "m", plural: "die Käse",
       gloss: { es: "el queso", en: "the cheese" },
       distractors: ["die Käse", "die Kasse", "der Kuchen"],
@@ -101,6 +111,18 @@ export const unit: Unit = {
 
     // ── Ordering & paying ────────────────────────────────────
     {
+      id: "ich-habe-hunger", type: "sentence", target: "Ich habe Hunger.",
+      gloss: { es: "Tengo hambre.", en: "I'm hungry." },
+      accept: [{ text: "Ich bin hungrig." }],
+      errors: [{
+        text: "Ich bin Hunger.",
+        feedback: { es: "Como en español: Hunger haben (tener hambre). También se dice «ich bin hungrig».", en: "German 'has' hunger: Ich habe Hunger (or: ich bin hungrig)." },
+      }],
+      distractors: ["bin", "hat", "Durst"],
+      note: { es: "Igual con la sed: Ich habe Durst.", en: "Same with thirst: Ich habe Durst." },
+      tags: ["food", "haben", "chunk"],
+    },
+    {
       id: "einen-kaffee", legacyId: "de-kaffee", type: "phrase", pos: "phrase", target: "Einen Kaffee, bitte.",
       gloss: { es: "Un café, por favor.", en: "A coffee, please." },
       accept: [
@@ -120,7 +142,7 @@ export const unit: Unit = {
     {
       id: "ich-moechte", type: "sentence", target: "Ich möchte einen Tee, bitte.",
       gloss: { es: "Quisiera un té, por favor.", en: "I'd like a tea, please." },
-      accept: [{ text: "Ich möchte einen Tee." }, { text: "Ich hätte gern einen Tee, bitte." }, { text: "Ich hätte gerne einen Tee, bitte." }],
+      accept: [{ text: "Ich möchte einen Tee." }, { text: "Ich hätte gern einen Tee, bitte." }, { text: "Ich hätte gerne einen Tee, bitte." }, { text: "Ich hätte gern einen Tee." }],
       errors: [{
         text: "Ich möchte ein Tee, bitte.",
         feedback: { es: "Tee es masculino y es el objeto: einen Tee.", en: "Tee is masculine and the object: einen Tee." },

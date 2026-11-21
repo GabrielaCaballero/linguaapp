@@ -118,6 +118,7 @@ export const unit: Unit = {
     {
       id: "frueher-lange-haare", type: "sentence", target: "Früher hatte ich lange Haare.",
       gloss: { es: "Antes tenía el pelo largo.", en: "I used to have long hair." },
+      accept: [{ text: "Ich hatte früher lange Haare." }],
       distractors: ["habe", "langen", "Haar"],
       tags: ["memories", "praeteritum"],
     },
@@ -135,6 +136,14 @@ export const unit: Unit = {
       errors: [{ text: "Als wir ankamen, hatte der Zug schon abgefahren.", feedback: { es: "abfahren va con sein: war abgefahren.", en: "abfahren takes sein: war abgefahren." } }],
       distractors: ["hatte", "ist", "kamen"],
       tags: ["memories", "plusquamperfekt"],
+    },
+    {
+      id: "erinnere-mich-an-kindheit", type: "sentence", target: "Ich erinnere mich gern an meine Kindheit.",
+      gloss: { es: "Recuerdo con cariño mi infancia.", en: "I have fond memories of my childhood." },
+      accept: [{ text: "Ich erinnere mich gerne an meine Kindheit." }],
+      errors: [{ text: "Ich erinnere mich gern von meiner Kindheit.", feedback: { es: "sich erinnern an + acusativo: an meine Kindheit.", en: "sich erinnern an + accusative: an meine Kindheit." } }],
+      distractors: ["mir", "meiner", "von"],
+      tags: ["memories", "reflexive", "verb-preposition"],
     },
     {
       id: "kannst-du-dich-erinnern", type: "sentence", register: "informal", target: "Kannst du dich daran erinnern?",

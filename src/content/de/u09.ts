@@ -37,12 +37,22 @@ export const unit: Unit = {
     {
       id: "krankenhaus", type: "word", pos: "noun", target: "das Krankenhaus", gender: "n", plural: "die Krankenhäuser",
       gloss: { es: "el hospital", en: "the hospital" },
+      variants: [
+        { region: "CH", text: "das Spital", note: { es: "En Suiza (y Austria) el hospital es «das Spital», también en alemán estándar.", en: "In Switzerland (and Austria) a hospital is 'das Spital', in standard German too." } },
+      ],
       distractors: ["der Krankenhaus", "das Kaufhaus", "das Rathaus"],
       note: { es: "krank (enfermo) + das Haus. Compuesto: toma el género de la última palabra.", en: "krank (ill) + das Haus. A compound takes the gender of its last part." },
       tags: ["town", "compound", "goethe-a1"],
     },
 
     // ── Transport ────────────────────────────────────────────
+    {
+      id: "supermarkt", type: "word", pos: "noun", target: "der Supermarkt", gender: "m", plural: "die Supermärkte",
+      gloss: { es: "el supermercado", en: "the supermarket" },
+      distractors: ["die Supermarkt", "das Supermarkt", "der Marktplatz"],
+      note: { es: "der Markt → der Supermarkt; plural con umlaut: die Supermärkte.", en: "der Markt → der Supermarkt; plural with umlaut: die Supermärkte." },
+      tags: ["town", "compound", "goethe-a1"],
+    },
     {
       id: "bus", type: "word", pos: "noun", target: "der Bus", gender: "m", plural: "die Busse",
       gloss: { es: "el autobús", en: "the bus" },
@@ -64,6 +74,9 @@ export const unit: Unit = {
     {
       id: "fahrkarte", type: "word", pos: "noun", target: "die Fahrkarte", gender: "f", plural: "die Fahrkarten",
       gloss: { es: "el boleto (billete) de transporte", en: "the ticket (bus, train)" },
+      variants: [
+        { region: "CH", text: "das Billett", note: { es: "En Suiza el boleto es «das Billett» (de la SBB, en la app o la máquina).", en: "In Switzerland a ticket is 'das Billett' (SBB app or machine)." } },
+      ],
       distractors: ["der Fahrkarte", "die Fahrt", "die Landkarte"],
       tags: ["transport", "goethe-a1"],
     },
@@ -103,6 +116,13 @@ export const unit: Unit = {
       tags: ["directions", "goethe-a1"],
     },
     {
+      id: "ampel", type: "word", pos: "noun", target: "die Ampel", gender: "f", plural: "die Ampeln",
+      gloss: { es: "el semáforo", en: "the traffic lights" },
+      distractors: ["der Ampel", "die Lampe", "die Angel"],
+      note: { es: "bis zur Ampel = hasta el semáforo.", en: "bis zur Ampel = as far as the traffic lights." },
+      tags: ["directions", "goethe-a1"],
+    },
+    {
       id: "nah", type: "word", pos: "adj", target: "nah",
       gloss: { es: "cerca", en: "near / close" },
       distractors: ["nach", "nass", "weit"],
@@ -138,6 +158,7 @@ export const unit: Unit = {
     {
       id: "mit-dem-bus", type: "sentence", target: "Ich fahre mit dem Bus.",
       gloss: { es: "Voy en autobús.", en: "I'm going by bus." },
+      accept: [{ text: "Ich nehme den Bus." }],
       errors: [
         { text: "Ich fahre mit der Bus.", feedback: { es: "mit + dativo; der Bus es masculino → mit dem Bus.", en: "mit takes the dative; der Bus is masculine → mit dem Bus." } },
         { text: "Ich fahre mit Bus.", feedback: { es: "Falta el artículo: mit dem Bus.", en: "The article is missing: mit dem Bus." } },

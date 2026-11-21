@@ -225,3 +225,33 @@ Format: date · who · decision · why
   a small "Supported languages" link at the bottom opens the list (tap, or hover on a computer),
   next to Privacy. A sample-exercise card was tried and dropped (owner). No invented
   testimonials, store badges or numbers.
+
+## 2026-11-21 · Server-side size and volume limits
+
+- The app runs on the learner's device, so the database also caps what a (modified) app can
+  store: progress JSON ≤ 2 MB raw (the old cap measured compressed size, ~30 MB raw), device
+  label ≤ 100 chars, answer ids ≤ 40/120/24 chars, and ≤ 3000 answers per learner per day
+  (counter table `answer_quota`, only the trigger can touch it). Added as `alter table … not
+  valid` so it applies to the existing tables. Owner action: run supabase/schema.sql again.
+
+## 2026-11-21 · Type and welcome points
+
+- Fonts: Gabarito (rounded, friendly geometric) for titles and target-language words, and
+  Literata (calm book serif made for screens) for text — "fun + formal", unlike the usual
+  AI-built sites (owner picked it from a side-by-side of five pairs; Fraunces, Caprasimo, Young
+  Serif and a condensed Bricolage were rejected). Replaces Bricolage Grotesque + Inter.
+  Self-hosted via next/font.
+- Welcome points merged with the owner's prototype ("Designed for busy days and real retention"):
+  a short placement test; short lessons, even offline; real grammar reviewed on time, no games
+  or streaks. Nothing else from the prototype (no "3x faster", no store claims).
+
+## 2026-11-21 · Swiss tips in the German course (step 1 of the Swiss plan)
+
+- German words show their Swiss forms on the learn card and in feedback: "CH · In Switzerland:
+  Grüezi". Content `variants` with region "CH"; new `dialect: true` marks spoken Swiss German
+  (Hoi, Guete Morge, Tschau, Uf Widerluege, Gern gschee, Exgüsi, s Brötli) — shown as a tip, never
+  accepted as a standard answer. Swiss Standard German words (das Spital, das Billett, das Natel,
+  Grüezi, Merci) stay accepted. Settings → "Swiss tips (CH)", on by default for German learners.
+- Later (step 2, if it works): a listening-only "Schwiizerdütsch to understand" module on top of
+  German, with recorded audio. A full Swiss German course isn't planned (no standard spelling, no
+  phone voices, one dialect would have to be chosen).

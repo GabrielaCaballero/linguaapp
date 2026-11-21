@@ -146,7 +146,7 @@ export const unit: Unit = {
           es: "Partizip I (-end) = algo en curso, activo: die steigenden Preise. Partizip II = algo hecho, pasivo: das gekaufte Handy. Llevan terminación de adjetivo y pueden ampliarse: das gestern gekaufte Handy.",
           en: "Partizip I (-end) = ongoing, active: die steigenden Preise. Partizip II = done, passive: das gekaufte Handy. They take adjective endings and can be expanded: das gestern gekaufte Handy.",
         },
-        table: [["Partizip I", "der ankommende Zug (el tren que llega)"], ["Partizip II", "der angekommene Zug (el tren que ya llegó)"]],
+        table: [["Partizip I", "der ankommende Zug (el tren que llega / the arriving train)"], ["Partizip II", "der angekommene Zug (el tren que ya llegó / the train that has arrived)"]],
       },
       question: {
         prompt: { es: "«El tren que está llegando» es…", en: "'The arriving train' is…" },

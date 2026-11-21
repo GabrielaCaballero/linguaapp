@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter } from "next/font/google";
+import { Gabarito, Literata } from "next/font/google";
 import { Boot } from "@/components/Boot";
 import { SyncRunner } from "@/components/SyncRunner";
 import { AnalyticsTag } from "@/components/AnalyticsTag";
@@ -7,9 +7,11 @@ import { NavTracker } from "@/components/ui";
 import { AccountGate } from "@/components/AccountGate";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
-// Display face (titles, words in the language you learn): modern, warm, full Italian/German accents.
-const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-bricolage", axes: ["opsz", "wdth"], display: "swap" });
+// Type (owner, 2026-11-21: fun + formal, not the usual AI-site fonts): Gabarito, a rounded,
+// friendly geometric face, for titles and the words you learn; Literata, a calm book serif made
+// for long reading on screens, for text. Both have full Italian/German accents.
+const body = Literata({ subsets: ["latin", "latin-ext"], axes: ["opsz"], variable: "--font-body", display: "swap" });
+const display = Gabarito({ subsets: ["latin", "latin-ext"], variable: "--font-gabarito", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Linguina",
@@ -33,7 +35,7 @@ const BOOT = `try{var d=JSON.parse(localStorage.getItem("lingua:v2")||"null");va
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" data-lang="it" className={`${inter.variable} ${bricolage.variable}`} suppressHydrationWarning>
+    <html lang="es" data-lang="it" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOT }} />
       </head>

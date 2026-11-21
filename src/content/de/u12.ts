@@ -124,7 +124,7 @@ export const unit: Unit = {
     {
       id: "morgen-regnet-es", type: "sentence", target: "Morgen regnet es.",
       gloss: { es: "Mañana va a llover.", en: "It's going to rain tomorrow." },
-      accept: [{ text: "Es regnet morgen." }],
+      accept: [{ text: "Es regnet morgen." }, { text: "Morgen wird es regnen." }],
       errors: [{ text: "Morgen es regnet.", feedback: { es: "Verbo en segunda posición: Morgen regnet es.", en: "The verb comes second: Morgen regnet es." } }],
       distractors: ["ist", "Regen", "regen"],
       note: { es: "El presente sirve para el futuro con una palabra de tiempo: morgen regnet es.", en: "The present works for the future with a time word: morgen regnet es." },
@@ -162,6 +162,7 @@ export const unit: Unit = {
     {
       id: "lieber-mit-dem-zug", type: "sentence", target: "Ich fahre lieber mit dem Zug.",
       gloss: { es: "Prefiero ir en tren.", en: "I'd rather go by train." },
+      accept: [{ text: "Ich nehme lieber den Zug." }],
       distractors: ["gern", "den", "fährt"],
       tags: ["travel", "comparison"],
     },

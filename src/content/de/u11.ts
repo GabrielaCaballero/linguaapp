@@ -48,6 +48,13 @@ export const unit: Unit = {
 
     // ── At the doctor's ──────────────────────────────────────
     {
+      id: "fuss", type: "word", pos: "noun", target: "der Fuß", gender: "m", plural: "die Füße",
+      gloss: { es: "el pie", en: "the foot" },
+      distractors: ["das Fuß", "der Fluss", "der Fuchs"],
+      note: { es: "zu Fuß = a pie.", en: "zu Fuß = on foot." },
+      tags: ["body", "goethe-a1"],
+    },
+    {
       id: "arzt", type: "word", pos: "noun", target: "der Arzt", gender: "m", plural: "die Ärzte",
       gloss: { es: "el médico", en: "the doctor" },
       accept: [{ text: "die Ärztin" }],
@@ -74,6 +81,13 @@ export const unit: Unit = {
       distractors: ["der Tablette", "die Tabelle", "das Tablett"],
       note: { es: "Ojo: das Tablett = la bandeja.", en: "Careful: das Tablett = tray." },
       tags: ["health", "goethe-a1"],
+    },
+    {
+      id: "grippe", type: "word", pos: "noun", target: "die Grippe", gender: "f", plural: "die Grippen",
+      gloss: { es: "la gripe", en: "the flu" },
+      distractors: ["der Grippe", "die Krippe", "die Gruppe"],
+      note: { es: "Un resfriado = die Erkältung.", en: "A cold = die Erkältung." },
+      tags: ["health", "goethe-a2"],
     },
     {
       id: "krank", type: "word", pos: "adj", target: "krank",
@@ -127,8 +141,9 @@ export const unit: Unit = {
     {
       id: "kopfschmerzen", type: "sentence", target: "Ich habe Kopfschmerzen.",
       gloss: { es: "Me duele la cabeza.", en: "I have a headache." },
+      accept: [{ text: "Mir tut der Kopf weh." }, { text: "Der Kopf tut mir weh." }],
       distractors: ["bin", "Kopf", "hat"],
-      note: { es: "Siempre en plural: die Kopfschmerzen, die Bauchschmerzen.", en: "Usually plural: Kopfschmerzen, Bauchschmerzen." },
+      note: { es: "Casi siempre en plural: die Kopfschmerzen, die Bauchschmerzen.", en: "Usually plural: Kopfschmerzen, Bauchschmerzen." },
       tags: ["health"],
     },
     {
@@ -149,6 +164,10 @@ export const unit: Unit = {
     {
       id: "weil-ich-krank-bin", type: "sentence", target: "Ich kann nicht kommen, weil ich krank bin.",
       gloss: { es: "No puedo ir porque estoy enfermo/a.", en: "I can't come because I'm ill." },
+      accept: [{
+        text: "Ich kann nicht kommen, denn ich bin krank.", verdict: "almost",
+        feedback: { es: "Correcto con «denn» (verbo en 2.ª posición), pero aquí practicamos «weil»: …, weil ich krank bin.", en: "Correct with 'denn' (verb second), but this one practises 'weil': …, weil ich krank bin." },
+      }],
       errors: [{ text: "Ich kann nicht kommen, weil ich bin krank.", feedback: { es: "Después de weil, el verbo va al final: weil ich krank bin.", en: "After weil, the verb goes last: weil ich krank bin." } }],
       distractors: ["denn", "ist", "kranke"],
       tags: ["health", "weil", "word-order"],

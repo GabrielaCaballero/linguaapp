@@ -37,7 +37,7 @@ export const unit: Unit = {
     },
     {
       id: "essere-al-verde", type: "phrase", pos: "phrase", target: "essere al verde",
-      gloss: { es: "no tener un peso, estar sin plata", en: "to be broke" },
+      gloss: { es: "estar sin dinero, no tener ni un centavo", en: "to be broke" },
       distractors: ["essere al rosso", "essere in verde", "essere verde"],
       tags: ["idioms", "money"],
     },
@@ -233,7 +233,7 @@ export const unit: Unit = {
       question: {
         prompt: { es: "«Questo mese sono al verde» significa…", en: "'Questo mese sono al verde' means…" },
         options: [
-          { es: "Este mes no tengo un peso.", en: "This month I'm broke." },
+          { es: "Este mes no tengo ni un centavo.", en: "This month I'm broke." },
           { es: "Este mes estoy verde (me falta experiencia).", en: "This month I'm inexperienced." },
           { es: "Este mes estoy en el campo.", en: "This month I'm in the countryside." },
           { es: "Este mes como solo verduras.", en: "This month I'm only eating vegetables." },
@@ -242,6 +242,29 @@ export const unit: Unit = {
       },
       note: { es: "«Estar verde» (sin experiencia) en italiano es «essere alle prime armi»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "idioms"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "piove-a-catinelle", type: "phrase", pos: "phrase", target: "piove a catinelle",
+      gloss: { es: "llueve a cántaros", en: "it's pouring (with rain)" },
+      distractors: ["piove a catene", "piove in catinelle", "nevica a catinelle"],
+      note: { es: "Literalmente «llueve a palanganas» (la catinella = la palangana).", en: "Literally 'it's raining by the basinful' (la catinella = basin)." },
+      tags: ["idioms", "weather"],
+    },
+    {
+      id: "essere-in-gamba", type: "phrase", pos: "phrase", target: "essere in gamba",
+      gloss: { es: "ser muy capaz, ser muy listo/a", en: "to be smart / really capable" },
+      distractors: ["essere a gamba", "essere in gambe", "avere gamba"],
+      note: { es: "Tua sorella è proprio in gamba! Recuerda: la gamba = la pierna.", en: "Tua sorella è proprio in gamba! (Literally 'in leg'.)" },
+      tags: ["idioms"],
+    },
+    {
+      id: "diavolo-per-capello", type: "phrase", pos: "phrase", target: "avere un diavolo per capello",
+      gloss: { es: "estar furioso/a", en: "to be furious" },
+      distractors: ["avere un diavolo per testa", "avere un capello per diavolo", "essere un diavolo per capello"],
+      note: { es: "Literalmente «tener un diablo por cada pelo». Ojo: il capello = el pelo; il cappello = el sombrero.", en: "Literally 'a devil for every hair'. Careful: il capello = hair; il cappello = hat." },
+      tags: ["idioms"],
     },
   ]),
 };

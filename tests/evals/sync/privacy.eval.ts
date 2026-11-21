@@ -157,5 +157,10 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
   it("rows are deleted with the user (on delete cascade) and size-capped", () => {
     expect(sql).toContain("on delete cascade");
     expect(sql).toMatch(/check \(pg_column_size\(db\) < \d+\)/);
+    // Raw size, text ids and answers per day are capped too, also on tables that already exist.
+    expect(sql).toMatch(/add constraint user_state_db_text_size check \(octet_length\(db::text\) <= \d+\) not valid/);
+    expect(sql).toMatch(/add constraint user_reviews_text_len check \(char_length\(epoch\) <= \d+ and char_length\(item\) <= \d+ and char_length\(mode\) <= \d+\)/);
+    expect(sql).toMatch(/create trigger user_reviews_quota before insert on public\.user_reviews/);
+    expect(sql).toMatch(/revoke all on public\.answer_quota from anon, authenticated, public/);
   });
 });

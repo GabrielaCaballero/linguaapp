@@ -129,6 +129,7 @@ export const unit: Unit = {
     {
       id: "muss-zugeben", type: "sentence", register: "informal", target: "Ich muss zugeben, dass du recht hast.",
       gloss: { es: "Tengo que admitir que tienes razón.", en: "I have to admit you're right." },
+      accept: [{ text: "Ich muss zugeben, du hast recht." }],
       distractors: ["zugebe", "das", "hat"],
       tags: ["argument"],
     },

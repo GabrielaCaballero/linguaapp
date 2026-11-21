@@ -336,5 +336,22 @@ export const unit: Unit = {
       note: { es: "topo = ratón. El topo (animal) es «la talpa»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "strada", type: "word", pos: "noun", target: "la strada", gender: "f", plural: "le strade",
+      gloss: { es: "la calle", en: "the street / road" },
+      distractors: ["la stanza", "la strega", "lo strato"],
+      note: { es: "En las direcciones se dice «via»: abito in via Garibaldi.", en: "In addresses Italians say 'via': abito in via Garibaldi." },
+      tags: ["town"],
+    },
+    {
+      id: "ce-un-supermercato", type: "sentence", target: "C'è un supermercato qui vicino?",
+      gloss: { es: "¿Hay un supermercado cerca de aquí?", en: "Is there a supermarket near here?" },
+      accept: [{ text: "C'è un supermercato vicino?" }, { text: "C'è un supermercato qua vicino?" }],
+      errors: [{ text: "Ci sono un supermercato qui vicino?", feedback: { es: "Con un singular: c'è (ci sono va con plural).", en: "A singular takes c'è (ci sono is for plurals)." } }],
+      distractors: ["sono", "lontano", "una"],
+      tags: ["town", "directions"],
+    },
   ]),
 };

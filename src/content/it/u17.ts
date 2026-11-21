@@ -116,7 +116,7 @@ export const unit: Unit = {
     },
     {
       id: "come-se", type: "sentence", target: "Era come se non mi vedesse.",
-      gloss: { es: "Era como si no me viera.", en: "It was as if she didn't see me." },
+      gloss: { es: "Era como si no me viera.", en: "It was as if he or she didn't see me." },
       accept: [{ text: "Era come se non mi vedesse affatto." }],
       distractors: ["vedeva", "vede", "vedrebbe"],
       tags: ["hypotheses"],
@@ -180,7 +180,7 @@ export const unit: Unit = {
       id: "lis-insegnante", type: "listening",
       target: "Se potessi cambiare lavoro, farei l'insegnante. Mi piacerebbe lavorare con i bambini, ma per ora non me lo posso permettere.",
       gloss: {
-        es: "Si pudiera cambiar de trabajo, sería maestra. Me gustaría trabajar con niños, pero por ahora no me lo puedo permitir.",
+        es: "Si pudiera cambiar de trabajo, sería docente. Me gustaría trabajar con niños, pero por ahora no me lo puedo permitir.",
         en: "If I could change jobs, I'd be a teacher. I'd like to work with children, but for now I can't afford to.",
       },
       question: {
@@ -233,6 +233,29 @@ export const unit: Unit = {
       },
       note: { es: "«Sueño» son dos palabras: il sonno (dormir: ho sonno) e il sogno (soñar: un bel sogno)." },
       exercises: ["guess", "question"], tags: ["bridge", "transfer-tip"],
+    },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    {
+      id: "desiderio", type: "word", pos: "noun", target: "il desiderio", gender: "m", plural: "i desideri",
+      gloss: { es: "el deseo", en: "the wish / desire" },
+      distractors: ["il deserto", "il decimo", "il dessert"],
+      note: { es: "esprimere un desiderio = pedir un deseo.", en: "esprimere un desiderio = to make a wish." },
+      tags: ["wishes", "dreams"],
+    },
+    {
+      id: "immaginare", type: "word", pos: "verb", target: "immaginare",
+      gloss: { es: "imaginar", en: "to imagine" },
+      distractors: ["imparare", "immigrare", "ingannare"],
+      note: { es: "Doble m: immaginare, l'immagine.", en: "Double m: immaginare, l'immagine." },
+      tags: ["dreams", "doubles"],
+    },
+    {
+      id: "se-potessi-partirei", type: "sentence", target: "Se potessi, partirei domani.",
+      gloss: { es: "Si pudiera, me iría mañana.", en: "If I could, I'd leave tomorrow." },
+      errors: [{ text: "Se potrei, partirei domani.", feedback: { es: "Tras «se» nunca va el condicional: se potessi.", en: "Never the conditional after 'se': se potessi." } }],
+      distractors: ["potrei", "parto", "partissi"],
+      tags: ["hypotheses"],
     },
   ]),
 };

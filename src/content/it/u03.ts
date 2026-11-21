@@ -206,5 +206,19 @@ export const unit: Unit = {
       },
       exercises: ["question", "listen"], tags: ["listening", "numbers"],
     },
+
+    // ── Added in content review 2026-11-21 ───────────────────
+    num("dodici", "dodici", "doce (12)", "twelve (12)", ["dieci", "duodici", "dozzina"]),
+    num("diciassette", "diciassette", "diecisiete (17)", "seventeen (17)", ["diciotto", "dicisette", "settantasette"], {
+      note: { es: "Del 17 al 19, «dici-» va delante: diciassette, diciotto, diciannove.", en: "From 17 to 19, 'dici-' comes first: diciassette, diciotto, diciannove." },
+    }),
+    num("cinquanta", "cinquanta", "cincuenta (50)", "fifty (50)", ["cinquecento", "quindici", "cinquata"]),
+    {
+      id: "ha-diciassette-anni", type: "sentence", target: "Marco ha diciassette anni.",
+      gloss: { es: "Marco tiene diecisiete años.", en: "Marco is seventeen." },
+      errors: [{ text: "Marco è diciassette anni.", feedback: { es: "La edad va con «avere»: Marco ha diciassette anni.", en: "Age uses 'avere': Marco ha diciassette anni." } }],
+      distractors: ["è", "anno", "diciotto"],
+      tags: ["age", "numbers"],
+    },
   ]),
 };

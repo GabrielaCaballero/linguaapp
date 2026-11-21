@@ -258,7 +258,7 @@ export const unit: Unit = {
       turns: [
         { who: "A", target: "Na, wie war dein Wochenende?", gloss: { es: "Bueno, ¿qué tal tu fin de semana?", en: "So, how was your weekend?" } },
         { who: "B", target: "Super! Ich war auf einer Party. Und du?", gloss: { es: "¡Genial! Fui a una fiesta. ¿Y tú?", en: "Great! I went to a party. And you?" } },
-        { who: "A", target: "Ich habe nur geschlafen. Ich war total müde.", gloss: { es: "Yo solo dormí. Estaba muy cansado.", en: "I just slept. I was totally exhausted." } },
+        { who: "A", target: "Ich habe nur geschlafen. Ich war total müde.", gloss: { es: "Yo solo dormí. Estaba muy cansado/a.", en: "I just slept. I was totally exhausted." } },
       ],
       question: {
         prompt: { es: "¿Qué hizo A el fin de semana?", en: "What did A do at the weekend?" },
