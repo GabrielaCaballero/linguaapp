@@ -4,7 +4,7 @@
 // shared by all browser contexts in a test, so two contexts act like two phones.
 // CUJ-14 runs on the normal build (no Supabase configured): accounts must be invisible.
 import { expect, test, type BrowserContext, type Page, type Route } from "@playwright/test";
-import { onboard, playLesson, readDB, T, watchErrors } from "./helpers";
+import { onboard, playLesson, readDB, T, watchErrors, pickGoal } from "./helpers";
 
 const SYNC = `http://localhost:${process.env.EVAL_SYNC_PORT ?? 3510}`;
 const FAKE = "https://lingua-test.supabase.co";
@@ -310,8 +310,7 @@ test.describe("e2e-sync · an account before the first lesson", () => {
     await enterCode(page, "nuevo@example.com");
     await expect(page.getByRole("status").filter({ hasText: t.acctDone })).toBeVisible();
     await page.getByRole("button", { name: t.continue }).click();
-    await page.getByRole("button", { name: t.setGoal, exact: true }).click();
-    await page.getByRole("button", { name: t.startFirst }).click();
+    await pickGoal(page, t);
     await page.waitForURL(/\/lesson/);
     // The finished setup is in the account right away.
     await expect.poll(() => fake.rows.size).toBe(1);
@@ -656,8 +655,7 @@ test.describe("e2e-sync · sign in with Google", () => {
         expect(new URL(a.searchParams.get("redirect_to")!).origin).toBe(SYNC);
       }
       await page.getByRole("button", { name: t.continue }).click();
-      await page.getByRole("button", { name: t.setGoal, exact: true }).click();
-      await page.getByRole("button", { name: t.startFirst }).click();
+      await pickGoal(page, t);
       await page.waitForURL(/\/lesson/);
       await expect.poll(() => fake.rows.size).toBe(1);
       await page.goto("/me/settings");

@@ -5,7 +5,7 @@ import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import type { BaseLang, Cefr, TargetLang } from "@/content/schema";
-import type { Anchor, Experience, Goal } from "@/lib/model";
+import type { Experience, Goal } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
 import { dict } from "@/lib/i18n";
 import { LANG_NAME, units } from "@/lib/content";
@@ -15,14 +15,14 @@ import { clock } from "@/lib/dates";
 import { accountHref } from "@/lib/nav";
 import { clearSetupDraft, loadSetupDraft, saveSetupDraft } from "@/lib/setupDraft";
 import { getEngine, isSyncConfigured, useAccount } from "@/lib/sync/client";
-import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAnchor, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
+import { applyPlacement, finishOnboarding, saveGoal, setActiveLang, setAppLang, setCourse, skipPendingGoals } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { Icon } from "@/components/icons";
 import { Loading, Seal, Seg, Toast } from "@/components/ui";
 import { PlacementResult, PlacementTest, type PlacementOutcome } from "@/components/Placement";
 import { SimpleGoal } from "@/components/GoalPicker";
 
-type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "account" | "goal" | "anchor";
+type StepId = "welcome" | "appLang" | "langs" | "explain" | "exp" | "level" | "cando" | "pIntro" | "placement" | "pResult" | "account" | "goal";
 interface Step { id: StepId; lang?: TargetLang }
 interface LangDraft { explainIn: BaseLang; exp?: Experience; canDo: (number | null)[]; outcome?: PlacementOutcome; goal?: Goal; /** "I know my level": pick it instead of taking the test. */ known?: boolean }
 
@@ -62,7 +62,6 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     for (const l of initial.profile.pendingGoal!) out[l] = { explainIn: initial.profile.courses[l]?.explainIn ?? "es", canDo: [] };
     return out;
   });
-  const [anchor, setAnchorDraft] = useState<Anchor | undefined>(undefined);
   const [idx, setIdx] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [voices, setVoices] = useState(false);
@@ -100,7 +99,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     }
   if (mode === "new" && syncOn && !acct.user && langs.length) steps.push({ id: "account" });
   for (const l of langs) steps.push({ id: "goal", lang: l });
-  if (mode === "new") steps.push({ id: "anchor" });
+  // No "when do you practise?" step: Linguina has no reminders, so the answer did nothing (owner, 2026-11-22).
   const step = steps[Math.min(idx, steps.length - 1)];
   const lang = step.lang;
   const d = lang ? drafts[lang] : undefined;
@@ -145,7 +144,6 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
       if (x.goal) saveGoal(l, x.goal);
     }
     if (mode !== "goalOnly" && langs[0]) setActiveLang(langs[0]);
-    if (anchor) setAnchor(anchor);
     finishOnboarding();
   };
 
@@ -153,10 +151,20 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     if (!lang) return;
     patch(lang, { goal: g });
     const isLast = idx >= steps.length - 1;
-    if (isLast) {
-      commit({ lang, goal: g });
-      router.replace("/");
-    } else go();
+    if (!isLast) return go();
+    commit({ lang, goal: g });
+    if (mode !== "new") return router.replace("/");
+    // The end of a first setup: upload it now (other devices wait for it), then the first lesson.
+    void getEngine()?.syncNow();
+    // Today becomes the screen under the first lesson (so Back lands there, not outside the app):
+    // replace onboarding with Today, which then opens the lesson on top. Without an account,
+    // saving the progress comes first (AccountGate); Today then opens the lesson after signing in.
+    try {
+      sessionStorage.setItem("lingua:autostart", "1");
+    } catch {
+      /* no storage: Today just shows its Start button */
+    }
+    router.replace(syncOn && !acct.user ? accountHref("required") : "/");
   };
 
   const total = steps.length;
@@ -197,7 +205,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
             {/* Saved at once, so "I already have an account" opens in this language too. */}
             <Seg label={t.sAppLang} value={appLang} options={[{ v: "es" as BaseLang, label: "Español" }, { v: "en" as BaseLang, label: "English" }]} onChange={(b) => { setAppLangDraft(b); setAppLang(b); }} />
           </div>
-          <div className="grow" style={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center" }}>
+          <div className="grow v-center" style={{ textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="brand-logo logo-light" src="/brand/linguina-logo.png" alt={t.appName} width={124} height={88} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -354,7 +362,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     case "pIntro":
       body = (
         <>
-          <div className="grow stack" style={{ justifyContent: "center", textAlign: "center", alignItems: "center", gap: 16 }}>
+          <div className="grow stack v-center" style={{ textAlign: "center", alignItems: "center", gap: 16 }}>
             <Seal lang={lang!} size={72} />
             <h1 className="title">{t.placementIntroTitle}</h1>
             <p className="muted" style={{ margin: 0 }}>{t.placementIntroSub}</p>
@@ -423,58 +431,12 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
             daysPerWeek={initial.profile.settings.daysPerWeek}
             initial={d?.goal ?? initial.profile.courses[lang!]?.goal}
             t={t}
+            cta={mode === "new" && idx >= steps.length - 1 ? t.startFirst : undefined}
             onSave={onGoal}
           />
         </>
       );
       break;
-    case "anchor": {
-      const slots: { slot: Anchor["slot"]; label: string; time: string }[] = [
-        { slot: "morning", label: t.anchorMorning, time: "08:00" },
-        { slot: "commute", label: t.anchorCommute, time: "08:30" },
-        { slot: "lunch", label: t.anchorLunch, time: "13:00" },
-        { slot: "evening", label: t.anchorEvening, time: "20:00" },
-      ];
-      body = (
-        <>
-          <h1 className="title" style={{ marginTop: 8 }}>{t.anchorTitle}</h1>
-          <p className="muted">{t.anchorSub}</p>
-          <div className="chips" style={{ marginTop: 8 }}>
-            {slots.map((s) => (
-              <button key={s.slot} className="chip" aria-pressed={anchor?.slot === s.slot} onClick={() => setAnchorDraft({ slot: s.slot, time: anchor?.slot === s.slot ? anchor.time : s.time })}>
-                {s.label}
-              </button>
-            ))}
-          </div>
-          {anchor && (
-            <input type="time" className="input" style={{ marginTop: 16, maxWidth: 160 }} value={anchor.time} onChange={(e) => setAnchorDraft({ ...anchor, time: e.target.value })} aria-label={t.timeLabel} />
-          )}
-          <div className="bottom-bar">
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                commit();
-                // Signed up mid-setup: upload the finished setup now (other devices wait for it).
-                void getEngine()?.syncNow();
-                // Today becomes the screen under the first lesson (so Back lands there, not outside
-                // the app): replace onboarding with Today, which then opens the lesson on top.
-                // Without an account, saving the progress comes first (AccountGate); Today then
-                // opens the lesson after signing in.
-                try {
-                  sessionStorage.setItem("lingua:autostart", "1");
-                } catch {
-                  /* no storage: Today just shows its Start button */
-                }
-                router.replace(syncOn && !acct.user ? accountHref("required") : "/");
-              }}
-            >
-              {t.startFirst}
-            </button>
-          </div>
-        </>
-      );
-      break;
-    }
   }
 
   return (

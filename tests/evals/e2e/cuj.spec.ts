@@ -1,6 +1,6 @@
 // Category: e2e — scripted CUJs (spec §6) × personas (spec §2), plus Judge P0/P1 regressions.
 import { expect, test, type Page } from "@playwright/test";
-import { ageDB, languageLeaks, onboard, playLesson, quitLesson, readDB, T, watchErrors, writeDB } from "./helpers";
+import { ageDB, languageLeaks, onboard, playLesson, quitLesson, readDB, T, watchErrors, writeDB, pickGoal } from "./helpers";
 import { migrateV1Fixture } from "./v1-fixture";
 
 test.beforeEach(async ({ page }) => {
@@ -157,7 +157,7 @@ test.describe("CUJ-4 second language (P1 Ana)", () => {
     await page.getByRole("button", { name: T.es.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: T.es.expNever }).click();
     await page.getByRole("button", { name: T.es.continue }).click();
-    await page.getByRole("button", { name: T.es.setGoal }).click();
+    await pickGoal(page, T.es);
     await page.waitForURL((u) => !u.pathname.startsWith("/onboarding"));
     const after = await readDB(page);
     for (const id of Object.keys(before.cards)) if (id.startsWith("it-")) expect(after.cards[id]).toEqual(before.cards[id]);
@@ -295,6 +295,8 @@ test.describe("CUJ-7 change goal", () => {
       return out;
     });
     expect(covered).toEqual([]);
+    // The simple goal screen starts with nothing picked.
+    if (await page.getByRole("button", { name: T.en.setGoal }).isDisabled().catch(() => false)) await page.locator(".choice-card", { hasText: T.en.goalCardMin(5) }).first().click();
     await page.getByRole("button", { name: T.en.setGoal }).or(page.getByRole("button", { name: T.en.save })).first().click();
     expect(Date.now() - start).toBeLessThan(60_000);
     const db = await readDB(page);
@@ -344,8 +346,12 @@ test.describe("CUJ-2b I know my level", () => {
     await expect(page.getByText(t.placementStart)).toHaveCount(0);
     await page.locator(".choice-card", { hasText: t.knowB1 }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await expect(page.getByRole("button", { name: t.setGoal })).toBeVisible();
-    await page.getByRole("button", { name: t.setGoal }).click();
+    // Goal: nothing picked yet, no "what you'll reach" box, can't go on (owner, 2026-11-22).
+    await expect(page.getByRole("button", { name: t.startFirst })).toBeDisabled();
+    await expect(page.getByText(t.milestonesTitle)).toHaveCount(0);
+    await page.locator(".choice-card", { hasText: t.goalCardMin(10) }).click();
+    await expect(page.getByText(t.milestonesTitle)).toBeVisible();
+    // The last goal starts the first lesson: no "when do you practise?" step any more.
     await page.getByRole("button", { name: t.startFirst }).click();
     await page.waitForURL(/\/lesson/);
     const db = await readDB(page);
@@ -373,7 +379,7 @@ test.describe("CUJ-2b I know my level", () => {
     await expect(page.getByText(t.levelTitle(t.langName.de))).toBeVisible();
     await page.locator(".choice-card", { hasText: t.knowA2 }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await expect(page.getByRole("button", { name: t.setGoal })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.startFirst })).toBeVisible();
   });
 });
 
@@ -400,7 +406,7 @@ test.describe("CUJ-12 v1 owner upgrade", () => {
     await expect(page.getByRole("button", { name: T.es.setGoal })).toBeVisible();
     await expect(page.getByText(T.es.getStarted)).toHaveCount(0);
     while (await page.getByRole("button", { name: T.es.setGoal }).isVisible().catch(() => false)) {
-      await page.getByRole("button", { name: T.es.setGoal }).click();
+      await pickGoal(page, T.es);
       await page.waitForTimeout(300);
     }
     const db = await readDB(page);
@@ -484,8 +490,7 @@ test.describe("CUJ-31 learn a bit, try it (coursebook order, in small steps)", (
     await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expNever }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await page.getByRole("button", { name: t.setGoal }).click();
-    await page.getByRole("button", { name: t.startFirst }).click();
+    await pickGoal(page, t);
     await page.waitForURL(/\/lesson/);
     const intro = page.locator(".unit-intro");
     await expect(intro).toBeVisible();
@@ -623,8 +628,7 @@ test.describe("Navigation regressions (QA 2026-11-16)", () => {
     await page.getByRole("button", { name: t.continue, exact: true }).click(); // "explain in…": keep the default
     await page.locator(".choice-card", { hasText: t.expNever }).click();
     await page.getByRole("button", { name: t.continue, exact: true }).click();
-    await page.getByRole("button", { name: t.setGoal }).click();
-    await page.getByRole("button", { name: t.startFirst }).click();
+    await pickGoal(page, t);
     await page.waitForURL(/\/lesson/);
     const lessonUrl = page.url();
     await page.getByRole("button", { name: t.readGrammarFirst }).click();

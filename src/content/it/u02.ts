@@ -10,7 +10,7 @@ export const unit: Unit = {
   canDo: [
     { es: "Puedo decir mi nacionalidad, de dónde soy y dónde vivo.", en: "I can say my nationality, where I'm from and where I live." },
     { es: "Puedo decir qué idiomas hablo y preguntárselo a otros, de tú («tu») o de usted («Lei»).", en: "I can say which languages I speak and ask others, with tu and Lei." },
-    { es: "Puedo leer gli, gn y sc.", en: "I can read gli, gn and sc aloud." },
+    { es: "Puedo pronunciar bien palabras con gli, gn y sc.", en: "I can pronounce words with gli, gn and sc correctly." },
   ],
   icon: "🗺️",
   items: build("it", 2, "A1.1", [

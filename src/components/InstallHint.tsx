@@ -5,7 +5,7 @@
 import { useSyncExternalStore } from "react";
 import type { Dict } from "@/lib/i18n";
 
-type Where = "inApp" | "iosSafari" | null;
+type Where = "inApp" | "iosSafari" | "android" | null;
 
 function detect(): Where {
   const ua = navigator.userAgent;
@@ -13,6 +13,7 @@ function detect(): Where {
   if (standalone) return null;
   if (/FBAN|FBAV|Instagram|Line\/|Snapchat|MicroMessenger|; wv\)/.test(ua)) return "inApp";
   if (/iPhone|iPad|iPod/.test(ua) && /Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return "iosSafari";
+  if (/Android/.test(ua) && /Chrome\//.test(ua)) return "android";
   return null;
 }
 
@@ -23,7 +24,7 @@ export function InstallHint({ t }: { t: Dict }) {
   if (!where) return null;
   return (
     <p className="caption" role="note" style={{ margin: "16px auto 0", maxWidth: 320 }}>
-      {where === "inApp" ? t.installInApp : t.installIos}
+      {where === "inApp" ? t.installInApp : where === "android" ? t.installAndroid : t.installIos}
     </p>
   );
 }

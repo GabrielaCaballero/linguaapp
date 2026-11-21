@@ -6,7 +6,7 @@ export const unit: Unit = {
   lang: "it",
   index: 11,
   cefr: "A2",
-  title: { target: "Quando ero piccolo", es: "Cuando era pequeño", en: "When I was little" },
+  title: { target: "Quando ero piccolo", es: "La infancia", en: "When I was little" },
   canDo: [
     { es: "Puedo describir cómo era mi infancia y qué hacía habitualmente.", en: "I can describe my childhood and what I used to do." },
     { es: "Puedo contar una situación del pasado y algo que pasó en ella.", en: "I can describe a past situation and something that happened during it." },

@@ -14,7 +14,7 @@ export const unit: Unit = {
   canDo: [
     { es: "Puedo decir y entender números del 0 al 100.", en: "I can say and understand numbers from 0 to 100." },
     { es: "Puedo decir mi edad, mi teléfono y deletrear mi nombre.", en: "I can give my age and phone number, and spell my name." },
-    { es: "Oigo la diferencia entre consonantes simples y dobles.", en: "I can hear the difference between single and double consonants." },
+    { es: "Distingo al oído las consonantes simples de las dobles.", en: "I can hear the difference between single and double consonants." },
   ],
   icon: "🔢",
   items: build("it", 3, "A1.1", [

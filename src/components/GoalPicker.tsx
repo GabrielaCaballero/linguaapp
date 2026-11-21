@@ -201,15 +201,16 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
  * something near and concrete ("in about 2 weeks: say hello and order a coffee"), never a level
  * 17 months away. The full picker (level, trip date, classes) stays one tap away.
  */
-export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWeek, initial, t, onSave }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; startUnit: number; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void }) {
-  const [minutes, setMinutes] = useState<number>(initial?.minutesPerDay && [5, 10, 15].includes(initial.minutesPerDay) ? initial.minutesPerDay : 5);
+export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWeek, initial, t, onSave, cta }: { lang: TargetLang; base: BaseLang; appLang: BaseLang; current: Cefr; startUnit: number; daysPerWeek: number; initial?: Goal; t: Dict; onSave: (g: Goal) => void; cta?: string }) {
+  // Nothing picked at first (an edit keeps the saved pace): what you'll reach shows once you choose.
+  const [minutes, setMinutes] = useState<number | null>(initial?.minutesPerDay && [5, 10, 15].includes(initial.minutesPerDay) ? initial.minutesPerDay : null);
   const [full, setFull] = useState(false);
   const us = units(lang);
   const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "B2" };
   if (full)
-    return <GoalPicker lang={lang} base={base} appLang={appLang} current={current} daysPerWeek={daysPerWeek} initial={initial} t={t} onSave={onSave} />;
+    return <GoalPicker lang={lang} base={base} appLang={appLang} current={current} daysPerWeek={daysPerWeek} initial={initial} t={t} cta={cta} onSave={onSave} />;
   const checkpoints = (m: number) => unitCheckpoints(us, startUnit, m, daysPerWeek, base, lang);
-  const save = () => onSave({ kind: "steady", target: DEFAULT[current], minutesPerDay: minutes, retention: retentionFor("steady"), setAt: clock() });
+  const save = () => minutes && onSave({ kind: "steady", target: DEFAULT[current], minutesPerDay: minutes, retention: retentionFor("steady"), setAt: clock() });
   return (
     <>
       <div className="stack" style={{ gap: 12 }}>
@@ -228,17 +229,21 @@ export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWee
             </button>
           );
         })}
-        <div className="card-soft stack" style={{ gap: 6 }} aria-live="polite">
-          <b className="label">{t.milestonesTitle}</b>
-          {checkpoints(minutes).map((ms) => (
-            <span key={ms.unit} className="label">{t.milestoneIn(ms.days, ms.canDo)}</span>
-          ))}
-          <span className="caption">{t.milestoneNote}</span>
+        <div aria-live="polite">
+          {minutes && (
+            <div className="card-soft stack fade-in" style={{ gap: 6 }}>
+              <b className="label">{t.milestonesTitle}</b>
+              {checkpoints(minutes).map((ms) => (
+                <span key={ms.unit} className="label">{t.milestoneIn(ms.days, ms.canDo)}</span>
+              ))}
+              <span className="caption">{t.milestoneNote}</span>
+            </div>
+          )}
         </div>
         <button type="button" className="link label" style={{ alignSelf: "flex-start", minHeight: 44 }} onClick={() => setFull(true)}>{t.moreGoalOptions}</button>
       </div>
       <div className="bottom-bar">
-        <button className="btn btn-primary" onClick={save}>{t.setGoal}</button>
+        <button className="btn btn-primary" disabled={!minutes} onClick={save}>{cta ?? t.setGoal}</button>
       </div>
     </>
   );

@@ -1,8 +1,8 @@
 // Category: engine — which browser voice speaks Italian/German (src/lib/speech.ts). Robotic
 // voices (Apple's Eloquence family, novelty voices) must lose to any natural one, but still be
 // used when they are all the device has.
-import { describe, expect, it } from "vitest";
-import { bestVoice, matchVoices, type VoiceLike } from "../../../src/lib/speech";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { bestVoice, hasVoice, matchVoices, type VoiceLike } from "../../../src/lib/speech";
 
 const v = (name: string, lang: string, voiceURI = name, localService = true, def = false): VoiceLike => ({ name, lang, voiceURI, localService, default: def });
 
@@ -38,5 +38,24 @@ describe("speech · voice ranking", () => {
     expect(matchVoices(SAFARI_IT, "fr-FR")).toHaveLength(0);
     expect(bestVoice(SAFARI_IT, "fr-FR")).toBeUndefined();
     expect(matchVoices(SAFARI_IT, "de-DE").map((x) => x.name)).toEqual(["Anna"]);
+  });
+});
+
+describe("speech · home-screen iPhone (partial voice list)", () => {
+  const only = (list: VoiceLike[], ua: string) => {
+    vi.stubGlobal("window", { speechSynthesis: { getVoices: () => list } });
+    vi.stubGlobal("navigator", { userAgent: ua, maxTouchPoints: 5 });
+  };
+  const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1";
+  const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36";
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("an iPhone whose list lacks Italian still gets audio (it speaks by language)", () => {
+    only([v("Samantha", "en-US")], IPHONE);
+    expect(hasVoice("it")).toBe(true);
+  });
+  it("elsewhere, a loaded list without the language means no audio exercises", () => {
+    only([v("Google US English", "en-US")], ANDROID);
+    expect(hasVoice("it")).toBe(false);
   });
 });

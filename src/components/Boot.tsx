@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDB, requestPersistence } from "@/lib/store";
 import { dict } from "@/lib/i18n";
+import { unlockSpeechOnFirstTouch } from "@/lib/speech";
 import { Icon } from "./icons";
 
 /** Keeps <html> attributes in sync with settings, registers the service worker, shows the offline pill. */
@@ -23,6 +24,7 @@ export function Boot() {
   }, [db]);
 
   useEffect(() => {
+    unlockSpeechOnFirstTouch();
     requestPersistence();
     const sync = () => setOnline(navigator.onLine);
     sync();

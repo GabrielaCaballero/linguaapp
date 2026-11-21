@@ -10,7 +10,7 @@ export const unit: Unit = {
   canDo: [
     { es: "Puedo hablar de noticias, programas y artículos que leí o vi.", en: "I can talk about news, programmes and articles I've read or seen." },
     { es: "Puedo dar mi opinión, estar de acuerdo o no, y dar una consecuencia (deshalb).", en: "I can give my opinion, agree or disagree, and give a consequence (deshalb)." },
-    { es: "Sé las terminaciones del adjetivo tras ein y der.", en: "I can use adjective endings after ein and der." },
+    { es: "Sé las terminaciones de los adjetivos después de ein y der.", en: "I can use adjective endings after ein and der." },
   ],
   icon: "📰",
   items: build("de", 17, "B1", [

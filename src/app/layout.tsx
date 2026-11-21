@@ -15,7 +15,7 @@ const display = Gabarito({ subsets: ["latin", "latin-ext"], variable: "--font-ga
 
 export const metadata: Metadata = {
   title: "Linguina",
-  description: "Learn a new language a few minutes a day. Works offline.",
+  description: "Learn a new language a few minutes a day.",
   appleWebApp: { capable: true, title: "Linguina", statusBarStyle: "default" },
 };
 

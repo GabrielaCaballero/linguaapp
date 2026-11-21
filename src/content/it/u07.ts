@@ -8,7 +8,7 @@ export const unit: Unit = {
   cefr: "A1.2",
   title: { target: "La mia giornata", es: "Mi día", en: "My day" },
   canDo: [
-    { es: "Puedo contar mi rutina diaria con horas y frecuencia.", en: "I can describe my daily routine with times and how often." },
+    { es: "Puedo contar mi día a día: a qué hora y cada cuánto hago las cosas.", en: "I can describe my daily routine with times and how often." },
     { es: "Puedo preguntar y decir la hora.", en: "I can ask and tell the time." },
     { es: "Sé usar los verbos reflexivos y los verbos en -isc-.", en: "I can use reflexive verbs and -isc- verbs." },
   ],

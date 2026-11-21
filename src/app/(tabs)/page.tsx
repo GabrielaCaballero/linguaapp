@@ -137,7 +137,6 @@ export default function Today() {
     card = <Banner icon="moon" title={t.sleepHelped} sub={t.sleepHelpedSub} />;
   }
 
-  const anchorLabel = db.profile.anchor ? { morning: t.anchorMorning, commute: t.anchorCommute, lunch: t.anchorLunch, evening: t.anchorEvening }[db.profile.anchor.slot] : null;
   const unitCount = units(lang).length;
 
   return (
@@ -170,11 +169,6 @@ export default function Today() {
           </span>
           <span className="caption">{t.unitN(unit.index)} / {unitCount}</span>
         </Ring>
-        {anchorLabel && (
-          <span className="pill" style={{ marginTop: 16 }}>
-            <Icon name="clock" size={14} /> {t.yourTime(`${anchorLabel} · ${db.profile.anchor!.time}`)}
-          </span>
-        )}
       </section>
 
       {card && <section style={{ marginBottom: 12 }} className="fade-in">{card}</section>}

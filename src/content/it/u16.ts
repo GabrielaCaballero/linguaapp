@@ -8,7 +8,7 @@ export const unit: Unit = {
   cefr: "B1",
   title: { target: "Racconti", es: "Relatos", en: "Stories" },
   canDo: [
-    { es: "Puedo contar una anécdota en orden, con lo que había pasado antes.", en: "I can tell an anecdote in order, including what had happened before." },
+    { es: "Puedo contar una anécdota en orden, incluido lo que había pasado antes.", en: "I can tell an anecdote in order, including what had happened before." },
     { es: "Puedo unir frases con che, cui y il quale.", en: "I can join sentences with che, cui and il quale." },
     { es: "Reconozco el passato remoto en cuentos y textos escritos.", en: "I can recognise the passato remoto in stories and written texts." },
   ],

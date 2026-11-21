@@ -222,7 +222,7 @@ Format: date · who · decision · why
 - Welcome stays minimal: the sub-line explains why it sticks ("Each word comes back just before
   you'd forget it"); step 2 states the value ("Real grammar and practice, no games or streaks").
   No language icons or "from Spanish or English" copy (more languages, maybe more bases, later):
-  a small "Supported languages" link at the bottom opens the list (tap, or hover on a computer),
+  a small "Languages you can learn" link at the bottom opens the list (tap, or hover on a computer),
   next to Privacy. A sample-exercise card was tried and dropped (owner). No invented
   testimonials, store badges or numbers.
 
@@ -265,3 +265,51 @@ Format: date · who · decision · why
   new language brings its own.
 - Typing exercises: the answer box sits right under the prompt (no gap pushing it to the bottom),
   so the phone keyboard no longer covers the word you're translating.
+
+## 2026-11-22 · Leaner setup and profile; small-screen layout fix
+
+- Goal step: no pace is preselected; the "what you'll reach" box appears once the learner picks
+  5/10/15 min, and the button stays disabled until then. An edit (goal already saved) keeps it.
+- No "When will you practise?" step: Linguina has no reminders or notifications, so the answer
+  did nothing. The last goal's button is "Start my first lesson"; Today no longer shows "Your
+  practice time". Old profiles keep `profile.anchor` (just unused).
+- Me: "Remembered after a week" and the long "What you can do" list removed (many words, little
+  value; the page was ~5000px tall).
+- Small phones: screens centred with `justify-content: center` pushed overflowing content above
+  the top (logo over the language switch) and under the bottom button (last lines unreachable).
+  `.v-center` (auto margins) centres when there's room and scrolls when there isn't: welcome,
+  placement result, lesson results.
+- Spanish welcome heading: "Para que tu poco tiempo rinda" (owner).
+
+## 2026-11-22 · Copy: no offline promise, clearer course list, facts on languages
+
+- "Works offline" removed from the welcome and the app description: never tested end to end, so
+  not promised (the app still keeps working when the connection drops). Point 2 is now "Short
+  lessons — five minutes: the commute, a coffee break, a wait".
+- Spanish point 3: "Gramática en serio y repasos en el momento justo" (more natural).
+- "Supported languages" → "Languages you can learn" (it read like the explanation languages).
+- Install tip says "add a Linguina shortcut to your home screen", now also on Android Chrome.
+- Course cards: instead of describing the language, how many people speak it and how hard it is
+  from your language (Ethnologue 2024 speakers; FSI training times; sources in languages.ts).
+
+## 2026-11-22 · Spanish pass: natural, not literal
+
+- The owner found the Spanish read like a word-for-word translation ("Elige lo que te entra en un
+  día", "Puedo leer en voz alta c, g, ch y gh"). About 45 UI strings rewritten for meaning, e.g.
+  "¿Cuánto tiempo tienes en un día normal?", "¿En qué idioma te explicamos el italiano?",
+  "Empezar en un nivel más fácil", "1 palabra que fallaste ayer", "Todavía no" (wrong answer),
+  "test" instead of "prueba" throughout setup, gender-neutral "seguro/a".
+- Unit can-dos: pronunciation ones now say what you'll manage ("Puedo pronunciar bien palabras
+  con c, g, ch y gh"), plus nine other can-dos and one unit title ("La infancia").
+- Rule for new copy: write the Spanish for meaning first, then check it against the English, not
+  the other way round.
+
+## 2026-11-22 · Audio in the iPhone home-screen app
+
+- Owner: no audio at all when Linguina is opened from the iPhone home screen (twice). Known
+  WebKit behaviour: a home-screen web app can see a partial voice list (no Italian/German) or an
+  empty one, and iOS drops speech that starts before the first touch.
+- Fix: on Apple devices `hasVoice` never hides audio because of the list (speech then asks by
+  language only), and the first touch anywhere speaks a silent utterance to unlock speech, so a
+  word's automatic "listen" works afterwards. Not verified on a real iPhone yet (owner to check
+  after deploy; also the ring/silent switch and volume).
