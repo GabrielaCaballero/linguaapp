@@ -105,7 +105,40 @@ export function hasVoice(lang: TargetLang): boolean {
   } catch {
     return false;
   }
+  // iPhone/iPad (and Safari on a Mac): the list a web app sees can be partial — on a home-screen
+  // app it may lack Italian or German even though the phone speaks them when asked by language.
+  // So on Apple devices never hide audio over the list; speak() then asks by language only.
+  if (isApple()) return true;
   return matchVoices(allVoices(), LOCALE[lang]).length > 0;
+}
+
+/** iPhone, iPad (including iPadOS that reports as a Mac) or Safari on a Mac. */
+export function isApple(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg\//.test(ua)) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * iOS plays speech only after the user has touched the page once; an automatic "listen" before
+ * that (a new word on screen) is dropped silently, and on a home-screen app it could stay
+ * silent. The first touch anywhere speaks an empty, silent utterance to unlock speech.
+ */
+export function unlockSpeechOnFirstTouch() {
+  if (!canSpeak() || typeof document === "undefined") return;
+  const unlock = () => {
+    try {
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    } catch {
+      /* nothing to unlock */
+    }
+    document.removeEventListener("pointerdown", unlock, true);
+    document.removeEventListener("keydown", unlock, true);
+  };
+  document.addEventListener("pointerdown", unlock, { capture: true, once: true });
+  document.addEventListener("keydown", unlock, { capture: true, once: true });
 }
 
 /** Resolve once voices are loaded (or after a short timeout). */

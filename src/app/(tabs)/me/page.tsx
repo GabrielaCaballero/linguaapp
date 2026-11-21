@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDB } from "@/lib/store";
 import { useNow } from "@/lib/hooks";
-import { gl, LANG_NAME, units } from "@/lib/content";
-import { avgMinutes, calibration, courseLangs, rememberedAfterWeek, targetFor, testerStats, unitProgress, weekStrip, wordBuckets } from "@/lib/stats";
+import { LANG_NAME } from "@/lib/content";
+import { avgMinutes, calibration, courseLangs, targetFor, testerStats, weekStrip, wordBuckets } from "@/lib/stats";
 import { fmtMonth, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
 import { saveGoal, setActiveLang } from "@/lib/actions";
@@ -39,7 +39,6 @@ export default function MePage() {
   const status = db.sessions.length < 3 ? null : pace >= 1.1 ? t.aheadPace : pace >= 0.8 ? t.onTrack : t.behindPace;
   const week = weekStrip(db, now);
   const wb = wordBuckets(db, lang);
-  const rem = rememberedAfterWeek(db, lang);
   const cal = calibration(db, lang);
   const dayFmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
 
@@ -130,27 +129,6 @@ export default function MePage() {
           </div>
           <div className="caption" style={{ marginTop: 6 }}>{t.wordsSub}</div>
         </Link>
-
-        <div className="card">
-          <div className="caption">{t.rememberedWeek}</div>
-          {rem ? <div className="stat" style={{ margin: "6px 0" }}>{rem.pct}%</div> : null}
-          <div className="caption">{rem ? `${t.rememberedWeekSub} (n=${rem.n})` : t.rememberedNone}</div>
-        </div>
-
-        <div className="card stack" style={{ gap: 10 }}>
-          <div className="caption">{t.canDos}</div>
-          {units(lang).map((u) => {
-            const p = unitProgress(db, u);
-            return u.canDo.map((c, k) => (
-              <div key={`${u.id}-${k}`} className="row" style={{ alignItems: "flex-start" }}>
-                <span className={`tick${p.canDo ? " on" : ""}`} aria-label={p.canDo ? "✓" : ""}>
-                  <Icon name="check" size={14} strokeWidth={3} />
-                </span>
-                <span className="label" style={{ color: p.canDo ? "var(--text)" : "var(--text-2)" }}>{gl(c, base)}</span>
-              </div>
-            ));
-          })}
-        </div>
 
         <div className="card stack" style={{ gap: 8 }}>
           <div className="caption">{t.calibration}</div>

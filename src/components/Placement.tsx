@@ -149,7 +149,7 @@ export function PlacementResult({ lang, base, outcome, t, onChange, onContinue }
   const shiftUnit = (dir: -1 | 1) => onChange(outcomeFor(lang, outcome.state, Math.max(1, Math.min(max, outcome.unit + dir))));
   return (
     <>
-      <div className="grow stack" style={{ justifyContent: "center", textAlign: "center", alignItems: "center", gap: 16 }}>
+      <div className="grow stack v-center" style={{ textAlign: "center", alignItems: "center", gap: 16 }}>
         <span style={{ fontSize: 56 }} aria-hidden="true">{u?.icon}</span>
         <h1 className="title">{t.resultTitle(outcome.cefr)}</h1>
         <p className="h2" style={{ fontWeight: 500 }}>{t.resultStart(outcome.unit, `${u?.title.target ?? ""} · ${u ? gl(u.title, base) : ""}`)}</p>

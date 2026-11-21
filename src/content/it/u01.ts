@@ -10,7 +10,7 @@ export const unit: Unit = {
   canDo: [
     { es: "Puedo saludar y despedirme en situaciones formales e informales.", en: "I can say hello and goodbye, formally and informally." },
     { es: "Puedo decir mi nombre y preguntar el de otra persona.", en: "I can say my name and ask someone theirs." },
-    { es: "Puedo leer en voz alta c, g, ch y gh.", en: "I can read c, g, ch and gh aloud." },
+    { es: "Puedo pronunciar bien palabras con c, g, ch y gh.", en: "I can pronounce words with c, g, ch and gh correctly." },
   ],
   icon: "👋",
   items: build("it", 1, "A0", [

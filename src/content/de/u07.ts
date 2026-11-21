@@ -8,7 +8,7 @@ export const unit: Unit = {
   cefr: "A1.2",
   title: { target: "Mein Tag", es: "Mi día", en: "My day" },
   canDo: [
-    { es: "Puedo contar mi rutina diaria con horas.", en: "I can describe my daily routine with times." },
+    { es: "Puedo contar mi día a día y a qué hora hago cada cosa.", en: "I can describe my daily routine with times." },
     { es: "Puedo preguntar y decir la hora.", en: "I can ask and tell the time." },
     { es: "Sé usar los verbos separables (ich stehe um sieben auf).", en: "I can use separable verbs (ich stehe um sieben auf)." },
   ],

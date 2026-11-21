@@ -165,6 +165,12 @@ a { color: inherit; }
 }
 .screen.full { padding-bottom: calc(env(safe-area-inset-bottom) + var(--s4)); }
 .grow { flex: 1; }
+/* Vertically centred when there's room, top-aligned and scrollable when there isn't. (Plain
+   justify-content: center pushed overflowing content above the top and under the bottom button
+   on small phones: logo over the language switch, last lines unreachable.) */
+.v-center { display: flex; flex-direction: column; }
+.v-center > :first-child { margin-top: auto; }
+.v-center > :last-child { margin-bottom: auto; }
 .row { display: flex; align-items: center; gap: var(--s3); }
 .between { justify-content: space-between; }
 .stack { display: flex; flex-direction: column; gap: var(--s3); }

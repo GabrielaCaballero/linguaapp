@@ -9,7 +9,7 @@ export const unit: Unit = {
   title: { target: "Erinnerungen", es: "Recuerdos", en: "Memories" },
   canDo: [
     { es: "Puedo contar recuerdos de mi infancia y mi vida.", en: "I can talk about memories of my childhood and my life." },
-    { es: "Puedo narrar hechos en orden, con lo que había pasado antes.", en: "I can narrate events in order, including what had happened before." },
+    { es: "Puedo contar hechos en orden, incluido lo que había pasado antes.", en: "I can narrate events in order, including what had happened before." },
     { es: "Sé usar el Präteritum, el Plusquamperfekt y elegir entre als y wenn.", en: "I can use the Präteritum and Plusquamperfekt and choose between als and wenn." },
   ],
   icon: "🕰️",

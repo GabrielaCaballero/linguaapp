@@ -48,7 +48,7 @@ export function Results({ t, summary, onDone, onMore }: { t: Dict; summary: Sess
   return (
     <main className="screen full" style={{ textAlign: "center" }}>
       {reached && <Confetti />}
-      <div className="grow" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 24 }}>
+      <div className="grow v-center" style={{ alignItems: "center", gap: 20, paddingTop: 24 }}>
         <Ring value={target ? mins / target : 1} size={188} gold={reached} label={t.todayOf(Math.round(mins), target)}>
           <span className="stat">{Math.round(mins)}</span>
           <span className="caption">/ {target} {t.min}</span>

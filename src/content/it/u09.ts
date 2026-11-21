@@ -9,7 +9,7 @@ export const unit: Unit = {
   title: { target: "Fare la spesa", es: "Hacer las compras", en: "Food shopping" },
   canDo: [
     { es: "Puedo comprar comida en una tienda o un mercado y pedir cantidades.", en: "I can buy food in a shop or market and ask for quantities." },
-    { es: "Puedo preguntar cuánto cuesta algo y decir que es todo.", en: "I can ask what things cost and say that's all." },
+    { es: "Puedo preguntar cuánto cuesta algo y decir «eso es todo».", en: "I can ask what things cost and say that's all." },
     { es: "Sé usar del, al, nel… y el partitivo (del pane, delle mele).", en: "I can use del, al, nel… and the partitive (del pane, delle mele)." },
   ],
   icon: "🛒",

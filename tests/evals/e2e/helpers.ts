@@ -74,7 +74,7 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
     }
   }
   // Every language's starting point first, then (accounts on) sign-up, then goals.
-  await btn(page, t.setGoal).or(btn(page, t.acctGoogle)).first().waitFor();
+  await btn(page, t.setGoal).or(btn(page, t.startFirst)).or(btn(page, t.acctGoogle)).first().waitFor();
   if (new URL(page.url()).pathname === "/account") {
     out.gated = true;
     if (!opts.signUp) return out;
@@ -86,8 +86,7 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
     await btn(page, t.continue).click();
     await page.waitForURL(/\/onboarding/);
   }
-  for (let k = 0; k < plan.langs.length; k++) await btn(page, t.setGoal).click();
-  await btn(page, t.startFirst).click();
+  for (let k = 0; k < plan.langs.length; k++) await pickGoal(page, t);
   await page.waitForURL(/\/lesson/);
   // The first lesson opens with a one-screen "This unit" card; start, then learn → try.
   await page.locator(".unit-intro, .unit-overview, .answer-area").first().waitFor();
@@ -96,6 +95,13 @@ export async function onboard(page: Page, plan: Plan, opts: { signUp?: { email: 
   await page.locator(".answer-area").first().waitFor();
   out.firstAnswerMs = Date.now() - t0;
   return out;
+}
+
+/** The goal step: pick a pace (nothing is preselected), then "Set my goal". */
+export async function pickGoal(page: Page, t: (typeof T)[keyof typeof T], minutes = 5) {
+  await page.locator(".choice-card", { hasText: t.goalCardMin(minutes) }).first().click();
+  // The last goal of a first setup starts the first lesson; otherwise "Set my goal".
+  await btn(page, t.setGoal).or(btn(page, t.startFirst)).first().click();
 }
 
 /** Answer the adaptive placement; returns the number of items shown. */

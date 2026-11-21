@@ -9,7 +9,7 @@ export const unit: Unit = {
   title: { target: "Familie", es: "La familia", en: "Family" },
   canDo: [
     { es: "Puedo presentar a mi familia y preguntar por la de otra persona.", en: "I can introduce my family and ask about someone else's." },
-    { es: "Aprendo cada sustantivo con der, die o das.", en: "I learn every noun with der, die or das." },
+    { es: "Me aprendo cada sustantivo con su artículo: der, die o das.", en: "I learn every noun with der, die or das." },
     { es: "Sé usar mein/meine y el verbo «haben».", en: "I can use mein/meine and the verb 'haben'." },
   ],
   icon: "👪",
