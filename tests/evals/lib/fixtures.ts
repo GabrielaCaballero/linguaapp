@@ -1,9 +1,10 @@
 // Shared helpers for the QA eval suite. Evals run against the REAL shipped content
 // (`@/content`), not the unit-test mini course, because the content is what learners see.
+import { COURSE_LANGS } from "./langs";
 import { courses } from "@/content";
 import type { BaseLang, Item, Lexicon, TargetLang } from "@/content/schema";
 
-export const ALL_ITEMS: Item[] = (["it", "de"] as TargetLang[]).flatMap((l) => courses[l].units.flatMap((u) => u.items));
+export const ALL_ITEMS: Item[] = COURSE_LANGS.flatMap((l) => courses[l].units.flatMap((u) => u.items));
 
 const byId = new Map(ALL_ITEMS.map((i) => [i.id, i]));
 

@@ -625,3 +625,6 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 /* Swiss forms of a German word ("CH · En Suiza: Grüezi"). */
 .region-tip { display: flex; gap: var(--s2); align-items: flex-start; font-size: var(--t-label); line-height: 1.4; text-align: left; }
 .ch-badge { flex: none; margin-top: 1px; padding: 1px 6px; border-radius: 6px; background: #d52b1e; color: #fff; font: 700 0.6875rem/1.5 var(--font-display); letter-spacing: 0.04em; }
+
+/* "Audio problems?" sheet */
+.audio-help { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; line-height: 1.45; }

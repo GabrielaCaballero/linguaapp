@@ -137,10 +137,11 @@ test.describe("CUJ-3 daily return + P1-1 lesson length", () => {
     expect(db.reviews.some((r: { t: number }) => r.t > since)).toBe(true);
     expect(page.url()).not.toMatch(/\/lesson.*kind=auto.*auto/);
   });
-  test("a '5 min' lesson is ≥18 graded tasks or keeps going until 5 real minutes (P1-1)", async ({ page }) => {
+  test("a beginner's lesson doesn't repeat a word over and over to fill 5 minutes (owner, 2026-11-22)", async ({ page }) => {
     await onboard(page, { appLang: "en", langs: [{ lang: "it", explainIn: "en", exp: "never" }] });
-    const s = await playLesson(page, { lang: "it", base: "en", appLang: "en", maxSteps: 40 });
-    expect(s.sawResults ? s.graded : 99).toBeGreaterThanOrEqual(18);
+    const s = await playLesson(page, { lang: "it", base: "en", appLang: "en", maxSteps: 60 });
+    // A real lesson still happens; it may end early rather than drilling the same words again.
+    expect(s.graded).toBeGreaterThanOrEqual(8);
   });
 });
 

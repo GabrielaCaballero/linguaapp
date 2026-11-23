@@ -9,7 +9,7 @@ import type { Experience, Goal } from "@/lib/model";
 import { getDB, useDB } from "@/lib/store";
 import { dict } from "@/lib/i18n";
 import { LANG_NAME, units } from "@/lib/content";
-import { LANG_INFO, TARGET_LANGS } from "@/content";
+import { LANG_INFO, availableLangs } from "@/content";
 import { priorMean, selfReported } from "@/lib/placement";
 import { clock } from "@/lib/dates";
 import { accountHref } from "@/lib/nav";
@@ -93,7 +93,9 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     for (const l of langs) {
       const d = drafts[l];
       // Which language explains this one: Spanish or English, per language (owner, 2026-11-20).
-      steps.push({ id: "explain", lang: l }, { id: "exp", lang: l });
+      // "Explain in…" only when the course can be explained in more than one language.
+      if (LANG_INFO[l].bases.length > 1) steps.push({ id: "explain", lang: l });
+      steps.push({ id: "exp", lang: l });
       if (d?.known) steps.push({ id: "level", lang: l });
       else if (d?.exp && d.exp !== "never") steps.push({ id: "cando", lang: l }, { id: "pIntro", lang: l }, { id: "placement", lang: l }, { id: "pResult", lang: l });
     }
@@ -242,7 +244,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
               <details className="langs-list" onMouseEnter={(e) => (e.currentTarget.open = true)} onMouseLeave={(e) => (e.currentTarget.open = false)}>
                 <summary className="caption footer-link">{t.supportedLangs}</summary>
                 <ul>
-                  {TARGET_LANGS.map((l) => (
+                  {availableLangs(appLang).map((l) => (
                     <li key={l} lang={l}>{LANG_NAME[l]}</li>
                   ))}
                 </ul>
@@ -263,7 +265,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
       );
       break;
     case "langs": {
-      const avail = TARGET_LANGS.filter((l) => !existing.includes(l));
+      const avail = availableLangs(appLang).filter((l) => !existing.includes(l));
       body = (
         <Question title={t.learnWhatTitle} sub={t.learnWhatSub} next={go} disabled={!langs.length} t={t}>
           {avail.map((l) => (
@@ -272,7 +274,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
               on={langs.includes(l)}
               onClick={() => {
                 setLangs((x) => (x.includes(l) ? x.filter((y) => y !== l) : [...x, l]));
-                if (!drafts[l]) patch(l, { explainIn: appLang, canDo: [null, null, null] });
+                if (!drafts[l]) patch(l, { explainIn: LANG_INFO[l].bases.includes(appLang) ? appLang : LANG_INFO[l].bases[0], canDo: [null, null, null] });
               }}
               title={LANG_NAME[l]}
               sub={LANG_INFO[l].tag[appLang]}
@@ -287,7 +289,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
     case "explain":
       body = (
         <Question title={t.explainInTitle(t.langName[lang!])} sub={t.explainInSub} next={go} t={t} seal={lang}>
-          {(["es", "en"] as BaseLang[]).map((b) => (
+          {LANG_INFO[lang!].bases.map((b) => (
             <Choice key={b} on={d?.explainIn === b} onClick={() => patch(lang!, { explainIn: b })} title={t.baseName[b]} />
           ))}
           {lang === "it" && d?.explainIn === "es" && <p className="card-soft label" style={{ margin: 0 }}>{t.shortcutTip}</p>}
@@ -317,6 +319,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
         { v: "A2", title: "A2", sub: t.knowA2 },
         { v: "B1", title: "B1", sub: t.knowB1 },
         { v: "B2", title: "B2", sub: t.knowB2 },
+        { v: "C1", title: "C1", sub: t.knowC1 },
       ];
       body = (
         <Question title={t.levelTitle(t.langName[lang!])} sub={t.levelSub} next={go} disabled={!d?.outcome} t={t} seal={lang}>

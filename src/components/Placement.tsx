@@ -20,7 +20,7 @@ export interface PlacementOutcome {
   beyond: boolean;
 }
 
-const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2"];
+const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1"];
 
 /** Outcome from the estimate; `unitOverride` comes from "Start lower/higher" (one unit per tap). */
 export function outcomeFor(lang: TargetLang, s: PlacementState, unitOverride?: number): PlacementOutcome {
@@ -58,7 +58,7 @@ export function PlacementTest({ lang, base, mu, t, canListen, onDone, onClose }:
     onDone(outcomeFor(lang, b, 1));
   };
 
-  const pos = Math.max(0, Math.min(1, (s.theta + 3.5) / 7));
+  const pos = Math.max(0, Math.min(1, (s.theta + 3.5) / 7.5));
   if (!item) return null;
   return (
     <div className="lesson" style={{ padding: 0, minHeight: "auto", flex: 1 }}>

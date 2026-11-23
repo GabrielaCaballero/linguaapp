@@ -1,4 +1,6 @@
 // Category: engine — placement (simulated learners, unit mapping, seeding) and goals math.
+import { LANG_INFO } from "@/content";
+import { COURSE_LANGS } from "../lib/langs";
 import { describe, expect, it } from "vitest";
 import { courses } from "@/content";
 import type { BaseLang, PlacementItem, TargetLang } from "@/content/schema";
@@ -11,7 +13,8 @@ import { visible } from "@/lib/content";
 import { DAY } from "@/lib/dates";
 import { normal, rng } from "../lib/fixtures";
 
-const PAIRS: [TargetLang, BaseLang][] = [["it", "es"], ["it", "en"], ["de", "en"], ["de", "es"]];
+// Every course × explanation language it offers (simulated learners run on each).
+const PAIRS: [TargetLang, BaseLang][] = COURSE_LANGS.flatMap((l) => LANG_INFO[l].bases.map((b) => [l, b] as [TargetLang, BaseLang]));
 
 function run(lang: TargetLang, base: BaseLang, mu: number, correct: (it: PlacementItem) => boolean): PlacementState {
   const bank = courses[lang].placement;
@@ -84,7 +87,7 @@ describe("placement: simulated learners on the real banks", () => {
 });
 
 describe("placement → unit mapping and seeding (P0-2 regression)", () => {
-  for (const lang of ["it", "de"] as TargetLang[]) {
+  for (const lang of COURSE_LANGS) {
     const units = courses[lang].units;
     const total = units.flatMap((u) => u.items).length;
     it(`${lang}: start unit is monotonic in θ and every unit is reachable`, () => {
@@ -127,8 +130,8 @@ const NOW = new Date(2026, 10, 12, 9).getTime();
 const by = (months: number) => NOW + months * 30.44 * DAY;
 
 describe("goals math (spec §4.5)", () => {
-  it("multipliers per pair", () => expect(MULT).toEqual({ "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3 }));
-  it("cumulative hours (B2 = 600, top of Cambridge's 500–600 band)", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600 }));
+  it("multipliers per pair", () => expect(MULT).toEqual({ "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3, "es-fr": 0.8, "en-fr": 1.0, "es-en": 1.0, "en-en": 1.0 }));
+  it("cumulative hours (B2 = 600, top of Cambridge's 500–600 band; C1 = 800)", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600, C1: 800 }));
   for (const [lang, base] of PAIRS)
     for (const target of ["A1.1", "A1", "A2", "B1", "B2"] as const)
       for (const months of [3, 6, 12])
@@ -202,7 +205,7 @@ describe("weekly check (P1-4 regression)", () => {
 
 describe("GO-7 / GO-8: course scope and end of content", () => {
   it("course top follows the shipped units (no hard-coded A1)", () => {
-    for (const lang of ["it", "de"] as TargetLang[]) {
+    for (const lang of COURSE_LANGS) {
       const top = courseTop(courses[lang].units.map((u) => u.cefr));
       expect(HOURS[top]).toBeGreaterThan(HOURS.A1);
     }
@@ -222,7 +225,7 @@ describe("GO-7 / GO-8: course scope and end of content", () => {
 });
 
 describe("placement · \"I know my level\" (skip the test)", () => {
-  for (const lang of ["it", "de"] as const) {
+  for (const lang of COURSE_LANGS) {
     const us = courses[lang].units;
     for (const level of ["A1.1", "A2", "B1", "B2"] as const) {
       it(`${lang} ${level}: starts at the first unit of that level, earlier units seeded, nothing later`, () => {

@@ -7,6 +7,8 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
 (Nothing open: the goal step and the "when do you practise?" step were done on 2026-11-22, see decisions.md.)
 
 ## Waiting on the owner
+- Recorded audio: enable Cloud Text-to-Speech, create a restricted API key, put it in
+  `.env.tts.local`, then `npm run audio:samples` and pick voices (docs/team/audio.md).
 - Open and merge the PR `require-account` → `main`:
   https://github.com/GabrielaCaballero/linguaapp/compare/main...require-account
 - Supabase → SQL Editor: run `supabase/schema.sql` again (new size and daily-answer limits).
@@ -21,8 +23,6 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
 ## Ideas for later
 - Swiss German, step 2: a listening-only "Schwiizerdütsch to understand" module on top of German,
   with recorded audio (step 1, Swiss tips, is done).
-- Natural audio: pre-generate audio files for the course's fixed words and sentences with a neural
-  TTS (build step, key never in the app), cached offline; browser voice as fallback.
 - Content (from the language reviewers):
   - units 1–6: sentence distractors are whole sentences, but the tiles exercise needs single words;
   - allow an optional subject pronoun ("Io mi alzo…") in the checker instead of per-item accepts;

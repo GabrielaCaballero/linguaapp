@@ -1,6 +1,6 @@
 "use client";
 
-import { TARGET_LANGS } from "@/content";
+import { availableLangs } from "@/content";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
@@ -100,7 +100,7 @@ export default function SettingsPage() {
             </div>
           );
         })}
-        {langs.length < TARGET_LANGS.length && (
+        {availableLangs(db.profile.appLang).some((l) => !langs.includes(l)) && (
           <button className="cell" onClick={() => router.push(onboardingHref())}>
             <Icon name="plus" size={20} className="accent" />
             <span className="grow">{t.addLanguage}</span>
@@ -136,6 +136,12 @@ export default function SettingsPage() {
           <button className="icon-btn" aria-label="+" onClick={() => set({ daysPerWeek: Math.min(7, s.daysPerWeek + 1) })}>+</button>
         </div>
         <Row label={t.sListening} on={s.listening} onChange={(v) => set({ listening: v })} />
+        <div className="cell" style={{ flexWrap: "wrap" }}>
+          <span className="grow">{t.sSlowAudio}</span>
+          <div style={{ width: "100%", marginTop: 8 }}>
+            <Seg label={t.sSlowAudio} value={String(s.slowRate ?? 0.6)} options={(["0.75", "0.6", "0.5"] as const).map((v) => ({ v, label: t.slowRates[v] }))} onChange={(v) => set({ slowRate: Number(v) as 0.75 | 0.6 | 0.5 })} />
+          </div>
+        </div>
         <Row label={t.sSpeaking} sub={t.sSpeakingSoon} on={false} onChange={() => {}} disabled />
         <Row label={t.sBridge} on={s.bridgeTips} onChange={(v) => set({ bridgeTips: v })} />
         {db.profile.courses.de && <Row label={t.sRegionTips} on={s.regionTips !== false} onChange={(v) => set({ regionTips: v })} />}

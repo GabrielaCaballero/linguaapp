@@ -1,5 +1,6 @@
 "use client";
 // /unit?id=it-u04 — a unit's overview, any time, from the Path.
+import { TARGET_LANGS } from "@/content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useDB } from "@/lib/store";
@@ -29,7 +30,7 @@ function UnitRoute() {
     voicesReady().then(() => setVoices(true));
   }, []);
   const id = sp.get("id") ?? "";
-  const lang = id.startsWith("de-") ? "de" : "it";
+  const lang = TARGET_LANGS.find((l) => id.startsWith(`${l}-`)) ?? "it";
   const unit = units(lang).find((u) => u.id === id);
   // An unknown unit goes to Path — but only while this page is the one on screen. Next keeps
   // visited pages alive in the background, where the URL has no ?id=; redirecting from there

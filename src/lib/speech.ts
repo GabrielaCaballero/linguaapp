@@ -4,6 +4,17 @@
 // exercises that need audio are skipped when the device has no voice for the language.
 import type { TargetLang } from "@/content/schema";
 import { LOCALE } from "./content";
+import { hasRecorded, playRecorded, stopRecorded, unlockRecorded } from "./recorded";
+import { getDB } from "./store";
+
+/** The learner's "slow" speed (Settings → Slow audio): 0.75, 0.6 (default) or 0.5. */
+export function slowRate(): number {
+  try {
+    return getDB().profile.settings.slowRate ?? 0.6;
+  } catch {
+    return 0.6;
+  }
+}
 
 /** The voice fields the ranking reads (a plain object in tests, a real voice in the browser). */
 export type VoiceLike = Pick<SpeechSynthesisVoice, "name" | "lang" | "voiceURI" | "localService" | "default">;
@@ -99,6 +110,8 @@ export function canSpeak(): boolean {
  * loaded list without this language means no.
  */
 export function hasVoice(lang: TargetLang): boolean {
+  // Recorded audio for this language: listening works whatever voices the phone has.
+  if (hasRecorded(lang)) return true;
   if (!canSpeak()) return false;
   try {
     if (window.speechSynthesis.getVoices().length === 0) return true;
@@ -125,8 +138,10 @@ export function isApple(): boolean {
  * silent. The first touch anywhere speaks an empty, silent utterance to unlock speech.
  */
 export function unlockSpeechOnFirstTouch() {
-  if (!canSpeak() || typeof document === "undefined") return;
+  if (typeof document === "undefined") return;
   const unlock = () => {
+    unlockRecorded();
+    if (!canSpeak()) return;
     try {
       const u = new SpeechSynthesisUtterance(" ");
       u.volume = 0;
@@ -152,7 +167,23 @@ export function voicesReady(timeout = 1200): Promise<void> {
   });
 }
 
+/**
+ * Say `text`: the course's recording when there is one (a natural voice on every device), else the
+ * phone's own voice. Never throws.
+ */
 export function speak(text: string, lang: TargetLang, slow = false) {
+  try {
+    if (canSpeak() && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) window.speechSynthesis.cancel();
+  } catch {
+    /* ignore */
+  }
+  stopRecorded();
+  void playRecorded(text, lang, slow ? slowRate() : 1).then((played) => {
+    if (!played) speakWithVoice(text, lang, slow);
+  });
+}
+
+function speakWithVoice(text: string, lang: TargetLang, slow: boolean) {
   if (!canSpeak()) return;
   try {
     const synth = window.speechSynthesis;
@@ -185,9 +216,9 @@ function utterance(text: string, locale: string, slow: boolean, voice: SpeechSyn
   const u = new SpeechSynthesisUtterance(text);
   u.lang = locale;
   if (voice) u.voice = voice;
-  // Close to natural speed: much below ~0.9 most engines stretch vowels and sound synthetic.
-  // "Slow" stays clearly slower without dropping into the drawl of 0.7.
-  u.rate = slow ? 0.75 : 0.95;
+  // Normal: close to natural speed (much below ~0.9 most engines stretch vowels). Slow: the
+  // learner's choice in Settings.
+  u.rate = slow ? slowRate() : 0.95;
   u.pitch = 1;
   u.volume = 1;
   return u;

@@ -1,5 +1,6 @@
 "use client";
 
+import { TARGET_LANGS } from "@/content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
@@ -21,7 +22,8 @@ export default function PlacementPage() {
 
 function PlacementRoute() {
   const sp = useSearchParams();
-  return <Retake key={sp.toString()} lang={sp.get("lang") === "de" ? "de" : "it"} />;
+  const q = sp.get("lang");
+  return <Retake key={sp.toString()} lang={TARGET_LANGS.find((l) => l === q) ?? "it"} />;
 }
 
 function Retake({ lang }: { lang: TargetLang }) {

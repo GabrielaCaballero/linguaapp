@@ -7,7 +7,7 @@ import { TARGET_LANGS } from "@/content/schema";
 export type { BaseLang, Cefr, Item, TargetLang };
 
 /** Levels a goal can aim for. "A1" = end of A1.2. */
-export type GoalLevel = "A1.1" | "A1" | "A2" | "B1" | "B2";
+export type GoalLevel = "A1.1" | "A1" | "A2" | "B1" | "B2" | "C1";
 export type GoalKind = "level" | "trip" | "steady" | "maintain";
 
 export interface Goal {
@@ -62,6 +62,8 @@ export interface Settings {
   theme: "system" | "light" | "dark";
   /** Swiss forms on German words ("CH · In Switzerland: Grüezi"). Missing = on. */
   regionTips?: boolean;
+  /** How slow the 🐢 "listen slowly" button plays (playback rate). Missing = 0.6. */
+  slowRate?: 0.75 | 0.6 | 0.5;
 }
 
 export interface Profile {

@@ -10,7 +10,10 @@
     "test": "vitest run",
     "eval": "node tests/evals/scoreboard.mjs",
     "eval:unit": "vitest run -c tests/evals/vitest.evals.config.ts",
-    "eval:e2e": "playwright test -c tests/evals/e2e/playwright.config.ts"
+    "eval:e2e": "playwright test -c tests/evals/e2e/playwright.config.ts",
+    "audio:collect": "vitest run -c scripts/tts/vitest.config.mts",
+    "audio:samples": "node scripts/tts/generate.mjs samples",
+    "audio:generate": "npm run audio:collect && node scripts/tts/generate.mjs generate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

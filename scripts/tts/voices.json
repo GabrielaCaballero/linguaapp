@@ -1,0 +1,7 @@
+{
+  "_note": "The voice used for each course. Pick after listening to the samples (npm run audio:samples). Change it, delete public/audio/<lang>/ and run npm run audio:generate again.",
+  "it": "it-IT-Chirp3-HD-Aoede",
+  "de": "de-DE-Chirp3-HD-Aoede",
+  "en": "en-US-Chirp3-HD-Aoede",
+  "fr": "fr-FR-Chirp3-HD-Aoede"
+}

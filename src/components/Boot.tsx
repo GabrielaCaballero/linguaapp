@@ -4,12 +4,20 @@ import { useEffect, useState } from "react";
 import { useDB, requestPersistence } from "@/lib/store";
 import { dict } from "@/lib/i18n";
 import { unlockSpeechOnFirstTouch } from "@/lib/speech";
+import { loadRecorded } from "@/lib/recorded";
+import { courseLangs } from "@/lib/stats";
 import { Icon } from "./icons";
 
 /** Keeps <html> attributes in sync with settings, registers the service worker, shows the offline pill. */
 export function Boot() {
   const db = useDB();
   const [online, setOnline] = useState(true);
+
+  // Which texts have a recording, for every course on this device (tiny lists; cached offline).
+  const langs = db ? courseLangs(db).join(",") : "";
+  useEffect(() => {
+    for (const l of langs.split(",").filter(Boolean)) void loadRecorded(l as Parameters<typeof loadRecorded>[0]);
+  }, [langs]);
 
   useEffect(() => {
     if (!db) return;

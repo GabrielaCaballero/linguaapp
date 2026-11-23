@@ -41,7 +41,7 @@ const DE: Small = {
   mein: { es: "mi", en: "my" }, meine: { es: "mi / mis", en: "my" }, dein: { es: "tu", en: "your" },
 };
 
-const SMALL: Record<TargetLang, Small> = { it: IT, de: DE };
+const SMALL: Record<TargetLang, Small> = { it: IT, de: DE, en: {}, fr: {} };
 
 export type Glossary = Map<string, string>;
 

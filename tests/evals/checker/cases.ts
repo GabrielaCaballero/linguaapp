@@ -157,7 +157,9 @@ const it: Case[] = [
   { id: "it-typo-07", item: I("it-u03-tre"), input: "tra", verdict: "wrong", tag: "no typo on short words" },
   { id: "it-typo-08", item: I("it-u03-sei"), input: "sie", verdict: "wrong", tag: "no typo on short words" },
   { id: "it-typo-12", item: I("it-u01-ciao"), input: "caio", verdict: "almost", reason: "typo", tag: "swapped letters on a 4-letter word" },
-  { id: "it-typo-13", item: I("it-u01-ciao"), input: "cieo", verdict: "wrong", tag: "4 letters: only a swap is forgiven" },
+  { id: "it-typo-13", item: I("it-u01-ciao"), input: "cieo", verdict: "wrong", tag: "4 letters: a changed letter only if it's a neighbouring key (a/e aren't)" },
+  { id: "it-typo-15", item: I("it-u01-ciao"), input: "cuao", verdict: "almost", reason: "typo", tag: "4 letters: neighbouring key (i/u) is a slip" },
+  { id: "it-typo-16", item: I("it-u01-ciao"), input: "cia", verdict: "almost", reason: "typo", tag: "4 letters: a dropped letter is a slip" },
   { id: "it-typo-14", item: I("it-u02-parlare"), input: "palrare", verdict: "almost", reason: "typo", tag: "a swap is one slip" },
   { id: "it-typo-09", item: I("it-u04-quanto-costa"), input: "Quando costa?", verdict: "wrong", tag: "real-word confusion quanto/quando" },
   // ── word order ───────────────────────────────────────────────────────────────

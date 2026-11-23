@@ -7,12 +7,12 @@ import { useEffect, useState } from "react";
 import { useDB } from "@/lib/store";
 import { useNow } from "@/lib/hooks";
 import { LANG_NAME } from "@/lib/content";
-import { avgMinutes, calibration, courseLangs, targetFor, testerStats, weekStrip, wordBuckets } from "@/lib/stats";
+import { avgMinutes, calibration, courseLangs, targetFor, weekStrip, wordBuckets } from "@/lib/stats";
 import { fmtMonth, fromISO } from "@/lib/dates";
 import { localeOf } from "@/lib/i18n";
 import { saveGoal, setActiveLang } from "@/lib/actions";
 import { onboardingHref } from "@/lib/nav";
-import { Loading, Ring, Seal, Sheet, Toast, useT } from "@/components/ui";
+import { Loading, Ring, Seal, Sheet, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { GoalPicker } from "@/components/GoalPicker";
 
@@ -22,7 +22,6 @@ export default function MePage() {
   const router = useRouter();
   const now = useNow();
   const [editGoal, setEditGoal] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   useEffect(() => {
     if (db && !db.profile.onboarded) router.replace(onboardingHref());
   }, [db, router]);
@@ -152,19 +151,6 @@ export default function MePage() {
           })}
         </div>
 
-        <button
-          className="btn btn-ghost"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(JSON.stringify(testerStats(db), null, 1));
-              setToast(t.statsCopied);
-            } catch {
-              setToast("—");
-            }
-          }}
-        >
-          {t.stats}
-        </button>
       </section>
 
       <Sheet open={editGoal} onClose={() => setEditGoal(false)} label={t.editGoal}>
@@ -185,7 +171,6 @@ export default function MePage() {
           }}
         />
       </Sheet>
-      <Toast text={toast} onDone={() => setToast(null)} />
     </main>
   );
 }
