@@ -9,6 +9,7 @@ import type { CheckResult } from "@/lib/check";
 import { gl, per } from "@/lib/content";
 import { Icon } from "../icons";
 import { Speaker, type CellResult } from "./Exercises";
+import { ReportProblem } from "./ReportProblem";
 
 export interface TutorView {
   status: "checking" | "done" | "failed" | "unsure";
@@ -36,6 +37,7 @@ export function Feedback({
   onRule,
   cells,
   choice,
+  mode,
 }: {
   t: Dict;
   item: Item;
@@ -57,6 +59,8 @@ export function Feedback({
   cells?: CellResult[];
   /** Multiple choice: the option picked and the right one. */
   choice?: { picked: string; answer: string };
+  /** The exercise, sent with a content report. */
+  mode?: string;
 }) {
   const btn = useRef<HTMLButtonElement>(null);
   const [more, setMore] = useState(false);
@@ -64,6 +68,9 @@ export function Feedback({
     // Focus Continue a beat later so the Enter that submitted the answer can't also press it.
     const focusId = setTimeout(() => btn.current?.focus({ preventScroll: true }), 250);
     const onKey = (e: KeyboardEvent) => {
+      // Not while typing a report or with a sheet open: Enter there isn't "continue".
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("textarea, input, [role=dialog]") || document.querySelector(".sheet[role=dialog]")) return;
       if (e.key === "Enter") {
         e.preventDefault();
         onContinue();
@@ -210,6 +217,7 @@ export function Feedback({
           {t.continue}
         </button>
       </div>
+      <ReportProblem t={t} item={item} base={base} verdict={v} text={text} mode={mode} />
     </div>
   );
 }

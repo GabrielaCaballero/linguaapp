@@ -1,34 +1,47 @@
 "use client";
 
-import type { BaseLang, Item } from "@/content/schema";
+import type { BaseLang, Item, Region } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
 import { per } from "@/lib/content";
 import { getDB } from "@/lib/store";
 
+/** Regions shown as tips: Swiss German forms on the German course, European Portuguese forms on
+ *  the (Brazilian) Portuguese one. */
+const TIP_REGIONS: { region: Region; badge: string; tag: string; label: (t: Dict) => string }[] = [
+  { region: "CH", badge: "CH", tag: "de-CH", label: (t) => t.inSwitzerland },
+  { region: "PT", badge: "PT", tag: "pt-PT", label: (t) => t.inPortugal },
+];
+
 /**
- * "CH · In Switzerland: Grüezi" — the Swiss forms of a German word or phrase (content `variants`
- * with region "CH"). Swiss Standard German words (Velo, Spital) are also accepted as answers;
- * dialect ones (Hoi, Znüni) are tips only. Off in Settings → "Swiss tips".
+ * "CH · In Switzerland: Grüezi" — the regional forms of a word or phrase (content `variants`).
+ * Swiss Standard German words (Velo, Spital) and European Portuguese ones (comboio) are also
+ * accepted as answers; dialect ones (Hoi, Znüni) are tips only. Off in Settings → "Regional tips".
  */
 export function RegionTips({ item, base, t }: { item: Item; base: BaseLang; t: Dict }) {
-  const ch = (item.variants ?? []).filter((v) => v.region === "CH");
-  if (!ch.length || getDB().profile.settings.regionTips === false) return null;
+  if (getDB().profile.settings.regionTips === false) return null;
   return (
-    <div className="region-tip">
-      <span className="ch-badge" aria-hidden="true">CH</span>
-      <span>
-        {t.inSwitzerland}{" "}
-        {ch.map((v, k) => (
-          <span key={v.text}>
-            {k > 0 && " · "}
-            <b lang="de-CH">{v.text}</b>
-            {v.dialect && <span className="muted"> ({t.dialect})</span>}
-          </span>
-        ))}
-        {ch.map((v) => per(v.note, base)).filter(Boolean).length > 0 && (
-          <span className="muted"> — {ch.map((v) => per(v.note, base)).filter(Boolean).join(" ")}</span>
-        )}
-      </span>
-    </div>
+    <>
+      {TIP_REGIONS.map(({ region, badge, tag, label }) => {
+        const vs = (item.variants ?? []).filter((v) => v.region === region);
+        if (!vs.length) return null;
+        const notes = vs.map((v) => per(v.note, base)).filter(Boolean);
+        return (
+          <div className="region-tip" key={region}>
+            <span className="ch-badge" aria-hidden="true">{badge}</span>
+            <span>
+              {label(t)}{" "}
+              {vs.map((v, k) => (
+                <span key={v.text}>
+                  {k > 0 && " · "}
+                  <b lang={tag}>{v.text}</b>
+                  {v.dialect && <span className="muted"> ({t.dialect})</span>}
+                </span>
+              ))}
+              {notes.length > 0 && <span className="muted"> — {notes.join(" ")}</span>}
+            </span>
+          </div>
+        );
+      })}
+    </>
   );
 }

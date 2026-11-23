@@ -361,7 +361,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 :root[data-theme="dark"] .logo-light { display: none; }
 :root[data-theme="dark"] .logo-dark { display: block; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo-light { display: none; } :root:not([data-theme="light"]) .logo-dark { display: block; } }
-.lang-switch { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 12px 4px 4px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: var(--t-label); color: var(--text); }
+.lang-switch { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 14px 4px 12px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: var(--t-label); color: var(--text); }
 .lang-switch:active { transform: scale(0.98); }
 .no-audio { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text-2); }
 .answer-area { margin-top: auto; display: flex; flex-direction: column; gap: var(--s3); padding-top: var(--s4); }
@@ -461,6 +461,9 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .fb-word { font-family: var(--font-display); font-size: 1.625rem; font-weight: 650; line-height: 1.2; }
 .fb-note { font-size: var(--t-label); }
 .fb-actions { display: flex; gap: var(--s3); align-items: center; }
+/* "Report a problem": small and quiet under the buttons (owner, 2026-11-23). */
+.report-link { align-self: center; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; font-size: var(--t-caption, 0.8125rem); font-weight: 500; color: inherit; opacity: 0.7; text-decoration: underline; text-underline-offset: 3px; }
+.report-sent { align-self: center; min-height: 36px; display: flex; align-items: center; }
 .draw { stroke-dasharray: 24; stroke-dashoffset: 24; animation: draw 360ms 80ms var(--ease-out) forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 .fb-tutor { border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); padding-top: var(--s3); font-size: var(--t-label); }

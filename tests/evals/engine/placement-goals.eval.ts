@@ -90,7 +90,8 @@ describe("placement → unit mapping and seeding (P0-2 regression)", () => {
   for (const lang of COURSE_LANGS) {
     const units = courses[lang].units;
     const total = units.flatMap((u) => u.items).length;
-    it(`${lang}: start unit is monotonic in θ and every unit is reachable`, () => {
+    // The test places up to C1 (decisions.md 2026-11-23): C2 units are reached by "I know my level".
+    it(`${lang}: start unit is monotonic in θ and every unit up to C1 is reachable`, () => {
       let prev = 0;
       const seen = new Set<number>();
       for (let th = -4; th <= 4; th += 0.05) {
@@ -99,7 +100,9 @@ describe("placement → unit mapping and seeding (P0-2 regression)", () => {
         prev = u;
         seen.add(u);
       }
-      expect(seen.size).toBe(units.length);
+      expect(seen.size).toBe(units.filter((x) => x.cefr !== "C2").length);
+      const c2 = units.find((x) => x.cefr === "C2");
+      if (c2) expect(selfReported(units, "C2").unit).toBe(c2.index);
     });
     it(`${lang}: seeds never include the start unit or later, and never the whole course`, () => {
       for (let th = -3; th <= 3; th += 0.25) {
@@ -130,8 +133,8 @@ const NOW = new Date(2026, 10, 12, 9).getTime();
 const by = (months: number) => NOW + months * 30.44 * DAY;
 
 describe("goals math (spec §4.5)", () => {
-  it("multipliers per pair", () => expect(MULT).toEqual({ "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3, "es-fr": 0.8, "en-fr": 1.0, "es-en": 1.0, "en-en": 1.0 }));
-  it("cumulative hours (B2 = 600, top of Cambridge's 500–600 band; C1 = 800)", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600, C1: 800 }));
+  it("multipliers per pair", () => expect(MULT).toEqual({ "es-it": 0.7, "en-it": 1.0, "en-de": 1.25, "es-de": 1.3, "es-fr": 0.8, "en-fr": 1.0, "es-en": 1.0, "en-en": 1.0, "es-pt": 0.7, "en-pt": 1.0 }));
+  it("cumulative hours (B2 = 600, top of Cambridge's 500–600 band; C1 = 800, C2 = 1200)", () => expect(HOURS).toEqual({ A0: 0, "A1.1": 45, A1: 90, A2: 190, B1: 375, B2: 600, C1: 800, C2: 1200 }));
   for (const [lang, base] of PAIRS)
     for (const target of ["A1.1", "A1", "A2", "B1", "B2"] as const)
       for (const months of [3, 6, 12])

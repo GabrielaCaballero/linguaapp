@@ -205,6 +205,18 @@ function enFull(s: string, loose = false): string {
 
 // French: "à le" / "de les" typed for au / des is wrong, with the contraction note.
 const FR_CONTRACTIONS: Record<string, string> = { au: "à le", aux: "à les", du: "de le", des: "de les" };
+// Portuguese: "de o" / "em a" typed for do / na is wrong, with the contraction note. "num/numa" are
+// left out on purpose: "em um / em uma" is standard written Brazilian Portuguese.
+const PT_CONTRACTIONS: Record<string, string> = {
+  do: "de o", da: "de a", dos: "de os", das: "de as",
+  no: "em o", na: "em a", nos: "em os", nas: "em as",
+  ao: "a o", aos: "a os", "à": "a a", "às": "a as",
+  pelo: "por o", pela: "por a", pelos: "por os", pelas: "por as",
+  dele: "de ele", dela: "de ela", deles: "de eles", delas: "de elas",
+  deste: "de este", desta: "de esta", desse: "de esse", dessa: "de essa", daquele: "de aquele", daquela: "de aquela",
+  neste: "em este", nesta: "em esta", nesse: "em esse", nessa: "em essa", naquele: "em aquele", naquela: "em aquela",
+  disso: "de isso", nisso: "em isso", disto: "de isto", daquilo: "de aquilo", "àquele": "a aquele", "àquela": "a aquela",
+};
 const DE_CONTRACTIONS: Record<string, string> = {
   im: "in dem", ins: "in das", am: "an dem", ans: "an das", zum: "zu dem", zur: "zu der",
   beim: "bei dem", vom: "von dem",
@@ -251,6 +263,13 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   // French a/à, ou/où, la/là, du/dû, sur/sûr: same rule (they're also closed-class words).
   if (lang === "fr" && (FR_ACCENT_MEANING.has([stripMarks(w), w].join("|")) || FR_ACCENT_MEANING.has([stripMarks(g), g].join("|"))) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
   if (lang === "it" && IT_ACCENT_MEANING.has([stripMarks(g), g].join("|")) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
+  // Portuguese: a missing accent, tilde or cedilla (voce, nao, almoco) is "almost"; when the bare
+  // form is another word (e/é, pais/país, por/pôr, avo/avó) the note says the accent changes the
+  // meaning. Two different accents (avô/avó) fall through to the minimal-pair rule: wrong.
+  if (lang === "pt" && stripMarks(g) === stripMarks(w) && (g === stripMarks(g) || w === stripMarks(w))) {
+    const key = (x: string) => [stripMarks(x), x].join("|");
+    return { v: "almost", reason: PT_ACCENT_MEANING.has(key(w)) || PT_ACCENT_MEANING.has(key(g)) ? "accent-meaning" : "accent" };
+  }
   if (isMinimalPair(bareTok(g), bareTok(w), lex)) return { v: "wrong", reason: "minimal-pair" };
   // "dov e" for "dov'è": the apostrophe dropped, the elided token otherwise right
   if (lang === "it" && want.endsWith("'") && g === w.slice(0, -1)) return { v: "almost", reason: "elision" };
@@ -278,6 +297,8 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   if (lang === "de" && endingOnly(deFold(g), deFold(w))) return { v: "wrong", reason: "wrong" };
   // French verb endings (mangé/manger/mangez, serai/serais) are grammar, never a typo.
   if (lang === "fr" && frEndingOnly(stripMarks(g), stripMarks(w), g, w)) return { v: "wrong", reason: "wrong" };
+  // Portuguese verb and noun endings (falo/fala/falam, falei/falou, livro/livros) are grammar, never a typo.
+  if (lang === "pt" && ptEndingOnly(stripMarks(g), stripMarks(w))) return { v: "wrong", reason: "wrong" };
   const base = lang === "de" ? deFold(w) : stripMarks(w);
   const len = [...bareTok(w)].length;
   // Phone typing (owner, 2026-11-22: "still too strict"): one slip from 4 letters, two from 8;
@@ -310,6 +331,30 @@ function frEndingOnly(g: string, w: string, gRaw: string, wRaw: string): boolean
   // mangé vs mange: same letters once accents go, but é ≠ e is an ending, not an accent slip.
   const accentEnding = g === w && /é$/.test(gRaw) !== /é$/.test(wRaw);
   return sg === sw && (eg !== ew || accentEnding);
+}
+// Portuguese endings, accents stripped, longest first (the stem must keep ≥ 3 letters).
+const PT_ENDINGS = [
+  "ariamos", "eriamos", "iriamos", "assemos", "essemos", "issemos", "avamos", "aramos", "eramos", "iramos",
+  "ariam", "eriam", "iriam", "assem", "essem", "issem", "aria", "eria", "iria", "asse", "esse", "isse",
+  "ando", "endo", "indo", "avam", "aram", "eram", "iram", "arem", "erem", "irem", "amos", "emos", "imos",
+  "ado", "ido", "ada", "ida", "ava", "iam", "oes", "aes", "ar", "er", "ir", "ei", "ou", "eu", "iu", "am", "em", "ia",
+  "ao", "os", "as", "es", "o", "a", "e", "s",
+];
+const PT_ACCENT_MEANING = new Set([
+  "e|é", "a|à", "as|às", "pais|país", "por|pôr", "avo|avô", "avo|avó", "vovo|vovô", "vovo|vovó", "se|sé", "nos|nós",
+  "pode|pôde", "esta|está", "da|dá", "mas|más", "pe|pé", "sabia|sábia", "publico|público", "pratica|prática",
+  "secretaria|secretária", "baba|babá", "camelo|camelô", "historia|história", "tem|têm", "vem|vêm",
+]);
+/** Same Portuguese stem, different (non-empty) ending: falo/fala, comprei/comprou, livro/livros. */
+function ptEndingOnly(g: string, w: string): boolean {
+  if (g === w) return false;
+  const split = (s: string) => {
+    for (const e of PT_ENDINGS) if (s.length - e.length >= 3 && s.endsWith(e)) return [s.slice(0, -e.length), e] as const;
+    return [s, ""] as const;
+  };
+  const [sg, eg] = split(g);
+  const [sw, ew] = split(w);
+  return sg === sw && eg !== ew && eg !== "" && ew !== "";
 }
 /** Same stem, only the inflectional ending differs. */
 function endingOnly(g: string, w: string): boolean {
@@ -398,14 +443,14 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
     }
 
     // Contractions: uncontracted form typed
-    const table = lang === "it" ? IT_CONTRACTIONS : lang === "fr" ? FR_CONTRACTIONS : lang === "de" ? DE_CONTRACTIONS : {};
+    const table = lang === "it" ? IT_CONTRACTIONS : lang === "fr" ? FR_CONTRACTIONS : lang === "de" ? DE_CONTRACTIONS : lang === "pt" ? PT_CONTRACTIONS : {};
     const expandedWant = expand(wantToks, table);
     if (expandedWant.length !== wantToks.length && gotToks.length === expandedWant.length) {
       const r = compareSeq(gotToks, expandedWant, lang, lex, item);
       if (r && r.verdict === "correct") {
         const contracted = wantToks.find((t) => table[t.toLowerCase()]) ?? "";
         const res: CheckResult =
-          lang === "it" || lang === "fr"
+          lang === "it" || lang === "fr" || lang === "pt"
             ? { verdict: "wrong", reason: "contraction", score: 0, detail: { got: table[contracted.toLowerCase()], want: contracted } }
             : { verdict: "almost", reason: "contraction", score: SCORE.contraction!, detail: { got: table[contracted.toLowerCase()], want: contracted } };
         if (!best || best.verdict === "wrong") best = res;
@@ -464,12 +509,15 @@ const INFORMAL: Record<TargetLang, string[]> = {
   it: ["tu", "ti", "te", "tuo", "tua", "sei", "hai", "stai", "chiami", "parli", "puoi", "vieni", "abiti", "scusa"],
   fr: ["tu", "toi", "ton", "ta", "tes", "te", "t'"],
   en: [],
+  pt: ["você", "vocês", "tu", "contigo"],
 };
 const FORMAL: Record<TargetLang, string[]> = {
   de: ["Sie", "Ihnen", "Ihr", "Ihre"],
   it: ["Lei", "Le", "Suo", "Sua", "sta", "chiama", "parla", "può", "viene", "abita", "scusi"],
   fr: ["vous", "votre", "vos"],
   en: [],
+  // Brazilian "você" is the everyday "you"; formal is "o senhor / a senhora".
+  pt: ["senhor", "senhora", "senhores", "senhoras"],
 };
 const IT_SPANISH_SPELLING: Record<string, string> = { chao: "ciao", mucho: "molto", gracias: "grazie", bueno: "buono", buena: "buona" };
 
@@ -481,13 +529,13 @@ function registerMismatch(answer: string, item: Item): { got: string; want: stri
   const lang = item.lang;
   if (item.register === "formal") {
     const hit = got.find((g) => INFORMAL[lang].includes(g.toLowerCase()) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
-    if (hit) return { got: hit, want: { de: "Sie", it: "Lei", fr: "vous", en: "you" }[lang] };
+    if (hit) return { got: hit, want: { de: "Sie", it: "Lei", fr: "vous", en: "you", pt: "o senhor / a senhora" }[lang] };
   } else {
     // Capitalised pronouns compare case-sensitively (German "sie" = she/they, Italian "lei" = she,
     // "le" = the); lowercase verb forms (sta, parla, scusi) compare case-insensitively.
     const same = (f: string, g: string) => (f[0] === f[0].toLowerCase() ? f === g.toLowerCase() : f === g);
     const hit = got.find((g) => FORMAL[lang].some((f) => same(f, g)) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
-    if (hit) return { got: hit, want: { de: "du", it: "tu", fr: "tu", en: "you" }[lang] };
+    if (hit) return { got: hit, want: { de: "du", it: "tu", fr: "tu", en: "you", pt: "você" }[lang] };
   }
   return null;
 }

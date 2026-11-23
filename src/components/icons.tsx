@@ -39,6 +39,7 @@ const P: Record<string, React.ReactNode> = {
     </>
   ),
   check: <path d="M5 12.5 10 17 19 7" />,
+  flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
   x: <path d="M7 7l10 10M17 7 7 17" />,
   tilde: <path d="M5 14c2-4 4-4 7-2s5 2 7-2" />,
   info: (

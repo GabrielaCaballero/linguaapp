@@ -1,12 +1,12 @@
 // Lingua content contract v2.1 — FROZEN. Change only via docs/team/decisions.md.
 // v2.1 (2026-11-14): grammar points, paradigm tables, sentence annotations, ruleId on errors. All optional.
 /** Every course on offer. Adding a language starts here: docs/team/adding-a-language.md (decisions.md 2026-11-21). */
-export const TARGET_LANGS = ["it", "de", "en", "fr"] as const;
+export const TARGET_LANGS = ["it", "de", "en", "fr", "pt"] as const;
 export type TargetLang = (typeof TARGET_LANGS)[number];
 export type BaseLang = "es" | "en";
-export type Cefr = "A0" | "A1.1" | "A1.2" | "A2" | "B1" | "B2" | "C1"; // B2 added 2026-11-13, C1 2026-11-22 (decisions.md)
+export type Cefr = "A0" | "A1.1" | "A1.2" | "A2" | "B1" | "B2" | "C1" | "C2"; // B2 added 2026-11-13, C1 2026-11-22, C2 2026-11-23 (decisions.md)
 export type Register = "formal" | "informal";
-export type Region = "DE" | "AT" | "CH" | "S-DE" | "IT" | "CH-IT";
+export type Region = "DE" | "AT" | "CH" | "S-DE" | "IT" | "CH-IT" | "BR" | "PT";
 /** Text in every base language. Both keys REQUIRED. */
 export type Glossed = Record<BaseLang, string>;
 /** Text written separately per base language (not translated). Either key optional. */
@@ -123,7 +123,7 @@ export interface PlacementItem {
   id: string;                 // `${lang}-p-${NN}`
   lang: TargetLang;
   cefr: Cefr;
-  b: number;                  // Rasch difficulty: A0 -2.5 · A1.1 -1.5 · A1.2 -0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 · C1 +3.3 (±0.4 within band)
+  b: number;                  // Rasch difficulty: A0 -2.5 · A1.1 -1.5 · A1.2 -0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 · C1 +3.3 · C2 +3.6 (±0.4 within band; C2 isn't placed by the test)
   skill: "vocab" | "grammar" | "listening" | "reading";
   kind: "mcq" | "listen" | "cloze" | "type";
   stem?: string;              // target-language text shown; cloze uses "___"

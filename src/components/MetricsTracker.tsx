@@ -4,6 +4,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { flushEvents, track } from "@/lib/metrics";
+import { flushReports } from "@/lib/reports";
 import { useAccount } from "@/lib/sync/client";
 
 const MAX_SECONDS = 30 * 60; // a screen left open for hours isn't "time spent"
@@ -16,14 +17,21 @@ export function MetricsTracker() {
 
   // The session is read asynchronously at launch: upload as soon as we know who's signed in.
   useEffect(() => {
-    if (userId) void flushEvents();
+    if (userId) {
+      void flushEvents();
+      void flushReports();
+    }
   }, [userId]);
 
   // One "app_open" per launch, then upload every minute and when the app goes to the background.
   useEffect(() => {
     track("app_open", {});
     void flushEvents();
-    const id = window.setInterval(() => void flushEvents(), 60_000);
+    void flushReports(); // content reports are sent whether or not statistics are on
+    const id = window.setInterval(() => {
+      void flushEvents();
+      void flushReports();
+    }, 60_000);
     return () => window.clearInterval(id);
   }, []);
 

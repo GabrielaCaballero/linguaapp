@@ -20,7 +20,7 @@ export interface PlacementOutcome {
   beyond: boolean;
 }
 
-const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1"];
+const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1", "C2"];
 
 /** Outcome from the estimate; `unitOverride` comes from "Start lower/higher" (one unit per tap). */
 export function outcomeFor(lang: TargetLang, s: PlacementState, unitOverride?: number): PlacementOutcome {

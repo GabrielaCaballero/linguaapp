@@ -8,7 +8,7 @@ import { gl, units, visible } from "@/lib/content";
 import { courseLangs, currentUnit, unitProgress } from "@/lib/stats";
 import { Loading, Ring, Seal, useCourseT } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { setActiveLang } from "@/lib/actions";
+import { CourseSwitcher } from "@/components/CourseSwitcher";
 import { lessonHref, onboardingHref } from "@/lib/nav";
 
 export default function PathPage() {
@@ -34,16 +34,12 @@ export default function PathPage() {
 
   return (
     <main className="screen">
-      <header className="row between" style={{ minHeight: 48 }}>
-        <h1 className="title">{t.pathTitle}</h1>
-        {langs.length > 1 && (
-          <div className="seg" style={{ width: 120 }}>
-            {langs.map((l) => (
-              <button key={l} aria-pressed={l === lang} onClick={() => setActiveLang(l)}>{l.toUpperCase()}</button>
-            ))}
-          </div>
-        )}
-        {langs.length === 1 && <Seal lang={lang} size={36} />}
+      <header className="stack" style={{ gap: 12 }}>
+        {langs.length > 1 ? <CourseSwitcher db={db} lang={lang} t={t} /> : null}
+        <div className="row between" style={{ minHeight: 48 }}>
+          <h1 className="title">{t.pathTitle}</h1>
+          {langs.length === 1 && <Seal lang={lang} size={36} />}
+        </div>
       </header>
       <Link href="/write" className="card row" style={{ marginTop: 16, gap: 12, textDecoration: "none", color: "inherit" }}>
         <span className="accent"><Icon name="sparkle" size={22} /></span>

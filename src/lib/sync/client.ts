@@ -272,6 +272,7 @@ export async function signOut(opts: { force?: boolean; forgetKey?: boolean } = {
   }
   localAdapter.remove(KEYS.auth);
   localAdapter.remove(KEYS.events);
+  localAdapter.remove(KEYS.reports);
   setUser(null);
   resetDB();
   if (opts.forgetKey) {
@@ -291,6 +292,16 @@ export function currentUserId(): string | null {
 export async function uploadEvents(rows: { t: string; name: string; props: object; platform: string; app_version: string }[]): Promise<boolean> {
   try {
     const { error } = await getClient().from("app_events").insert(rows);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** "Report a problem": insert a batch into content_reports (rows only the owner can read). */
+export async function uploadReports(rows: object[]): Promise<boolean> {
+  try {
+    const { error } = await getClient().from("content_reports").insert(rows);
     return !error;
   } catch {
     return false;

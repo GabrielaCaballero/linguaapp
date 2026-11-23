@@ -305,3 +305,77 @@ revoke all on function public.count_event() from anon, authenticated, public;
 drop trigger if exists app_events_quota on public.app_events;
 create trigger app_events_quota before insert on public.app_events
   for each row execute function public.count_event();
+
+-- ── Content reports (2026-11-23) ──────────────────────────────────────────────────────────
+-- "Report a problem" on the answer screen: a learner flags a wrong translation, a correction
+-- that should have accepted their answer, bad audio… One row per report: the item, the reason,
+-- what they typed (only for "my answer should count") and an optional comment. Learners can add
+-- their own and cannot read anyone's; the owner reads them in the SQL Editor (docs/team/metrics.sql,
+-- section 9). Deleted with the account. Safe to run again.
+create table if not exists public.content_reports (
+  id          bigserial primary key,
+  user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  t           timestamptz not null,
+  item_id     text not null,
+  lang        text not null,
+  base        text,
+  reason      text not null check (reason in ('answer_ok', 'translation', 'audio', 'mistake', 'other')),
+  mode        text,                                   -- the exercise (recall, tiles, listen…)
+  verdict     text,                                   -- what the app said: correct / almost / wrong
+  answer      text,                                   -- what the learner typed (answer_ok only)
+  comment     text,
+  app_version text,
+  status      text not null default 'new',            -- the owner's triage: new / fixed / wontfix
+  created_at  timestamptz not null default now(),
+  constraint content_reports_sizes check (char_length(item_id) <= 80 and char_length(lang) <= 8 and char_length(coalesce(base, '')) <= 8 and char_length(coalesce(mode, '')) <= 20 and char_length(coalesce(verdict, '')) <= 10 and char_length(coalesce(answer, '')) <= 300 and char_length(coalesce(comment, '')) <= 500 and char_length(coalesce(app_version, '')) <= 20 and char_length(status) <= 20)
+);
+create index if not exists content_reports_item on public.content_reports (item_id);
+create index if not exists content_reports_t on public.content_reports (created_at);
+
+alter table public.content_reports enable row level security;
+revoke all on public.content_reports from anon, authenticated, public;
+grant insert (user_id, t, item_id, lang, base, reason, mode, verdict, answer, comment, app_version) on public.content_reports to authenticated;
+grant usage, select on sequence public.content_reports_id_seq to authenticated;
+drop policy if exists "add own reports" on public.content_reports;
+create policy "add own reports" on public.content_reports for insert to authenticated with check (user_id = (select auth.uid()));
+
+-- At most 50 reports per learner per day.
+create table if not exists public.report_quota (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  day     date not null default current_date,
+  n       integer not null default 0,
+  primary key (user_id, day)
+);
+alter table public.report_quota enable row level security;
+revoke all on public.report_quota from anon, authenticated, public;
+
+create or replace function public.count_report()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  used integer;
+begin
+  if auth.uid() is null then
+    return new;
+  end if;
+  insert into public.report_quota as q (user_id, day, n)
+  values (auth.uid(), current_date, 1)
+  on conflict (user_id, day) do update set n = q.n + 1
+  returning q.n into used;
+  if used = 1 then
+    delete from public.report_quota where user_id = auth.uid() and day < current_date - 7;
+  end if;
+  if used > 50 then
+    raise exception 'daily report limit reached' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.count_report() from anon, authenticated, public;
+
+drop trigger if exists content_reports_quota on public.content_reports;
+create trigger content_reports_quota before insert on public.content_reports
+  for each row execute function public.count_report();
