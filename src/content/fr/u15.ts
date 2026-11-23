@@ -158,7 +158,7 @@ export const unit: Unit = {
       id: "dlg-velo", type: "dialogue", target: "Tu as raison, mais…", register: "informal",
       gloss: { es: "Tienes razón, pero…", en: "You're right, but…" },
       turns: [
-        { who: "A", target: "À mon avis, il faut que la ville interdise les voitures au centre.", gloss: { es: "En mi opinión, la ciudad tiene que prohibir los coches en el centro.", en: "In my opinion, the city should ban cars from the centre." } },
+        { who: "A", target: "À mon avis, il faut que la ville interdise les voitures au centre.", gloss: { es: "En mi opinión, la ciudad tiene que prohibir los autos en el centro.", en: "In my opinion, the city should ban cars from the centre." } },
         { who: "B", target: "Tu as raison, mais je ne pense pas que ce soit facile.", gloss: { es: "Tienes razón, pero no creo que sea fácil.", en: "You're right, but I don't think it'll be easy." } },
         { who: "A", target: "Pourquoi ? Il y a des vélos et des bus partout.", gloss: { es: "¿Por qué? Hay bicis y autobuses por todas partes.", en: "Why? There are bikes and buses everywhere." } },
         { who: "B", target: "Oui, mais les commerçants ne sont pas d'accord.", gloss: { es: "Sí, pero los comerciantes no están de acuerdo.", en: "Yes, but the shopkeepers don't agree." } },

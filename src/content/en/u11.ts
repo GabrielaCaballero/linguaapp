@@ -211,7 +211,7 @@ export const unit: Unit = {
       turns: [
         { who: "A", target: "Where did you grow up?", gloss: { es: "¿Dónde te criaste?", en: "Where did you grow up?" } },
         { who: "B", target: "In a small town near the coast. We used to go to the beach every weekend.", gloss: { es: "En un pueblo cerca de la costa. Íbamos a la playa todos los fines de semana.", en: "In a small town near the coast. We used to go to the beach every weekend." } },
-        { who: "A", target: "Lucky you! Were you a happy kid?", gloss: { es: "¡Qué suerte! ¿Fuiste un niño feliz?", en: "Lucky you! Were you a happy kid?" } },
+        { who: "A", target: "Lucky you! Were you a happy kid?", gloss: { es: "¡Qué suerte! ¿Eras un niño feliz?", en: "Lucky you! Were you a happy kid?" } },
         { who: "B", target: "Yes, very. But I was really naughty. My teachers weren't too happy!", gloss: { es: "Sí, mucho. Pero era muy travieso. ¡Mis maestros no estaban muy contentos!", en: "Yes, very. But I was really naughty. My teachers weren't too happy!" } },
       ],
       question: {

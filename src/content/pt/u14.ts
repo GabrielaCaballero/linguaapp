@@ -22,12 +22,12 @@ export const unit: Unit = {
     { id: "salario", type: "word", pos: "noun", target: "o salário", gender: "m", plural: "os salários", gloss: { es: "el sueldo, el salario", en: "the salary / pay" }, distractors: ["a salária", "o saldo", "o salão"], tags: ["work", "money"] },
     { id: "vaga", type: "word", pos: "noun", target: "a vaga", gender: "f", plural: "as vagas", gloss: { es: "la vacante (de empleo) / el lugar para estacionar", en: "the vacancy / parking space" }, distractors: ["o vago", "a vela", "a vagem"], note: { es: "«vaga» también es un lugar libre: tem vaga na garagem?", en: "'vaga' is also a free space: tem vaga na garagem?" }, tags: ["work"] },
     { id: "curriculo", type: "word", pos: "noun", target: "o currículo", gender: "m", plural: "os currículos", gloss: { es: "el currículum, la hoja de vida", en: "the CV / résumé" }, distractors: ["a currícula", "o curricular", "o curso"], tags: ["work"] },
-    { id: "home-office", type: "phrase", pos: "phrase", target: "trabalhar de casa", gloss: { es: "trabajar desde casa", en: "to work from home" }, accept: [{ text: "fazer home office" }, { text: "trabalhar em casa" }], variants: [{ region: "PT", text: "trabalhar em teletrabalho" }], distractors: ["trabalhar na casa", "trabalhar por casa", "trabalhar a casa"], tags: ["work"] },
+    { id: "home-office", type: "phrase", pos: "phrase", target: "trabalhar de casa", gloss: { es: "trabajar desde casa", en: "to work from home" }, accept: [{ text: "fazer home office" }, { text: "trabalhar em casa" }], variants: [{ region: "PT", text: "trabalhar a partir de casa", note: { es: "En Portugal: trabalhar a partir de casa / estar em teletrabalho.", en: "In Portugal: trabalhar a partir de casa / estar em teletrabalho." } }, { region: "PT", text: "estar em teletrabalho" }], distractors: ["trabalhar na casa", "trabalhar por casa", "trabalhar a casa"], tags: ["work"] },
     // ── Sentences ────────────────────────────────────────────
     {
       id: "trabalho-numa-empresa", type: "sentence", target: "Eu trabalho numa empresa de tecnologia há cinco anos.",
       gloss: { es: "Trabajo en una empresa de tecnología desde hace cinco años.", en: "I've been working at a tech company for five years." },
-      accept: [{ text: "Trabalho numa empresa de tecnologia há cinco anos." }, { text: "Eu trabalho em uma empresa de tecnologia há cinco anos." }],
+      accept: [{ text: "Trabalho numa empresa de tecnologia há cinco anos." }, { text: "Eu trabalho em uma empresa de tecnologia há cinco anos." }, { text: "Eu trabalho numa empresa de tecnologia faz cinco anos." }],
       errors: [{ text: "Eu trabalho numa empresa de tecnologia faz cinco anos atrás.", feedback: { es: "«há cinco anos» ya incluye «hace»: no hace falta «atrás».", en: "'há cinco anos' already means 'for/ago': no need for 'atrás'." } }],
       distractors: ["faz", "desde", "a"],
       tags: ["work"],
@@ -50,7 +50,7 @@ export const unit: Unit = {
     {
       id: "envio-em-anexo", type: "sentence", target: "Envio em anexo o meu currículo.", register: "formal",
       gloss: { es: "Adjunto mi currículum.", en: "Please find my CV attached. (formal)" },
-      accept: [{ text: "Segue em anexo o meu currículo." }, { text: "Segue anexo o meu currículo." }],
+      accept: [{ text: "Segue em anexo o meu currículo." }, { text: "Segue anexo o meu currículo." }, { text: "Envio o meu currículo em anexo." }, { text: "Envio em anexo meu currículo." }],
       distractors: ["no", "anexado", "curriculum"],
       tags: ["work", "email", "formal"],
     },
@@ -58,7 +58,7 @@ export const unit: Unit = {
       id: "prezada-senhora", type: "phrase", pos: "phrase", target: "Prezada Sra. Lima,", spoken: "Prezada senhora Lima,", register: "formal",
       gloss: { es: "Estimada Sra. Lima: (en un correo)", en: "Dear Ms Lima, (in an email)" },
       accept: [{ text: "Prezada senhora Lima," }, { text: "Cara Sra. Lima," }],
-      distractors: ["Querida Sra. Lima,", "Estimada Sra. Lima,", "Olá Sra. Lima,"],
+      distractors: ["Querida Sra. Lima,", "Prezado Sra. Lima,", "Olá Sra. Lima,"],
       note: { es: "Para cerrar: «Atenciosamente» (atentamente) o «Abraços» si hay confianza.", en: "To close: 'Atenciosamente' (yours sincerely), or 'Abraços' if you know them well." },
       tags: ["work", "email", "formal"],
     },

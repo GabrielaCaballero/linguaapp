@@ -27,6 +27,7 @@ export const unit: Unit = {
     {
       id: "le-pont-a-ete-ferme", type: "sentence", target: "Le pont a été fermé à cause de la tempête.",
       gloss: { es: "Cerraron el puente por la tormenta.", en: "The bridge was closed because of the storm." },
+      accept: [{ text: "On a fermé le pont à cause de la tempête." }],
       errors: [{ text: "Le pont a fermé à cause de la tempête.", feedback: { es: "En pasiva: être + participio (a été fermé).", en: "Passive: être + participle (a été fermé)." }, ruleId: "fr-g-passif" }],
       distractors: ["est", "par", "grâce"],
       tags: ["passive", "news"],
@@ -34,6 +35,7 @@ export const unit: Unit = {
     {
       id: "le-voleur-a-ete-arrete", type: "sentence", target: "Le voleur a été arrêté par la police.",
       gloss: { es: "La policía detuvo al ladrón.", en: "The thief was arrested by the police." },
+      accept: [{ text: "La police a arrêté le voleur." }],
       errors: [{ text: "Le voleur a été arrêté de la police.", feedback: { es: "El agente de la pasiva va con «par».", en: "The agent of a passive takes 'par'." }, ruleId: "fr-g-passif" }],
       distractors: ["de", "arrêtée", "est"],
       tags: ["passive", "news"],
@@ -56,7 +58,8 @@ export const unit: Unit = {
     {
       id: "selon-les-experts", type: "sentence", target: "Selon les experts, les prix vont continuer à augmenter.",
       gloss: { es: "Según los expertos, los precios van a seguir subiendo.", en: "According to experts, prices will keep rising." },
-      distractors: ["d'après", "de", "augmenté"],
+      accept: [{ text: "D'après les experts, les prix vont continuer à augmenter." }, { text: "Selon les experts, les prix vont continuer d'augmenter." }],
+      distractors: ["sur", "de", "augmenté"],
       tags: ["news", "economy"],
     },
     {

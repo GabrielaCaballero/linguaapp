@@ -45,6 +45,7 @@ export const unit: Unit = {
     {
       id: "quantos-anos-voce-tem", type: "sentence", target: "Quantos anos você tem?", register: "informal",
       gloss: { es: "¿Cuántos años tienes?", en: "How old are you? (informal)" },
+      accept: [{ text: "Você tem quantos anos?" }],
       variants: [{ region: "PT", text: "Quantos anos tens?" }],
       distractors: ["é", "Quanto", "o senhor"],
       tags: ["age"],
@@ -83,7 +84,7 @@ export const unit: Unit = {
     {
       id: "no-sabado", type: "sentence", target: "No sábado eu não trabalho.",
       gloss: { es: "El sábado no trabajo.", en: "I don't work on Saturday." },
-      accept: [{ text: "No sábado não trabalho." }, { text: "Eu não trabalho no sábado." }],
+      accept: [{ text: "No sábado não trabalho." }, { text: "Eu não trabalho no sábado." }, { text: "Não trabalho no sábado." }],
       errors: [{ text: "O sábado eu não trabalho.", feedback: { es: "Para «el sábado» (ese día) se dice «no sábado» (em + o).", en: "'On Saturday' is 'no sábado' (em + o)." } }],
       distractors: ["na", "trabalha", "nunca"],
       tags: ["days"],

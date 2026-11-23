@@ -32,14 +32,14 @@ export const unit: Unit = {
     {
       id: "imagina", type: "sentence", target: "Você vai me ajudar na mudança? — Imagina! Estou de férias.",
       gloss: { es: "¿Me vas a ayudar con la mudanza? — ¡Ni lo sueñes! Estoy de vacaciones.", en: "Are you going to help me move? — You must be joking! I'm on holiday." },
-      distractors: ["Imagine", "mudança de", "Claro"],
+      distractors: ["Imaginou", "mudança de", "Claro"],
       note: { es: "«Imagina!» = de nada; aquí, irónico: ¡ni hablar!", en: "'Imagina!' usually means 'don't mention it'; here it's ironic: 'no way!'." },
       grammar: ["pt-g-ironia"], tags: ["irony"],
     },
     {
       id: "sei-la", type: "sentence", target: "Sei lá, tipo, acho que ele ficou chateado.",
       gloss: { es: "No sé, o sea, creo que se molestó.", en: "I dunno, like, I think he got upset." },
-      distractors: ["Sei ali", "chateou", "aborrecido"],
+      distractors: ["Sei ali", "chateou", "chatice"],
       grammar: ["pt-g-marcadores-discursivos"], tags: ["discourse", "colloquial"],
     },
     {

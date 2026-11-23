@@ -129,7 +129,7 @@ const bank: PlacementItem[] = [
   },
   {
     id: "fr-p-20", lang: "fr", cefr: "A2", b: 0.3, skill: "vocab", kind: "mcq", stem: "le quai",
-    mcq: { prompt: MEAN, options: [{ es: "la plataforma del tren", en: "the platform" }, { es: "el boleto", en: "the ticket" }, { es: "la maleta", en: "the suitcase" }, { es: "el retraso", en: "the delay" }], answer: 0 },
+    mcq: { prompt: MEAN, options: [{ es: "el andén del tren", en: "the platform" }, { es: "el boleto", en: "the ticket" }, { es: "la maleta", en: "the suitcase" }, { es: "el retraso", en: "the delay" }], answer: 0 },
     seeds: ["fr-u12-quai", "fr-u12-quel-quai"],
   },
   {
@@ -235,7 +235,7 @@ const bank: PlacementItem[] = [
     id: "fr-p-36", lang: "fr", cefr: "B2", b: 2.6, skill: "reading", kind: "mcq", stem: "Le maire a affirmé qu'il interdirait les voitures au centre. Néanmoins, les commerçants s'y opposent.",
     mcq: {
       prompt: { es: "¿Qué hacen los comerciantes?", en: "What are the shopkeepers doing?" },
-      options: [{ es: "Se oponen a la medida.", en: "They oppose the measure." }, { es: "Apoyan al alcalde.", en: "They support the mayor." }, { es: "Ya prohibieron los coches.", en: "They've already banned cars." }, { es: "Cierran sus tiendas.", en: "They're closing their shops." }],
+      options: [{ es: "Se oponen a la medida.", en: "They oppose the measure." }, { es: "Apoyan al alcalde.", en: "They support the mayor." }, { es: "Ya prohibieron los autos.", en: "They've already banned cars." }, { es: "Cierran sus tiendas.", en: "They're closing their shops." }],
       answer: 0,
     },
     seeds: ["fr-u23-affirmer", "fr-u23-neanmoins", "fr-u23-il-a-dit-que"],
@@ -265,7 +265,7 @@ const bank: PlacementItem[] = [
     id: "fr-p-41", lang: "fr", cefr: "C1", b: 3.3, skill: "listening", kind: "listen", spoken: "Selon nos informations, le ministre aurait démissionné ce matin.",
     mcq: {
       prompt: { es: "¿Qué dice la noticia?", en: "What does the news item say?" },
-      options: [{ es: "Que el ministro habría dimitido, pero no está confirmado.", en: "That the minister has reportedly resigned, but it isn't confirmed." }, { es: "Que el ministro dimitió, y es oficial.", en: "That the minister resigned, and it's official." }, { es: "Que el ministro dimitirá mañana.", en: "That the minister will resign tomorrow." }, { es: "Que el ministro se niega a dimitir.", en: "That the minister refuses to resign." }],
+      options: [{ es: "Que el ministro habría renunciado, pero no está confirmado.", en: "That the minister has reportedly resigned, but it isn't confirmed." }, { es: "Que el ministro renunció, y es oficial.", en: "That the minister resigned, and it's official." }, { es: "Que el ministro renunciará mañana.", en: "That the minister will resign tomorrow." }, { es: "Que el ministro se niega a renunciar.", en: "That the minister refuses to resign." }],
       answer: 0,
     },
     seeds: ["fr-u28-selon-nos-informations", "fr-u28-pat-conditionnel-info", "fr-u28-suspect-aurait-pris-la-fuite"],

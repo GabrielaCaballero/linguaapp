@@ -35,7 +35,7 @@ export const unit: Unit = {
       id: "i-dont-agree", type: "phrase", pos: "phrase", target: "I'm not so sure about that.",
       gloss: { es: "No estoy tan seguro/a de eso.", en: "I'm not so sure about that." },
       accept: [{ text: "I don't agree." }, { text: "I disagree." }, { text: "I'm not sure about that." }],
-      distractors: ["I'm not so sure of this.", "I'm not agree.", "I no agree."],
+      distractors: ["I'm not so secure about that.", "I'm not agree.", "I no agree."],
       note: { es: "Forma suave de discrepar; «I disagree» es más directo." },
       tags: ["opinions", "chunk"],
     },

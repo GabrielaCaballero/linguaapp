@@ -60,7 +60,7 @@ export const unit: Unit = {
     },
     {
       id: "muffin", type: "word", target: "muffin", plural: "muffins",
-      gloss: { es: "magdalena, panquecito", en: "muffin" },
+      gloss: { es: "muffin, panquecito", en: "muffin" },
       distractors: ["muffler", "puffin", "cookie"],
       tags: ["food"],
     },
@@ -151,7 +151,7 @@ export const unit: Unit = {
     },
     {
       id: "this-muffin", type: "sentence", target: "This muffin is delicious!",
-      gloss: { es: "¡Esta magdalena está riquísima!", en: "This muffin is delicious!" },
+      gloss: { es: "¡Este muffin está riquísimo!", en: "This muffin is delicious!" },
       errors: [{ text: "These muffin is delicious!", feedback: { es: "Con un solo objeto: this. «these» es para varios." }, ruleId: "en-g-this-that" }],
       distractors: ["These", "are", "That's"],
       grammar: ["en-g-this-that"],
@@ -210,7 +210,7 @@ export const unit: Unit = {
         { who: "A", target: "Hi! What can I get you?", gloss: { es: "¡Hola! ¿Qué te sirvo?", en: "Hi! What can I get you?" } },
         { who: "B", target: "Hi. Can I have a medium latte, please?", gloss: { es: "Hola. ¿Me das un latte mediano, por favor?", en: "Hi. Can I have a medium latte, please?" } },
         { who: "A", target: "Sure. For here or to go?", gloss: { es: "Claro. ¿Para tomar aquí o para llevar?", en: "Sure. For here or to go?" } },
-        { who: "B", target: "To go, please. And a blueberry muffin.", gloss: { es: "Para llevar, por favor. Y una magdalena de arándanos.", en: "To go, please. And a blueberry muffin." } },
+        { who: "B", target: "To go, please. And a blueberry muffin.", gloss: { es: "Para llevar, por favor. Y un muffin de arándanos.", en: "To go, please. And a blueberry muffin." } },
         { who: "A", target: "Anything else?", gloss: { es: "¿Algo más?", en: "Anything else?" } },
         { who: "B", target: "No, that's all, thanks.", gloss: { es: "No, eso es todo, gracias.", en: "No, that's all, thanks." } },
       ],

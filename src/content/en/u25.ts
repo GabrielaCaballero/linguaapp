@@ -90,8 +90,7 @@ export const unit: Unit = {
     {
       id: "that-would-be-difficult", type: "sentence", target: "That would be a little difficult for us.",
       gloss: { es: "Eso nos resultaría un poco difícil (= no).", en: "That would be a little difficult for us." },
-      accept: [{ text: "That would be a bit difficult for us." }, { text: "That might be a little difficult for us." }],
-      errors: [{ text: "That is impossible for us.", feedback: { es: "Correcto, pero demasiado directo en una negociación; «would be a little difficult» suaviza el no." }, ruleId: "en-g-diplomatic" }],
+      accept: [{ text: "That would be a bit difficult for us." }, { text: "That might be a little difficult for us." }, { text: "That is impossible for us.", verdict: "almost", feedback: { es: "Correcto, pero demasiado directo en una negociación; «would be a little difficult» suaviza el no." } }],
       distractors: ["will", "few", "to"],
       grammar: ["en-g-diplomatic"],
       tags: ["negotiation", "diplomacy"],
@@ -108,7 +107,7 @@ export const unit: Unit = {
     {
       id: "wouldnt-it-make-sense", type: "sentence", target: "Wouldn't it make more sense to split the costs?",
       gloss: { es: "¿No tendría más sentido repartir los gastos?", en: "Wouldn't it make more sense to split the costs?" },
-      distractors: ["have", "sense's", "divide"],
+      distractors: ["have", "sense's", "splitting"],
       grammar: ["en-g-diplomatic"],
       tags: ["negotiation", "diplomacy"],
     },
@@ -142,8 +141,8 @@ export const unit: Unit = {
     {
       id: "provided-that", type: "sentence", target: "We can agree to that, provided that payment is made within thirty days.",
       gloss: { es: "Podemos aceptarlo, siempre que el pago se haga en un plazo de treinta días.", en: "We can agree to that, provided that payment is made within thirty days." },
-      accept: [{ text: "We can agree to that, provided payment is made within thirty days." }, { text: "We can agree to that, as long as payment is made within thirty days." }],
-      distractors: ["providing", "in", "will"],
+      accept: [{ text: "We can agree to that, provided payment is made within thirty days." }, { text: "We can agree to that, as long as payment is made within thirty days." }, { text: "We can agree to that, providing that payment is made within thirty days." }],
+      distractors: ["provide", "in", "will"],
       grammar: ["en-g-conditional-inversion"],
       tags: ["negotiation", "conditions"],
     },

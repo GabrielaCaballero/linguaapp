@@ -44,7 +44,7 @@ export const unit: Unit = {
     },
     {
       id: "ministre-demissionnerait", type: "sentence", target: "Selon nos informations, le ministre démissionnerait dans les prochains jours.",
-      gloss: { es: "Según nuestra información, el ministro dimitiría en los próximos días.", en: "According to our sources, the minister is set to resign in the coming days." },
+      gloss: { es: "Según nuestra información, el ministro renunciaría en los próximos días.", en: "According to our sources, the minister is set to resign in the coming days." },
       distractors: ["démissionnera", "prochaines", "jour"],
       grammar: ["fr-g-conditionnel-info"], tags: ["media", "politics"],
     },
@@ -198,7 +198,7 @@ export const unit: Unit = {
         ],
         answer: 0,
       },
-      note: { en: "To edit a text = réviser or corriger; an editor at a newspaper = un rédacteur en chef." },
+      note: { en: "To edit a text = réviser or corriger; a newspaper editor = un rédacteur (the editor-in-chief = le rédacteur en chef)." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "media"],
     },
   ]),

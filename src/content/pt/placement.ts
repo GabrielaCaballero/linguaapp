@@ -88,7 +88,7 @@ const bank: PlacementItem[] = [
   // ── A1.2 ───────────────────────────────────────────────────
   {
     id: "pt-p-13", lang: "pt", cefr: "A1.2", b: -0.6, skill: "vocab", kind: "mcq", stem: "Eu acordo às sete.", falseFriend: true,
-    mcq: { prompt: MEAN, options: [{ es: "Me despierto a las siete.", en: "I wake up at seven." }, { es: "Me acuerdo a las siete.", en: "I remember at seven." }, { es: "Quedamos a las siete.", en: "We meet at seven." }, { es: "Me acuesto a las siete.", en: "I go to bed at seven." }], answer: 0 },
+    mcq: { prompt: MEAN, options: [{ es: "Me despierto a las siete.", en: "I wake up at seven." }, { es: "Me acuerdo a las siete.", en: "I remember at seven." }, { es: "Nos vemos a las siete.", en: "We meet at seven." }, { es: "Me acuesto a las siete.", en: "I go to bed at seven." }], answer: 0 },
     seeds: ["pt-u07-acordar", "pt-u07-br-acordar", "pt-u07-acordo-as-sete"],
   },
   {

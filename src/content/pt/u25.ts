@@ -16,7 +16,7 @@ export const unit: Unit = {
     { id: "orcamento", type: "word", pos: "noun", target: "o orçamento", gender: "m", plural: "os orçamentos", gloss: { es: "el presupuesto", en: "the budget / quote" }, distractors: ["a orçamenta", "o ornamento", "o pressuposto"], note: { es: "Ojo: «o pressuposto» es la premisa, no el presupuesto.", en: "Also a supplier's quote: pedir um orçamento." }, tags: ["work", "money"] },
     { id: "faturamento", type: "word", pos: "noun", target: "o faturamento", gender: "m", plural: "os faturamentos", gloss: { es: "la facturación", en: "the turnover / revenue" }, variants: [{ region: "PT", text: "a faturação" }], distractors: ["a fatura", "o fatiamento", "o faturado"], tags: ["work", "money"] },
     { id: "multa", type: "word", pos: "noun", target: "a multa contratual", gender: "f", plural: "as multas contratuais", gloss: { es: "la penalización por contrato", en: "the contractual penalty" }, distractors: ["a pena contratual", "o multo contratual", "a culpa contratual"], tags: ["work", "contracts"] },
-    { id: "pauta", type: "word", pos: "noun", target: "a pauta", gender: "f", plural: "as pautas", gloss: { es: "el orden del día", en: "the agenda (of a meeting)" }, distractors: ["a agenda", "o pauto", "a pausa"], note: { es: "«a agenda» es tu libreta o calendario; los temas de la reunión son «a pauta».", en: "'a agenda' is your diary; the meeting's topics are 'a pauta'." }, tags: ["work", "meetings"] },
+    { id: "pauta", type: "word", pos: "noun", target: "a pauta", gender: "f", plural: "as pautas", gloss: { es: "el orden del día", en: "the agenda (of a meeting)" }, variants: [{ region: "PT", text: "a ordem de trabalhos", note: { es: "En Portugal el orden del día es «a ordem de trabalhos»; «pauta» es otra cosa (partitura, lista de notas).", en: "In Portugal a meeting agenda is 'a ordem de trabalhos'; 'pauta' means something else (sheet music, a list of grades)." } }], distractors: ["a pasta", "o pauto", "a pausa"], note: { es: "«a agenda» es tu libreta o calendario; los temas de la reunión son «a pauta».", en: "'a agenda' is your diary; the meeting's topics are 'a pauta'." }, tags: ["work", "meetings"] },
     { id: "efetuar", type: "word", pos: "verb", target: "efetuar", gloss: { es: "efectuar, realizar (formal)", en: "to carry out / make (formal)" }, forms: { "part.": "efetuado" }, distractors: ["efeituar", "afetar", "efetivar-se de"], tags: ["work", "formal"] },
     { id: "mediante", type: "word", pos: "prep", target: "mediante", gloss: { es: "mediante, a cambio de", en: "upon / subject to" }, distractors: ["mediando", "medianamente", "por meio"], note: { es: "Mediante pagamento = previo pago.", en: "Mediante pagamento = upon payment." }, tags: ["work", "formal"] },
     { id: "tendo-em-vista", type: "phrase", pos: "phrase", target: "tendo em vista", gloss: { es: "en vista de, considerando", en: "in view of / given" }, distractors: ["tendo a vista", "tendo em visto", "tenho em vista de"], tags: ["work", "formal", "connectors"] },
@@ -41,7 +41,7 @@ export const unit: Unit = {
       id: "conforme-combinado", type: "sentence", target: "Conforme combinado, segue a proposta revisada.", register: "formal",
       gloss: { es: "Según lo acordado, adjunto la propuesta revisada.", en: "As agreed, please find the revised proposal. (formal)" },
       accept: [{ text: "Conforme o combinado, segue a proposta revisada." }, { text: "Como combinado, segue a proposta revisada." }],
-      distractors: ["Conformado", "seguem", "revista"],
+      distractors: ["Conformado", "seguem", "revisão"],
       tags: ["work", "email", "formal"],
     },
     {
@@ -141,7 +141,9 @@ export const unit: Unit = {
     {
       id: "br-en-agenda", type: "bridge", onlyFor: "en", target: "a pauta da reunião",
       gloss: { es: "el orden del día de la reunión", en: "the meeting agenda" },
-      distractors: ["a agenda da reunião", "a pausa da reunião", "a lista da agenda"],
+      accept: [{ text: "a agenda da reunião", verdict: "almost", feedback: { en: "You'll hear it in Brazilian offices, but the standard word for a meeting's agenda is 'a pauta'." } }],
+      variants: [{ region: "PT", text: "a ordem de trabalhos da reunião" }],
+      distractors: ["a pasta da reunião", "a pausa da reunião", "a lista da agenda"],
       note: { en: "False friend: a agenda is a diary or planner; a meeting's agenda is 'a pauta'." },
       exercises: ["guess", "recall"], tags: ["bridge", "false-friend", "meetings"],
     },

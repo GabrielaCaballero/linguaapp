@@ -168,7 +168,7 @@ export const unit: Unit = {
     {
       id: "oui", type: "word", pos: "adv", target: "oui",
       gloss: { es: "sí", en: "yes" },
-      distractors: ["non", "si", "ou"],
+      distractors: ["non", "où", "ou"],
       note: { es: "«Si» también existe, pero solo para contradecir una pregunta negativa: Tu ne viens pas ? — Si !", en: "'Si' also exists, but only to contradict a negative question: Tu ne viens pas ? — Si !" },
       tags: ["basic"],
     },

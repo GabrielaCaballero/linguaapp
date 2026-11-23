@@ -27,7 +27,7 @@ export const unit: Unit = {
     { id: "soulagement", type: "word", pos: "noun", target: "le soulagement", gender: "m", plural: "les soulagements", gloss: { es: "el alivio", en: "the relief" }, distractors: ["le soulèvement", "le soulier", "l'allègement"], tags: ["feelings"] },
     { id: "rancune", type: "word", pos: "noun", target: "la rancune", gender: "f", plural: "les rancunes", gloss: { es: "el rencor", en: "the grudge / resentment" }, distractors: ["la rançon", "la rangée", "la rune"], note: { es: "Sans rancune ! = ¡Sin rencores!", en: "Sans rancune ! = No hard feelings!" }, tags: ["feelings"] },
     { id: "vexe", type: "word", pos: "adj", target: "vexé", gloss: { es: "ofendido/a, herido/a en su orgullo", en: "offended / hurt (pride)" }, forms: { m: "vexé", f: "vexée" }, accept: [{ text: "vexée" }], distractors: ["vexant", "vêtu", "versé"], tags: ["feelings"] },
-    { id: "navre", type: "word", pos: "adj", target: "navré", gloss: { es: "apenado/a, muy arrepentido/a (formal)", en: "terribly sorry" }, forms: { m: "navré", f: "navrée" }, accept: [{ text: "navrée" }], distractors: ["navrant", "nerveux", "navigué"], note: { es: "Je suis navré/e = lo siento muchísimo; navrant = lamentable.", en: "Je suis navré/e = I'm terribly sorry; navrant = deplorable." }, tags: ["feelings", "polite"] },
+    { id: "navre", type: "word", pos: "adj", target: "navré", gloss: { es: "apenado/a, desolado/a (formal)", en: "terribly sorry" }, forms: { m: "navré", f: "navrée" }, accept: [{ text: "navrée" }], distractors: ["navrant", "nerveux", "navigué"], note: { es: "Je suis navré/e = lo siento muchísimo; navrant = lamentable.", en: "Je suis navré/e = I'm terribly sorry; navrant = deplorable." }, tags: ["feelings", "polite"] },
     { id: "amertume", type: "word", pos: "noun", target: "l'amertume", gender: "f", plural: "les amertumes", gloss: { es: "la amargura", en: "the bitterness" }, distractors: ["l'amer", "l'amitié", "l'armature"], tags: ["feelings"] },
     { id: "remords", type: "word", pos: "noun", target: "le remords", gender: "m", plural: "les remords", gloss: { es: "el remordimiento", en: "the remorse" }, distractors: ["le remord", "la remorque", "le rebord"], note: { es: "Siempre con -s, también en singular: le remords.", en: "Always spelt with -s, even in the singular: le remords." }, tags: ["feelings"] },
     {
@@ -72,7 +72,7 @@ export const unit: Unit = {
     {
       id: "meilleur-film", type: "sentence", target: "C'est le meilleur film que j'aie jamais vu.",
       gloss: { es: "Es la mejor película que he visto en mi vida.", en: "It's the best film I've ever seen." },
-      accept: [{ text: "C'est le meilleur film que j'ai jamais vu.", feedback: { es: "Se oye mucho, pero tras un superlativo el registro cuidado pide subjuntivo: que j'aie vu.", en: "Very common, but after a superlative careful French uses the subjunctive: que j'aie vu." } }],
+      accept: [{ text: "C'est le meilleur film que j'ai jamais vu.", verdict: "almost", feedback: { es: "Se oye mucho, pero tras un superlativo el registro cuidado pide subjuntivo: que j'aie vu.", en: "Very common, but after a superlative careful French uses the subjunctive: que j'aie vu." } }],
       distractors: ["mieux", "a", "vue"],
       grammar: ["fr-g-subj-relative"], tags: ["subjunctive", "culture"],
     },

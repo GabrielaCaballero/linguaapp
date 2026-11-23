@@ -33,6 +33,7 @@ export const unit: Unit = {
     {
       id: "le-verre-se-recycle", type: "sentence", target: "Le verre se recycle à l'infini.",
       gloss: { es: "El vidrio se recicla infinitamente.", en: "Glass can be recycled endlessly." },
+      accept: [{ text: "Le verre est recyclable à l'infini." }, { text: "Le verre est recyclé à l'infini." }],
       distractors: ["est", "recyclé", "infinie"],
       grammar: ["fr-g-passif-pronominal"], tags: ["environment"],
     },
@@ -46,6 +47,7 @@ export const unit: Unit = {
     {
       id: "sest-fait-renverser", type: "sentence", target: "Il s'est fait renverser par une voiture.",
       gloss: { es: "Lo atropelló un auto.", en: "He got run over by a car." },
+      accept: [{ text: "Il a été renversé par une voiture." }, { text: "Une voiture l'a renversé." }],
       errors: [{ text: "Il s'est fait renversé par une voiture.", feedback: { es: "Tras «se faire» va el infinitivo: se faire renverser.", en: "se faire is followed by the infinitive: se faire renverser." }, ruleId: "fr-g-passif-pronominal" }],
       distractors: ["été", "renversé", "pour"],
       grammar: ["fr-g-passif-pronominal"], tags: ["news"],
@@ -88,7 +90,7 @@ export const unit: Unit = {
         table: [["usage / norme", "Ça ne se fait pas."], ["passif", "Le verre se recycle."], ["se faire + inf.", "Elle s'est fait licencier."]],
       },
       question: {
-        prompt: { es: "Completa: «Ce plat ___ froid.» (se sirve frío)", en: "Complete: 'Ce plat ___ froid.' (it's eaten cold)" },
+        prompt: { es: "Completa: «Ce plat ___ froid.» (se come frío)", en: "Complete: 'Ce plat ___ froid.' (it's eaten cold)" },
         options: ["se mange", "mange", "se mangent", "s'est mangé"],
         answer: 0,
       },

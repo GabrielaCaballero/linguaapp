@@ -408,7 +408,7 @@ export const grammar1: GrammarPoint[] = [
       en: "vou, vai, vamos, vão + infinitive: vou viajar = I'm going to travel.",
     },
     rule: {
-      es: "Es la forma normal de hablar del futuro en Brasil. A diferencia del español, no lleva «a» entre ir y el infinitivo: vamos comer, não «vamos a comer».",
+      es: "Es la forma normal de hablar del futuro en Brasil. A diferencia del español, no lleva «a» entre ir y el infinitivo: vamos comer, no «vamos a comer».",
       en: "This is the normal way to talk about the future in Brazil. ir is irregular: vou, vai, vamos, vão.",
     },
     table: { head: ["", "ir", "+ infinitivo"], rows: [["eu", "vou", "viajar"], ["você / ele / ela", "vai", "trabalhar"], ["nós", "vamos", "sair"], ["vocês / eles / elas", "vão", "estudar"]] },

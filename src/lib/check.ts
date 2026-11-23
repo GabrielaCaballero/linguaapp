@@ -7,6 +7,7 @@ import { courses } from "@/content";
 
 export type Reason =
   | "exact"
+  | "gender" // Portuguese -o/-a swapped (cansado/cansada)
   | "accept"
   | "variant"
   | "ss" // German ss for ß
@@ -209,7 +210,7 @@ const FR_CONTRACTIONS: Record<string, string> = { au: "à le", aux: "à les", du
 // left out on purpose: "em um / em uma" is standard written Brazilian Portuguese.
 const PT_CONTRACTIONS: Record<string, string> = {
   do: "de o", da: "de a", dos: "de os", das: "de as",
-  no: "em o", na: "em a", nos: "em os", nas: "em as",
+  no: "em o", na: "em a", nas: "em as", // not "nos": it is also the pronoun "us"
   ao: "a o", aos: "a os", "à": "a a", "às": "a as",
   pelo: "por o", pela: "por a", pelos: "por os", pelas: "por as",
   dele: "de ele", dela: "de ela", deles: "de eles", delas: "de elas",
@@ -297,6 +298,9 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   if (lang === "de" && endingOnly(deFold(g), deFold(w))) return { v: "wrong", reason: "wrong" };
   // French verb endings (mangé/manger/mangez, serai/serais) are grammar, never a typo.
   if (lang === "fr" && frEndingOnly(stripMarks(g), stripMarks(w), g, w)) return { v: "wrong", reason: "wrong" };
+  // Portuguese masculine/feminine (cansado/cansada, obrigado/obrigada): the learner may be talking
+  // about themself or someone else, so it's "almost" with a note, never wrong (review 2026-11-23).
+  if (lang === "pt" && genderSwap(stripMarks(g), stripMarks(w))) return { v: "almost", reason: "gender" };
   // Portuguese verb and noun endings (falo/fala/falam, falei/falou, livro/livros) are grammar, never a typo.
   if (lang === "pt" && ptEndingOnly(stripMarks(g), stripMarks(w))) return { v: "wrong", reason: "wrong" };
   const base = lang === "de" ? deFold(w) : stripMarks(w);
@@ -346,6 +350,13 @@ const PT_ACCENT_MEANING = new Set([
   "secretaria|secretária", "baba|babá", "camelo|camelô", "historia|história", "tem|têm", "vem|vêm",
 ]);
 /** Same Portuguese stem, different (non-empty) ending: falo/fala, comprei/comprou, livro/livros. */
+/** Same adjective or participle, only -o/-a (or -os/-as) swapped: cansado/cansada, brasileiro/
+ *  brasileira, famoso/famosa. Limited to those endings so verb forms (falo/fala) stay grammar. */
+const PT_GENDERED = /(ad|id|os|eir|iv|an)(o|a)(s?)$/;
+function genderSwap(g: string, w: string): boolean {
+  if (g === w || g.length !== w.length || !PT_GENDERED.test(g) || !PT_GENDERED.test(w)) return false;
+  return g.replace(PT_GENDERED, "$1_$3") === w.replace(PT_GENDERED, "$1_$3");
+}
 function ptEndingOnly(g: string, w: string): boolean {
   if (g === w) return false;
   const split = (s: string) => {

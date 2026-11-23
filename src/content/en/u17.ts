@@ -136,7 +136,7 @@ export const unit: Unit = {
       gloss: { es: "Te escribo en cuanto aterrice.", en: "I'll text you as soon as I land." },
       accept: [{ text: "I will text you as soon as I land." }, { text: "I'll message you as soon as I land." }],
       errors: [{ text: "I'll text you as soon as I will land.", feedback: { es: "Después de «as soon as», «when» o «if» va presente: as soon as I land." }, ruleId: "en-g-first-conditional" }],
-      distractors: ["will", "landed", "write"],
+      distractors: ["will", "landed", "texting"],
       grammar: ["en-g-first-conditional"],
       tags: ["conditionals", "travel"],
     },

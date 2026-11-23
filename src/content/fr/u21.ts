@@ -16,7 +16,7 @@ export const unit: Unit = {
   items: build("fr", 21, "B2", [
     { id: "regret", type: "word", pos: "noun", target: "le regret", gender: "m", plural: "les regrets", gloss: { es: "el arrepentimiento, el pesar", en: "the regret" }, distractors: ["la regret", "le retrait", "le regard"], note: { es: "Je n'ai aucun regret = no me arrepiento de nada.", en: "Je n'ai aucun regret = I have no regrets." }, tags: ["regret"] },
     { id: "regretter", type: "word", pos: "verb", target: "regretter", gloss: { es: "lamentar, arrepentirse de", en: "to regret / to be sorry" }, distractors: ["regarder", "regrouper", "rejeter"], note: { es: "Je regrette de ne pas être venu/e = lamento no haber venido.", en: "Je regrette de ne pas être venu/e = I'm sorry I didn't come." }, tags: ["regret"] },
-    { id: "occasion", type: "word", pos: "noun", target: "l'occasion", gender: "f", plural: "les occasions", gloss: { es: "la oportunidad / la ocasión", en: "the opportunity / chance" }, distractors: ["le occasion", "l'accusation", "l'évasion"], note: { es: "une voiture d'occasion = un coche de segunda mano.", en: "une voiture d'occasion = a second-hand car." }, tags: ["regret"] },
+    { id: "occasion", type: "word", pos: "noun", target: "l'occasion", gender: "f", plural: "les occasions", gloss: { es: "la oportunidad / la ocasión", en: "the opportunity / chance" }, distractors: ["le occasion", "l'accusation", "l'évasion"], note: { es: "une voiture d'occasion = un auto de segunda mano.", en: "une voiture d'occasion = a second-hand car." }, tags: ["regret"] },
     { id: "heureusement", type: "word", pos: "adv", target: "heureusement", gloss: { es: "por suerte, afortunadamente", en: "fortunately" }, distractors: ["malheureusement", "heureux", "honnêtement"], tags: ["connectors"] },
     { id: "malheureusement", type: "word", pos: "adv", target: "malheureusement", gloss: { es: "lamentablemente, por desgracia", en: "unfortunately" }, distractors: ["heureusement", "malhonnêtement", "mal"], tags: ["connectors"] },
     { id: "se-tromper", type: "word", pos: "verb", target: "se tromper", gloss: { es: "equivocarse", en: "to make a mistake / be wrong" }, distractors: ["tromper", "se troubler", "tremper"], note: { es: "Je me suis trompé/e de numéro = me equivoqué de número.", en: "Je me suis trompé/e de numéro = I dialled the wrong number." }, tags: ["regret", "reflexive"] },
@@ -42,8 +42,7 @@ export const unit: Unit = {
     {
       id: "jaurais-du", type: "sentence", target: "J'aurais dû étudier davantage.",
       gloss: { es: "Debería haber estudiado más.", en: "I should have studied more." },
-      accept: [{ text: "J'aurais dû étudier plus." }],
-      errors: [{ text: "Je devrais avoir étudié davantage.", feedback: { es: "El reproche sobre el pasado: j'aurais dû + infinitivo.", en: "Regret about the past: j'aurais dû + infinitive." }, ruleId: "fr-g-cond-passe" }],
+      accept: [{ text: "J'aurais dû étudier plus." }, { text: "Je devrais avoir étudié davantage.", verdict: "almost", feedback: { es: "Es posible, pero lo natural para un reproche sobre el pasado es «j'aurais dû + infinitivo».", en: "Possible, but the natural way to express regret about the past is 'j'aurais dû + infinitive'." } }],
       distractors: ["devrais", "étudié", "dois"],
       tags: ["regret", "conditional"],
     },

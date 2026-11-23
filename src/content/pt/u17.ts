@@ -39,7 +39,7 @@ export const unit: Unit = {
       id: "se-tivesse-tempo", type: "sentence", target: "Se a gente tivesse mais tempo, ia aprender a tocar violão.",
       gloss: { es: "Si tuviéramos más tiempo, aprenderíamos a tocar la guitarra.", en: "If we had more time, we'd learn to play the guitar." },
       accept: [{ text: "Se nós tivéssemos mais tempo, aprenderíamos a tocar violão." }, { text: "Se a gente tivesse mais tempo, aprenderia a tocar violão." }],
-      variants: [{ region: "PT", text: "Se tivéssemos mais tempo, aprenderíamos a tocar guitarra.", note: { es: "En Portugal la guitarra española es «a guitarra»; en Brasil, «o violão».", en: "In Portugal the classical guitar is 'a guitarra'; in Brazil 'o violão'." } }],
+      variants: [{ region: "PT", text: "Se tivéssemos mais tempo, aprenderíamos a tocar viola.", note: { es: "En Portugal la guitarra acústica se llama tradicionalmente «a viola» (también «guitarra»); en Brasil, «o violão».", en: "In Portugal the acoustic guitar is traditionally 'a viola' (also 'guitarra'); in Brazil 'o violão'." } }, { region: "PT", text: "Se tivéssemos mais tempo, aprenderíamos a tocar guitarra." }],
       distractors: ["tinha", "jogar", "teria"],
       note: { es: "En el habla brasileña, «ia + infinitivo» reemplaza a menudo al condicional: ia aprender = aprendería.", en: "In Brazilian speech 'ia + infinitive' often replaces the conditional: ia aprender = would learn." },
       tags: ["dreams", "conditional", "music"],

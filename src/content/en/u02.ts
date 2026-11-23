@@ -157,9 +157,8 @@ export const unit: Unit = {
     {
       id: "were-colombian", type: "sentence", target: "We're not American. We're Colombian.",
       gloss: { es: "No somos estadounidenses. Somos colombianos.", en: "We're not American. We're Colombian." },
-      accept: [{ text: "We are not American. We are Colombian." }, { text: "We aren't American. We're Colombian." }],
-      errors: [{ text: "We're not Americans. We're Colombians.", feedback: { es: "Después de «be», la nacionalidad es un adjetivo y no lleva -s: We're Colombian." } }],
-      distractors: ["no", "is", "Americans"],
+      accept: [{ text: "We are not American. We are Colombian." }, { text: "We aren't American. We're Colombian." }, { text: "We're not Americans. We're Colombians." }],
+      distractors: ["no", "is", "Colombia"],
       grammar: ["en-g-be"],
       tags: ["countries", "nationality", "negation"],
     },

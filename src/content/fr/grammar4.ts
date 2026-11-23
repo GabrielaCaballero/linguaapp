@@ -205,7 +205,7 @@ export const grammar4: GrammarPoint[] = [
       { target: "Le président serait favorable à cette réforme.", gloss: { es: "El presidente estaría a favor de esta reforma.", en: "The president is said to favour this reform." } },
     ],
     pitfalls: {
-      es: "No lo traduzcas como hipótesis: «il aurait démissionné» en una noticia no es «habría dimitido si…», sino «parece que dimitió».",
+      es: "No lo traduzcas como hipótesis: «il aurait démissionné» en una noticia no es «habría renunciado si…», sino «parece que renunció».",
       en: "Don't read it as a hypothesis: in a news story 'il aurait démissionné' means 'he has reportedly resigned'.",
     },
   },

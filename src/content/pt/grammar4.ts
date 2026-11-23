@@ -71,8 +71,8 @@ export const grammar4: GrammarPoint[] = [
     id: "pt-g-participio-duplo", lang: "pt", cefr: "C1",
     title: { es: "Participios dobles: aceitado / aceito", en: "Double participles: aceitado / aceito" },
     short: {
-      es: "Regular con ter / haver (tinha aceitado); corto con ser / estar (foi aceito). pago, ganho, gasto: casi siempre cortos.",
-      en: "Regular with ter / haver (tinha aceitado); short with ser / estar (foi aceito). pago, ganho, gasto: almost always short.",
+      es: "Regular con ter / haver (tinha aceitado); corto con ser / estar (foi aceito). pago, ganho, gasto: muy frecuentes también con ter.",
+      en: "Regular with ter / haver (tinha aceitado); short with ser / estar (foi aceito). pago, ganho, gasto: very common with ter too.",
     },
     rule: {
       es: "Algunos verbos tienen un participio regular (-ado, -ido) y otro irregular. El regular va con los tiempos compuestos (ter / haver); el irregular, con la pasiva y como adjetivo (ser / estar / ficar). En Portugal «aceite» en lugar de «aceito».",
@@ -231,8 +231,8 @@ export const grammar4: GrammarPoint[] = [
       en: "Portugal: tu falas, tu és, tu tens, tu falaste, tu foste. Past of tu: -aste, -este, -iste.",
     },
     rule: {
-      es: "En Portugal «tu» es el trato informal normal, con terminación en -s en casi todos los tiempos (presente falas, imperfeito falavas, condicional falarias). El pretérito perfeito termina en -ste sin s: falaste. En el sur y el norte de Brasil se usa «tu» también, a menudo con el verbo de «você»: tu fala.",
-      en: "In Portugal 'tu' is the normal informal 'you', ending in -s in most tenses (falas, falavas, falarias). The simple past ends in -ste with no s: falaste. Parts of southern and northern Brazil also use 'tu', often with the você verb form: tu fala.",
+      es: "En Portugal «tu» es el trato informal normal, con terminación en -s en casi todos los tiempos (presente falas, imperfeito falavas, condicional falarias). El pretérito perfeito termina en -ste sin s: falaste. En varias regiones de Brasil (Río, el Sur, el Norte, el Nordeste) se usa «tu» también, a menudo con el verbo de «você»: tu fala.",
+      en: "In Portugal 'tu' is the normal informal 'you', ending in -s in most tenses (falas, falavas, falarias). The simple past ends in -ste with no s: falaste. Several Brazilian regions (Rio, the South, North and Northeast) also use 'tu', often with the você verb form: tu fala.",
     },
     table: { head: ["tempo", "falar", "ser", "ter"], rows: [["presente", "falas", "és", "tens"], ["pretérito", "falaste", "foste", "tiveste"], ["imperfeito", "falavas", "eras", "tinhas"], ["imperativo", "fala!", "sê!", "tem!"]] },
     examples: [

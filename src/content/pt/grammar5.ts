@@ -93,8 +93,8 @@ export const grammar5: GrammarPoint[] = [
     id: "pt-g-tu-regional", lang: "pt", cefr: "C2",
     title: { es: "El «tu» regional de Brasil", en: "Regional 'tu' in Brazil" },
     short: {
-      es: "Sur, Norte y parte del Nordeste: tu + verbo de você (tu vai, tu falou). Norma: tu vais / você vai.",
-      en: "South, North and parts of the Northeast: tu + você verb (tu vai, tu falou). Standard: tu vais / você vai.",
+      es: "Río, Sur, Norte y parte del Nordeste: tu + verbo de você (tu vai, tu falou). Norma: tu vais / você vai.",
+      en: "Rio, the South, North and parts of the Northeast: tu + você verb (tu vai, tu falou). Standard: tu vais / você vai.",
     },
     rule: {
       es: "En muchas regiones «tu» es el pronombre informal, pero se conjuga casi siempre como «você» (tu sabe, tu foi). En algunos lugares (Porto Alegre, Florianópolis, Belém) se oyen formas clásicas (tu vais, tu fizeste). Es un rasgo regional, no un error de aprendiz, pero no pertenece a la norma escrita.",
@@ -204,8 +204,8 @@ export const grammar5: GrammarPoint[] = [
       en: "tráfego / tráfico, eminente / iminente, comprimento / cumprimento, ratificar / retificar, concerto / conserto.",
     },
     rule: {
-      es: "Palabras de forma y sonido casi iguales pero de sentido distinto. El corrector no las detecta porque las dos existen: hay que conocerlas. Algunas coinciden con trampas para hispanohablantes (tráfico).",
-      en: "Words that look and sound almost the same but mean different things. Spellcheckers won't catch them because both exist: you have to know them.",
+      es: "Palabras de forma y sonido casi iguales pero de sentido distinto. El corrector no las detecta porque las dos existen: hay que conocerlas. Algunas coinciden con trampas para hispanohablantes (tráfico). Ojo: los diccionarios admiten «tráfico» también para la circulación, pero los textos cuidados prefieren «tráfego».",
+      en: "Words that look and sound almost the same but mean different things. Spellcheckers won't catch them because both exist: you have to know them. Note: dictionaries also allow 'tráfico' for traffic flow, but careful writing prefers 'tráfego'.",
     },
     table: { head: ["palavra", "sentido"], rows: [["tráfego / tráfico", "trânsito / comércio ilegal"], ["eminente / iminente", "ilustre / prestes a ocorrer"], ["comprimento / cumprimento", "tamanho / saudação"], ["ratificar / retificar", "confirmar / corrigir"], ["descrição / discrição", "descrever / ser discreto"]] },
     examples: [

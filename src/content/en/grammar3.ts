@@ -138,7 +138,7 @@ export const grammar3: GrammarPoint[] = [
       { es: "Añade for / since o pregunta con How long…?", en: "Add for / since, or ask How long…?" },
       { es: "¿Es un verbo de estado o un resultado (cuántos)? → present perfect simple.", en: "A state verb, or a result (how many)? → simple present perfect." },
     ],
-    table: { head: ["continuous (actividad)", "simple (resultado)"], rows: [["I've been writing emails.", "I've written ten emails."], ["She's been painting.", "She's painted the room."], ["How long have you been here?", "✗ been being"]] },
+    table: { head: ["continuous (actividad)", "simple (resultado)"], rows: [["I've been writing emails.", "I've written ten emails."], ["She's been painting.", "She's painted the room."], ["✗ I've been knowing her for years.", "I've known her for years."]] },
     examples: [
       { target: "We've been living here since 2018.", gloss: { es: "Vivimos aquí desde 2018.", en: "We've been living here since 2018." } },
       { target: "You look tired. Have you been sleeping well?", gloss: { es: "Te ves cansado/a. ¿Has estado durmiendo bien?", en: "You look tired. Have you been sleeping well?" } },

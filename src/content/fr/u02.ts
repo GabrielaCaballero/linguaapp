@@ -30,7 +30,7 @@ export const unit: Unit = {
       forms: { m: "français", f: "française", mpl: "français", fpl: "françaises" },
       accept: [{ text: "française" }],
       distractors: ["France", "francais", "franche"],
-      note: { es: "La ç suena «s». En femenino suena la s: française ≈ «fransés».", en: "ç sounds like 's'. In the feminine the s is heard: française ≈ 'fron-sez'." },
+      note: { es: "La ç suena «s». En femenino suena la s (como z): française ≈ «fransez».", en: "ç sounds like 's'. In the feminine the s is heard: française ≈ 'fron-sez'." },
       tags: ["nationality", "language"],
     },
     {

@@ -23,7 +23,7 @@ export const unit: Unit = {
     },
     {
       id: "verbose", type: "word", pos: "adj", target: "verbose",
-      gloss: { es: "palabrero/a, que usa demasiadas palabras", en: "verbose" },
+      gloss: { es: "verboso/a, que usa demasiadas palabras", en: "verbose" },
       distractors: ["verbal", "verbatim", "voracious"],
       note: { es: "«verbal» significa oral o relativo a las palabras; «verbatim» es palabra por palabra." },
       tags: ["writing", "style"],
@@ -136,7 +136,7 @@ export const unit: Unit = {
       gloss: { es: "Por mucho que nos esforcemos, siempre habrá errores.", en: "No matter how hard we try, there will always be errors." },
       accept: [{ text: "However hard we try, there will always be errors." }],
       errors: [{ text: "No matter how hard we will try, there will always be errors.", feedback: { es: "Tras «no matter how / however» va presente, aunque hable del futuro: no matter how hard we try." }, ruleId: "en-g-no-matter" }],
-      distractors: ["much", "what", "tried"],
+      distractors: ["many", "what", "tried"],
       grammar: ["en-g-no-matter"],
       tags: ["concession", "writing"],
     },
@@ -196,10 +196,10 @@ export const unit: Unit = {
     // ── Dialogue + listening ─────────────────────────────────
     {
       id: "dlg-editing", type: "dialogue", target: "It's solid, but a bit verbose.",
-      gloss: { es: "Está bien hecho, pero es algo palabrero.", en: "It's solid, but a bit verbose." },
+      gloss: { es: "Está bien hecho, pero le sobran palabras.", en: "It's solid, but a bit verbose." },
       turns: [
         { who: "A", target: "Could you take a look at my report before I send it?", gloss: { es: "¿Podrías echarle un vistazo a mi informe antes de que lo mande?", en: "Could you take a look at my report before I send it?" } },
-        { who: "B", target: "Sure. It's solid, but a bit verbose. This paragraph, for instance, says the same thing twice.", gloss: { es: "Claro. Está bien hecho, pero es algo palabrero. Este párrafo, por ejemplo, dice lo mismo dos veces.", en: "Sure. It's solid, but a bit verbose. This paragraph, for instance, says the same thing twice." } },
+        { who: "B", target: "Sure. It's solid, but a bit verbose. This paragraph, for instance, says the same thing twice.", gloss: { es: "Claro. Está bien hecho, pero le sobran palabras. Este párrafo, por ejemplo, dice lo mismo dos veces.", en: "Sure. It's solid, but a bit verbose. This paragraph, for instance, says the same thing twice." } },
         { who: "A", target: "Fair enough. Should I cut one of the sentences, then? If so, which one?", gloss: { es: "Es justo. ¿Corto una de las oraciones, entonces? Si es así, ¿cuál?", en: "Fair enough. Should I cut one of the sentences, then? If so, which one?" } },
         { who: "B", target: "I'd keep the first and drop the second. The former makes the point far more concisely.", gloss: { es: "Yo dejaría la primera y quitaría la segunda. La primera lo dice de forma mucho más concisa.", en: "I'd keep the first and drop the second. The former makes the point far more concisely." } },
       ],

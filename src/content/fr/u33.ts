@@ -52,7 +52,7 @@ export const unit: Unit = {
     {
       id: "tribunal-a-deboute", type: "sentence", target: "Le tribunal a débouté le plaignant de sa demande.",
       gloss: { es: "El tribunal desestimó la demanda del denunciante.", en: "The court dismissed the plaintiff's claim." },
-      distractors: ["débouché", "la", "demandeur"],
+      distractors: ["débouché", "la", "plaintif"],
       tags: ["law"],
     },
     {
@@ -73,7 +73,7 @@ export const unit: Unit = {
     {
       id: "en-vertu-de-larticle", type: "sentence", register: "formal", target: "En vertu de l'article trois, le contrat peut être résilié.",
       gloss: { es: "En virtud del artículo tres, el contrato puede rescindirse.", en: "Under article three, the contract may be terminated." },
-      distractors: ["vertus", "résolu", "résilier"],
+      distractors: ["vertus", "résilé", "résilier"],
       grammar: ["fr-g-formules-administratives"], tags: ["law", "contracts"],
     },
     {
@@ -159,7 +159,7 @@ export const unit: Unit = {
       id: "dlg-avocate", type: "dialogue", register: "formal", target: "Vous avez subi un préjudice.",
       gloss: { es: "Usted sufrió un perjuicio.", en: "You have suffered harm." },
       turns: [
-        { who: "A", target: "Mon propriétaire refuse de me rendre ma caution depuis six mois.", gloss: { es: "Mi casero se niega a devolverme el depósito desde hace seis meses.", en: "My landlord has refused to return my deposit for six months." } },
+        { who: "A", target: "Mon propriétaire refuse de me rendre ma caution depuis six mois.", gloss: { es: "El dueño del departamento se niega a devolverme el depósito desde hace seis meses.", en: "My landlord has refused to return my deposit for six months." } },
         { who: "B", target: "Vous avez donc subi un préjudice. Lui avez-vous adressé une mise en demeure ?", gloss: { es: "Entonces usted sufrió un perjuicio. ¿Le envió un requerimiento formal?", en: "So you have suffered harm. Have you sent him a formal notice?" } },
         { who: "A", target: "Non, seulement des courriels.", gloss: { es: "No, solo correos electrónicos.", en: "No, only emails." } },
         { who: "B", target: "Commencez par une lettre recommandée. Le cas échéant, nous saisirons le tribunal.", gloss: { es: "Empiece por una carta certificada. Si hace falta, recurriremos al tribunal.", en: "Start with a recorded-delivery letter. If need be, we'll take it to court." } },

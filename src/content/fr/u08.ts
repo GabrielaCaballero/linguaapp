@@ -178,9 +178,9 @@ export const unit: Unit = {
       question: {
         prompt: { es: "«Ma voiture est sale» significa…", en: "'Ma voiture est sale' means…" },
         options: [
-          { es: "Mi coche está sucio", en: "My car is dirty" },
-          { es: "Mi coche sale (se va)", en: "My car is leaving" },
-          { es: "Mi coche está en venta", en: "My car is for sale" },
+          { es: "Mi auto está sucio", en: "My car is dirty" },
+          { es: "Mi auto sale (se va)", en: "My car is leaving" },
+          { es: "Mi auto está en venta", en: "My car is for sale" },
         ],
         answer: 0,
       },

@@ -25,8 +25,7 @@ export const unit: Unit = {
     {
       id: "ele-disse-que-ia", type: "sentence", target: "O ministro disse que ia renunciar ao cargo.",
       gloss: { es: "El ministro dijo que iba a renunciar al cargo.", en: "The minister said he was going to resign." },
-      accept: [{ text: "O ministro disse que renunciaria ao cargo." }],
-      errors: [{ text: "O ministro disse que vai renunciar ao cargo.", feedback: { es: "En estilo indirecto con «disse», el futuro pasa a ia / renunciaria (aunque en el habla se oye «vai»).", en: "In reported speech after 'disse', the future shifts to ia / renunciaria." }, ruleId: "pt-g-discurso-indireto" }],
+      accept: [{ text: "O ministro disse que renunciaria ao cargo." }, { text: "O ministro disse que vai renunciar ao cargo.", verdict: "almost", feedback: { es: "Muy común (sobre todo si aún no ocurrió), pero en estilo indirecto lo esperado es ia / renunciaria.", en: "Very common (especially if it hasn't happened yet), but reported speech normally shifts to ia / renunciaria." } }],
       distractors: ["vai", "do", "dizia"],
       tags: ["news", "reported-speech"],
     },
@@ -47,8 +46,7 @@ export const unit: Unit = {
     {
       id: "tenho-trabalhado", type: "sentence", target: "Ultimamente eu tenho trabalhado demais.",
       gloss: { es: "Últimamente estoy trabajando demasiado.", en: "Lately I've been working too much." },
-      accept: [{ text: "Ultimamente tenho trabalhado demais." }, { text: "Ultimamente eu tenho trabalhado muito." }],
-      errors: [{ text: "Ultimamente eu trabalhei demais.", feedback: { es: "Para algo repetido hasta ahora: tenho trabalhado.", en: "For something repeated up to now: tenho trabalhado." }, ruleId: "pt-g-perfeito-composto" }],
+      accept: [{ text: "Ultimamente tenho trabalhado demais." }, { text: "Ultimamente eu tenho trabalhado muito." }, { text: "Ultimamente eu trabalhei demais.", verdict: "almost", feedback: { es: "Se entiende, pero para algo repetido hasta ahora lo natural es «tenho trabalhado».", en: "Understandable, but for something repeated up to now the natural form is 'tenho trabalhado'." } }],
       distractors: ["trabalhei", "estou", "tenho trabalho"],
       tags: ["news", "present-perfect"],
     },

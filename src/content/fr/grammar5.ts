@@ -333,8 +333,8 @@ export const grammar5: GrammarPoint[] = [
       en: "-teur → -trice (directrice, autrice); -eur → -eure (professeure); -e → just the article (la ministre).",
     },
     rule: {
-      es: "Quebec, Suiza y Bélgica feminizaron los nombres de profesiones antes que Francia; la Academia francesa los aceptó en 2019. Reglas: -teur → -trice, -eur → -eure (si no hay verbo cercano), -ier → -ière, y palabras en -e solo cambian el artículo.",
-      en: "Quebec, Switzerland and Belgium feminised job titles before France; the Académie française accepted them in 2019. Rules: -teur → -trice, -eur → -eure (when there's no related verb), -ier → -ière, and words in -e only change the article.",
+      es: "Quebec, Suiza y Bélgica feminizaron los nombres de profesiones antes que Francia; la Academia francesa los aceptó en 2019. Reglas: -teur → -trice, -eur → -euse si hay un verbo cercano (vendeur → vendeuse) y -eure si no (professeure), -ier → -ière, y palabras en -e solo cambian el artículo.",
+      en: "Quebec, Switzerland and Belgium feminised job titles before France; the Académie française accepted them in 2019. Rules: -teur → -trice, -eur → -euse when there's a related verb (vendeur → vendeuse) and -eure when there isn't (professeure), -ier → -ière, and words in -e only change the article.",
     },
     steps: [
       { es: "¿Termina en -teur? → -trice: directeur → directrice.", en: "Ends in -teur? → -trice: directeur → directrice." },

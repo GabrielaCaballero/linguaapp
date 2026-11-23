@@ -60,6 +60,7 @@ export const unit: Unit = {
     {
       id: "quelque-effort", type: "sentence", target: "Quelque effort qu'il fasse, il n'y arrive pas.",
       gloss: { es: "Por más esfuerzos que haga, no lo logra.", en: "Whatever effort he makes, he can't manage it." },
+      accept: [{ text: "Quelques efforts qu'il fasse, il n'y arrive pas." }],
       distractors: ["Quel", "Quelle", "fait"],
       grammar: ["fr-g-quel-que"], tags: ["nuance", "subjunctive"],
     },

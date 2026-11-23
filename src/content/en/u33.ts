@@ -179,7 +179,7 @@ export const unit: Unit = {
           es: "La partícula no es aleatoria: suele tener un sentido propio que se repite en muchos verbos. «up» = completar o aumentar (use up, speed up); «down» = reducir (play down, cut down); «off» = separar, cancelar (call off, brush off); «out» = hasta el final o hacia fuera (work out, pan out); «through» = de principio a fin (see it through).",
           en: "The particle isn't random: it usually has its own meaning, repeated across many verbs. 'up' = complete or increase (use up, speed up); 'down' = reduce (play down, cut down); 'off' = separate, cancel (call off, brush off); 'out' = to the end or outwards (work out, pan out); 'through' = from start to finish (see it through).",
         },
-        table: [["partícula", "idea", "ejemplos"], ["up", "completar, subir", "use up, speed up"], ["down", "reducir", "play down, cut down"], ["off", "separar, cancelar", "call off, brush off"], ["out", "hasta el final", "work out, pan out"], ["through", "de principio a fin", "see through, read through"]],
+        table: [["partícula", "idea", "ejemplos"], ["up", "completar, subir", "use up, speed up"], ["down", "reducir", "play down, cut down"], ["off", "separar, cancelar", "call off, brush off"], ["out", "hasta el final", "work out, pan out"], ["through", "de principio a fin", "see it through, read through"]],
       },
       question: {
         prompt: { es: "«They called off the wedding» significa que…", en: "'They called off the wedding' means that…" },

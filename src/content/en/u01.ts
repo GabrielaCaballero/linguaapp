@@ -84,7 +84,7 @@ export const unit: Unit = {
       id: "goodbye", type: "phrase", pos: "phrase", target: "Goodbye",
       gloss: { es: "Adiós", en: "Goodbye" },
       accept: [{ text: "Bye" }, { text: "Good-bye" }, { text: "Bye-bye" }],
-      distractors: ["Hello", "Good night", "See you"],
+      distractors: ["Hello", "Good night", "Sorry"],
       note: { es: "En la conversación diaria casi todos dicen «Bye»." },
       tags: ["greeting", "chunk"],
     },

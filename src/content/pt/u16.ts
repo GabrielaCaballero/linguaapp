@@ -51,7 +51,7 @@ export const unit: Unit = {
     {
       id: "nao-me-lembro", type: "sentence", target: "Não me lembro onde deixei as chaves.",
       gloss: { es: "No me acuerdo dónde dejé las llaves.", en: "I can't remember where I left my keys." },
-      accept: [{ text: "Eu não me lembro onde deixei as chaves." }, { text: "Não lembro onde deixei as chaves." }],
+      accept: [{ text: "Eu não me lembro onde deixei as chaves." }, { text: "Não lembro onde deixei as chaves." }, { text: "Não me lembro de onde deixei as chaves." }],
       distractors: ["acordo", "deixava", "chave"],
       tags: ["narrative"],
     },
@@ -154,13 +154,13 @@ export const unit: Unit = {
     // ── Bridges ──────────────────────────────────────────────
     {
       id: "br-rato", type: "bridge", onlyFor: "es", target: "o rato",
-      gloss: { es: "el ratón", en: "the mouse" },
+      gloss: { es: "el ratón / la rata", en: "the mouse / rat" },
       question: {
         prompt: { es: "«Vi um rato na cozinha» significa que viste…", en: "'Vi um rato na cozinha' means you saw…" },
-        options: [{ es: "un ratón", en: "a mouse" }, { es: "un rato libre", en: "a free moment" }, { es: "una rata grande", en: "a big rat" }],
+        options: [{ es: "un ratón (o una rata)", en: "a mouse (or a rat)" }, { es: "un rato libre", en: "a free moment" }, { es: "un gato", en: "a cat" }],
         answer: 0,
       },
-      note: { es: "Falso amigo: «rato» = ratón; «un rato» (un momento) es «um tempinho» o «um pouco»." },
+      note: { es: "Falso amigo: «rato» = ratón (en Brasil, sobre todo la rata; el ratoncito es «camundongo»); «un rato» (un momento) es «um tempinho» o «um pouco»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "animals"],
     },
     {

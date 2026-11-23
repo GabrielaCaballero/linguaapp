@@ -24,15 +24,14 @@ export const unit: Unit = {
     {
       id: "na-minha-opiniao", type: "sentence", target: "Na minha opinião, o transporte público é caro demais.",
       gloss: { es: "En mi opinión, el transporte público es demasiado caro.", en: "In my opinion, public transport is too expensive." },
-      accept: [{ text: "Na minha opinião, o transporte público é muito caro." }, { text: "Pra mim, o transporte público é caro demais." }],
-      errors: [{ text: "Em minha opinião, o transporte público é caro demais.", feedback: { es: "Se entiende, pero lo más natural es «na minha opinião».", en: "Understandable, but the natural phrase is 'na minha opinião'." } }],
-      distractors: ["Em", "barato", "demasiado"],
+      accept: [{ text: "Na minha opinião, o transporte público é muito caro." }, { text: "Pra mim, o transporte público é caro demais." }, { text: "Em minha opinião, o transporte público é caro demais." }],
+      distractors: ["No", "barato", "demasiado"],
       tags: ["opinion"],
     },
     {
       id: "acho-que-voce-tem-razao", type: "sentence", target: "Acho que você tem razão.", register: "informal",
       gloss: { es: "Creo que tienes razón.", en: "I think you're right. (informal)" },
-      accept: [{ text: "Eu acho que você tem razão." }],
+      accept: [{ text: "Eu acho que você tem razão." }, { text: "Acho que você está certo." }, { text: "Acho que você está certa." }],
       errors: [{ text: "Acho que você está certo razão.", feedback: { es: "Tener razón = ter razão (o «estar certo»).", en: "To be right = ter razão (or estar certo)." } }],
       distractors: ["é", "tenha", "razões"],
       tags: ["opinion"],

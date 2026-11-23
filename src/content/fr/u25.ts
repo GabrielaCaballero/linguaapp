@@ -175,7 +175,7 @@ export const unit: Unit = {
     // ── Listening & dialogue ─────────────────────────────────
     {
       id: "lis-devis", type: "listening", register: "formal",
-      target: "Nous avons étudié votre devis avec attention. Le prix nous semble raisonnable, mais les délais de livraison sont trop longs. Au cas où vous pourriez les réduire de deux semaines, nous serions prêts à signer.",
+      target: "Nous avons étudié votre devis avec attention. Le prix nous semble raisonnable, mais les délais de livraison sont trop longs. Dans l'hypothèse où vous pourriez les réduire de deux semaines, nous serions prêts à signer.",
       gloss: {
         es: "Revisamos con atención su presupuesto. El precio nos parece razonable, pero los plazos de entrega son demasiado largos. Si pudieran reducirlos en dos semanas, estaríamos listos para firmar.",
         en: "We have looked carefully at your quote. The price seems reasonable, but the delivery times are too long. Should you be able to cut them by two weeks, we would be ready to sign.",

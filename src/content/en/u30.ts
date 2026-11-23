@@ -132,8 +132,8 @@ export const unit: Unit = {
     {
       id: "overrated-sentence", type: "sentence", target: "Critics loved it, but I found it a bit overrated.",
       gloss: { es: "A la crítica le encantó, pero a mí me pareció algo sobrevalorada.", en: "Critics loved it, but I found it a bit overrated." },
-      accept: [{ text: "The critics loved it, but I found it a bit overrated." }, { text: "Critics loved it, but I thought it was a bit overrated." }],
-      distractors: ["founded", "little", "underrated"],
+      accept: [{ text: "The critics loved it, but I found it a bit overrated." }, { text: "Critics loved it, but I thought it was a bit overrated." }, { text: "Critics loved it, but I found it a little overrated." }],
+      distractors: ["founded", "few", "underrated"],
       tags: ["art", "opinions"],
     },
 

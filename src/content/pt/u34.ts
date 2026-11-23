@@ -23,7 +23,7 @@ export const unit: Unit = {
     {
       id: "partiu-desta", type: "sentence", target: "O avô dela partiu desta para melhor no ano passado.",
       gloss: { es: "Su abuelo pasó a mejor vida el año pasado.", en: "Her grandfather passed away last year." },
-      accept: [{ text: "O avô dela faleceu no ano passado." }],
+      accept: [{ text: "O avô dela faleceu no ano passado." }, { text: "O avô dela partiu dessa para melhor no ano passado." }],
       distractors: ["partiu-se", "dessa", "avó"],
       note: { es: "Eufemismo de «morreu»; también «faleceu» (formal) o «bateu as botas» (vulgar y humorístico).", en: "A euphemism for 'morreu'; also 'faleceu' (formal) or 'bateu as botas' (jokey, like 'kicked the bucket')." },
       tags: ["rhetoric", "euphemism"],
@@ -38,7 +38,7 @@ export const unit: Unit = {
     {
       id: "ha-dez-anos", type: "sentence", target: "Mudei para cá há dez anos.",
       gloss: { es: "Me mudé aquí hace diez años.", en: "I moved here ten years ago." },
-      accept: [{ text: "Eu me mudei para cá há dez anos." }, { text: "Mudei para cá dez anos atrás." }],
+      accept: [{ text: "Eu me mudei para cá há dez anos." }, { text: "Mudei para cá dez anos atrás." }, { text: "Mudei para cá faz dez anos." }, { text: "Eu me mudei para cá faz dez anos." }],
       errors: [{ text: "Mudei para cá há dez anos atrás.", feedback: { es: "Redundante: «há» ya significa «hace»; usa «há dez anos» o «dez anos atrás».", en: "Redundant: 'há' already means 'ago'; use 'há dez anos' or 'dez anos atrás'." }, ruleId: "pt-g-vicios-linguagem" }],
       distractors: ["a", "atrás", "faz"],
       tags: ["style"],

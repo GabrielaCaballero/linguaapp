@@ -98,7 +98,7 @@ export const unit: Unit = {
           { label: "tu", answer: "étais parti", ruleId: "fr-g-pqp" },
           { label: "il", answer: "était parti", ruleId: "fr-g-pqp" },
           { label: "nous", answer: "étions partis", ruleId: "fr-g-pqp" },
-          { label: "vous", answer: "étiez partis", ruleId: "fr-g-pqp" },
+          { label: "vous", answer: "étiez partis", accept: ["étiez parti"], ruleId: "fr-g-pqp" },
           { label: "ils", answer: "étaient partis", ruleId: "fr-g-pqp" },
         ],
       },

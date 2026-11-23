@@ -225,7 +225,7 @@ export const grammar2: GrammarPoint[] = [
       en: "Estou com dor de cabeça. / Minha perna está doendo. doer agrees with the body part.",
     },
     rule: {
-      es: "La forma más natural es estar com dor de + parte del cuerpo (sin artículo). También: la parte del cuerpo como sujeto de doer: meu pé dói, minhas costas doem. «Me dói a cabeça» existe, pero suena más literario.",
+      es: "La forma más natural es estar com dor de + parte del cuerpo (sin artículo). También: la parte del cuerpo como sujeto de doer: meu pé dói, minhas costas doem. «Me dói a cabeça» existe, pero en Brasil es menos habitual (en Portugal se oye mucho «dói-me a cabeça»).",
       en: "The most natural phrase is estar com dor de + body part. Or make the body part the subject of doer: meu pé dói (my foot hurts), minhas costas doem (my back hurts).",
     },
     table: { head: ["", "exemplo"], rows: [["estar com dor de", "Estou com dor de dente."], ["doer (sing.)", "Meu joelho dói."], ["doer (pl.)", "Meus pés doem."], ["ter dor", "Tenho dor nas costas."]] },
@@ -375,8 +375,8 @@ export const grammar2: GrammarPoint[] = [
       en: "feito, dito, visto, escrito, aberto, posto, vindo, ganho, pago, gasto.",
     },
     rule: {
-      es: "Los regulares terminan en -ado / -ido (falado, comido). Algunos verbos tienen participio irregular, y otros tienen dos: com ter el regular (tinha aceitado) y con ser / estar el corto (foi aceito); con ganhar, gastar y pagar se usa casi siempre el corto (tinha pago).",
-      en: "Regular participles end in -ado / -ido (falado, comido). Some verbs are irregular, and some have two: the long one with ter (tinha aceitado), the short one with ser / estar (foi aceito); ganhar, gastar, pagar mostly use the short one (tinha pago).",
+      es: "Los regulares terminan en -ado / -ido (falado, comido). Algunos verbos tienen participio irregular, y otros tienen dos: con ter el regular (tinha aceitado) y con ser / estar el corto (foi aceito); con ganhar, gastar y pagar el corto es muy frecuente también con ter (tinha pago, tinha ganho).",
+      en: "Regular participles end in -ado / -ido (falado, comido). Some verbs are irregular, and some have two: the long one with ter (tinha aceitado), the short one with ser / estar (foi aceito); with ganhar, gastar and pagar the short one is very common with ter too (tinha pago, tinha ganho).",
     },
     table: { head: ["infinitivo", "particípio"], rows: [["fazer", "feito"], ["dizer", "dito"], ["ver", "visto"], ["vir", "vindo"], ["escrever", "escrito"], ["pôr", "posto"]] },
     examples: [

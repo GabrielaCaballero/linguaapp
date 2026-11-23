@@ -18,7 +18,7 @@ export const unit: Unit = {
     {
       id: "election", type: "word", target: "election", plural: "elections",
       gloss: { es: "elección, elecciones (votación)", en: "election" },
-      distractors: ["selection", "erection", "electron"],
+      distractors: ["selection", "elocution", "electron"],
       note: { es: "election = votación; «elegir» algo cualquiera es «choose»." },
       tags: ["politics"],
     },

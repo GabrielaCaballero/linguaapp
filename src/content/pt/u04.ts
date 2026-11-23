@@ -34,15 +34,14 @@ export const unit: Unit = {
     { id: "cafe-da-manha", type: "word", pos: "noun", target: "o café da manhã", gender: "m", plural: "os cafés da manhã", gloss: { es: "el desayuno", en: "the breakfast" }, variants: [{ region: "PT", text: "o pequeno-almoço", note: { es: "En Portugal: o pequeno-almoço.", en: "In Portugal: o pequeno-almoço." } }], distractors: ["o almoço", "o desayuno", "a manhã do café"], tags: ["food", "meals"] },
     { id: "a-conta", type: "word", pos: "noun", target: "a conta", gender: "f", plural: "as contas", gloss: { es: "la cuenta", en: "the bill / check" }, distractors: ["o conto", "a cuenta", "a nota"], tags: ["restaurant"] },
     { id: "garcom", type: "word", pos: "noun", target: "o garçom", gender: "m", plural: "os garçons", gloss: { es: "el mesero / camarero", en: "the waiter" }, accept: [{ text: "a garçonete" }], variants: [{ region: "PT", text: "o empregado de mesa", note: { es: "En Portugal: o empregado (de mesa).", en: "In Portugal: o empregado (de mesa)." } }], distractors: ["o garção", "o camareiro", "o mesero"], tags: ["restaurant", "people"] },
-    { id: "cardapio", type: "word", pos: "noun", target: "o cardápio", gender: "m", plural: "os cardápios", gloss: { es: "el menú / la carta", en: "the menu" }, variants: [{ region: "PT", text: "a ementa" }], distractors: ["a carta", "o menu do dia", "o cardapo"], tags: ["restaurant"] },
+    { id: "cardapio", type: "word", pos: "noun", target: "o cardápio", gender: "m", plural: "os cardápios", gloss: { es: "el menú / la carta", en: "the menu" }, accept: [{ text: "o menu" }], variants: [{ region: "PT", text: "a ementa" }], distractors: ["a cardápia", "o menu do dia", "o cardapo"], tags: ["restaurant"] },
     { id: "querer", type: "word", pos: "verb", target: "querer", gloss: { es: "querer", en: "to want" }, forms: { eu: "quero", você: "quer", "eu (cortés)": "queria" }, distractors: ["quero", "quer", "gostar"], tags: ["verbs", "restaurant"] },
     { id: "gelado", type: "word", pos: "adj", target: "gelado", gloss: { es: "helado / bien frío", en: "ice-cold" }, accept: [{ text: "gelada" }], distractors: ["quente", "geado", "sorvete"], note: { es: "Una cerveja gelada = bien fría. El helado (postre) es «o sorvete» en Brasil.", en: "Uma cerveja gelada = ice-cold beer. Ice cream is 'o sorvete' in Brazil." }, tags: ["drinks"] },
     // ── Phrases & sentences ──────────────────────────────────
     {
       id: "eu-queria-um-cafe", type: "sentence", target: "Eu queria um café, por favor.",
       gloss: { es: "Quería un café, por favor.", en: "I'd like a coffee, please." },
-      accept: [{ text: "Queria um café, por favor." }, { text: "Eu gostaria de um café, por favor." }, { text: "Me vê um café, por favor." }, { text: "Um café, por favor." }],
-      errors: [{ text: "Eu quero um café.", feedback: { es: "Se entiende, pero suena brusco; para pedir: eu queria… / me vê…", en: "Understandable but blunt; to order say: eu queria… / me vê…" }, ruleId: "pt-g-queria" }],
+      accept: [{ text: "Queria um café, por favor." }, { text: "Eu gostaria de um café, por favor." }, { text: "Me vê um café, por favor." }, { text: "Um café, por favor." }, { text: "Eu quero um café.", verdict: "almost", feedback: { es: "Es correcto, pero suena brusco; para pedir es más amable: eu queria… / me vê…", en: "Correct, but a bit blunt; more polite: eu queria… / me vê…" } }, { text: "Eu quero um café, por favor.", verdict: "almost", feedback: { es: "Es correcto, pero «eu queria…» o «me vê…» suena más amable.", en: "Correct, but 'eu queria…' or 'me vê…' sounds friendlier." } }],
       distractors: ["quer", "uma", "gostaria"],
       tags: ["restaurant", "polite"],
     },
@@ -79,7 +78,7 @@ export const unit: Unit = {
     {
       id: "uma-cerveja-gelada", type: "sentence", target: "Uma cerveja bem gelada, por favor.",
       gloss: { es: "Una cerveza bien fría, por favor.", en: "A nice cold beer, please." },
-      distractors: ["um", "fria", "gelado"],
+      distractors: ["um", "frio", "gelado"],
       tags: ["restaurant", "drinks"],
     },
     // ── Grammar ──────────────────────────────────────────────

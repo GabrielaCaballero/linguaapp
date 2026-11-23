@@ -79,8 +79,9 @@ export const unit: Unit = {
     {
       id: "faute-de-moyens", type: "sentence", target: "Le projet a échoué faute de moyens.",
       gloss: { es: "El proyecto fracasó por falta de recursos.", en: "The project failed for lack of resources." },
+      accept: [{ text: "Le projet a échoué par manque de moyens." }, { text: "Le projet a échoué faute de ressources." }],
       errors: [{ text: "Le projet a échoué par faute de moyens.", feedback: { es: "Se dice «faute de», sin preposición delante.", en: "It's just faute de, with no preposition before it." }, ruleId: "fr-g-cause-consequence" }],
-      distractors: ["par", "manque", "échoue"],
+      distractors: ["par", "fautes", "échoue"],
       grammar: ["fr-g-cause-consequence"], tags: ["debate", "connectors"],
     },
     {

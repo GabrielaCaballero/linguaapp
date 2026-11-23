@@ -1,6 +1,6 @@
 // UI strings. App language is global (es/en). Spanish is neutral Latin-American with tú.
 // Course content (glosses, notes) uses the per-course "explain in" language instead.
-import type { BaseLang } from "@/content/schema";
+import type { BaseLang, TargetLang } from "@/content/schema";
 
 const en = {
   appName: "Linguina",
@@ -330,6 +330,7 @@ const en = {
   notes: {
     accent: (w: string) => `Watch the accent: ${w}`,
     "accent-meaning": (w: string) => `The accent changes the meaning: ${w}`,
+    gender: (w: string) => `Masculine or feminine? Here it's ${w} (fine if you meant the other one)`,
     umlaut: (w: string) => `The umlaut matters (${w})`,
     register: (w: string) => `Right words, wrong register — this one is ${w}.`,
     spanish: (w: string) => `That's the Spanish spelling — in Italian: ${w}`,
@@ -573,7 +574,7 @@ const en = {
   courseAnswer: "Course answer",
   why: "Why?",
   // misc
-  langName: { it: "Italian", de: "German", en: "English", fr: "French" } as Record<string, string>,
+  langName: { it: "Italian", de: "German", en: "English", fr: "French", pt: "Portuguese" } as Record<TargetLang, string>,
   baseName: { es: "Español", en: "English" } as Record<string, string>,
 };
 
@@ -901,6 +902,7 @@ const es: Dict = {
   notes: {
     accent: (w) => `Ojo con el acento: ${w}`,
     "accent-meaning": (w) => `El acento cambia el significado: ${w}`,
+    gender: (w) => `¿Masculino o femenino? Aquí es ${w} (está bien si te referías al otro)`,
     umlaut: (w) => `La diéresis importa (${w})`,
     register: (w) => `Las palabras están bien, pero el registro no: aquí va ${w}.`,
     spanish: (w) => `Esa es la ortografía española — en italiano: ${w}`,
@@ -1137,7 +1139,7 @@ const es: Dict = {
   tutorRaised: "El tutor lo acepta como válido.",
   courseAnswer: "Respuesta del curso",
   why: "¿Por qué?",
-  langName: { it: "italiano", de: "alemán", en: "inglés", fr: "francés" },
+  langName: { it: "italiano", de: "alemán", en: "inglés", fr: "francés", pt: "portugués" },
   baseName: { es: "Español", en: "English" },
 };
 

@@ -17,7 +17,7 @@ export const unit: Unit = {
     // ── Vocabulary ───────────────────────────────────────────
     {
       id: "pollution", type: "word", target: "pollution",
-      gloss: { es: "contaminación", en: "pollution" },
+      gloss: { es: "contaminación (del aire, del agua…)", en: "pollution" },
       distractors: ["contamination", "population", "solution"],
       note: { es: "La contaminación del aire o el agua es «pollution»; «contamination» se usa más para comida o radiación." },
       tags: ["environment"],
