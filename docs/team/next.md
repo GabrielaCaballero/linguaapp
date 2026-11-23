@@ -30,3 +30,12 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
     the der/die/das drill: let nouns without a plural through the schema;
   - German units 14–24 could use one or two more everyday sentences each.
 - Content on a server (per-unit, signed-in, rate-limited) once the content has commercial value.
+
+## PR order (2026-11-23)
+Merge in this order (each is based on the previous one):
+1. `require-account` → main (natural Spanish, leaner setup, iPhone audio fix)
+2. `app-audio-typing` → recorded audio, kinder typing, no repeats, C1 levels in the app
+3. `c1-italian-german` → C1 content + Italian/German audio
+4. `english-french-courses` → English and French courses + audio
+After merging: run supabase/schema.sql only if it changed (it hasn't since 2026-11-21).
+Still open: native review of the C1, English and French content (AI drafts).
