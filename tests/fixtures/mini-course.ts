@@ -73,7 +73,7 @@ export const deUnits: Unit[] = [
   ]),
 ];
 
-const BAND_B: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3 };
+const BAND_B: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3, C2: 3.6 };
 const BANDS: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1"];
 
 function placementBank(lang: TargetLang, units: Unit[]): PlacementItem[] {
@@ -126,4 +126,4 @@ export const deCourse: CoursePack = {
 };
 
 const empty = (lang: TargetLang): CoursePack => ({ lang, version: "0", units: [], placement: [], lexicon: { closedClass: [], minimalPairs: [] } });
-export const fixtureCourses: Record<TargetLang, CoursePack> = { it: itCourse, de: deCourse, en: empty("en"), fr: empty("fr") };
+export const fixtureCourses: Record<TargetLang, CoursePack> = { it: itCourse, de: deCourse, en: empty("en"), fr: empty("fr"), pt: empty("pt") };

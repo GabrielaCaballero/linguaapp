@@ -282,6 +282,7 @@ export function chooseMode(item: Item, card: CardV2 | undefined, ctx: ModeCtx): 
 const IT_ARTICLES = ["il", "lo", "la", "l'", "i", "gli", "le"];
 const DE_ARTICLES = ["der", "die", "das"];
 const FR_ARTICLES = ["le", "la", "l'", "les"];
+const PT_ARTICLES = ["o", "a", "os", "as"];
 
 /** The definite article on a noun item ("der Kaffee" → der, "l'amico" → l'), or null. */
 export function articleOf(item: Item): { article: string; rest: string; options: string[] } | null {
@@ -294,6 +295,10 @@ export function articleOf(item: Item): { article: string; rest: string; options:
   if (item.lang === "fr") {
     const m = t.match(/^(l')(.+)$/i) ?? t.match(/^(le|la|les)\s+(.+)$/i);
     return m ? { article: m[1].toLowerCase(), rest: m[2], options: FR_ARTICLES } : null;
+  }
+  if (item.lang === "pt") {
+    const m = t.match(/^(o|a|os|as)\s+(.+)$/i);
+    return m ? { article: m[1].toLowerCase(), rest: m[2], options: PT_ARTICLES } : null;
   }
   if (item.lang !== "it") return null; // English has no article drill
   const m = t.match(/^(l')(.+)$/i) ?? t.match(/^(il|lo|la|i|gli|le)\s+(.+)$/i);

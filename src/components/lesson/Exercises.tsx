@@ -44,7 +44,7 @@ export interface ExProps {
   onNoAudio?: () => void;
 }
 
-const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"] };
+const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"], pt: ["ã", "õ", "á", "é", "í", "ó", "ú", "â", "ê", "ô", "à", "ç"] };
 
 export function Speaker({ text, lang, slow, big, label, auto }: { text: string; lang: TargetLang; slow?: boolean; big?: boolean; label: string; auto?: boolean }) {
   const [on, setOn] = useState(false);

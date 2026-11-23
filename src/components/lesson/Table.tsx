@@ -9,7 +9,7 @@ import { check } from "@/lib/check";
 import { gl } from "@/lib/content";
 import type { CellResult, ExProps } from "./Exercises";
 
-const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"] };
+const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"], pt: ["ã", "õ", "á", "é", "í", "ó", "ú", "â", "ê", "ô", "à", "ç"] };
 
 /** Longest common prefix of all forms ("komm" for kommen), used for the endings stage. */
 export function stemOf(cells: ParadigmCell[]): string {

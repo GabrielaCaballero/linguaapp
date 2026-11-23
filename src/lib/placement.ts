@@ -119,10 +119,10 @@ export function band(theta: number): Cefr {
   return "C1";
 }
 
-const ORDER: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1"];
+const ORDER: Cefr[] = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1", "C2"];
 export const cefrRank = (c: Cefr) => ORDER.indexOf(c);
 
-const BAND_LO: Record<Cefr, number> = { A0: -3, "A1.1": -2, "A1.2": -1, A2: 0, B1: 1, B2: 2, C1: 3 };
+const BAND_LO: Record<Cefr, number> = { A0: -3, "A1.1": -2, "A1.2": -1, A2: 0, B1: 1, B2: 2, C1: 3, C2: 3.35 };
 
 /**
  * A Rasch-scale difficulty per unit. Units sharing a CEFR band are spread evenly across it, in
@@ -140,7 +140,9 @@ export function unitDifficulty(units: Unit[]): Map<number, number> {
     // Only coarse low bands are stretched (B2 and C1 are tagged unit by unit). C1 is squeezed
     // into 3.0–3.3: the ability grid ends at 4 and a start unit is judged from θ − SE, so wider
     // C1 difficulties would make its last units unreachable from the test.
-    const hi = cefrRank(c) === top && cefrRank(c) < cefrRank("B2") ? lo + 2 : c === "C1" ? lo + 0.3 : lo + 1;
+    // C2 sits just above it (3.35–3.6): the test can reach its first units, and C2 learners
+    // usually say "I know my level" anyway.
+    const hi = cefrRank(c) === top && cefrRank(c) < cefrRank("B2") ? lo + 2 : c === "C1" ? lo + 0.3 : c === "C2" ? lo + 0.25 : lo + 1;
     group.forEach((u, k) => out.set(u.index, lo + ((k + 0.5) * (hi - lo)) / group.length));
   }
   return out;
@@ -175,7 +177,7 @@ export function seeds(units: Unit[], startIndex: number, bank: PlacementItem[], 
 }
 
 /** Middle of each band on the θ scale (between the CUTS). */
-const BAND_THETA: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3 };
+const BAND_THETA: Record<Cefr, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3, C2: 3.6 };
 
 /**
  * "I know my level": skip the test. Start at the first unit of the chosen level; every

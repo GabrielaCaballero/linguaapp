@@ -6,7 +6,7 @@ import type { BaseLang, TargetLang } from "./schema";
 export interface LangInfo {
   /** Shown to learners. A new course stays false until its content is complete and reviewed. */
   available: boolean;
-  /** Languages it can be explained in (an English course isn't offered to English speakers). */
+  /** Languages it can be explained in (English is explained in Spanish only, also in an English app). */
   bases: BaseLang[];
   /** The language's own name ("Italiano", "Deutsch"): shown on course pickers. */
   native: string;
@@ -68,7 +68,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
         [0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => `<circle cx="${11 + c * 5}" cy="${11 + r * 5.5}" r="1.1" fill="#fff"/>`)).join(""),
     },
     locale: "en-US",
-    tag: { en: "About 1.5 billion speakers (≈18% of the world)", es: "Unos 1.500 millones de hablantes (≈18 % del mundo) · Dificultad media" },
+    tag: { en: "About 1.5 billion speakers (≈18% of the world) · Explained in Spanish", es: "Unos 1.500 millones de hablantes (≈18 % del mundo) · Dificultad media" },
     canDo: {
       en: ["say hello, your name and where you're from?", "order food and ask the price?", "talk about your family and your day?"],
       es: ["saludar, decir tu nombre y de dónde eres?", "pedir comida y preguntar el precio?", "hablar de tu familia y de tu día?"],
@@ -87,9 +87,33 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
       es: ["saludar, decir tu nombre y de dónde eres?", "pedir un café y preguntar el precio?", "hablar de tu familia y de tu día?"],
     },
   },
+  pt: {
+    available: true,
+    bases: ["es", "en"],
+    native: "Português",
+    seal: "PT",
+    // Brazilian Portuguese (most learners and speakers): Brazil's flag, simplified to green, the
+    // yellow diamond and the blue globe, inside the stamp's 36×44 window at (7,7).
+    flag: {
+      svg:
+        '<rect x="7" y="7" width="36" height="44" fill="#009c3b"/>' +
+        '<polygon points="25,13 41,29 25,45 9,29" fill="#ffdf00"/>' +
+        '<circle cx="25" cy="29" r="7.5" fill="#002776"/>' +
+        '<path d="M17.8 27.2 Q25 25.2 32.2 30.4" stroke="#fff" stroke-width="1.3" fill="none"/>',
+    },
+    locale: "pt-BR",
+    tag: { en: "About 264 million speakers (≈3.2% of the world) · Easy for English speakers", es: "Unos 264 millones de hablantes (≈3,2 % del mundo) · Muy fácil desde el español" },
+    canDo: {
+      en: ["say hello, your name and where you're from?", "order a coffee and ask the price?", "talk about your family and your day?"],
+      es: ["saludar, decir tu nombre y de dónde eres?", "pedir un café y preguntar el precio?", "hablar de tu familia y de tu día?"],
+    },
+  },
 };
 
-/** The courses learners can pick now (in this app language: no English course for English speakers). */
-export function availableLangs(appLang?: BaseLang): TargetLang[] {
-  return (Object.keys(LANG_INFO) as TargetLang[]).filter((l) => LANG_INFO[l].available && l !== appLang);
+/** The courses learners can pick now. Every course is offered whatever the app's language
+ *  (owner, 2026-11-23: an English app still offers English); a course explained only in another
+ *  language says so on its card (`tag`). `appLang` is kept for callers and future filters. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function availableLangs(_appLang?: BaseLang): TargetLang[] {
+  return (Object.keys(LANG_INFO) as TargetLang[]).filter((l) => LANG_INFO[l].available);
 }

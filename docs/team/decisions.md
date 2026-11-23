@@ -380,3 +380,27 @@ Format: date · who · decision · why
 - Ready-made queries: docs/team/metrics.sql (active users, retention, languages, time per
   screen, lessons finished vs left, setup funnel, hardest items, devices). Owner action: run
   supabase/schema.sql again to create the table.
+
+## 2026-11-23 · "Report a problem", C2, Portuguese
+
+- Owner: let learners flag content that's wrong. Under every correction, a quiet "Report a
+  problem" link opens a sheet: my answer should count (only when they typed) / the translation /
+  the audio / a mistake in the sentence or explanation / something else, plus an optional comment.
+  Reports go to `content_reports` (schema.sql): insert-own only, nobody reads them from the app,
+  the learner can't set the owner's `status` (new / fixed / wontfix), ≤ 50 per learner per day,
+  deleted with the account. Queued on the device, sent when signed in. Not tied to "Share usage
+  statistics": the learner chose to send it. Typed text goes along only with "my answer should
+  count". Privacy page updated. Owner reads them with docs/team/metrics.sql section 9.
+- Owner: every course to C2, German and English first, then Italian and French (French also
+  needs C1). App: "C2" in the schema (Rasch b ≈ +3.6), units squeezed into 3.35–3.6 above C1; the
+  placement test still tops out at C1 (C2 learners pick "I know my level", offered once a course
+  has C2 units); goals: C2 = 1200 guided hours (Cambridge 1000–1200), "Mastery".
+- Owner: add Portuguese. Brazilian (pt-BR: most speakers and learners), for Spanish and English
+  speakers, Brazil's flag; European forms are accepted and shown as "In Portugal:" tips (region
+  "PT", same switch as the Swiss tips, now "Regional tips"). Article drill o/a/os/as; register:
+  você vs o senhor / a senhora; time multiplier es 0.7, en 1.0 (like Italian). Hidden until the
+  content is reviewed. Recorded voice pt-BR-Chirp3-HD-Aoede.
+- Owner: an English app still offers the English course (it's explained in Spanish; its card
+  says so). Also: course picker is the same flag button on Today and the course map (the IT/DE/FR
+  pills didn't fit 3+ languages); the "Path" tab is now "Course" / "Curso".
+- Owner: Portuguese visible to learners now (2026-11-23), before the native review.

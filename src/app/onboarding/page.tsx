@@ -322,6 +322,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
         { v: "B1", title: "B1", sub: t.knowB1 },
         { v: "B2", title: "B2", sub: t.knowB2 },
         { v: "C1", title: "C1", sub: t.knowC1 },
+        ...(units(lang!).some((u) => u.cefr === "C2") ? [{ v: "C2" as Cefr, title: "C2", sub: t.knowC2 }] : []),
       ];
       body = (
         <Question title={t.levelTitle(t.langName[lang!])} sub={t.levelSub} next={go} disabled={!d?.outcome} t={t} seal={lang}>

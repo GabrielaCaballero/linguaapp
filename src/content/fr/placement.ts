@@ -1,9 +1,9 @@
 import type { Mcq, PlacementItem } from "../schema";
 import { spreadAnswers } from "../build";
 
-// 36 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2) · per band: 2 vocab, 2 grammar,
+// 42 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2, C1; no C2: the test tops out at C1) · per band: 2 vocab, 2 grammar,
 // 1 listening, 1 reading. False friends for Spanish speakers flagged (weighted ×1.5 es→fr).
-// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band).
+// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 · C1 +3.3 (±0.4 within band).
 // Authors write the key as option 0; spreadAnswers rotates it deterministically.
 const MEAN: Mcq["prompt"] = { es: "¿Qué significa?", en: "What does it mean?" };
 const CLOZE: Mcq["prompt"] = { es: "Completa la frase.", en: "Complete the sentence." };
@@ -239,6 +239,45 @@ const bank: PlacementItem[] = [
       answer: 0,
     },
     seeds: ["fr-u23-affirmer", "fr-u23-neanmoins", "fr-u23-il-a-dit-que"],
+  },
+  // ── C1 ─────────────────────────────────────────────────────
+  {
+    id: "fr-p-37", lang: "fr", cefr: "C1", b: 3.1, skill: "vocab", kind: "mcq", stem: "Après des heures de discussion, les deux parties ont trouvé un terrain d'entente.",
+    mcq: { prompt: MEAN, options: [{ es: "Tras horas de discusión, las dos partes llegaron a un acuerdo.", en: "After hours of discussion, the two sides found common ground." }, { es: "Tras horas de discusión, las dos partes compraron un terreno.", en: "After hours of discussion, the two sides bought a plot of land." }, { es: "Tras horas de discusión, las dos partes rompieron la negociación.", en: "After hours of discussion, the two sides broke off talks." }, { es: "Tras horas de discusión, las dos partes se quedaron esperando.", en: "After hours of discussion, the two sides were left waiting." }], answer: 0 },
+    seeds: ["fr-u25-terrain-dentente", "fr-u25-negociation"],
+  },
+  {
+    id: "fr-p-38", lang: "fr", cefr: "C1", b: 3.5, skill: "vocab", kind: "mcq", stem: "Il est très riche ; il n'est pas heureux pour autant.", falseFriend: true,
+    mcq: { prompt: MEAN, options: [{ es: "Es muy rico, pero no por eso es feliz.", en: "He's very rich, but that doesn't make him happy." }, { es: "Es muy rico y, por lo tanto, no es feliz.", en: "He's very rich and therefore unhappy." }, { es: "Es tan rico como feliz.", en: "He's as rich as he is happy." }, { es: "Es muy rico porque no es feliz.", en: "He's very rich because he's unhappy." }], answer: 0 },
+    seeds: ["fr-u26-pour-autant", "fr-u26-br-pour-autant", "fr-u26-pas-irremplacable-pour-autant"],
+  },
+  {
+    id: "fr-p-39", lang: "fr", cefr: "C1", b: 3.0, skill: "grammar", kind: "cloze", stem: "Je suis vraiment content que tu ___ venu hier.",
+    mcq: { prompt: CLOZE, options: ["sois", "es", "étais", "seras"], answer: 0 },
+    seeds: ["fr-u27-content-que-tu-sois-venu", "fr-u27-pat-subj-passe"],
+  },
+  {
+    id: "fr-p-40", lang: "fr", cefr: "C1", b: 3.4, skill: "grammar", kind: "cloze", stem: "Au cas où vous ___ des questions, n'hésitez pas à m'appeler.",
+    mcq: { prompt: CLOZE, options: ["auriez", "ayez", "avez", "aurez"], answer: 0 },
+    seeds: ["fr-u25-au-cas-ou", "fr-u25-au-cas-ou-questions", "fr-u25-pat-au-cas-ou"],
+  },
+  {
+    id: "fr-p-41", lang: "fr", cefr: "C1", b: 3.3, skill: "listening", kind: "listen", spoken: "Selon nos informations, le ministre aurait démissionné ce matin.",
+    mcq: {
+      prompt: { es: "¿Qué dice la noticia?", en: "What does the news item say?" },
+      options: [{ es: "Que el ministro habría dimitido, pero no está confirmado.", en: "That the minister has reportedly resigned, but it isn't confirmed." }, { es: "Que el ministro dimitió, y es oficial.", en: "That the minister resigned, and it's official." }, { es: "Que el ministro dimitirá mañana.", en: "That the minister will resign tomorrow." }, { es: "Que el ministro se niega a dimitir.", en: "That the minister refuses to resign." }],
+      answer: 0,
+    },
+    seeds: ["fr-u28-selon-nos-informations", "fr-u28-pat-conditionnel-info", "fr-u28-suspect-aurait-pris-la-fuite"],
+  },
+  {
+    id: "fr-p-42", lang: "fr", cefr: "C1", b: 3.6, skill: "reading", kind: "mcq", stem: "J'ai beau lui répéter que ce n'est pas grave, il s'en veut encore de ne pas être venu.",
+    mcq: {
+      prompt: { es: "¿Qué le pasa a él?", en: "What's going on with him?" },
+      options: [{ es: "Sigue culpándose por no haber venido, aunque le digo que no es grave.", en: "He still blames himself for not coming, though I keep saying it doesn't matter." }, { es: "Está enojado conmigo porque no fui.", en: "He's angry with me because I didn't come." }, { es: "Quiere venir, pero no puede.", en: "He wants to come but can't." }, { es: "Le parece grave que yo no haya venido.", en: "He thinks it's serious that I didn't come." }],
+      answer: 0,
+    },
+    seeds: ["fr-u26-jai-beau", "fr-u27-sen-vouloir", "fr-u27-je-men-veux"],
   },
 ];
 

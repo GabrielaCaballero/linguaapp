@@ -148,7 +148,7 @@ export default function SettingsPage() {
         </div>
         <Row label={t.sSpeaking} sub={t.sSpeakingSoon} on={false} onChange={() => {}} disabled />
         <Row label={t.sBridge} on={s.bridgeTips} onChange={(v) => set({ bridgeTips: v })} />
-        {db.profile.courses.de && <Row label={t.sRegionTips} on={s.regionTips !== false} onChange={(v) => set({ regionTips: v })} />}
+        {(db.profile.courses.de || db.profile.courses.pt) && <Row label={t.sRegionTips} on={s.regionTips !== false} onChange={(v) => set({ regionTips: v })} />}
         <Row label={t.sSpeed} on={s.speedTimer} onChange={(v) => set({ speedTimer: v })} />
       </div>
 

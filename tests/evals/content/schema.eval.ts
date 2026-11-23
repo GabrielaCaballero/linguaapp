@@ -12,6 +12,7 @@ const IT_ART: Record<string, string[]> = { m: ["il", "lo", "l'", "i", "gli"], f:
 const DE_ART: Record<string, string> = { m: "der", f: "die", n: "das" };
 // "les" too: plural-only nouns (les grands-parents, les vacances).
 const FR_ART: Record<string, string[]> = { m: ["le", "l'", "les"], f: ["la", "l'", "les"] };
+const PT_ART: Record<string, string[]> = { m: ["o", "os"], f: ["a", "as"] };
 
 function check(lang: TargetLang, name: string, bad: (i: Item) => string | false) {
   it(`${lang}: ${name}`, () => {
@@ -27,7 +28,7 @@ for (const lang of COURSE_LANGS) {
     it(`${lang}: units indexed 1…N with no gaps (N ≥ 6), ids ${lang}-uNN, cefr non-decreasing`, () => {
       expect(c.units.length).toBeGreaterThanOrEqual(6);
       expect(c.units.map((u) => u.index)).toEqual(c.units.map((_, k) => k + 1));
-      const order = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1"];
+      const order = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1", "C2"];
       c.units.forEach((u, k) => {
         expect(order).toContain(u.cefr);
         expect(u.id).toBe(`${lang}-u${String(u.index).padStart(2, "0")}`);
@@ -69,6 +70,7 @@ for (const lang of COURSE_LANGS) {
       const art = first[1] ?? first[2];
       if (lang === "de") return art === DE_ART[i.gender] ? false : `"${i.target}" vs gender ${i.gender}`;
       if (lang === "fr") return FR_ART[i.gender]?.includes(art) ? false : `"${i.target}" vs gender ${i.gender}`;
+      if (lang === "pt") return PT_ART[i.gender]?.includes(art) ? false : `"${i.target}" vs gender ${i.gender}`;
       return IT_ART[i.gender]?.includes(art) ? false : `"${i.target}" vs gender ${i.gender}`;
     });
     if (lang === "de") {
@@ -80,6 +82,12 @@ for (const lang of COURSE_LANGS) {
         const hit = (i.distractors ?? []).find((d) => !d.includes(" ") && up(d) !== up(i.target));
         return hit ? `"${hit}" vs "${i.target}"` : false;
       });
+    } else if (lang === "pt") {
+      // Portuguese uses á é í ó ú, â ê ô, ã õ, ç and only à/às with a grave (crase).
+      const answers = (i: Item) => [i.target, ...(i.accept ?? []).map((a) => a.text)].join(" | ");
+      check(lang, "Portuguese: grave accent only in the crase (à, às, àquele, àquilo)", (i) => (/[àèìòù]/i.test(answers(i).replace(/(^|[^\p{L}])(àquel[ae]s?|àquilo|às?)(?=$|[^\p{L}])/giu, "$1")) ? `"${i.target}"` : false));
+      check(lang, "Portuguese: no Spanish ñ in answers", (i) => (/ñ/i.test(answers(i)) ? `"${i.target}"` : false));
+      check(lang, "Portuguese: no uncontracted preposition+article in answers (de o, em a, por os…)", (i) => (/(^|[^\p{L}])(de|em|por) (o|a|os|as)(?=$|[^\p{L}])/iu.test(answers(i)) ? `"${i.target}"` : false));
     } else {
       check(lang, "Italian accents: no á í ó ú (Italian uses grave, acute only on é)", (i) => (/[áíóú]/.test([i.target, ...(i.accept ?? []).map((a) => a.text)].join(" ")) ? `"${i.target}"` : false));
       check(lang, "Italian elision uses an apostrophe, not pò", (i) => (/\bpò\b/.test(i.target) ? `"${i.target}"` : false));
@@ -130,7 +138,7 @@ for (const lang of COURSE_LANGS) {
       }
     });
     it(`${lang}: placement b within ±0.4 of the band centre; MCQ valid; seeds exist`, () => {
-      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3 };
+      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3, C2: 3.6 };
       const unitIds = new Set(c.units.flatMap((u) => u.items.map((i) => i.id)));
       for (const x of c.placement) {
         expect(Math.abs(x.b - centre[x.cefr]), x.id).toBeLessThanOrEqual(0.4 + 1e-9);

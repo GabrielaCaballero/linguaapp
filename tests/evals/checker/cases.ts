@@ -338,4 +338,39 @@ const de: Case[] = [
   { id: "de-typo-14", item: I("de-u02-s-ei-ie"), input: "Wein", verdict: "wrong", tag: "Wien/Wein sound item" },
 ];
 
-export const CASES: Case[] = [...it, ...de];
+// Portuguese (pt-BR, European forms as variants): accents almost, accent-changes-meaning pairs,
+// contractions typed apart are wrong, verb/noun endings are grammar (never typos).
+const pt: Case[] = [
+  { id: "pt-01", item: I("pt-u01-obrigado"), input: "obrigado", verdict: "correct", tag: "Portuguese exact" },
+  { id: "pt-02", item: I("pt-u01-obrigado"), input: "Obrigada!", verdict: "correct", tag: "both genders accepted" },
+  { id: "pt-03", item: I("pt-u05-avo-f"), input: "a avô", verdict: "wrong", reason: "minimal-pair", tag: "avó/avô: grandmother is not grandfather" },
+  { id: "pt-04", item: I("pt-u05-avo-f"), input: "a avo", verdict: "almost", reason: "accent-meaning", tag: "avo/avó: missing accent changes the word" },
+  { id: "pt-05", item: I("pt-u05-br-pais"), input: "o pais", verdict: "almost", reason: "accent-meaning", tag: "pais/país" },
+  { id: "pt-06", item: W("pt", "Ela é médica."), input: "Ela e médica.", verdict: "almost", reason: "accent-meaning", tag: "e/é" },
+  { id: "pt-07", item: W("pt", "Eu moro no centro."), input: "Eu moro em o centro.", verdict: "wrong", reason: "contraction", wantHas: "no", tag: "em + o = no" },
+  { id: "pt-08", item: W("pt", "Vou à praia."), input: "Vou a a praia.", verdict: "wrong", reason: "contraction", tag: "a + a = à" },
+  { id: "pt-09", item: W("pt", "Vou à praia."), input: "Vou a praia.", verdict: "almost", reason: "accent-meaning", tag: "missing crase" },
+  { id: "pt-10", item: I("pt-u04-cafe-da-manha"), input: "o cafe da manha", verdict: "almost", reason: "accent", tag: "missing accent and tilde" },
+  { id: "pt-11", item: I("pt-u07-almocar"), input: "almocar", verdict: "almost", reason: "accent", tag: "missing cedilla" },
+  { id: "pt-12", item: I("pt-u02-voce-fala-ingles"), input: "Você falo inglês?", verdict: "wrong", tag: "falo/fala: verb ending is grammar" },
+  { id: "pt-13", item: W("pt", "Eu falei com ela."), input: "Eu falou com ela.", verdict: "wrong", tag: "falei/falou: past ending is grammar" },
+  { id: "pt-14", item: W("pt", "os livros", { pos: "noun", gender: "m" }), input: "os livro", verdict: "wrong", tag: "plural ending is grammar" },
+  { id: "pt-15", item: I("pt-u06-bairro"), input: "o bairo", verdict: "almost", reason: "typo", tag: "typo on a content word" },
+  { id: "pt-16", item: I("pt-u14-escritorio"), input: "o escritóro", verdict: "almost", reason: "typo", tag: "typo on a long word" },
+  { id: "pt-17", item: I("pt-u01-como-o-senhor-se-chama"), input: "Como você se chama?", verdict: "wrong", reason: "register", tag: "você for o senhor" },
+  { id: "pt-18", item: I("pt-u06-onibus"), input: "o autocarro", verdict: "correct", tag: "European variant accepted" },
+  { id: "pt-19", item: I("pt-u04-cafe-da-manha"), input: "o pequeno-almoço", verdict: "correct", tag: "European variant accepted" },
+  { id: "pt-20", item: W("pt", "Vou pôr a mesa."), input: "Vou por a mesa.", verdict: "almost", reason: "accent-meaning", tag: "por/pôr" },
+  { id: "pt-21", item: I("pt-u02-voce-fala-ingles"), input: "Voce fala ingles?", verdict: "almost", reason: "accent", tag: "você typed without accent (closed-class word)" },
+  { id: "pt-22", item: W("pt", "Eu não sei."), input: "Eu nao sei", verdict: "almost", reason: "accent", tag: "não without tilde" },
+  { id: "pt-23", item: I("pt-u02-morar"), input: "morrer", verdict: "wrong", tag: "morar/morrer minimal pair" },
+  { id: "pt-24", item: I("pt-u04-agua"), input: "o água", verdict: "wrong", tag: "wrong article is never a typo" },
+  { id: "pt-25", item: I("pt-u04-agua"), input: "água", verdict: "wrong", reason: "article-missing", tag: "missing article" },
+  { id: "pt-26", item: I("pt-u02-morar"), input: "viver", verdict: "almost", feedback: true, tag: "accept almost with note" },
+  { id: "pt-27", item: W("pt", "Eles têm dois filhos."), input: "Eles tem dois filhos.", verdict: "almost", reason: "accent-meaning", tag: "tem/têm" },
+  { id: "pt-28", item: I("pt-u02-sou-do-mexico"), input: "Eu sou de o México.", verdict: "wrong", reason: "known-error", feedback: true, tag: "de + o known error" },
+  { id: "pt-29", item: W("pt", "Ele é do Brasil."), input: "Ele é de o Brasil.", verdict: "wrong", reason: "contraction", wantHas: "do", tag: "de + o = do" },
+  { id: "pt-30", item: W("pt", "Ela trabalhou ontem."), input: "Ela trabalhava ontem.", verdict: "wrong", tag: "perfeito/imperfeito is grammar" },
+];
+
+export const CASES: Case[] = [...it, ...de, ...pt];

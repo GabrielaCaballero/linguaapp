@@ -545,6 +545,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
           }}
           cells={fb.cells}
           choice={fb.choice}
+          mode={mode ?? undefined}
         />
       )}
 

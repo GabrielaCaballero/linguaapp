@@ -101,3 +101,14 @@ from public.user_reviews group by 1 order by 2 desc;
 select platform, count(distinct user_id) as learners from public.app_events
 where name = 'app_open' and t > now() - interval '30 days' group by 1 order by 2 desc;
 select name, props, count(*) from public.app_events where name in ('audio_help', 'slow_audio') group by 1, 2 order by 3 desc;
+
+-- ── 9. Content reports ("Report a problem" on the answer screen) ─────────────────────────
+-- New reports, newest first, with the item's text (look the id up in src/content/<lang>/).
+select created_at::date as day, item_id, reason, verdict, mode, answer, comment, base
+from public.content_reports where status = 'new' order by created_at desc limit 100;
+-- Items reported most often (fix these first).
+select item_id, count(*) as reports, count(distinct user_id) as learners,
+       string_agg(distinct reason, ', ') as reasons
+from public.content_reports where status = 'new' group by 1 order by 2 desc limit 50;
+-- After fixing an item, mark its reports (change the id):
+-- update public.content_reports set status = 'fixed' where item_id = 'it-u01-ciao' and status = 'new';

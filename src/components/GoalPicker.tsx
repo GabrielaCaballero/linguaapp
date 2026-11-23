@@ -20,7 +20,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   // The shipped units decide how far the course goes; goals beyond it are honest about "more units coming" (GO-7).
   const COURSE_TOP = courseTop(units(lang).map((u) => u.cefr));
   const reachable = LEVELS.filter((l) => HOURS[l] > CURRENT_HOURS[current]);
-  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C1" };
+  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C2", C2: "C2" };
   const [target, setTarget] = useState<GoalLevel>(initial?.target && reachable.includes(initial.target) ? initial.target : reachable.includes(DEFAULT[current]) ? DEFAULT[current] : reachable[0] ?? "B2");
   const [months, setMonths] = useState<number | null>(initial?.by ? null : 6);
   const [date, setDate] = useState<string>(initial?.by ?? toISO(addMonths(new Date(now), 6)));
@@ -46,7 +46,7 @@ export function GoalPicker({ lang, base, appLang, current, daysPerWeek, initial,
   const beyondCourse = (kind === "level" || kind === "steady") && HOURS[target] > HOURS[COURSE_TOP];
   const label = kind === "maintain" ? "relaxed" : kind === "steady" ? (steadyMin <= 15 ? "relaxed" : steadyMin <= 30 ? "steady" : steadyMin <= 45 ? "ambitious" : "demanding") : plan.label;
   const amber = (kind === "level" || kind === "trip") && plan.label === "demanding";
-  const levelName: Record<GoalLevel, string> = { "A1.1": t.levelA11, A1: t.levelA1, A2: t.levelA2, B1: t.levelB1, B2: t.levelB2, C1: t.levelC1 };
+  const levelName: Record<GoalLevel, string> = { "A1.1": t.levelA11, A1: t.levelA1, A2: t.levelA2, B1: t.levelB1, B2: t.levelB2, C1: t.levelC1, C2: t.levelC2 };
 
   const pickMonths = (m: number) => {
     setMonths(m);
@@ -206,7 +206,7 @@ export function SimpleGoal({ lang, base, appLang, current, startUnit, daysPerWee
   const [minutes, setMinutes] = useState<number | null>(initial?.minutesPerDay && [5, 10, 15].includes(initial.minutesPerDay) ? initial.minutesPerDay : null);
   const [full, setFull] = useState(false);
   const us = units(lang);
-  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C1" };
+  const DEFAULT: Record<Cefr, GoalLevel> = { A0: "A1", "A1.1": "A1", "A1.2": "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C2", C2: "C2" };
   if (full)
     return <GoalPicker lang={lang} base={base} appLang={appLang} current={current} daysPerWeek={daysPerWeek} initial={initial} t={t} cta={cta} onSave={onSave} />;
   const checkpoints = (m: number) => unitCheckpoints(us, startUnit, m, daysPerWeek, base, lang);

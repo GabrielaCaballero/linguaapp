@@ -29,6 +29,12 @@ import { unit as u27 } from "./u27";
 import { unit as u28 } from "./u28";
 import { unit as u29 } from "./u29";
 import { unit as u30 } from "./u30";
+import { unit as u31 } from "./u31";
+import { unit as u32 } from "./u32";
+import { unit as u33 } from "./u33";
+import { unit as u34 } from "./u34";
+import { unit as u35 } from "./u35";
+import { unit as u36 } from "./u36";
 import { placement } from "./placement";
 import { lexicon } from "./lexicon";
 import { grammar } from "./grammar";
@@ -37,8 +43,8 @@ import { grammar } from "./grammar";
 // LANG_INFO.en.available is true (src/content/languages.ts), after review.
 export const course: CoursePack = {
   lang: "en",
-  version: "1.0.0",
-  units: [u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20, u21, u22, u23, u24, u25, u26, u27, u28, u29, u30],
+  version: "1.1.0",
+  units: [u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20, u21, u22, u23, u24, u25, u26, u27, u28, u29, u30, u31, u32, u33, u34, u35, u36],
   placement,
   lexicon,
   grammar,

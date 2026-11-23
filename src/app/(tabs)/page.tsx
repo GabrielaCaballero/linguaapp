@@ -1,23 +1,23 @@
 "use client";
 
-import { availableLangs } from "@/content";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { TargetLang } from "@/content/schema";
 import { useDB } from "@/lib/store";
 import { useNow } from "@/lib/hooks";
 import { Icon } from "@/components/icons";
-import { Ring, Seal, Sheet, Toast, WeekDots, Loading, useT } from "@/components/ui";
-import { LANG_NAME, units } from "@/lib/content";
+import { Ring, Sheet, Toast, WeekDots, Loading, useT } from "@/components/ui";
+import { units } from "@/lib/content";
 import { courseTop, retentionFor } from "@/lib/goals";
 import { dueCount, courseComplete, courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
 import { lastSessionAt, AWAY_DAYS } from "@/lib/session";
 import { DAY, fmtMonth, startOfWeek } from "@/lib/dates";
-import { checkinChoice, dropLegacyTies, markSeen, saveGoal, setActiveLang, setSettings } from "@/lib/actions";
+import { checkinChoice, dropLegacyTies, markSeen, saveGoal, setSettings } from "@/lib/actions";
 import { downloadText } from "@/lib/backup";
 import { localeOf } from "@/lib/i18n";
 import { lessonHref, onboardingHref } from "@/lib/nav";
 import { useMustSignIn } from "@/components/AccountGate";
+import { CourseSwitcher } from "@/components/CourseSwitcher";
 import { isSyncConfigured, useAccount } from "@/lib/sync/client";
 
 export default function Today() {
@@ -25,7 +25,6 @@ export default function Today() {
   const t = useT(db);
   const router = useRouter();
   const now = useNow();
-  const [switcher, setSwitcher] = useState(false);
   const [menu, setMenu] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -74,7 +73,6 @@ export default function Today() {
   // Close sheets before leaving: this page stays alive (cacheComponents <Activity>).
   const start = (kind: string) => {
     setMenu(false);
-    setSwitcher(false);
     router.push(lessonHref(kind));
   };
 
@@ -143,11 +141,7 @@ export default function Today() {
     <main className="screen">
       <header className="row between" style={{ minHeight: 48 }}>
         {/* The one place to change language: a labelled button, not a bare flag (owner, 2026-11-16). */}
-        <button className="lang-switch" onClick={() => setSwitcher(true)} aria-label={`${t.switchCourse}: ${LANG_NAME[lang]}`}>
-          <Seal lang={lang} size={28} />
-          <span>{LANG_NAME[lang]}</span>
-          <Icon name="down" size={16} className="muted" />
-        </button>
+        <CourseSwitcher db={db} lang={lang} t={t} />
         <div className="row" style={{ gap: 8 }} aria-label={t.weekGoal(days, db.profile.settings.daysPerWeek)} role="img">
           <WeekDots n={days} goal={db.profile.settings.daysPerWeek} />
           <span className="caption">{t.thisWeek}</span>
@@ -230,27 +224,6 @@ export default function Today() {
         </div>
       </Sheet>
 
-      <Sheet open={switcher} onClose={() => setSwitcher(false)} label={t.switchCourse}>
-        <h2 className="h2" style={{ marginBottom: 12 }}>{t.switchCourse}</h2>
-        <div className="group">
-          {langs.map((l) => (
-            <button key={l} className="cell" onClick={() => { setActiveLang(l); setSwitcher(false); }} aria-pressed={l === lang}>
-              <Seal lang={l} size={36} />
-              <span className="grow">
-                <span style={{ fontWeight: 650 }}>{LANG_NAME[l]}</span>
-                <div className="cell-sub">{Math.round(todayMinutes(db, now, l))}/{targetFor(db, l)} {t.min} · {t.unitN(currentUnit(db, l).index)}</div>
-              </span>
-              {l === lang && <Icon name="check" size={20} className="accent" />}
-            </button>
-          ))}
-          {availableLangs(db.profile.appLang).some((l) => !langs.includes(l)) && (
-            <button className="cell" onClick={() => { setSwitcher(false); router.push(onboardingHref()); }}>
-              <span className="icon-btn" style={{ background: "var(--surface-2)" }}><Icon name="plus" size={20} /></span>
-              <span className="grow" style={{ fontWeight: 600 }}>{t.addLanguage}</span>
-            </button>
-          )}
-        </div>
-      </Sheet>
       <Toast text={toast} onDone={() => setToast(null)} />
     </main>
   );
