@@ -54,7 +54,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
     },
   },
   en: {
-    available: false,
+    available: true,
     bases: ["es"],
     native: "English",
     seal: "EN",
@@ -75,7 +75,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
     },
   },
   fr: {
-    available: false,
+    available: true,
     bases: ["es", "en"],
     native: "Français",
     seal: "FR",
