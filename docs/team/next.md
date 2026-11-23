@@ -7,6 +7,8 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
 (Nothing open: the goal step and the "when do you practise?" step were done on 2026-11-22, see decisions.md.)
 
 ## Waiting on the owner
+- Supabase → SQL Editor: run `supabase/schema.sql` again (creates `app_events` for usage
+  statistics). Then the queries in `docs/team/metrics.sql`.
 - Recorded audio: enable Cloud Text-to-Speech, create a restricted API key, put it in
   `.env.tts.local`, then `npm run audio:samples` and pick voices (docs/team/audio.md).
 - Open and merge the PR `require-account` → `main`:

@@ -8,12 +8,13 @@ import type { TargetLang } from "@/content/schema";
 import type { Settings } from "@/lib/model";
 import { resetDB, useDB } from "@/lib/store";
 import { LANG_NAME } from "@/lib/content";
-import { removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
+import { markSeen, removeCourse, saveGoal, setAppLang, setCourse, setSettings } from "@/lib/actions";
+import { clearEvents, track } from "@/lib/metrics";
 import { getConfig, subscribeConfig, tutorName } from "@/lib/llm/provider";
 import { ProfileEditor } from "@/components/ProfileEditor";
 import { courseLangs, targetFor } from "@/lib/stats";
 import { accountHref, onboardingHref, placementHref } from "@/lib/nav";
-import { deleteAccount, getEngine, signOut, useAccount, useSyncStatus } from "@/lib/sync/client";
+import { deleteAccount, getEngine, isSyncConfigured, signOut, useAccount, useSyncStatus } from "@/lib/sync/client";
 import { localeOf } from "@/lib/i18n";
 import { BackHeader, Loading, Seal, Seg, Sheet, Switch, Toast, useT } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -139,7 +140,10 @@ export default function SettingsPage() {
         <div className="cell" style={{ flexWrap: "wrap" }}>
           <span className="grow">{t.sSlowAudio}</span>
           <div style={{ width: "100%", marginTop: 8 }}>
-            <Seg label={t.sSlowAudio} value={String(s.slowRate ?? 0.6)} options={(["0.75", "0.6", "0.5"] as const).map((v) => ({ v, label: t.slowRates[v] }))} onChange={(v) => set({ slowRate: Number(v) as 0.75 | 0.6 | 0.5 })} />
+            <Seg label={t.sSlowAudio} value={String(s.slowRate ?? 0.6)} options={(["0.75", "0.6", "0.5"] as const).map((v) => ({ v, label: t.slowRates[v] }))} onChange={(v) => {
+                set({ slowRate: Number(v) as 0.75 | 0.6 | 0.5 });
+                track("slow_audio", { rate: Number(v) });
+              }} />
           </div>
         </div>
         <Row label={t.sSpeaking} sub={t.sSpeakingSoon} on={false} onChange={() => {}} disabled />
@@ -175,6 +179,18 @@ export default function SettingsPage() {
 
       <div className="group-title">{t.sData}</div>
       <div className="group">
+        {isSyncConfigured() && (
+          <Row
+            label={t.sShareStats}
+            sub={t.sShareStatsSub}
+            on={s.shareStats === true}
+            onChange={(v) => {
+              set({ shareStats: v });
+              markSeen("statsAsk");
+              if (!v) clearEvents();
+            }}
+          />
+        )}
         <button className="cell" onClick={() => setReset(true)} style={{ color: "var(--miss)" }}><Icon name="trash" size={20} /><span className="grow">{t.sReset}</span></button>
       </div>
       <p className="caption" style={{ margin: "8px 4px 0" }}>{t.acctPrivacy}</p>

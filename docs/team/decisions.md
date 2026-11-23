@@ -363,3 +363,20 @@ Format: date · who · decision · why
   contraction note; verb endings (mangé/manger/mangez, serai/serais) are grammar, never a typo.
 - Content evals: French article/gender table; English nouns need a plural but no gender. The
   simulated-learner placement tests run on every course × explanation language.
+
+## 2026-11-23 · Usage metrics in our own Supabase table
+
+- Chosen over PostHog: data stays with the accounts, no new vendor, matches the privacy promise.
+- `app_events` (schema.sql): learners can only insert their own rows (RLS), nobody reads them from
+  the app, ≤ 2 KB per event, ≤ 2000 events per learner per day, deleted with the account.
+- Only with consent: "Share usage statistics" is off until the learner says yes — asked once on
+  Today after the first lesson, switch in Settings → Your data; turning it off clears the queue.
+- Events: app_open (platform: ios/android/desktop, "-app" when installed), screen_time (path +
+  visible seconds, ≤ 30 min), lesson_start / lesson_end (lang, kind, seconds, graded, correct,
+  completed or left at task n), course_added (lang, base, how they started, level), signed_in,
+  audio_help, slow_audio. Never the email or typed text. Queued on the device (≤ 500), uploaded
+  in batches when signed in (on launch, on each screen change, every minute, when hidden).
+- Answers in user_reviews are also analysed in aggregate (hardest items) — privacy page updated.
+- Ready-made queries: docs/team/metrics.sql (active users, retention, languages, time per
+  screen, lessons finished vs left, setup funnel, hardest items, devices). Owner action: run
+  supabase/schema.sql again to create the table.

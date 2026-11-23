@@ -237,3 +237,71 @@ drop trigger if exists user_reviews_quota on public.user_reviews;
 create trigger user_reviews_quota before insert on public.user_reviews
   for each row execute function public.count_answer();
 
+
+-- ── Usage statistics (2026-11-23) ─────────────────────────────────────────────────────────
+-- Only from learners who turned on "Share usage statistics" (off until they say yes). Each row
+-- is one event (a screen and its seconds, a lesson start/end, a setup step…) with a small JSON of
+-- details: never the email, never typed answers. Learners can add their own events and cannot
+-- read anyone's (not even their own); the owner reads them in the SQL Editor (docs/team/metrics.sql).
+-- Deleted with the account. Safe to run again.
+create table if not exists public.app_events (
+  id          bigserial primary key,
+  user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  t           timestamptz not null,                 -- when it happened on the device
+  name        text not null,
+  props       jsonb not null default '{}'::jsonb,
+  app_version text,
+  platform    text,                                 -- ios / android / desktop, + "-app" when installed
+  created_at  timestamptz not null default now(),
+  constraint app_events_sizes check (char_length(name) <= 40 and octet_length(props::text) <= 2000 and char_length(coalesce(app_version, '')) <= 20 and char_length(coalesce(platform, '')) <= 20)
+);
+create index if not exists app_events_name_t on public.app_events (name, t);
+create index if not exists app_events_user_t on public.app_events (user_id, t);
+
+alter table public.app_events enable row level security;
+revoke all on public.app_events from anon, authenticated, public;
+grant insert on public.app_events to authenticated;
+grant usage, select on sequence public.app_events_id_seq to authenticated;
+drop policy if exists "add own events" on public.app_events;
+create policy "add own events" on public.app_events for insert to authenticated with check (user_id = (select auth.uid()));
+
+-- At most 2000 events per learner per day (a busy day is a few hundred).
+create table if not exists public.event_quota (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  day     date not null default current_date,
+  n       integer not null default 0,
+  primary key (user_id, day)
+);
+alter table public.event_quota enable row level security;
+revoke all on public.event_quota from anon, authenticated, public;
+
+create or replace function public.count_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  used integer;
+begin
+  if auth.uid() is null then
+    return new;
+  end if;
+  insert into public.event_quota as q (user_id, day, n)
+  values (auth.uid(), current_date, 1)
+  on conflict (user_id, day) do update set n = q.n + 1
+  returning q.n into used;
+  if used = 1 then
+    delete from public.event_quota where user_id = auth.uid() and day < current_date - 7;
+  end if;
+  if used > 2000 then
+    raise exception 'daily event limit reached' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.count_event() from anon, authenticated, public;
+
+drop trigger if exists app_events_quota on public.app_events;
+create trigger app_events_quota before insert on public.app_events
+  for each row execute function public.count_event();

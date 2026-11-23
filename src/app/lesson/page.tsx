@@ -12,6 +12,7 @@ import { startOfDay } from "@/lib/dates";
 import { lessonHref } from "@/lib/nav";
 import { previousPath } from "@/lib/navstack";
 import { clearLessonDraft, loadLessonDraft, saveLessonDraft } from "@/lib/lessonDraft";
+import { track } from "@/lib/metrics";
 import { endSession, introduce, recordAnswer, regrade, sessionStart } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
 import { loadRecorded } from "@/lib/recorded";
@@ -155,6 +156,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       : { graded: 0, correct: 0, newItems: new Set<string>(), stronger: new Set<string>(), toFix: new Set<string>(), sureWrong: 0, guessRight: 0, typedMiss: false, confUsed: 0 },
   );
   const finished = useRef(false);
+  const quitting = useRef(false);
   const leaving = useRef(false);
   const [readingGrammar, setReadingGrammar] = useState(false);
   const extensions = useRef(draft?.extensions ?? 0);
@@ -162,6 +164,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
 
   useEffect(() => {
     if (!draft) sessionStart(lang, kind);
+    track("lesson_start", { lang, kind, resumed: !!draft });
   }, [lang, kind, draft]);
 
   // Keep the lesson's place on the device after every step (answered → the next task).
@@ -194,7 +197,10 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
     const seconds = Math.round((Date.now() - startedAt) / 1000);
     endSession({ lang, seconds, tasks: idx + 1, graded: s.graded, correct: s.correct, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], startedAt });
     feel("finish", getDB().profile.settings);
+    // Ended with "End lesson" (quitting) or by running out of time/tasks (completed).
+    track("lesson_end", { lang, kind, seconds, graded: s.graded, correct: s.correct, newItems: s.newItems.size, completed: !quitting.current, at: idx + 1, of: tasks.length });
     setSummary({ lang, seconds, newItems: s.newItems.size, stronger: s.stronger.size, toFix: [...s.toFix], sureWrong: s.sureWrong, guessRight: s.guessRight, graded: s.graded, correct: s.correct, typedMiss: s.typedMiss, welcomeBack: built.welcomeBack, confUsed: s.confUsed });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, idx, startedAt, built.welcomeBack]);
 
   // speed round timer
@@ -561,7 +567,9 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
           <button
             className="btn btn-ghost"
             onClick={() => {
+              quitting.current = true;
               if (stats.current.graded > 0 || stats.current.newItems.size > 0) finish();
+              else track("lesson_end", { lang, kind, seconds: Math.round((Date.now() - startedAt) / 1000), graded: 0, correct: 0, newItems: 0, completed: false, at: idx + 1, of: tasks.length });
               clearLessonDraft();
               goHome();
             }}

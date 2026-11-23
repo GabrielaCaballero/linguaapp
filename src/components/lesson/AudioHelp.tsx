@@ -6,6 +6,7 @@ import { isApple } from "@/lib/speech";
 import { markSeen } from "@/lib/actions";
 import { getDB } from "@/lib/store";
 import { Sheet } from "../ui";
+import { track } from "@/lib/metrics";
 
 /**
  * "Audio problems?": what to check when nothing plays. A web page can't tell that an iPhone is on
@@ -18,7 +19,14 @@ export function AudioHelp({ t }: { t: Dict }) {
   const steps = [...(apple ? [t.audioHelpSilent] : []), t.audioHelpVolume, t.audioHelpBluetooth, apple ? t.audioHelpVoiceApple : t.audioHelpVoiceAndroid, t.audioHelpSetting];
   return (
     <>
-      <button type="button" className="link label no-audio" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="link label no-audio"
+        onClick={() => {
+          setOpen(true);
+          track("audio_help", { apple });
+        }}
+      >
         {t.audioHelp}
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} label={t.audioHelpTitle}>

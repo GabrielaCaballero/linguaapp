@@ -13,12 +13,12 @@ import { courseTop, retentionFor } from "@/lib/goals";
 import { dueCount, courseComplete, courseLangs, currentUnit, practiceDaysThisWeek, sleepReady, targetFor, toFix, todayMinutes, weeklyCheck } from "@/lib/stats";
 import { lastSessionAt, AWAY_DAYS } from "@/lib/session";
 import { DAY, fmtMonth, startOfWeek } from "@/lib/dates";
-import { checkinChoice, dropLegacyTies, saveGoal, setActiveLang } from "@/lib/actions";
+import { checkinChoice, dropLegacyTies, markSeen, saveGoal, setActiveLang, setSettings } from "@/lib/actions";
 import { downloadText } from "@/lib/backup";
 import { localeOf } from "@/lib/i18n";
 import { lessonHref, onboardingHref } from "@/lib/nav";
 import { useMustSignIn } from "@/components/AccountGate";
-import { useAccount } from "@/lib/sync/client";
+import { isSyncConfigured, useAccount } from "@/lib/sync/client";
 
 export default function Today() {
   const db = useDB();
@@ -171,6 +171,33 @@ export default function Today() {
         </Ring>
       </section>
 
+      {/* Once, after the first lesson: may we collect usage statistics? (off until yes) */}
+      {isSyncConfigured() && db.profile.settings.shareStats === undefined && !db.profile.seen?.statsAsk && db.sessions.length > 0 && (
+        <section className="card-soft stack fade-in" style={{ gap: 8, marginBottom: 12 }} role="note">
+          <b className="label">{t.statsAskTitle}</b>
+          <span className="caption">{t.statsAskBody}</span>
+          <div className="row" style={{ gap: 8 }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                setSettings({ shareStats: true });
+                markSeen("statsAsk");
+              }}
+            >
+              {t.statsYes}
+            </button>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setSettings({ shareStats: false });
+                markSeen("statsAsk");
+              }}
+            >
+              {t.statsNo}
+            </button>
+          </div>
+        </section>
+      )}
       {card && <section style={{ marginBottom: 12 }} className="fade-in">{card}</section>}
 
       <div className="bottom-bar">

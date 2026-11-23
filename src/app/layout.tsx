@@ -3,6 +3,7 @@ import { Gabarito, Literata } from "next/font/google";
 import { Boot } from "@/components/Boot";
 import { SyncRunner } from "@/components/SyncRunner";
 import { AnalyticsTag } from "@/components/AnalyticsTag";
+import { MetricsTracker } from "@/components/MetricsTracker";
 import { NavTracker } from "@/components/ui";
 import { AccountGate } from "@/components/AccountGate";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AccountGate />
         {/* Only on Vercel: elsewhere (local, tests) the analytics script doesn't exist and would 404. */}
         {process.env.VERCEL ? <AnalyticsTag /> : null}
+        <MetricsTracker />
       </body>
     </html>
   );
