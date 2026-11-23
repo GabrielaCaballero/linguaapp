@@ -1,9 +1,9 @@
 import type { PlacementItem } from "../schema";
 import { spreadAnswers } from "../build";
 
-// 36 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2) · per band: 2 vocab, 2 grammar,
+// 42 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2, C1) · per band: 2 vocab, 2 grammar,
 // 1 listening, 1 reading. At least one false friend per band (weighted ×1.5 for es→it).
-// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band).
+// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 · C1 +3.3 (±0.4 within band).
 const bank: PlacementItem[] = [
   // ── A0 ─────────────────────────────────────────────────────
   {
@@ -424,6 +424,80 @@ const bank: PlacementItem[] = [
         { es: "Se prolongarán una semana más.", en: "It will be extended by a week." },
         { es: "Abrirán dentro de una semana.", en: "It will open in a week." },
         { es: "Habrá más plazas la semana que viene.", en: "There will be more places next week." },
+      ],
+      answer: 0,
+    },
+  },
+  // ── C1 (added with units 25–30) ────────────────────────────
+  {
+    id: "it-p-37", lang: "it", cefr: "C1", b: 3.1, skill: "vocab", kind: "mcq", stem: "il mio relatore", falseFriend: true,
+    seeds: ["it-u27-br-relatore"],
+    mcq: {
+      prompt: { es: "¿Qué significa (en la universidad)?", en: "What does it mean (at university)?" },
+      options: [
+        { es: "mi director de tesis", en: "my thesis supervisor" },
+        { es: "mi narrador", en: "my narrator" },
+        { es: "mi periodista de confianza", en: "my trusted reporter" },
+        { es: "mi compañero de estudios", en: "my fellow student" },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-38", lang: "it", cefr: "C1", b: 3.0, skill: "vocab", kind: "mcq", stem: "Il governo ha fatto marcia indietro.",
+    seeds: ["it-u29-fare-marcia-indietro"],
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "El gobierno dio marcha atrás (cambió de decisión).", en: "The government backtracked." },
+        { es: "El gobierno organizó una marcha de protesta.", en: "The government organised a protest march." },
+        { es: "El gobierno aceleró la reforma.", en: "The government sped up the reform." },
+        { es: "El gobierno se quedó atrás en las encuestas.", en: "The government fell behind in the polls." },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-39", lang: "it", cefr: "C1", b: 3.2, skill: "grammar", kind: "cloze", stem: "Qualora ___ necessario, La contatteremo.",
+    seeds: ["it-u25-qualora"],
+    mcq: {
+      prompt: { es: "Completa la frase.", en: "Complete the sentence." },
+      options: ["fosse", "è", "sarà", "sarebbe"],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-40", lang: "it", cefr: "C1", b: 3.5, skill: "grammar", kind: "cloze", stem: "Se avessimo investito prima nelle rinnovabili, oggi ___ meno l'energia.",
+    seeds: ["it-u29-se-avessimo-investito"],
+    mcq: {
+      prompt: { es: "Completa la frase.", en: "Complete the sentence." },
+      options: ["pagheremmo", "avremmo pagato", "pagassimo", "paghiamo"],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-41", lang: "it", cefr: "C1", b: 3.4, skill: "listening", kind: "listen", spoken: "Pur riconoscendo i progressi, l'opposizione ha votato contro il disegno di legge.",
+    mcq: {
+      prompt: { es: "¿Qué hizo la oposición?", en: "What did the opposition do?" },
+      options: [
+        { es: "Votó en contra, aunque reconoce los avances.", en: "It voted against, while acknowledging the progress." },
+        { es: "Votó a favor porque hubo avances.", en: "It voted in favour because there was progress." },
+        { es: "No participó en la votación.", en: "It didn't take part in the vote." },
+        { es: "Presentó otro proyecto de ley.", en: "It put forward another bill." },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "it-p-42", lang: "it", cefr: "C1", b: 3.6, skill: "reading", kind: "mcq",
+    stem: "Ancorché accolta con freddezza dalla critica, l'opera fu in seguito riconosciuta come il capolavoro dell'artista.",
+    mcq: {
+      prompt: { es: "¿Qué pasó con la obra?", en: "What happened to the work?" },
+      options: [
+        { es: "Al principio no gustó a la crítica, pero luego se consideró su obra maestra.", en: "Critics were cool at first, but it was later seen as the artist's masterpiece." },
+        { es: "La crítica la elogió desde el principio.", en: "Critics praised it from the start." },
+        { es: "El artista la destruyó por las críticas.", en: "The artist destroyed it because of the reviews." },
+        { es: "Nunca llegó a ser reconocida.", en: "It was never recognised." },
       ],
       answer: 0,
     },
