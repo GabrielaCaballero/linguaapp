@@ -36,7 +36,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => !k.startsWith(VERSION)).map((k) => caches.delete(k)));
+      // Old app versions go; the recorded-audio cache (lingua-audio-*, filled by the page) stays.
+      await Promise.all(keys.filter((k) => !k.startsWith(VERSION) && !k.startsWith("lingua-audio")).map((k) => caches.delete(k)));
       await self.clients.claim();
     })(),
   );

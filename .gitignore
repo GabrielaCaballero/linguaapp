@@ -44,3 +44,8 @@ next-env.d.ts
 /.next-v2/
 /.next-qa/
 /.next-qa-sync/
+
+# recorded-audio tooling: the Google key and the voice samples never go in the repo
+.env.tts.local
+/public/audio-samples/
+/scripts/tts/texts.json

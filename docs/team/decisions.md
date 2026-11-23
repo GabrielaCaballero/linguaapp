@@ -313,3 +313,53 @@ Format: date · who · decision · why
   language only), and the first touch anywhere speaks a silent utterance to unlock speech, so a
   word's automatic "listen" works afterwards. Not verified on a real iPhone yet (owner to check
   after deploy; also the ring/silent switch and volume).
+
+## 2026-11-22 · Recorded audio with a neural voice
+
+- iPhone gives web apps only basic voices (Siri voices are never exposed), so audio sounded
+  robotic there and natural on Android. Fix: record the course's fixed words and sentences once
+  with Google Cloud Text-to-Speech (scripts/tts), serve them as mp3 from linguina.app, play them
+  first and fall back to the phone's voice. ~1,700 clips, ~40k characters: free tier / <1 USD.
+  Key only on the generating computer. Setup and commands: docs/team/audio.md.
+
+## 2026-11-22 · Slow audio speed; help when nothing plays
+
+- Settings → "Slow audio 🐢": Slow 0.75× / Slower 0.6× (default) / Very slow 0.5×, for recordings
+  and the phone's voice (owner: the old 0.75× wasn't slow enough).
+- "Audio problems?" under audio exercises opens what to check: silent mode first on iPhone (a
+  tester's iPhone was on silent; the phone's voice doesn't play then, and no web page can detect
+  silent mode), volume, Bluetooth, downloading a voice, the listening setting. A one-time tip on
+  iPhone the first time audio appears. Recorded clips (HTML audio) play even on silent.
+- Generator paces requests (2 at a time, pause, retries on 429): Chirp3-HD voices have a low
+  per-minute quota.
+
+## 2026-11-22 · Towards C1
+
+- Owner: extend both courses to C1. Six C1 units per language (25–30), written by one German and
+  one Italian author agent, reviewed before the audit hashes are re-pinned (owner's OK).
+- App: "C1" in the content schema (Rasch b ≈ +3.3), placement (θ ≥ 3 → C1), goals (C1 = 800
+  guided hours, Cambridge 700–800), "I know my level" (C1: "precise and flexible: work, study,
+  irony, complex texts") and the goal picker ("Near-native precision"). The low-band stretch in
+  unitDifficulty now applies only below B2.
+
+## 2026-11-22 · Kinder typing, no word over and over; English and French started
+
+- Checker: one slip from 4 letters (on 4-letter words a changed letter must be a neighbouring
+  key), two from 8; never when the typed word is another word of the course.
+- Lessons: a word is retried in the same lesson only if it wasn't already practised twice; the
+  "practise this session's words again" filler skips words practised twice, so a beginner's
+  lesson can end early instead of drilling. Replaces the old "≥18 graded tasks" rule.
+- English (A0–C1, for Spanish speakers, en-US) and French (A0–B2) courses being written by two
+  author agents; hidden (`LANG_INFO.available: false`) until reviewed. Courses now list from
+  `availableLangs()`; "explain in" offers only a course's `bases`.
+
+## 2026-11-23 · French course written; checker and exercises learn French
+
+- French A0–B2: 24 units, 53 grammar cards, 36 placement items (author agent; native review
+  still pending). Hidden until enabled.
+- App for French: article drill offers le/la/l'/les; register note says "vous"/"tu"; elision
+  typed without the apostrophe ("l eau", "jai") is "almost"; a/à, ou/où, la/là, du/dû, sur/sûr
+  are "almost" with the accent-changes-meaning note; "à le"/"de les" for au/des is wrong with the
+  contraction note; verb endings (mangé/manger/mangez, serai/serais) are grammar, never a typo.
+- Content evals: French article/gender table; English nouns need a plural but no gender. The
+  simulated-learner placement tests run on every course × explanation language.

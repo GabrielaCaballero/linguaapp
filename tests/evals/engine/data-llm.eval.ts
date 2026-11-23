@@ -1,4 +1,5 @@
 // Category: engine — v1→v2 migration, backup/import round trip, LLM guardrails + tutor orchestration (mocked).
+import { COURSE_LANGS } from "../lib/langs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { courses } from "@/content";
 import type { Item } from "@/content/schema";
@@ -12,7 +13,7 @@ import { DAY } from "@/lib/dates";
 
 const NOW = new Date(2026, 10, 12, 9).getTime();
 const T0 = NOW - 20 * DAY;
-const all: Item[] = (["it", "de"] as const).flatMap((l) => courses[l].units.flatMap((u) => u.items));
+const all: Item[] = COURSE_LANGS.flatMap((l) => courses[l].units.flatMap((u) => u.items));
 const legacy: LegacyIndex = new Map(all.filter((i) => i.legacyId).map((i) => [i.legacyId!, { id: i.id, lang: i.lang }]));
 const [itL, deL] = [all.find((i) => i.lang === "it" && i.legacyId)!, all.find((i) => i.lang === "de" && i.legacyId)!];
 

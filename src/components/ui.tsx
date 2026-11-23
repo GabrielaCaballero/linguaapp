@@ -40,8 +40,7 @@ const STAMP_HOLES: [number, number][] = (() => {
 
 export function Seal({ lang, size = 56 }: { lang: TargetLang; size?: number }) {
   const id = useId().replace(/:/g, "");
-  const { dir, colors } = LANG_INFO[lang].flag;
-  const n = colors.length;
+  const flag = LANG_INFO[lang].flag;
   const [x0, y0, w, h] = [7, 7, 36, 44];
   // Alternate the tilt between languages so two stamps side by side don't look copy-pasted.
   const tilt = TARGET_LANGS.indexOf(lang) % 2 ? 4 : -5;
@@ -56,8 +55,13 @@ export function Seal({ lang, size = 56 }: { lang: TargetLang; size?: number }) {
         </mask>
         <g mask={`url(#st${id})`}>
           <rect width={STAMP_W} height={STAMP_H} fill="#fff" />
-          {colors.map((c, k) =>
-            dir === "v" ? <rect key={k} x={x0 + (w / n) * k} y={y0} width={w / n + 0.3} height={h} fill={c} /> : <rect key={k} x={x0} y={y0 + (h / n) * k} width={w} height={h / n + 0.3} fill={c} />,
+          {"svg" in flag ? (
+            // A flag that isn't plain stripes (registry-defined markup, our own code only).
+            <g dangerouslySetInnerHTML={{ __html: flag.svg }} />
+          ) : (
+            flag.colors.map((c, k, all) =>
+              flag.dir === "v" ? <rect key={k} x={x0 + (w / all.length) * k} y={y0} width={w / all.length + 0.3} height={h} fill={c} /> : <rect key={k} x={x0} y={y0 + (h / all.length) * k} width={w} height={h / all.length + 0.3} fill={c} />,
+            )
           )}
           <rect x={x0} y={y0} width={w} height={h} fill="none" stroke="rgb(0 0 0 / 0.12)" />
         </g>

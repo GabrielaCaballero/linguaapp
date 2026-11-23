@@ -3,6 +3,7 @@
 // Fuzziness applies ONLY to open-class tokens; closed-class words (articles, prepositions,
 // pronouns, auxiliaries) must match exactly, and a typo may never bridge a minimal pair.
 import type { BaseLang, Item, Lexicon, TargetLang } from "@/content/schema";
+import { courses } from "@/content";
 
 export type Reason =
   | "exact"
@@ -131,6 +132,44 @@ export function osa(a: string, b: string): number {
   return d[a.length][b.length];
 }
 
+// Phone keyboards (QWERTY / QWERTZ / AZERTY rows): keys next to each other.
+const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm", "qwertzuiop", "yxcvbnm", "azertyuiop", "qsdfghjklm", "wxcvbn"];
+function neighbours(a: string, b: string): boolean {
+  for (const r of ROWS) {
+    const i = r.indexOf(a);
+    const j = r.indexOf(b);
+    if (i >= 0 && j >= 0 && Math.abs(i - j) === 1) return true;
+  }
+  // the key right above/below (qwerty rows offset by about half a key)
+  const grid = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+  for (let r = 0; r < 2; r++) {
+    const i = grid[r].indexOf(a);
+    const j = grid[r + 1].indexOf(b);
+    const i2 = grid[r].indexOf(b);
+    const j2 = grid[r + 1].indexOf(a);
+    if ((i >= 0 && j >= 0 && (j === i || j === i - 1)) || (i2 >= 0 && j2 >= 0 && (j2 === i2 || j2 === i2 - 1))) return true;
+  }
+  return false;
+}
+/** Same length, exactly one letter different, and those two letters are neighbouring keys. */
+function neighbourSub(got: string, want: string): boolean {
+  const k = [...got].findIndex((c, i) => c !== want[i]);
+  return k >= 0 && neighbours(got[k], want[k]);
+}
+
+/** Every word used in the course's targets, per language (lowercase), built once. */
+const courseWords = new Map<TargetLang, Set<string>>();
+function isOtherCourseWord(got: string, want: string, lang: TargetLang): boolean {
+  let set = courseWords.get(lang);
+  if (!set) {
+    set = new Set<string>();
+    for (const u of courses[lang].units) for (const i of u.items) for (const t of tokens(i.target)) set.add(bareTok(t).toLowerCase());
+    courseWords.set(lang, set);
+  }
+  const g = bareTok(got).toLowerCase();
+  return g !== bareTok(want).toLowerCase() && set.has(g);
+}
+
 const IT_ACCENT_MEANING = new Set(["e|è", "si|sì", "da|dà", "la|là", "li|lì", "ne|né", "se|sé"]);
 
 const IT_CONTRACTIONS: Record<string, string> = {
@@ -140,6 +179,32 @@ const IT_CONTRACTIONS: Record<string, string> = {
   nel: "in il", nello: "in lo", nella: "in la", nei: "in i", negli: "in gli", nelle: "in le",
   sul: "su il", sullo: "su lo", sulla: "su la", sui: "su i", sugli: "su gli", sulle: "su le",
 };
+// English contractions → full forms (only unambiguous ones: "he's", "I'd" and "it's" vary).
+const EN_CONTRACTIONS: Record<string, string> = {
+  "i'm": "i am", "you're": "you are", "we're": "we are", "they're": "they are",
+  "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not",
+  "don't": "do not", "doesn't": "does not", "didn't": "did not", "haven't": "have not", "hasn't": "has not", "hadn't": "had not",
+  "can't": "cannot", "couldn't": "could not", "won't": "will not", "wouldn't": "would not", "shouldn't": "should not", "mustn't": "must not",
+  "i'll": "i will", "you'll": "you will", "we'll": "we will", "they'll": "they will", "she'll": "she will", "he'll": "he will",
+  "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have", "let's": "let us", "that's": "that is", "there's": "there is",
+};
+/** Lowercase, punctuation-free, contractions spelled out. `loose`: also read "dont"/"im" as don't/I'm. */
+function enFull(s: string, loose = false): string {
+  let t = norm(s).replace(/[’‘]/g, "'").replace(/[.,!?;:]+/g, "");
+  t = t.replace(/\bcan not\b/g, "cannot");
+  const words = t.split(/\s+/).map((w) => {
+    if (EN_CONTRACTIONS[w]) return EN_CONTRACTIONS[w];
+    if (loose && !w.includes("'")) {
+      const hit = Object.keys(EN_CONTRACTIONS).find((c) => c.replace("'", "") === w && w !== "well" && w !== "were" && w !== "hell" && w !== "shell" && w !== "wed" && w !== "id" && w !== "its" && w !== "lets");
+      if (hit) return EN_CONTRACTIONS[hit];
+    }
+    return w;
+  });
+  return words.join(" ");
+}
+
+// French: "à le" / "de les" typed for au / des is wrong, with the contraction note.
+const FR_CONTRACTIONS: Record<string, string> = { au: "à le", aux: "à les", du: "de le", des: "de les" };
 const DE_CONTRACTIONS: Record<string, string> = {
   im: "in dem", ins: "in das", am: "an dem", ans: "an das", zum: "zu dem", zur: "zu der",
   beim: "bei dem", vom: "von dem",
@@ -183,6 +248,8 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   // e/è, si/sì, da/dà …: a missing accent that changes meaning is "almost" with a specific note
   // (spec §4.8), even though the pair is listed in the lexicon's minimal pairs.
   if (lang === "it" && IT_ACCENT_MEANING.has([stripMarks(w), w].join("|")) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
+  // French a/à, ou/où, la/là, du/dû, sur/sûr: same rule (they're also closed-class words).
+  if (lang === "fr" && (FR_ACCENT_MEANING.has([stripMarks(w), w].join("|")) || FR_ACCENT_MEANING.has([stripMarks(g), g].join("|"))) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
   if (lang === "it" && IT_ACCENT_MEANING.has([stripMarks(g), g].join("|")) && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent-meaning" };
   if (isMinimalPair(bareTok(g), bareTok(w), lex)) return { v: "wrong", reason: "minimal-pair" };
   // "dov e" for "dov'è": the apostrophe dropped, the elided token otherwise right
@@ -205,23 +272,45 @@ function compareToken(got: string, want: string, lang: TargetLang, lex: Lexicon,
   if (lang === "de") {
     if (deStrip(g) === deStrip(w)) return { v: "almost", reason: "umlaut" };
   }
+  // French: a missing or wrong accent (é/è/ê, à, ç…) is "almost", like Italian.
+  if (lang === "fr" && stripMarks(g) === stripMarks(w)) return { v: "almost", reason: "accent" };
   // German verb/adjective endings (wohne/wohnt, spreche/sprechen) are grammar, never a typo.
   if (lang === "de" && endingOnly(deFold(g), deFold(w))) return { v: "wrong", reason: "wrong" };
+  // French verb endings (mangé/manger/mangez, serai/serais) are grammar, never a typo.
+  if (lang === "fr" && frEndingOnly(stripMarks(g), stripMarks(w), g, w)) return { v: "wrong", reason: "wrong" };
   const base = lang === "de" ? deFold(w) : stripMarks(w);
   const len = [...bareTok(w)].length;
-  const allowed = len >= 10 ? 2 : len >= 5 ? 1 : 0;
+  // Phone typing (owner, 2026-11-22: "still too strict"): one slip from 4 letters, two from 8;
+  // swapped neighbours count as one slip. A slip is never forgiven when it lands on another word
+  // of the course (the learner may really have confused them) or a listed minimal pair.
+  const allowed = len >= 8 ? 2 : len >= 4 ? 1 : 0;
   if (item.type !== "sound") {
     const gg = lang === "de" ? deFold(g) : stripMarks(g);
-    // Phone typing: swapped neighbours count as one slip. Words of 4 letters forgive only a swap
-    // ("caio", "nien"); a changed letter there too often makes another word (owner, 2026-11-20).
     const d = osa(gg, base);
-    if (d <= allowed) return { v: "almost", reason: "typo" };
-    if (len === 4 && d === 1 && gg.length === base.length && lev(gg, base) === 2) return { v: "almost", reason: "typo" };
+    // 4-letter words: a changed letter counts as a slip only if it's a neighbouring key (a phone
+    // typo), so "echt" for "acht" stays wrong; dropped, doubled or swapped letters pass.
+    const shortSubOk = len >= 5 || d !== 1 || gg.length !== base.length || lev(gg, base) === 2 || neighbourSub(gg, base);
+    if (d <= allowed && shortSubOk && !(lang === "it" && IT_SPANISH_SPELLING[g]) && !isOtherCourseWord(g, w, lang)) return { v: "almost", reason: "typo" };
   }
   return { v: "wrong", reason: "wrong" };
 }
 
 const DE_ENDINGS = new Set(["", "e", "t", "st", "en", "n", "et", "est", "es", "em", "er"]);
+const FR_ENDINGS = ["ais", "ait", "aient", "ai", "ez", "er", "es", "ee", "e", "s", "ent", "ons", "iez", "ions"];
+const FR_ACCENT_MEANING = new Set(["a|à", "ou|où", "la|là", "du|dû", "sur|sûr"]);
+/** Same French stem, different verb ending (é/er/ez/ais/ait…): grammar. */
+function frEndingOnly(g: string, w: string, gRaw: string, wRaw: string): boolean {
+  if (g === w && gRaw === wRaw) return false;
+  const stem = (s: string) => {
+    for (const e of FR_ENDINGS) if (s.length - e.length >= 3 && s.endsWith(e)) return [s.slice(0, -e.length), e] as const;
+    return [s, ""] as const;
+  };
+  const [sg, eg] = stem(g);
+  const [sw, ew] = stem(w);
+  // mangé vs mange: same letters once accents go, but é ≠ e is an ending, not an accent slip.
+  const accentEnding = g === w && /é$/.test(gRaw) !== /é$/.test(wRaw);
+  return sg === sw && (eg !== ew || accentEnding);
+}
 /** Same stem, only the inflectional ending differs. */
 function endingOnly(g: string, w: string): boolean {
   if (g === w) return false;
@@ -275,6 +364,14 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
       return { verdict: "correct", reason: t.reason, score: 1, note: capNote };
     }
   }
+  // English: contracted and full forms are the same answer ("I'm" = "I am", "don't" = "do not");
+  // a contraction typed without its apostrophe ("dont", "im") is "almost".
+  if (lang === "en") {
+    for (const t of exactTargets) {
+      if (enFull(answer) === enFull(t.text)) return { verdict: "correct", reason: t.reason, score: 1 };
+      if (enFull(answer, true) === enFull(t.text)) return { verdict: "almost", reason: "elision", score: SCORE.elision!, detail: { got: answer, want: tidy(t.text) } };
+    }
+  }
   // 2. known errors
   for (const e of item.errors ?? []) if (norm(e.text) === a) return { verdict: "wrong", reason: "known-error", score: 0, feedback: fb(e.feedback), ruleId: e.ruleId };
   // 3. accepted-but-almost alternatives
@@ -292,8 +389,8 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
     const wantToks = tokens(c);
     consider(compareSeq(gotToks, wantToks, lang, lex, item));
 
-    // Italian elision typed without apostrophe: "l amico", "lamico", "dove è"
-    if (lang === "it" && c.includes("'")) {
+    // Elision typed without apostrophe: "l amico", "lamico", "dove è" (Italian); "l eau", "jai" (French)
+    if ((lang === "it" || lang === "fr") && c.includes("'")) {
       const squash = (s: string) => s.toLowerCase().replace(/['\s]/g, "");
       if (squash(answer) === squash(c)) consider({ verdict: "almost", reason: "elision", score: SCORE.elision!, detail: { got: answer, want: c } });
       const dovE = c.toLowerCase().replace(/(\w)'(?=[aeiouèéìòù])/g, (_m, ch) => ch + " ");
@@ -301,14 +398,14 @@ export function check(input: string, item: Item, opts: CheckOptions): CheckResul
     }
 
     // Contractions: uncontracted form typed
-    const table = lang === "it" ? IT_CONTRACTIONS : DE_CONTRACTIONS;
+    const table = lang === "it" ? IT_CONTRACTIONS : lang === "fr" ? FR_CONTRACTIONS : lang === "de" ? DE_CONTRACTIONS : {};
     const expandedWant = expand(wantToks, table);
     if (expandedWant.length !== wantToks.length && gotToks.length === expandedWant.length) {
       const r = compareSeq(gotToks, expandedWant, lang, lex, item);
       if (r && r.verdict === "correct") {
         const contracted = wantToks.find((t) => table[t.toLowerCase()]) ?? "";
         const res: CheckResult =
-          lang === "it"
+          lang === "it" || lang === "fr"
             ? { verdict: "wrong", reason: "contraction", score: 0, detail: { got: table[contracted.toLowerCase()], want: contracted } }
             : { verdict: "almost", reason: "contraction", score: SCORE.contraction!, detail: { got: table[contracted.toLowerCase()], want: contracted } };
         if (!best || best.verdict === "wrong") best = res;
@@ -365,10 +462,14 @@ function hasLoweredNoun(answer: string, target: string, item: Item): boolean {
 const INFORMAL: Record<TargetLang, string[]> = {
   de: ["du", "dich", "dir", "dein", "deine", "deinen", "deinem", "bist", "hast", "kommst", "wohnst", "sprichst", "heißt", "heisst"],
   it: ["tu", "ti", "te", "tuo", "tua", "sei", "hai", "stai", "chiami", "parli", "puoi", "vieni", "abiti", "scusa"],
+  fr: ["tu", "toi", "ton", "ta", "tes", "te", "t'"],
+  en: [],
 };
 const FORMAL: Record<TargetLang, string[]> = {
   de: ["Sie", "Ihnen", "Ihr", "Ihre"],
   it: ["Lei", "Le", "Suo", "Sua", "sta", "chiama", "parla", "può", "viene", "abita", "scusi"],
+  fr: ["vous", "votre", "vos"],
+  en: [],
 };
 const IT_SPANISH_SPELLING: Record<string, string> = { chao: "ciao", mucho: "molto", gracias: "grazie", bueno: "buono", buena: "buona" };
 
@@ -380,13 +481,13 @@ function registerMismatch(answer: string, item: Item): { got: string; want: stri
   const lang = item.lang;
   if (item.register === "formal") {
     const hit = got.find((g) => INFORMAL[lang].includes(g.toLowerCase()) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
-    if (hit) return { got: hit, want: lang === "de" ? "Sie" : "Lei" };
+    if (hit) return { got: hit, want: { de: "Sie", it: "Lei", fr: "vous", en: "you" }[lang] };
   } else {
     // Capitalised pronouns compare case-sensitively (German "sie" = she/they, Italian "lei" = she,
     // "le" = the); lowercase verb forms (sta, parla, scusi) compare case-insensitively.
     const same = (f: string, g: string) => (f[0] === f[0].toLowerCase() ? f === g.toLowerCase() : f === g);
     const hit = got.find((g) => FORMAL[lang].some((f) => same(f, g)) && !want.some((w) => w.toLowerCase() === g.toLowerCase()));
-    if (hit) return { got: hit, want: lang === "de" ? "du" : "tu" };
+    if (hit) return { got: hit, want: { de: "du", it: "tu", fr: "tu", en: "you" }[lang] };
   }
   return null;
 }

@@ -11,6 +11,7 @@ import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
 import { TableExercise } from "./Table";
 import { WordHints } from "./WordHints";
+import { AudioHelp, SilentTip } from "./AudioHelp";
 
 export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => void;
 
@@ -43,7 +44,7 @@ export interface ExProps {
   onNoAudio?: () => void;
 }
 
-const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] };
+const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"] };
 
 export function Speaker({ text, lang, slow, big, label, auto }: { text: string; lang: TargetLang; slow?: boolean; big?: boolean; label: string; auto?: boolean }) {
   const [on, setOn] = useState(false);
@@ -74,12 +75,20 @@ export function Speaker({ text, lang, slow, big, label, auto }: { text: string; 
 }
 
 /** "Can't listen now" (like Duolingo): the rest of the lesson shows text instead of audio. */
+/** Under an audio exercise: "Can't listen now" (text instead of audio) and "Audio problems?". */
 export function NoAudio({ t, onNoAudio }: { t: Dict; onNoAudio?: () => void }) {
-  if (!onNoAudio) return null;
   return (
-    <button type="button" className="link label no-audio" onClick={onNoAudio}>
-      <Icon name="speaker" size={16} /> {t.cantListen}
-    </button>
+    <>
+      <SilentTip t={t} />
+      <div className="row" style={{ justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+        {onNoAudio && (
+          <button type="button" className="link label no-audio" onClick={onNoAudio}>
+            <Icon name="speaker" size={16} /> {t.cantListen}
+          </button>
+        )}
+        <AudioHelp t={t} />
+      </div>
+    </>
   );
 }
 

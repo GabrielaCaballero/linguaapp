@@ -14,6 +14,7 @@ import { previousPath } from "@/lib/navstack";
 import { clearLessonDraft, loadLessonDraft, saveLessonDraft } from "@/lib/lessonDraft";
 import { endSession, introduce, recordAnswer, regrade, sessionStart } from "@/lib/actions";
 import { hasVoice, voicesReady } from "@/lib/speech";
+import { loadRecorded } from "@/lib/recorded";
 import { feel } from "@/lib/feel";
 import type { CheckResult } from "@/lib/check";
 import { Icon } from "@/components/icons";
@@ -74,7 +75,8 @@ function LessonEntry({ kindParam, unitParam }: { kindParam: string | null; unitP
 
   useEffect(() => {
     let alive = true;
-    voicesReady().then(() => {
+    // Wait for the voices and for which texts have a recording (either one makes audio work).
+    Promise.all([voicesReady(), loadRecorded(getDB().profile.activeLang)]).then(() => {
       if (!alive) return;
       const d = getDB();
       setCanListen(hasVoice(d.profile.activeLang) && d.profile.settings.listening);
@@ -254,8 +256,10 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       const capped = stats.current.newItems.size + BASE_NEW + 1 > MAX_NEW_PER_LESSON;
       let more = make(new Set(tasks.map((x) => x.itemId)), capped).tasks;
       // Capped and nothing else waiting (e.g. a beginner's first lessons): practise this session's
-      // words again, weakest first, so "5 minutes" stays 5 minutes without more new words.
-      if (!more.length && capped) more = make(new Set(), true).tasks;
+      // words again — but only those not already practised twice in this lesson. A word doesn't
+      // come back over and over in one sitting; spacing it across days is what makes it stick
+      // (owner, 2026-11-22). Nothing left → the lesson ends a little early.
+      if (!more.length && capped) more = make(new Set(tasks.filter((x) => timesGraded(tasks.slice(0, idx + 1), x.itemId) >= 2).map((x) => x.itemId)), true).tasks;
       if (more.length) {
         setTasks((ts) => [...ts, ...more.map((m) => ({ ...m, key: `x${extensions.current}-${m.key}` }))]);
         setIdx((i) => i + 1);
@@ -341,7 +345,8 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       if (conf === "sure") s.sureWrong++;
       if (typed) s.typedMiss = true;
       setCombo(0);
-      if (!speed && !isTry) setTasks((ts) => requeue(ts, idx, counts.current));
+      // Retry once later in the lesson — unless this word was already practised twice today.
+      if (!speed && !isTry && timesGraded(tasks.slice(0, idx), item.id) < 2) setTasks((ts) => requeue(ts, idx, counts.current));
     }
     feel(r.verdict === "correct" ? "success" : r.verdict === "almost" ? "almost" : "miss", getDB().profile.settings);
 
@@ -583,4 +588,9 @@ function RefSync({ tasks, idx }: { tasks: Task[]; idx: number }) {
     idxRef.current = idx;
   }, [tasks, idx]);
   return null;
+}
+
+/** How many graded tasks for this item are in the list (learn cards aren't counted). */
+function timesGraded(list: Task[], itemId: string): number {
+  return list.filter((x) => x.itemId === itemId && x.role !== "intro").length;
 }

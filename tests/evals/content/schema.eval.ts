@@ -1,6 +1,7 @@
 // Category: content — every item valid per the content contract (spec §3.3) and the
 // linguist's style guide (06 §2). One eval case per rule per course (graded deterministically);
 // failures list the offending ids.
+import { COURSE_LANGS } from "../lib/langs";
 import { describe, expect, it } from "vitest";
 import { courses } from "@/content";
 import type { Item, TargetLang } from "@/content/schema";
@@ -9,6 +10,8 @@ const BANNED = /lavello|zurigo|z[uü]rich|\bgabi\b|gabriela|\bdante\b|\bfide\b|c
 const VOSEO = /(^|[^\p{L}])(vos|tenés|sos|podés|querés|escuchá|elegí|hablás|vosotros|habláis|tenéis)(?=$|[^\p{L}])/iu;
 const IT_ART: Record<string, string[]> = { m: ["il", "lo", "l'", "i", "gli"], f: ["la", "l'", "le"] };
 const DE_ART: Record<string, string> = { m: "der", f: "die", n: "das" };
+// "les" too: plural-only nouns (les grands-parents, les vacances).
+const FR_ART: Record<string, string[]> = { m: ["le", "l'", "les"], f: ["la", "l'", "les"] };
 
 function check(lang: TargetLang, name: string, bad: (i: Item) => string | false) {
   it(`${lang}: ${name}`, () => {
@@ -18,13 +21,13 @@ function check(lang: TargetLang, name: string, bad: (i: Item) => string | false)
   });
 }
 
-for (const lang of ["it", "de"] as TargetLang[]) {
+for (const lang of COURSE_LANGS) {
   const c = courses[lang];
   describe(`content ${lang}`, () => {
     it(`${lang}: units indexed 1…N with no gaps (N ≥ 6), ids ${lang}-uNN, cefr non-decreasing`, () => {
       expect(c.units.length).toBeGreaterThanOrEqual(6);
       expect(c.units.map((u) => u.index)).toEqual(c.units.map((_, k) => k + 1));
-      const order = ["A0", "A1.1", "A1.2", "A2", "B1", "B2"];
+      const order = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", "C1"];
       c.units.forEach((u, k) => {
         expect(order).toContain(u.cefr);
         expect(u.id).toBe(`${lang}-u${String(u.index).padStart(2, "0")}`);
@@ -58,12 +61,14 @@ for (const lang of ["it", "de"] as TargetLang[]) {
       const hit = (i.distractors ?? []).find((d) => ok.has(d.toLowerCase().replace(/[.!?¿¡]/g, "").trim()));
       return hit ? `distractor "${hit}" is accepted` : false;
     });
-    check(lang, "nouns carry gender + plural with article", (i) => (i.pos === "noun" && (!i.gender || !i.plural) ? "missing gender/plural" : false));
+    // English nouns have no grammatical gender: a plural is enough there.
+    check(lang, "nouns carry gender + plural with article", (i) => (i.pos === "noun" && ((lang !== "en" && !i.gender) || !i.plural) ? "missing gender/plural" : false));
     check(lang, "noun target starts with the article matching its gender", (i) => {
-      if (i.pos !== "noun" || !i.gender || i.type === "bridge") return false;
+      if (i.pos !== "noun" || !i.gender || i.type === "bridge" || lang === "en") return false;
       const first = i.target.toLowerCase().match(/^(l')|^(\S+)/)!;
       const art = first[1] ?? first[2];
       if (lang === "de") return art === DE_ART[i.gender] ? false : `"${i.target}" vs gender ${i.gender}`;
+      if (lang === "fr") return FR_ART[i.gender]?.includes(art) ? false : `"${i.target}" vs gender ${i.gender}`;
       return IT_ART[i.gender]?.includes(art) ? false : `"${i.target}" vs gender ${i.gender}`;
     });
     if (lang === "de") {
@@ -112,10 +117,11 @@ for (const lang of ["it", "de"] as TargetLang[]) {
     });
     check(lang, "no owner-specific or banned strings", (i) => (BANNED.test(JSON.stringify(i)) ? "banned string" : false));
 
-    it(`${lang}: placement bank 36 items, 6 per band (A0…B2), 2 vocab/2 grammar/1 listening/1 reading`, () => {
+    it(`${lang}: placement bank 6 per band (A0…B2 required, C1 once the course has it), 2 vocab/2 grammar/1 listening/1 reading`, () => {
       const p = c.placement;
-      expect(p.length).toBe(36);
-      for (const band of ["A0", "A1.1", "A1.2", "A2", "B1", "B2"]) {
+      const bands = ["A0", "A1.1", "A1.2", "A2", "B1", "B2", ...(p.some((x) => x.cefr === "C1") ? ["C1"] : [])];
+      expect(p.length).toBe(6 * bands.length);
+      for (const band of bands) {
         const b = p.filter((x) => x.cefr === band);
         expect(b.length, band).toBe(6);
         const n = (s: string) => b.filter((x) => x.skill === s).length;
@@ -124,7 +130,7 @@ for (const lang of ["it", "de"] as TargetLang[]) {
       }
     });
     it(`${lang}: placement b within ±0.4 of the band centre; MCQ valid; seeds exist`, () => {
-      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5 };
+      const centre: Record<string, number> = { A0: -2.5, "A1.1": -1.5, "A1.2": -0.5, A2: 0.5, B1: 1.5, B2: 2.5, C1: 3.3 };
       const unitIds = new Set(c.units.flatMap((u) => u.items.map((i) => i.id)));
       for (const x of c.placement) {
         expect(Math.abs(x.b - centre[x.cefr]), x.id).toBeLessThanOrEqual(0.4 + 1e-9);
