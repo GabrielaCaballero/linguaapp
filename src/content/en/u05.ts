@@ -93,7 +93,7 @@ export const unit: Unit = {
       id: "cousin", type: "word", target: "cousin", plural: "cousins",
       gloss: { es: "primo/a", en: "cousin" },
       distractors: ["cushion", "kitchen", "cuisine"],
-      note: { es: "Sirve para primo y prima; se pronuncia «késin»." },
+      note: { es: "Sirve para primo y prima; se pronuncia más o menos «kázin»." },
       tags: ["family"],
     },
 

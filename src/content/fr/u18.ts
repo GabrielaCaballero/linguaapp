@@ -14,7 +14,7 @@ export const unit: Unit = {
   ],
   icon: "🌱",
   items: build("fr", 18, "B1", [
-    { id: "environnement", type: "word", pos: "noun", target: "l'environnement", gender: "m", plural: "les environnements", gloss: { es: "el medio ambiente", en: "the environment" }, distractors: ["la environnement", "l'environ", "l'enseignement"], note: { es: "Doble n y sin «m» antes de «n»: environnement.", en: "Note the double n: environnement." }, tags: ["environment"] },
+    { id: "environnement", type: "word", pos: "noun", target: "l'environnement", gender: "m", plural: "les environnements", gloss: { es: "el medio ambiente", en: "the environment" }, distractors: ["la environnement", "l'environ", "l'enseignement"], note: { es: "Ojo con la doble n: environnement.", en: "Note the double n: environnement." }, tags: ["environment"] },
     { id: "dechets", type: "word", pos: "noun", target: "le déchet", gender: "m", plural: "les déchets", gloss: { es: "el residuo, la basura", en: "the waste / rubbish" }, distractors: ["la déchet", "le déchu", "le cachet"], note: { es: "Casi siempre en plural: trier ses déchets = separar la basura.", en: "Usually plural: trier ses déchets = to sort your rubbish." }, tags: ["environment"] },
     { id: "recycler", type: "word", pos: "verb", target: "recycler", gloss: { es: "reciclar", en: "to recycle" }, distractors: ["recycle", "reculer", "cycler"], tags: ["environment"] },
     { id: "pollution", type: "word", pos: "noun", target: "la pollution", gender: "f", plural: "les pollutions", gloss: { es: "la contaminación", en: "the pollution" }, distractors: ["le pollution", "la potion", "la position"], tags: ["environment"] },
@@ -48,7 +48,7 @@ export const unit: Unit = {
     {
       id: "jen-ai-trop", type: "sentence", target: "Du plastique ? On en utilise beaucoup trop.",
       gloss: { es: "¿Plástico? Usamos demasiado.", en: "Plastic? We use far too much of it." },
-      errors: [{ text: "Du plastique ? On l'utilise beaucoup trop.", feedback: { es: "Con cantidades (du, beaucoup de…) el pronombre es «en».", en: "With quantities (du, beaucoup de…) the pronoun is 'en'." }, ruleId: "fr-g-y-en" }],
+      accept: [{ text: "Du plastique ? On l'utilise beaucoup trop.", verdict: "almost", feedback: { es: "Se dice, pero tras un partitivo (du plastique) lo esperado es «en».", en: "People say it, but after a partitive (du plastique) the expected pronoun is 'en'." } }],
       distractors: ["y", "le", "de"],
       tags: ["pronouns", "environment"],
     },

@@ -371,6 +371,9 @@ const pt: Case[] = [
   { id: "pt-28", item: I("pt-u02-sou-do-mexico"), input: "Eu sou de o México.", verdict: "wrong", reason: "known-error", feedback: true, tag: "de + o known error" },
   { id: "pt-29", item: W("pt", "Ele é do Brasil."), input: "Ele é de o Brasil.", verdict: "wrong", reason: "contraction", wantHas: "do", tag: "de + o = do" },
   { id: "pt-30", item: W("pt", "Ela trabalhou ontem."), input: "Ela trabalhava ontem.", verdict: "wrong", tag: "perfeito/imperfeito is grammar" },
+  { id: "pt-31", item: W("pt", "Estou muito cansado."), input: "Estou muito cansada.", verdict: "almost", reason: "gender", tag: "o/a swap: the learner may be a woman" },
+  { id: "pt-32", item: W("pt", "Muito obrigado!"), input: "Muito obrigada!", verdict: "almost", reason: "gender", tag: "obrigado/obrigada" },
+  { id: "pt-33", item: W("pt", "Ele nos viu ontem."), input: "Ele nos viu ontem.", verdict: "correct", tag: "nos = pronoun, not em + os" },
 ];
 
 export const CASES: Case[] = [...it, ...de, ...pt];

@@ -96,7 +96,7 @@ export const unit: Unit = {
       id: "what-happened-next", type: "phrase", pos: "phrase", target: "What happened next?",
       gloss: { es: "¿Y qué pasó después?", en: "What happened next?" },
       accept: [{ text: "Then what happened?" }, { text: "And then?" }],
-      distractors: ["What did happen next?", "What passed next?", "What happens next time?"],
+      distractors: ["What it happened next?", "What passed next?", "What happens next time?"],
       tags: ["stories", "chunk"],
     },
 
@@ -122,8 +122,8 @@ export const unit: Unit = {
     {
       id: "while-she-was-cooking", type: "sentence", target: "While she was cooking, the lights went out.",
       gloss: { es: "Mientras cocinaba, se fue la luz.", en: "While she was cooking, the lights went out." },
-      accept: [{ text: "The lights went out while she was cooking." }],
-      distractors: ["when", "cooked", "were"],
+      accept: [{ text: "The lights went out while she was cooking." }, { text: "When she was cooking, the lights went out." }],
+      distractors: ["during", "cooked", "were"],
       grammar: ["en-g-past-continuous"],
       tags: ["stories", "past-continuous"],
     },

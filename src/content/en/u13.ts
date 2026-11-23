@@ -234,7 +234,7 @@ export const unit: Unit = {
       id: "br-constipated", type: "bridge", onlyFor: "es", target: "constipated",
       gloss: { es: "estreñido/a", en: "constipated" },
       question: {
-        prompt: { es: "Tienes la nariz tapada por un resfrío. ¿Qué dices?", en: "Your nose is blocked because of a cold. What do you say?" },
+        prompt: { es: "Tienes la nariz tapada por un resfriado. ¿Qué dices?", en: "Your nose is blocked because of a cold. What do you say?" },
         options: ["I have a cold and a stuffy nose.", "I'm constipated.", "I'm constipation."],
         answer: 0,
       },
@@ -247,7 +247,7 @@ export const unit: Unit = {
       question: {
         prompt: { es: "«I was so embarrassed!» significa…", en: "'I was so embarrassed!' means…" },
         options: [
-          { es: "¡Qué vergüenza me dio!", en: "I felt so ashamed!" },
+          { es: "¡Qué vergüenza me dio!", en: "I felt so embarrassed!" },
           { es: "¡Estaba embarazada!", en: "I was pregnant!" },
           { es: "¡Estaba muy enojada!", en: "I was so angry!" },
         ],

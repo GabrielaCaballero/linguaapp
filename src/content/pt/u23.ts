@@ -49,7 +49,7 @@ export const unit: Unit = {
       id: "por-um-lado-voce-tem-razao", type: "sentence", target: "Até certo ponto você tem razão, mas não podemos generalizar.",
       gloss: { es: "Hasta cierto punto tienes razón, pero no podemos generalizar.", en: "Up to a point you're right, but we can't generalise." },
       accept: [{ text: "Até certo ponto você tem razão, mas a gente não pode generalizar." }],
-      distractors: ["Até um certo", "está certo", "generalizando"],
+      distractors: ["Até certos", "tem certeza", "generalizando"],
       tags: ["debate"],
     },
     {
@@ -81,8 +81,8 @@ export const unit: Unit = {
       gloss: { es: "conectores para argumentar", en: "connectors for arguing" },
       pattern: {
         rule: {
-          es: "Añadir: além disso, aliás. Oponer: mas, no entanto, contudo, porém. Concluir: portanto, por isso, logo. Explicar: ou seja, isto é. Ojo: «entretanto» suele significar «sin embargo», no «mientras tanto».",
-          en: "Adding: além disso, aliás. Contrasting: mas, no entanto, contudo, porém. Concluding: portanto, por isso, logo. Rephrasing: ou seja, isto é. Note: entretanto usually means 'however'.",
+          es: "Añadir: além disso, aliás. Oponer: mas, no entanto, contudo, porém. Concluir: portanto, por isso, logo. Explicar: ou seja, isto é. Ojo: en Brasil «entretanto» suele significar «sin embargo»; en Portugal, sobre todo «mientras tanto».",
+          en: "Adding: além disso, aliás. Contrasting: mas, no entanto, contudo, porém. Concluding: portanto, por isso, logo. Rephrasing: ou seja, isto é. Note: in Brazil entretanto usually means 'however'; in Portugal mostly 'meanwhile'.",
         },
         table: [["adição", "além disso, aliás"], ["oposição", "no entanto, contudo, porém"], ["conclusão", "portanto, por isso"], ["explicação", "ou seja, isto é"]],
       },

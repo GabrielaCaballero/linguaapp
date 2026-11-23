@@ -54,7 +54,7 @@ export const unit: Unit = {
     {
       id: "nao-tive-culpa", type: "sentence", target: "Desculpa, a culpa foi minha.",
       gloss: { es: "Perdón, fue culpa mía.", en: "Sorry, it was my fault." },
-      accept: [{ text: "Desculpe, a culpa foi minha." }, { text: "Foi mal, a culpa foi minha." }],
+      accept: [{ text: "Desculpe, a culpa foi minha." }, { text: "Foi mal, a culpa foi minha." }, { text: "Desculpa, a culpa era minha." }, { text: "Desculpa, a culpa é minha." }],
       distractors: ["era", "minha culpa de", "falha"],
       note: { es: "«Foi mal!» = ¡perdón!, muy coloquial.", en: "'Foi mal!' = my bad!, very informal." },
       tags: ["regret", "chunk"],

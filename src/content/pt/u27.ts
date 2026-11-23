@@ -18,7 +18,7 @@ export const unit: Unit = {
     { id: "mesoclise", type: "word", pos: "noun", target: "a mesóclise", gender: "f", plural: "as mesóclises", gloss: { es: "la mesoclisis (pronombre dentro del verbo)", en: "the mesoclisis (pronoun inside the verb)" }, distractors: ["a mesoclísia", "a mesóclese", "a metástase"], note: { es: "Solo en futuro y condicional: far-se-á, dir-lhe-ia. En el habla casi no existe.", en: "Only in the future and conditional: far-se-á, dir-lhe-ia. Practically absent from speech." }, tags: ["grammar-terms", "formal"] },
     { id: "fala-se", type: "word", pos: "other", target: "dir-se-ia", gloss: { es: "se diría", en: "one would say" }, distractors: ["se diria", "diria-se", "dir-lhe-ia"], note: { es: "Forma culta escrita; en el habla: «a gente diria».", en: "Formal written form; in speech: 'a gente diria'." }, grammar: ["pt-g-mesoclise"], tags: ["formal"] },
     { id: "faze-lo", type: "word", pos: "other", target: "fazê-lo", gloss: { es: "hacerlo", en: "to do it" }, distractors: ["fazer-lo", "fazer-o", "faze-lo"], note: { es: "Tras -r, el pronombre o pasa a lo y la r cae: fazer + o = fazê-lo, vender + a = vendê-la.", en: "After -r, o becomes lo and the r drops: fazer + o = fazê-lo, vender + a = vendê-la." }, grammar: ["pt-g-colocacao-pronominal"], tags: ["formal", "pronouns"] },
-    { id: "vos", type: "word", pos: "pron", target: "vós", gloss: { es: "ustedes (2.ª persona plural arcaica; textos religiosos o solemnes)", en: "ye / you (plural, archaic)" }, distractors: ["vos", "vocês", "vóis"], note: { es: "Solo en la Biblia, oraciones, himnos y discursos muy solemnes.", en: "Only in the Bible, prayers, anthems and very solemn speeches." }, tags: ["formal", "pronouns"] },
+    { id: "vos", type: "word", pos: "pron", target: "vós", gloss: { es: "2.ª persona del plural de España, no «ustedes» (arcaica; textos religiosos o solemnes)", en: "ye / you (plural, archaic)" }, distractors: ["vos", "vocês", "vóis"], note: { es: "Solo en la Biblia, oraciones, himnos y discursos muy solemnes.", en: "Only in the Bible, prayers, anthems and very solemn speeches." }, tags: ["formal", "pronouns"] },
     { id: "outrossim", type: "word", pos: "adv", target: "outrossim", gloss: { es: "asimismo (muy formal)", en: "likewise / furthermore (very formal)" }, distractors: ["outro sim", "outrosim", "assim mesmo"], tags: ["formal", "connectors"] },
     // ── Sentences ────────────────────────────────────────────
     {
@@ -134,6 +134,7 @@ export const unit: Unit = {
     {
       id: "br-pronome-inicio", type: "bridge", onlyFor: "es", target: "Disseram-me que sim.",
       gloss: { es: "Me dijeron que sí.", en: "They told me yes." },
+      accept: [{ text: "Me disseram que sim.", verdict: "almost", feedback: { es: "Es lo normal al hablar en Brasil; en la norma escrita la frase no empieza con pronombre átono: disseram-me." } }],
       distractors: ["Me disseram-me que sim.", "Dijeram-me que sim.", "Disseram-lhe que sim de."],
       note: { es: "A diferencia del español, la norma portuguesa no empieza la frase con pronombre átono: Disseram-me (Portugal y textos formales) / Me disseram (habla brasileña)." },
       exercises: ["guess", "recall"], tags: ["bridge", "pronouns"],

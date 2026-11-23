@@ -224,7 +224,7 @@ export const grammar3: GrammarPoint[] = [
       { target: "É importante os alunos lerem mais.", gloss: { es: "Es importante que los alumnos lean más.", en: "It's important for students to read more." } },
     ],
     pitfalls: {
-      es: "Con el mismo sujeto no hace falta conjugarlo: nós viemos para ver (no «para vermos», aunque se oye).",
+      es: "Con el mismo sujeto conjugarlo es opcional: nós viemos para ver (o para vermos).",
       en: "With the same subject it's optional: nós viemos para ver (or vermos).",
     },
   },
@@ -279,8 +279,8 @@ export const grammar3: GrammarPoint[] = [
       en: "Adding: além disso. Contrasting: no entanto, contudo. Concluding: portanto. Rephrasing: ou seja.",
     },
     rule: {
-      es: "Organizan un texto o una intervención. «porém», «contudo» y «todavia» equivalen a «sin embargo» (todavia ≠ todavía). «entretanto» casi siempre es «sin embargo». «aliás» añade o corrige (por cierto, mejor dicho).",
-      en: "They structure a text or a contribution. porém, contudo and todavia all mean 'however'. entretanto usually means 'however' too. aliás adds or corrects (by the way, or rather).",
+      es: "Organizan un texto o una intervención. «porém», «contudo» y «todavia» equivalen a «sin embargo» (todavia ≠ todavía). En Brasil «entretanto» casi siempre es «sin embargo» (en Portugal suele ser «mientras tanto»). «aliás» añade o corrige (por cierto, mejor dicho).",
+      en: "They structure a text or a contribution. porém, contudo and todavia all mean 'however'. In Brazil entretanto usually means 'however' too (in Portugal mostly 'meanwhile'). aliás adds or corrects (by the way, or rather).",
     },
     table: { head: ["função", "conectores"], rows: [["adição", "além disso, aliás, também"], ["oposição", "mas, porém, contudo, no entanto"], ["conclusão", "portanto, logo, por isso"], ["explicação", "ou seja, isto é, quer dizer"], ["exemplo", "por exemplo, como"]] },
     examples: [

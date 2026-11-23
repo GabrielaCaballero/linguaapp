@@ -25,9 +25,9 @@ export const unit: Unit = {
       exercises: ["pick-spelling", "listen"], tags: ["sound", "spelling"],
     },
     // ── Words ────────────────────────────────────────────────
-    { id: "acordar", type: "word", pos: "verb", target: "acordar", gloss: { es: "despertarse", en: "to wake up" }, forms: { eu: "acordo", você: "acorda" }, distractors: ["despertar-se", "lembrar", "acordo"], tags: ["routine", "verbs"] },
+    { id: "acordar", type: "word", pos: "verb", target: "acordar", gloss: { es: "despertarse", en: "to wake up" }, forms: { eu: "acordo", você: "acorda" }, distractors: ["recordar", "lembrar", "acordo"], tags: ["routine", "verbs"] },
     { id: "levantar-se", type: "word", pos: "verb", target: "levantar-se", gloss: { es: "levantarse", en: "to get up" }, forms: { eu: "me levanto", você: "se levanta" }, distractors: ["levantar-me", "se levantar-se", "levar-se"], tags: ["routine", "reflexive"] },
-    { id: "tomar-banho", type: "phrase", pos: "phrase", target: "tomar banho", gloss: { es: "bañarse / ducharse", en: "to have a shower" }, accept: [{ text: "tomar uma ducha" }], variants: [{ region: "PT", text: "tomar duche", note: { es: "En Portugal: tomar duche (ducharse) y tomar banho (bañarse).", en: "In Portugal: tomar duche (shower) vs tomar banho (bath)." } }], distractors: ["fazer banho", "tomar o banheiro", "banhar-se de"], tags: ["routine"] },
+    { id: "tomar-banho", type: "phrase", pos: "phrase", target: "tomar banho", gloss: { es: "bañarse / ducharse", en: "to have a shower" }, accept: [{ text: "tomar uma ducha" }], variants: [{ region: "PT", text: "tomar duche", note: { es: "En Portugal también se dice «tomar duche» (ducharse); «tomar banho» sirve para las dos cosas.", en: "In Portugal you'll also hear 'tomar duche' (shower); 'tomar banho' covers both." } }], distractors: ["fazer banho", "tomar o banheiro", "banhar-se de"], tags: ["routine"] },
     { id: "almocar", type: "word", pos: "verb", target: "almoçar", gloss: { es: "almorzar", en: "to have lunch" }, forms: { eu: "almoço", você: "almoça" }, distractors: ["almorçar", "almoço", "jantar"], tags: ["routine", "meals"] },
     { id: "jantar", type: "word", pos: "verb", target: "jantar", gloss: { es: "cenar", en: "to have dinner" }, forms: { eu: "janto", você: "janta" }, distractors: ["cenar", "almoçar", "janta"], note: { es: "También es sustantivo: o jantar (la cena).", en: "Also a noun: o jantar (dinner)." }, tags: ["routine", "meals"] },
     { id: "dormir", type: "word", pos: "verb", target: "dormir", gloss: { es: "dormir", en: "to sleep" }, forms: { eu: "durmo", você: "dorme" }, distractors: ["durmir", "dorme", "acordar"], note: { es: "Irregular en «eu»: durmo.", en: "Irregular for eu: durmo." }, tags: ["routine", "verbs"] },
@@ -59,7 +59,7 @@ export const unit: Unit = {
     {
       id: "acordo-as-sete", type: "sentence", target: "Eu acordo às sete e me levanto às sete e quinze.",
       gloss: { es: "Me despierto a las siete y me levanto a las siete y cuarto.", en: "I wake up at seven and get up at a quarter past seven." },
-      accept: [{ text: "Acordo às sete e me levanto às sete e quinze." }],
+      accept: [{ text: "Acordo às sete e me levanto às sete e quinze." }, { text: "Eu acordo às sete e levanto às sete e quinze." }],
       variants: [{ region: "PT", text: "Acordo às sete e levanto-me às sete e um quarto.", note: { es: "En Portugal el pronombre va detrás del verbo: levanto-me.", en: "In Portugal the pronoun goes after the verb: levanto-me." } }],
       errors: [{ text: "Eu acordo a as sete.", feedback: { es: "a + as = às: às sete.", en: "a + as = às: às sete." }, ruleId: "pt-g-em-contracoes" }],
       distractors: ["as", "se", "levanta"],
@@ -83,6 +83,7 @@ export const unit: Unit = {
     {
       id: "ela-dorme-tarde", type: "sentence", target: "Nos fins de semana ela dorme até tarde.",
       gloss: { es: "Los fines de semana ella duerme hasta tarde.", en: "At weekends she sleeps in." },
+      variants: [{ region: "PT", text: "Aos fins de semana ela dorme até tarde.", note: { es: "En Portugal: aos fins de semana.", en: "In Portugal: aos fins de semana." } }],
       distractors: ["durme", "nas", "cedo"],
       tags: ["routine"],
     },

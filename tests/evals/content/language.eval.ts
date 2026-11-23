@@ -6,8 +6,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { courses } from "@/content";
 
-const EN = /\b(the|and|with|your|you|also|this|that|which|it's|isn't|don't|when|where|what|there|here|word|words|sentence)\b/i;
-const ES = /\b(el|los|las|que|con|para|pero|también|está|están|cuando|donde|palabra|frase|usted|ustedes|tienes|puedes|nosotros|ellos)\b/i;
+// Letter-aware word edges: \b treats accented letters as non-letters, so "andén" read as "and".
+const EN = /(?<!\p{L})(the|and|with|your|you|also|this|that|which|it's|isn't|don't|when|where|what|there|here|word|words|sentence)(?!\p{L})/iu;
+const ES = /(?<!\p{L})(el|los|las|que|con|para|pero|también|está|están|cuando|donde|palabra|frase|usted|ustedes|tienes|puedes|nosotros|ellos)(?!\p{L})/iu;
 const strip = (s: string) => s.replace(/«[^»]*»/g, " ").replace(/'[^']*'/g, " ").replace(/"[^"]*"/g, " ").replace(/\*[^*]*\*/g, " ").replace(/\b\S+:/g, " ").replace(/(^|\s)-\S+/g, " ");
 
 function walk(o: unknown, where: string, known: Set<string>, out: string[]) {

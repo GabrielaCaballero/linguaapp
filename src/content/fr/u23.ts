@@ -27,7 +27,7 @@ export const unit: Unit = {
     {
       id: "il-a-dit-que", type: "sentence", target: "Il a dit qu'il viendrait demain.",
       gloss: { es: "Dijo que vendría mañana.", en: "He said he would come tomorrow." },
-      errors: [{ text: "Il a dit qu'il viendra demain.", feedback: { es: "Con verbo introductor en pasado, el futuro pasa a condicional: qu'il viendrait.", en: "After a past reporting verb, the future becomes the conditional: qu'il viendrait." }, ruleId: "fr-g-discours-indirect" }],
+      accept: [{ text: "Il a dit qu'il viendra demain.", verdict: "almost", feedback: { es: "Se admite si «mañana» todavía no llegó, pero la regla general es pasar el futuro a condicional: qu'il viendrait.", en: "Acceptable if tomorrow hasn't come yet, but the general rule is that the future becomes the conditional: qu'il viendrait." } }],
       distractors: ["viendra", "venait", "que"],
       tags: ["reported-speech"],
     },
@@ -58,6 +58,7 @@ export const unit: Unit = {
       accept: [{ text: "Appelle-moi avant de partir." }],
       errors: [{ text: "Appelle-moi avant que tu pars.", feedback: { es: "avant que + subjuntivo: avant que tu partes.", en: "avant que + subjunctive: avant que tu partes." }, ruleId: "fr-g-subj-conjonctions" }],
       distractors: ["pars", "après", "moi-même"],
+      note: { es: "Con el mismo sujeto se prefiere «avant de + infinitivo»: appelle-moi avant de partir.", en: "With the same subject, 'avant de + infinitive' is preferred: appelle-moi avant de partir." },
       tags: ["subjonctif"],
     },
     {
@@ -141,7 +142,7 @@ export const unit: Unit = {
       id: "dlg-debat-voiture", type: "dialogue", target: "Je ne suis pas tout à fait d'accord.", register: "formal",
       gloss: { es: "No estoy del todo de acuerdo.", en: "I don't entirely agree." },
       turns: [
-        { who: "A", target: "Le maire a dit qu'il interdirait les voitures en centre-ville l'an prochain.", gloss: { es: "El alcalde dijo que prohibiría los coches en el centro el año que viene.", en: "The mayor said he would ban cars from the town centre next year." } },
+        { who: "A", target: "Le maire a dit qu'il interdirait les voitures en centre-ville l'an prochain.", gloss: { es: "El alcalde dijo que prohibiría los autos en el centro el año que viene.", en: "The mayor said he would ban cars from the town centre next year." } },
         { who: "B", target: "Je ne suis pas tout à fait d'accord avec cette mesure. Les personnes âgées en ont besoin.", gloss: { es: "No estoy del todo de acuerdo con esa medida. Las personas mayores los necesitan.", en: "I don't entirely agree with that measure. Older people need them." } },
         { who: "A", target: "C'est vrai. Néanmoins, la pollution est un vrai problème.", gloss: { es: "Es cierto. No obstante, la contaminación es un problema real.", en: "True. Nevertheless, pollution is a real problem." } },
         { who: "B", target: "D'accord, à condition qu'on prévoie des navettes gratuites.", gloss: { es: "De acuerdo, siempre que haya transportes gratuitos.", en: "Fine, provided free shuttles are laid on." } },

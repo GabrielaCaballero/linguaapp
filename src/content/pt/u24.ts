@@ -27,14 +27,14 @@ export const unit: Unit = {
     {
       id: "to-cansado", type: "sentence", target: "Tô morrendo de fome, cê quer comer alguma coisa?", register: "informal",
       gloss: { es: "Me muero de hambre, ¿quieres comer algo?", en: "I'm starving, do you want something to eat? (informal)" },
-      accept: [{ text: "Estou morrendo de fome, você quer comer alguma coisa?" }],
+      accept: [{ text: "Estou morrendo de fome, você quer comer alguma coisa?" }, { text: "Tô morrendo de fome, você quer comer alguma coisa?" }],
       distractors: ["Tá", "fomes", "algo de"],
       grammar: ["pt-g-fala-coloquial"], tags: ["colloquial"],
     },
     {
       id: "pisei-na-bola", type: "sentence", target: "Foi mal, eu pisei na bola com você.", register: "informal",
       gloss: { es: "Perdón, metí la pata contigo.", en: "Sorry, I let you down. (informal)" },
-      accept: [{ text: "Desculpa, eu pisei na bola com você." }],
+      accept: [{ text: "Desculpa, eu pisei na bola com você." }, { text: "Foi mal, eu pisei na bola contigo." }],
       distractors: ["pisou", "a", "contigo"],
       tags: ["idiom"],
     },
@@ -55,7 +55,8 @@ export const unit: Unit = {
     {
       id: "que-saudade", type: "sentence", target: "Que saudade da minha terra!",
       gloss: { es: "¡Cómo extraño mi tierra!", en: "How I miss my homeland!" },
-      distractors: ["saudades de", "do", "Qual"],
+      accept: [{ text: "Que saudades da minha terra!" }],
+      distractors: ["saudosa", "do", "Qual"],
       tags: ["feelings", "culture"],
     },
     // ── Grammar ──────────────────────────────────────────────
@@ -96,7 +97,7 @@ export const unit: Unit = {
     // ── Listening & dialogue ─────────────────────────────────
     {
       id: "lis-coloquial", type: "listening", target: "E aí, cara, beleza? Tô a fim de ir num barzinho hoje. Cê topa? Se não der, a gente marca pra amanhã, de boa.",
-      gloss: { es: "¿Qué tal, amigo, todo bien? Tengo ganas de ir a un barcito hoy. ¿Te apuntas? Si no puedes, lo dejamos para mañana, tranquilo.", en: "Hey man, all good? I feel like going to a bar tonight. You up for it? If you can't, we'll do tomorrow, no worries." },
+      gloss: { es: "¿Qué tal, amigo, todo bien? Tengo ganas de ir a un barcito hoy. ¿Te animas? Si no puedes, lo dejamos para mañana, tranquilo.", en: "Hey man, all good? I feel like going to a bar tonight. You up for it? If you can't, we'll do tomorrow, no worries." },
       question: {
         prompt: { es: "¿Qué propone?", en: "What does the speaker suggest?" },
         options: [
@@ -146,6 +147,8 @@ export const unit: Unit = {
     {
       id: "br-en-saudade", type: "bridge", onlyFor: "en", target: "Estou com saudade de você.",
       gloss: { es: "Te extraño.", en: "I miss you." },
+      accept: [{ text: "Estou com saudades de você." }, { text: "Sinto sua falta." }, { text: "Sinto falta de você." }, { text: "Tenho saudade de você." }],
+      variants: [{ region: "PT", text: "Tenho saudades tuas.", note: { es: "En Portugal: tenho saudades tuas / tenho saudades de ti.", en: "In Portugal: tenho saudades tuas / tenho saudades de ti." } }, { region: "PT", text: "Tenho saudades de ti." }],
       distractors: ["Eu perco você.", "Estou perdendo você.", "Sinto você."],
       note: { en: "'To miss someone' is 'ter / estar com saudade de'; 'perder' only means to miss a bus or lose something." },
       exercises: ["guess", "recall"], tags: ["bridge", "feelings"],

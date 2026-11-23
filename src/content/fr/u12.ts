@@ -15,7 +15,7 @@ export const unit: Unit = {
   icon: "🚆",
   items: build("fr", 12, "A2", [
     { id: "billet", type: "word", pos: "noun", target: "le billet", gender: "m", plural: "les billets", gloss: { es: "el boleto (el billete)", en: "the ticket" }, distractors: ["la billet", "le ballet", "le bijou"], note: { es: "un aller simple = solo ida; un aller-retour = ida y vuelta.", en: "un aller simple = one-way; un aller-retour = return / round trip." }, tags: ["travel"] },
-    { id: "quai", type: "word", pos: "noun", target: "le quai", gender: "m", plural: "les quais", gloss: { es: "la plataforma (del tren)", en: "the platform" }, distractors: ["la quai", "le quoi", "la clé"], note: { es: "Suena «ké». También es el muelle de un río: les quais de Seine.", en: "Pronounced 'kay'. Also a riverbank: les quais de Seine." }, tags: ["travel"] },
+    { id: "quai", type: "word", pos: "noun", target: "le quai", gender: "m", plural: "les quais", gloss: { es: "el andén (del tren)", en: "the platform" }, distractors: ["la quai", "le quoi", "la clé"], note: { es: "Suena «ké». También es el muelle de un río: les quais de Seine.", en: "Pronounced 'kay'. Also a riverbank: les quais de Seine." }, tags: ["travel"] },
     { id: "valise", type: "word", pos: "noun", target: "la valise", gender: "f", plural: "les valises", gloss: { es: "la maleta (la valija)", en: "the suitcase" }, distractors: ["le valise", "la valse", "la vallée"], tags: ["travel"] },
     { id: "retard", type: "word", pos: "noun", target: "le retard", gender: "m", plural: "les retards", gloss: { es: "el retraso", en: "the delay" }, distractors: ["la retard", "le regard", "le rétro"], note: { es: "être en retard = llegar tarde; le train a du retard = el tren viene con retraso.", en: "être en retard = to be late; le train a du retard = the train is delayed." }, tags: ["travel"] },
     { id: "partir", type: "word", pos: "verb", target: "partir", gloss: { es: "irse, salir (de viaje)", en: "to leave" }, forms: { je: "pars", nous: "partons", pp: "parti", aux: "être" }, distractors: ["sortir", "partager", "porter"], tags: ["travel", "verbs"] },
@@ -34,7 +34,7 @@ export const unit: Unit = {
     },
     {
       id: "quel-quai", type: "phrase", pos: "phrase", target: "Le train part de quel quai ?",
-      gloss: { es: "¿De qué plataforma sale el tren?", en: "Which platform does the train leave from?" },
+      gloss: { es: "¿De qué andén sale el tren?", en: "Which platform does the train leave from?" },
       accept: [{ text: "Le train part de quelle voie ?" }, { text: "De quel quai part le train ?" }],
       distractors: ["Le train part à quel quai ?", "Le train part de quelle quai ?", "Le train parte de quel quai ?"],
       tags: ["travel", "chunk"],
@@ -97,7 +97,7 @@ export const unit: Unit = {
       gloss: { es: "«aller» (ir) en passé composé", en: "aller (to go) — passé composé" },
       grammar: ["fr-g-pc-etre"],
       paradigm: {
-        caption: { es: "Conjuga «aller» en passé composé (sujeto masculino)", en: "Conjugate aller in the passé composé (masculine subject)" },
+        caption: { es: "Conjuga «aller» en passé composé (je, tu y nous: masculino)", en: "Conjugate aller in the passé composé (je, tu, nous: masculine)" },
         cells: [
           { label: "je", answer: "suis allé", ruleId: "fr-g-pc-etre" },
           { label: "tu", answer: "es allé", ruleId: "fr-g-pc-etre" },

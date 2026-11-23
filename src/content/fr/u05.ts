@@ -46,7 +46,7 @@ export const unit: Unit = {
     },
     {
       id: "ses-enfants", type: "sentence", target: "Ses enfants sont petits.",
-      gloss: { es: "Sus hijos son pequeños.", en: "His / her children are small." },
+      gloss: { es: "Sus hijos (de él o de ella) son pequeños.", en: "His / her children are small." },
       distractors: ["leurs", "son", "petit"],
       note: { es: "«ses» vale para «de él» y «de ella»: el posesivo concuerda con lo que se posee.", en: "'ses' means both his and her: the possessive agrees with what is owned." },
       tags: ["family"],

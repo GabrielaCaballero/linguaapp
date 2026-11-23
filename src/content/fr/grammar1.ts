@@ -416,7 +416,7 @@ export const grammar1: GrammarPoint[] = [
       rows: [["je", "finis", "choisis"], ["tu", "finis", "choisis"], ["il / elle", "finit", "choisit"], ["nous", "finissons", "choisissons"], ["vous", "finissez", "choisissez"], ["ils / elles", "finissent", "choisissent"]],
     },
     examples: [
-      { target: "Je finis le travail à dix-huit heures.", gloss: { es: "Salgo del trabajo a las seis de la tarde.", en: "I finish work at 6 p.m." } },
+      { target: "Je finis le travail à dix-huit heures.", gloss: { es: "Termino de trabajar a las seis de la tarde.", en: "I finish work at 6 p.m." } },
       { target: "Vous choisissez quel dessert ?", gloss: { es: "¿Qué postre elige?", en: "Which dessert are you having?" } },
     ],
     pitfalls: {

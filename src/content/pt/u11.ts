@@ -66,7 +66,7 @@ export const unit: Unit = {
       id: "costumava-ir", type: "sentence", target: "A gente costumava passar as férias na casa dos meus avós.",
       gloss: { es: "Solíamos pasar las vacaciones en casa de mis abuelos.", en: "We used to spend the holidays at my grandparents' house." },
       accept: [{ text: "Nós costumávamos passar as férias na casa dos meus avós." }],
-      distractors: ["costumou", "avôs", "das"],
+      distractors: ["costumou", "avó", "das"],
       tags: ["childhood", "habits", "family"],
     },
     // ── Grammar ──────────────────────────────────────────────

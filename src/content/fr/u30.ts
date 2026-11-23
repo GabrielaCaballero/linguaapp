@@ -37,7 +37,7 @@ export const unit: Unit = {
     {
       id: "puis-je", type: "sentence", register: "formal", target: "Puis-je vous demander un service ?",
       gloss: { es: "¿Puedo pedirle un favor?", en: "May I ask you a favour?" },
-      accept: [{ text: "Est-ce que je peux vous demander un service ?" }],
+      accept: [{ text: "Est-ce que je peux vous demander un service ?" }, { text: "Puis-je vous demander une faveur ?" }],
       errors: [{ text: "Peux-je vous demander un service ?", feedback: { es: "Con «je» invertido, «pouvoir» toma la forma «puis»: puis-je.", en: "With inverted je, pouvoir becomes puis: puis-je." }, ruleId: "fr-g-registres" }],
       distractors: ["Peux", "Pourrai", "faveur"],
       grammar: ["fr-g-registres"], tags: ["register", "polite"],
@@ -168,7 +168,7 @@ export const unit: Unit = {
       turns: [
         { who: "A", target: "Mamie, le prof de maths est trop relou, il nous a donné trois exercices !", gloss: { es: "Abuela, el profe de matemáticas es súper pesado, ¡nos dio tres ejercicios!", en: "Grandma, the maths teacher is so annoying, he gave us three exercises!" } },
         { who: "B", target: "Relou ? Et ça veut dire quoi, « chelou », que tu disais hier ?", gloss: { es: "¿«Relou»? ¿Y qué quiere decir «chelou», eso que decías ayer?", en: "'Relou'? And what does 'chelou', which you said yesterday, mean?" } },
-        { who: "A", target: "C'est du verlan : « louche » à l'envers. Bizarre, quoi.", gloss: { es: "Es verlan: «louche» al revés. Raro, vaya.", en: "It's verlan: 'louche' backwards. Weird, basically." } },
+        { who: "A", target: "C'est du verlan : « louche » à l'envers. Bizarre, quoi.", gloss: { es: "Es verlan: «louche» al revés. Raro, o sea.", en: "It's verlan: 'louche' backwards. Weird, basically." } },
         { who: "B", target: "Ah ! De mon temps, on disait déjà « laisse béton » pour « laisse tomber » !", gloss: { es: "¡Ah! En mis tiempos ya decíamos «laisse béton» por «laisse tomber».", en: "Ah! In my day we already said 'laisse béton' for 'laisse tomber'!" } },
       ],
       question: {

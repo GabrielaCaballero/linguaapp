@@ -58,8 +58,7 @@ export const unit: Unit = {
     {
       id: "voce-e-casada", type: "sentence", target: "Você é casada?", register: "informal",
       gloss: { es: "¿Estás casada?", en: "Are you married? (informal)" },
-      accept: [{ text: "Você é casado?" }],
-      errors: [{ text: "Você está casada?", feedback: { es: "El estado civil va con «ser»: você é casada?", en: "Marital status takes 'ser': você é casada?" } }],
+      accept: [{ text: "Você é casado?" }, { text: "Você está casada?", verdict: "almost", feedback: { es: "Se oye, pero lo más común para el estado civil es «ser»: você é casada?", en: "You'll hear it, but marital status usually takes 'ser': você é casada?" } }],
       distractors: ["está", "cansada", "o senhor"],
       tags: ["family", "relationships"],
     },
@@ -73,7 +72,8 @@ export const unit: Unit = {
     {
       id: "o-irmao-dela", type: "sentence", target: "O irmão dela mora em Brasília.",
       gloss: { es: "El hermano de ella vive en Brasilia.", en: "Her brother lives in Brasília." },
-      errors: [{ text: "O irmão de ela mora em Brasília.", feedback: { es: "de + ela = dela.", en: "de + ela = dela." }, ruleId: "pt-g-dele-dela" }, { text: "Seu irmão mora em Brasília.", feedback: { es: "«seu» se entiende como «tu»; para «de ella» se usa «dela».", en: "'seu' is understood as 'your'; for 'her' use 'dela'." }, ruleId: "pt-g-dele-dela" }],
+      errors: [{ text: "O irmão de ela mora em Brasília.", feedback: { es: "de + ela = dela.", en: "de + ela = dela." }, ruleId: "pt-g-dele-dela" }],
+      accept: [{ text: "Seu irmão mora em Brasília.", verdict: "almost", feedback: { es: "Es correcto, pero en Brasil «seu» se entiende sobre todo como «tu»; para «de ella», más claro: o irmão dela.", en: "Correct, but in Brazil 'seu' is mostly heard as 'your'; for 'her', clearer: o irmão dela." } }],
       distractors: ["dele", "sua", "de"],
       tags: ["family", "possessives"],
     },

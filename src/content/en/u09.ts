@@ -113,7 +113,7 @@ export const unit: Unit = {
     {
       id: "paper-or-plastic", type: "phrase", pos: "phrase", target: "Do you need a bag?",
       gloss: { es: "¿Necesitas una bolsa?", en: "Do you need a bag?" },
-      distractors: ["Do you need a sack?", "Do you need bag?", "You need a bag?"],
+      distractors: ["Do you need a sack?", "Do you need bag?", "Do you need of a bag?"],
       tags: ["shopping", "chunk"],
     },
 
@@ -167,7 +167,7 @@ export const unit: Unit = {
       id: "pay-by-card", type: "sentence", target: "Can I pay by card?",
       gloss: { es: "¿Puedo pagar con tarjeta?", en: "Can I pay by card?" },
       accept: [{ text: "Can I pay with a card?" }, { text: "Can I pay with card?" }, { text: "Do you take cards?" }],
-      errors: [{ text: "Can I pay with credit?", feedback: { es: "Se dice «pay by card» o «pay with a card»." } }],
+      errors: [{ text: "Can I pay in card?", feedback: { es: "Con tarjeta se dice «pay by card» o «pay with a card»; «in» va con «cash»: pay in cash." } }],
       distractors: ["for", "in", "tarjet"],
       tags: ["shopping", "money"],
     },
@@ -231,7 +231,7 @@ export const unit: Unit = {
     },
     {
       id: "lis-shopping-list", type: "listening", target: "Okay, for the party we need two bottles of soda, a lot of chips, some cheese and a dozen eggs. We don't need any bread.",
-      gloss: { es: "Bueno, para la fiesta necesitamos dos botellas de refresco, muchas papas fritas, queso y una docena de huevos. No necesitamos pan.", en: "Okay, for the party we need two bottles of soda, a lot of chips, some cheese and a dozen eggs. We don't need any bread." },
+      gloss: { es: "Bueno, para la fiesta necesitamos dos botellas de refresco, muchas papitas, queso y una docena de huevos. No necesitamos pan.", en: "Okay, for the party we need two bottles of soda, a lot of chips, some cheese and a dozen eggs. We don't need any bread." },
       question: {
         prompt: { es: "¿Qué NO necesitan comprar?", en: "What do they NOT need to buy?" },
         options: [

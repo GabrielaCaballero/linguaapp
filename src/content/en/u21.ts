@@ -123,9 +123,9 @@ export const unit: Unit = {
     {
       id: "i-regret-not-studying", type: "sentence", target: "I regret not studying harder at school.",
       gloss: { es: "Me arrepiento de no haber estudiado más en la escuela.", en: "I regret not studying harder at school." },
-      accept: [{ text: "I regret not having studied harder at school." }],
+      accept: [{ text: "I regret not having studied harder at school." }, { text: "I regret not studying more at school." }],
       errors: [{ text: "I regret to not study harder at school.", feedback: { es: "Para arrepentirse de algo pasado: regret + (not) -ing." }, ruleId: "en-g-gerund-infinitive" }],
-      distractors: ["to", "study", "more"],
+      distractors: ["to", "study", "studied"],
       grammar: ["en-g-gerund-infinitive"],
       tags: ["regrets", "school"],
     },

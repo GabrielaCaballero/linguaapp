@@ -70,7 +70,7 @@ export const unit: Unit = {
     {
       id: "eut-il-su", type: "sentence", target: "Eût-il connu la vérité, il n'aurait rien dit.",
       gloss: { es: "Aunque hubiera conocido la verdad, no habría dicho nada.", en: "Even had he known the truth, he would have said nothing." },
-      accept: [{ text: "Même s'il avait connu la vérité, il n'aurait rien dit.", feedback: { es: "Correcto en lenguaje corriente; «eût-il su» es la versión literaria.", en: "Correct in everyday French; eût-il su is the literary version." } }],
+      accept: [{ text: "Même s'il avait connu la vérité, il n'aurait rien dit.", feedback: { es: "Correcto en lenguaje corriente; «eût-il connu» es la versión literaria.", en: "Correct in everyday French; eût-il connu is the literary version." } }],
       distractors: ["Eut", "savait", "dirait"],
       grammar: ["fr-g-subj-imparfait"], tags: ["literature", "subjunctive"],
     },

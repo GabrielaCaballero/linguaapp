@@ -52,7 +52,7 @@ export const unit: Unit = {
     },
     {
       id: "je-finis-a-six", type: "sentence", target: "Je finis le travail à dix-huit heures.", spoken: "Je finis le travail à dix-huit heures.",
-      gloss: { es: "Salgo del trabajo a las seis de la tarde.", en: "I finish work at six p.m." },
+      gloss: { es: "Termino de trabajar a las seis de la tarde.", en: "I finish work at six p.m." },
       accept: [{ text: "Je finis de travailler à dix-huit heures." }, { text: "Je finis le travail à six heures du soir." }],
       distractors: ["fini", "finit", "au"],
       note: { es: "En horarios oficiales se usan las 24 horas: dix-huit heures = las 18:00.", en: "Timetables use the 24-hour clock: dix-huit heures = 6 p.m." },

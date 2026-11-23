@@ -29,7 +29,7 @@ export const unit: Unit = {
     {
       id: "jai-mal-a-la-tete", type: "sentence", target: "J'ai mal à la tête depuis hier.",
       gloss: { es: "Me duele la cabeza desde ayer.", en: "I've had a headache since yesterday." },
-      errors: [{ text: "Ma tête me fait mal depuis hier.", feedback: { es: "Se entiende, pero lo natural es «j'ai mal à + parte del cuerpo».", en: "Understandable, but the natural phrase is 'j'ai mal à + body part'." }, ruleId: "fr-g-avoir-mal" }],
+      accept: [{ text: "Ma tête me fait mal depuis hier.", verdict: "almost", feedback: { es: "Correcto, pero lo más habitual es «j'ai mal à + parte del cuerpo».", en: "Correct, but the usual phrase is 'j'ai mal à + body part'." } }],
       distractors: ["au", "de", "suis"],
       tags: ["health", "body"],
     },

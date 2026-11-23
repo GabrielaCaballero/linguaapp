@@ -112,7 +112,7 @@ export const unit: Unit = {
     {
       id: "quarter-to-nine", type: "phrase", pos: "phrase", target: "It's a quarter to nine.",
       gloss: { es: "Son las nueve menos cuarto.", en: "It's a quarter to nine." },
-      accept: [{ text: "It's quarter to nine." }, { text: "It's eight forty-five." }, { text: "It's a quarter of nine." }],
+      accept: [{ text: "It's quarter to nine." }, { text: "It's eight forty-five." }, { text: "It's a quarter of nine." }, { text: "It's a quarter till nine." }],
       distractors: ["It's nine less quarter.", "It's a quarter past nine.", "It's a quarter for nine."],
       tags: ["time"],
     },

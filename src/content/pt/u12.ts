@@ -21,7 +21,7 @@ export const unit: Unit = {
     { id: "rodoviaria", type: "word", pos: "noun", target: "a rodoviária", gender: "f", plural: "as rodoviárias", gloss: { es: "la terminal de autobuses", en: "the coach / bus station" }, distractors: ["a ferroviária", "o rodoviário", "a rodovia"], note: { es: "En Brasil se viaja mucho en autobús de larga distancia, desde la rodoviária.", en: "Long-distance travel in Brazil is often by coach, from the rodoviária." }, tags: ["travel", "transport"] },
     { id: "reserva", type: "word", pos: "noun", target: "a reserva", gender: "f", plural: "as reservas", gloss: { es: "la reserva / reservación", en: "the booking / reservation" }, distractors: ["o reserva", "a reservação", "a resenha"], tags: ["travel", "hotel"] },
     { id: "embarque", type: "word", pos: "noun", target: "o embarque", gender: "m", plural: "os embarques", gloss: { es: "el embarque", en: "the boarding" }, distractors: ["a embarque", "o embarco", "o desembarque"], tags: ["travel", "airport"] },
-    { id: "precisar-de", type: "phrase", pos: "phrase", target: "precisar de", gloss: { es: "necesitar", en: "to need" }, distractors: ["precisar a", "necessitar", "presisar de"], note: { es: "Con sustantivo lleva «de» (preciso de ajuda); con infinitivo, no (preciso sair).", en: "With a noun it takes 'de' (preciso de ajuda); with a verb it doesn't (preciso sair)." }, grammar: ["pt-g-poder"], tags: ["verbs", "travel"] },
+    { id: "precisar-de", type: "phrase", pos: "phrase", target: "precisar de", gloss: { es: "necesitar", en: "to need" }, distractors: ["precisar a", "precisar em", "presisar de"], note: { es: "Con sustantivo lleva «de» (preciso de ajuda); con infinitivo, no (preciso sair).", en: "With a noun it takes 'de' (preciso de ajuda); with a verb it doesn't (preciso sair)." }, grammar: ["pt-g-poder"], tags: ["verbs", "travel"] },
     { id: "melhor", type: "word", pos: "adj", target: "melhor", gloss: { es: "mejor", en: "better / best" }, distractors: ["mais bom", "maior", "pior"], grammar: ["pt-g-comparativos"], tags: ["comparison"] },
     // ── Sentences ────────────────────────────────────────────
     {
@@ -122,7 +122,7 @@ export const unit: Unit = {
     // ── Listening & dialogue ─────────────────────────────────
     {
       id: "lis-aeroporto", type: "listening", target: "Atenção, senhores passageiros do voo três dois sete com destino a Manaus: o embarque foi transferido para o portão doze.",
-      gloss: { es: "Atención, señores pasajeros del vuelo trescientos veintisiete con destino a Manaos: el embarque se cambió a la puerta doce.", en: "Attention, passengers on flight three two seven to Manaus: boarding has been moved to gate twelve." },
+      gloss: { es: "Atención, señores pasajeros del vuelo tres dos siete con destino a Manaos: el embarque se cambió a la puerta doce.", en: "Attention, passengers on flight three two seven to Manaus: boarding has been moved to gate twelve." },
       question: {
         prompt: { es: "¿Qué cambió?", en: "What has changed?" },
         options: [
@@ -164,7 +164,7 @@ export const unit: Unit = {
         options: [{ es: "la billetera", en: "your wallet" }, { es: "el bolso de mano", en: "your handbag" }, { es: "una carta", en: "a letter" }],
         answer: 0,
       },
-      note: { es: "«a carteira» es la billetera (y la carteira de motorista, el carnet de conducir); el bolso de mano es «a bolsa»." },
+      note: { es: "«a carteira» es la billetera (y la carteira de motorista, la licencia de conducir); el bolso de mano es «a bolsa»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "travel"],
     },
     {

@@ -60,7 +60,7 @@ export const unit: Unit = {
     {
       id: "ola", type: "phrase", pos: "phrase", target: "Olá",
       gloss: { es: "Hola", en: "Hello" },
-      distractors: ["Oi", "Tchau", "Hola"],
+      distractors: ["Olha", "Tchau", "Hola"],
       note: { es: "Sirve con cualquier persona; entre amigos en Brasil se dice más «Oi».", en: "Fine with anyone; among friends Brazilians mostly say 'Oi'." },
       tags: ["greeting", "chunk"],
     },

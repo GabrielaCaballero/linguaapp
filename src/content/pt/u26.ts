@@ -81,8 +81,8 @@ export const unit: Unit = {
       gloss: { es: "participios dobles", en: "double participles" },
       pattern: {
         rule: {
-          es: "Algunos verbos tienen dos participios: el regular con ter / haver (tinha aceitado, tinha entregado) y el corto con ser / estar (foi aceito, está entregue). Con ganhar, gastar y pagar, el corto se usa en todos los casos (tinha pago).",
-          en: "Some verbs have two participles: the regular one with ter / haver (tinha aceitado, tinha entregado) and the short one with ser / estar (foi aceito, está entregue). ganhar, gastar and pagar use the short form everywhere (tinha pago).",
+          es: "Algunos verbos tienen dos participios: el regular con ter / haver (tinha aceitado, tinha entregado) y el corto con ser / estar (foi aceito, está entregue). Con ganhar, gastar y pagar, el corto es muy frecuente también con ter (tinha pago, tinha ganho).",
+          en: "Some verbs have two participles: the regular one with ter / haver (tinha aceitado, tinha entregado) and the short one with ser / estar (foi aceito, está entregue). With ganhar, gastar and pagar the short form is very common with ter too (tinha pago, tinha ganho).",
         },
         table: [["aceitar", "tinha aceitado", "foi aceito"], ["entregar", "tinha entregado", "foi entregue"], ["imprimir", "tinha imprimido", "foi impresso"], ["pagar", "tinha pago", "foi pago"]],
       },

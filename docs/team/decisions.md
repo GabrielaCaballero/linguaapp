@@ -404,3 +404,11 @@ Format: date · who · decision · why
   says so). Also: course picker is the same flag button on Today and the course map (the IT/DE/FR
   pills didn't fit 3+ languages); the "Path" tab is now "Course" / "Curso".
 - Owner: Portuguese visible to learners now (2026-11-23), before the native review.
+- Expert review (AI reviewer agents, 2026-11-23) of English (A0–C2), French (A0–C2) and
+  Portuguese (A0–C2): 172 items fixed — mostly correct answers that were marked wrong, Spain-only
+  or literal Spanish glosses, a few facts (Caetano Veloso was born in Santo Amaro). Checker,
+  Portuguese: -o/-a on adjectives and participles (cansado/cansada) is "almost" with a note, not
+  wrong; "nos" is not expanded as a contraction (it's also the pronoun). Language eval uses
+  letter-aware word edges ("andén" no longer reads as English "and"). Native human review still
+  recommended; open questions in the reviewers' reports (French B1 units with A2 content,
+  "mustn't" in US English, crase consistency in Portuguese C1–C2).

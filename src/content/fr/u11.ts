@@ -58,15 +58,16 @@ export const unit: Unit = {
       id: "cetait-super", type: "phrase", pos: "phrase", target: "C'était super !",
       gloss: { es: "¡Estuvo genial!", en: "It was great!" },
       accept: [{ text: "C'était génial !" }],
-      distractors: ["C'est été super !", "Ça a été super !", "C'étais super !"],
+      distractors: ["C'est été super !", "Ce était super !", "C'étais super !"],
       note: { es: "Para valorar una experiencia pasada se usa casi siempre «c'était».", en: "To comment on a past experience French almost always uses 'c'était'." },
       tags: ["chunk", "imparfait"],
     },
     {
       id: "je-me-souviens", type: "sentence", target: "Je me souviens de mon premier vélo.",
       gloss: { es: "Me acuerdo de mi primera bicicleta.", en: "I remember my first bike." },
+      accept: [{ text: "Je me rappelle mon premier vélo." }],
       errors: [{ text: "Je me souviens mon premier vélo.", feedback: { es: "se souvenir de + algo: je me souviens de…", en: "se souvenir de + something: je me souviens de…" } }],
-      distractors: ["rappelle", "du", "souvenir"],
+      distractors: ["souvient", "du", "souvenir"],
       tags: ["childhood", "memories"],
     },
     // ── Grammar ──────────────────────────────────────────────

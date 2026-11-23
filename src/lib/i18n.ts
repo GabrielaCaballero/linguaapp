@@ -330,6 +330,7 @@ const en = {
   notes: {
     accent: (w: string) => `Watch the accent: ${w}`,
     "accent-meaning": (w: string) => `The accent changes the meaning: ${w}`,
+    gender: (w: string) => `Masculine or feminine? Here it's ${w} (fine if you meant the other one)`,
     umlaut: (w: string) => `The umlaut matters (${w})`,
     register: (w: string) => `Right words, wrong register — this one is ${w}.`,
     spanish: (w: string) => `That's the Spanish spelling — in Italian: ${w}`,
@@ -901,6 +902,7 @@ const es: Dict = {
   notes: {
     accent: (w) => `Ojo con el acento: ${w}`,
     "accent-meaning": (w) => `El acento cambia el significado: ${w}`,
+    gender: (w) => `¿Masculino o femenino? Aquí es ${w} (está bien si te referías al otro)`,
     umlaut: (w) => `La diéresis importa (${w})`,
     register: (w) => `Las palabras están bien, pero el registro no: aquí va ${w}.`,
     spanish: (w) => `Esa es la ortografía española — en italiano: ${w}`,

@@ -45,8 +45,7 @@ export const unit: Unit = {
     {
       id: "em-relacao-a", type: "sentence", target: "Em relação ao meio ambiente, as medidas ainda são insuficientes.",
       gloss: { es: "En cuanto al medio ambiente, las medidas todavía son insuficientes.", en: "As regards the environment, the measures are still inadequate." },
-      accept: [{ text: "Com relação ao meio ambiente, as medidas ainda são insuficientes." }],
-      errors: [{ text: "A nível de meio ambiente, as medidas ainda são insuficientes.", feedback: { es: "«a nível de» con este sentido es una muletilla mal vista; usa «em relação a» o «no que diz respeito a».", en: "'a nível de' used this way is a frowned-upon filler; use 'em relação a' or 'no que diz respeito a'." }, ruleId: "pt-g-a-medida-que" }],
+      accept: [{ text: "Com relação ao meio ambiente, as medidas ainda são insuficientes." }, { text: "A nível de meio ambiente, as medidas ainda são insuficientes.", verdict: "almost", feedback: { es: "Se entiende y se oye mucho, pero «a nível de» con este sentido es una muletilla mal vista en textos cuidados; usa «em relação a» o «no que diz respeito a».", en: "Understandable and common, but 'a nível de' used this way is a frowned-upon filler in careful writing; use 'em relação a' or 'no que diz respeito a'." } }],
       distractors: ["A nível do", "da", "insuficiente"],
       tags: ["writing"],
     },

@@ -13,13 +13,13 @@ export const unit: Unit = {
   ],
   icon: "📈",
   items: build("pt", 19, "B2", [
-    { id: "contrato", type: "word", pos: "noun", target: "o contrato", gender: "m", plural: "os contratos", gloss: { es: "el contrato", en: "the contract" }, distractors: ["a contrata", "o contracto", "o contrário"], note: { es: "Desde la reforma de 2009 se escribe sin c: contrato, ação, ótimo.", en: "Brazilian spelling has no silent c: contrato, ação, ótimo." }, tags: ["work", "contracts"] },
+    { id: "contrato", type: "word", pos: "noun", target: "o contrato", gender: "m", plural: "os contratos", gloss: { es: "el contrato", en: "the contract" }, distractors: ["a contrata", "o contracto", "o contrário"], note: { es: "En Brasil la c muda nunca se escribió (contrato, ação, ótimo); desde el Acuerdo Ortográfico Portugal también la quitó (antes: contracto, acção, óptimo).", en: "Brazilian spelling has no silent c (contrato, ação, ótimo); since the Spelling Agreement Portugal dropped it too (formerly contracto, acção, óptimo)." }, tags: ["work", "contracts"] },
     { id: "prazo", type: "word", pos: "noun", target: "o prazo", gender: "m", plural: "os prazos", gloss: { es: "el plazo", en: "the deadline / time limit" }, distractors: ["o praço", "a prazo", "o preço"], tags: ["work"] },
     { id: "aumento", type: "word", pos: "noun", target: "o aumento", gender: "m", plural: "os aumentos", gloss: { es: "el aumento (de sueldo)", en: "the pay rise" }, distractors: ["a aumenta", "o alimento", "o argumento"], tags: ["work", "money"] },
     { id: "demitir", type: "word", pos: "verb", target: "demitir", gloss: { es: "despedir (a un empleado)", en: "to fire / dismiss" }, forms: { "ele (pret.)": "demitiu", "passiva": "foi demitido" }, distractors: ["dimitir", "despedir-se", "admitir"], note: { es: "pedir demissão = renunciar (dimitir); ser demitido = ser despedido.", en: "pedir demissão = to resign; ser demitido = to be fired." }, tags: ["work", "verbs"] },
     { id: "contratar", type: "word", pos: "verb", target: "contratar", gloss: { es: "contratar", en: "to hire" }, forms: { "ele (pret.)": "contratou" }, distractors: ["contrair", "contrastar", "contatar"], tags: ["work", "verbs"] },
     { id: "estagio", type: "word", pos: "noun", target: "o estágio", gender: "m", plural: "os estágios", gloss: { es: "las prácticas, la pasantía", en: "the internship" }, distractors: ["o estádio", "a estagia", "o estagiário de"], tags: ["work"] },
-    { id: "carteira-assinada", type: "phrase", pos: "phrase", target: "com carteira assinada", gloss: { es: "con contrato formal (en blanco)", en: "formally employed (with full rights)" }, distractors: ["com carta assinada", "de carteira firmada", "com cartão assinado"], note: { es: "En Brasil, el empleo formal se registra en la «carteira de trabalho».", en: "In Brazil formal jobs are recorded in the 'carteira de trabalho' (work booklet)." }, tags: ["work", "culture"] },
+    { id: "carteira-assinada", type: "phrase", pos: "phrase", target: "com carteira assinada", gloss: { es: "con contrato formal (empleo registrado, con todos los derechos)", en: "formally employed (with full rights)" }, distractors: ["com carta assinada", "de carteira firmada", "com cartão assinado"], note: { es: "En Brasil, el empleo formal se registra en la «carteira de trabalho».", en: "In Brazil formal jobs are recorded in the 'carteira de trabalho' (work booklet)." }, tags: ["work", "culture"] },
     { id: "salario-negociavel", type: "phrase", pos: "phrase", target: "a combinar", gloss: { es: "a convenir", en: "negotiable / to be agreed" }, distractors: ["para combinar", "a combinado", "de combinar"], note: { es: "En anuncios: «Salário a combinar».", en: "In job ads: 'Salário a combinar' (salary negotiable)." }, tags: ["work", "chunk"] },
     // ── Sentences ────────────────────────────────────────────
     {
@@ -57,7 +57,7 @@ export const unit: Unit = {
       id: "ele-foi-demitido", type: "sentence", target: "Ele foi demitido e agora está procurando emprego.",
       gloss: { es: "Lo despidieron y ahora está buscando trabajo.", en: "He was fired and now he's looking for a job." },
       variants: [{ region: "PT", text: "Ele foi despedido e agora está à procura de emprego.", note: { es: "En Portugal: ser despedido, estar à procura de.", en: "In Portugal: ser despedido, estar à procura de." } }],
-      distractors: ["dimitido", "despediu", "buscando"],
+      distractors: ["dimitido", "despediu", "buscado"],
       tags: ["work"],
     },
     {
@@ -144,7 +144,7 @@ export const unit: Unit = {
       id: "br-firma", type: "bridge", onlyFor: "es", target: "a assinatura",
       gloss: { es: "la firma (en un documento) / la suscripción", en: "the signature / subscription" },
       distractors: ["a firma", "a assinação", "a firmatura"],
-      note: { es: "Ojo: «a firma» en portugués es la empresa; firmar es «assinar» y la firma, «a assinatura»." },
+      note: { es: "Ojo: «a firma» en portugués es sobre todo la empresa (solo en «reconhecer firma» es la firma); firmar es «assinar» y la firma, «a assinatura»." },
       exercises: ["guess", "recall"], tags: ["bridge", "false-friend", "contracts"],
     },
     {

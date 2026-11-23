@@ -70,8 +70,7 @@ export const unit: Unit = {
     {
       id: "moro-em-sao-paulo", type: "sentence", target: "Eu moro em São Paulo.",
       gloss: { es: "Vivo en São Paulo.", en: "I live in São Paulo." },
-      accept: [{ text: "Moro em São Paulo." }],
-      errors: [{ text: "Eu vivo em São Paulo.", feedback: { es: "Se entiende, pero para el lugar donde vives se dice «morar».", en: "Understandable, but for where you live Brazilians say 'morar'." } }],
+      accept: [{ text: "Moro em São Paulo." }, { text: "Eu vivo em São Paulo.", verdict: "almost", feedback: { es: "Es correcto, pero para el lugar donde vives en Brasil se dice casi siempre «morar».", en: "Correct, but for where you live Brazilians almost always say 'morar'." } }],
       distractors: ["no", "na", "mora"],
       tags: ["introductions"],
     },
@@ -99,7 +98,7 @@ export const unit: Unit = {
     {
       id: "trabalho-como-professora", type: "sentence", target: "Eu trabalho como professora.",
       gloss: { es: "Trabajo de profesora.", en: "I work as a teacher." },
-      accept: [{ text: "Eu trabalho como professor." }, { text: "Sou professora." }, { text: "Sou professor." }],
+      accept: [{ text: "Eu trabalho como professor." }, { text: "Trabalho como professora." }, { text: "Trabalho como professor." }, { text: "Sou professora." }, { text: "Sou professor." }, { text: "Eu sou professora." }, { text: "Eu sou professor." }],
       errors: [{ text: "Eu sou uma professora.", feedback: { es: "Con profesiones, sin artículo: sou professora.", en: "No article with jobs: sou professora." } }],
       distractors: ["de", "trabalha", "uma"],
       tags: ["work", "introductions"],

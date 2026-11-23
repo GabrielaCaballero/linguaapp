@@ -53,7 +53,7 @@ export const unit: Unit = {
     {
       id: "vamos-a-praia", type: "sentence", target: "Vamos à praia no sábado?",
       gloss: { es: "¿Vamos a la playa el sábado?", en: "Shall we go to the beach on Saturday?" },
-      accept: [{ text: "Vamos para a praia no sábado?" }, { text: "Bora na praia no sábado?" }],
+      accept: [{ text: "Vamos para a praia no sábado?" }, { text: "Bora na praia no sábado?" }, { text: "Vamos na praia no sábado?", verdict: "almost", feedback: { es: "Muy común en el habla brasileña; la norma pide «ir a»: vamos à praia.", en: "Very common in Brazilian speech; the standard is 'ir a': vamos à praia." } }],
       errors: [{ text: "Vamos a praia no sábado?", feedback: { es: "a + a = à: vamos à praia.", en: "a + a = à: vamos à praia." }, ruleId: "pt-g-em-contracoes" }],
       distractors: ["na", "ao", "vai"],
       tags: ["leisure", "plans"],
@@ -159,7 +159,7 @@ export const unit: Unit = {
       id: "dlg-cinema", type: "dialogue", target: "Bora!",
       gloss: { es: "¡Vamos!", en: "Let's go!" },
       turns: [
-        { who: "A", target: "E aí, vamos ao cinema hoje à noite?", gloss: { es: "¿Y? ¿Vamos al cine esta noche?", en: "Hey, shall we go to the cinema tonight?" } },
+        { who: "A", target: "E aí, vamos ao cinema hoje à noite?", gloss: { es: "Oye, ¿vamos al cine esta noche?", en: "Hey, shall we go to the cinema tonight?" } },
         { who: "B", target: "Hoje não dá, estou muito cansada. Que tal amanhã?", gloss: { es: "Hoy no puedo, estoy muy cansada. ¿Qué tal mañana?", en: "I can't tonight, I'm really tired. How about tomorrow?" } },
         { who: "A", target: "Amanhã às oito?", gloss: { es: "¿Mañana a las ocho?", en: "Tomorrow at eight?" } },
         { who: "B", target: "Bora!", gloss: { es: "¡Vamos!", en: "Let's go!" } },
@@ -168,7 +168,7 @@ export const unit: Unit = {
         prompt: { es: "¿Cuándo van al cine?", en: "When are they going to the cinema?" },
         options: [
           { es: "Mañana a las ocho", en: "Tomorrow at eight" },
-          { es: "Hoy a la noche", en: "Tonight" },
+          { es: "Esta noche", en: "Tonight" },
           { es: "No van a ir", en: "They aren't going" },
         ],
         answer: 0,
@@ -180,8 +180,9 @@ export const unit: Unit = {
     {
       id: "br-assistir", type: "bridge", onlyFor: "es", target: "assistir a um jogo",
       gloss: { es: "ver un partido", en: "to watch a match" },
+      accept: [{ text: "assistir ao jogo" }, { text: "assistir um jogo" }, { text: "ver um jogo" }],
       distractors: ["assistir um jogador", "ver um jogo de", "olhar o jogo"],
-      note: { es: "«assistir» se usa para ver TV, películas y partidos; para «asistir a una clase» se dice «frequentar» o «ir à aula»." },
+      note: { es: "«assistir (a)» es ver TV, películas y partidos, y también conserva el sentido de «asistir»: assistir a uma aula. Ayudar es «ajudar»." },
       exercises: ["guess", "recall"], tags: ["bridge", "false-friend", "leisure"],
     },
     {

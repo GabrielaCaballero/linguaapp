@@ -13,7 +13,7 @@ export const unit: Unit = {
   ],
   icon: "🌳",
   items: build("pt", 18, "B1", [
-    { id: "meio-ambiente", type: "word", pos: "noun", target: "o meio ambiente", gender: "m", plural: "os meios ambientes", gloss: { es: "el medio ambiente", en: "the environment" }, variants: [{ region: "PT", text: "o meio-ambiente" }], distractors: ["a meio ambiente", "o médio ambiente", "o meio ambiental"], tags: ["environment"] },
+    { id: "meio-ambiente", type: "word", pos: "noun", target: "o meio ambiente", gender: "m", plural: "os meios ambientes", gloss: { es: "el medio ambiente", en: "the environment" }, variants: [{ region: "PT", text: "o ambiente", note: { es: "En Portugal se dice sobre todo «o ambiente».", en: "In Portugal people mostly say 'o ambiente'." } }], distractors: ["a meio ambiente", "o médio ambiente", "o meio ambiental"], tags: ["environment"] },
     { id: "lixo", type: "word", pos: "noun", target: "o lixo", gender: "m", plural: "os lixos", gloss: { es: "la basura", en: "the rubbish / trash" }, distractors: ["a lixa", "o luxo", "o basura"], note: { es: "jogar no lixo = tirar a la basura. Ojo: «o luxo» es el lujo.", en: "jogar no lixo = to throw away. Careful: 'o luxo' is luxury." }, tags: ["environment"] },
     { id: "reciclagem", type: "word", pos: "noun", target: "a reciclagem", gender: "f", plural: "as reciclagens", gloss: { es: "el reciclaje", en: "the recycling" }, distractors: ["o reciclagem", "a reciclação", "o reciclaje"], note: { es: "Las palabras en -agem son femeninas: a reciclagem, a viagem.", en: "-agem nouns are feminine: a reciclagem." }, tags: ["environment"] },
     { id: "poluicao", type: "word", pos: "noun", target: "a poluição", gender: "f", plural: "as poluições", gloss: { es: "la contaminación", en: "the pollution" }, distractors: ["a polução", "a contaminação de", "o poluição"], tags: ["environment"] },
@@ -129,7 +129,7 @@ export const unit: Unit = {
         ],
         answer: 0,
       },
-      note: { es: "aliás = de hecho, por cierto.", en: "aliás = actually, by the way." },
+      note: { es: "aliás = de hecho, por cierto. En Portugal la pajita es «a palhinha».", en: "aliás = actually, by the way. In Portugal a straw is 'a palhinha'." },
       exercises: ["question"], tags: ["dialogue", "environment"],
     },
     // ── Bridges ──────────────────────────────────────────────
@@ -141,7 +141,7 @@ export const unit: Unit = {
         options: [{ es: "sobornos", en: "bribes" }, { es: "propinas de los clientes", en: "tips" }, { es: "un aumento", en: "a pay rise" }],
         answer: 0,
       },
-      note: { es: "Falso amigo: en Brasil «propina» es soborno; la propina del mesero es «a gorjeta»." },
+      note: { es: "Falso amigo: en Brasil «propina» es soborno (en Portugal, la cuota de matrícula universitaria); la propina del mesero es «a gorjeta»." },
       exercises: ["guess", "question"], tags: ["bridge", "false-friend", "society"],
     },
     {

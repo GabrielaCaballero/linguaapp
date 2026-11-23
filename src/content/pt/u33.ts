@@ -24,7 +24,7 @@ export const unit: Unit = {
     // ── Sentences ────────────────────────────────────────────
     {
       id: "tu-vai", type: "sentence", target: "Tu vai na festa amanhã?",
-      gloss: { es: "¿Vas a la fiesta mañana? (habla del Sur o del Norte de Brasil)", en: "Are you going to the party tomorrow? (southern / northern Brazilian speech)" },
+      gloss: { es: "¿Vas a la fiesta mañana? (habla de Río, del Sur, del Norte o del Nordeste de Brasil)", en: "Are you going to the party tomorrow? (Rio, southern, northern or northeastern Brazilian speech)" },
       accept: [{ text: "Você vai na festa amanhã?" }, { text: "Você vai à festa amanhã?" }],
       variants: [{ region: "PT", text: "Tu vais à festa amanhã?" }],
       distractors: ["vais", "à", "foi"],
@@ -51,8 +51,8 @@ export const unit: Unit = {
       gloss: { es: "el «tu» regional brasileño", en: "regional Brazilian 'tu'" },
       pattern: {
         rule: {
-          es: "En el Sur, partes del Norte y del Nordeste se usa «tu» en vez de «você», pero casi siempre con el verbo de «você»: tu vai, tu falou. En Porto Alegre y Florianópolis a veces se oye con la terminación clásica (tu vais). La norma escrita pide tu vais / você vai.",
-          en: "In the South and parts of the North and Northeast people say 'tu' instead of você, usually with the você verb: tu vai, tu falou. Classic endings (tu vais) are sometimes heard in the far south. The written standard requires tu vais / você vai.",
+          es: "En Río de Janeiro, el Sur y partes del Norte y del Nordeste se usa «tu» en vez de «você», pero casi siempre con el verbo de «você»: tu vai, tu falou. En Porto Alegre y Florianópolis a veces se oye con la terminación clásica (tu vais). La norma escrita pide tu vais / você vai.",
+          en: "In Rio de Janeiro, the South and parts of the North and Northeast people say 'tu' instead of você, usually with the você verb: tu vai, tu falou. Classic endings (tu vais) are sometimes heard in the far south. The written standard requires tu vais / você vai.",
         },
         table: [["fala regional", "Tu vai?"], ["norma (tu)", "Tu vais?"], ["norma (você)", "Você vai?"], ["passado regional", "Tu falou com ela?"]],
       },
@@ -68,8 +68,8 @@ export const unit: Unit = {
       gloss: { es: "rasgos de los acentos brasileños", en: "features of Brazilian accents" },
       pattern: {
         rule: {
-          es: "Río: la s final suena «sh» (mais ≈ «maish») y la r es aspirada. Interior paulista y Minas: r «retrofleja» como en inglés (porta). Gran parte del Nordeste: t y d antes de i no se palatalizan (tia ≈ «tía», no «chía») y las vocales son más abiertas.",
-          en: "Rio: final s sounds 'sh' (mais ≈ 'maish') and r is breathy. Inland São Paulo and Minas: an English-like 'r' (porta). Much of the Northeast: t and d before i don't become 'ch' / 'j' (tia ≈ 'tee-a'), and vowels are more open.",
+          es: "Río: la s final suena «sh» (mais ≈ «maish») y la r es aspirada. Interior paulista y partes de Minas (sur, Triángulo), Goiás y Paraná: r «retrofleja» como en inglés (porta). Gran parte del Nordeste: t y d antes de i no se palatalizan (tia ≈ «tía», no «chía») y las vocales son más abiertas.",
+          en: "Rio: final s sounds 'sh' (mais ≈ 'maish') and r is breathy. Inland São Paulo and parts of Minas, Goiás and Paraná: an English-like 'r' (porta). Much of the Northeast: t and d before i don't become 'ch' / 'j' (tia ≈ 'tee-a'), and vowels are more open.",
         },
         table: [["Rio", "mais ≈ maish"], ["interior SP / MG", "porta com r inglês"], ["Nordeste", "tia ≈ tia (sem tch)"], ["Sul", "leite ≈ leite (e final fechado)"]],
       },

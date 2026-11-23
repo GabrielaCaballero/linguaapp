@@ -127,7 +127,7 @@ export const unit: Unit = {
     },
     {
       id: "im-good-at", type: "sentence", target: "I'm good at solving problems under pressure.",
-      gloss: { es: "Se me da bien resolver problemas bajo presión.", en: "I'm good at solving problems under pressure." },
+      gloss: { es: "Soy bueno/a resolviendo problemas bajo presión.", en: "I'm good at solving problems under pressure." },
       accept: [{ text: "I am good at solving problems under pressure." }],
       errors: [{ text: "I'm good at solve problems under pressure.", feedback: { es: "Después de una preposición (at, in, of…) el verbo va con -ing." }, ruleId: "en-g-gerund-infinitive" }],
       distractors: ["solve", "in", "to"],

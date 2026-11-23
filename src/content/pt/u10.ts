@@ -19,12 +19,13 @@ export const unit: Unit = {
     { id: "churrasco", type: "word", pos: "noun", target: "o churrasco", gender: "m", plural: "os churrascos", gloss: { es: "el asado (la parrillada)", en: "the barbecue" }, distractors: ["a churrasco", "o churro", "o assado de"], tags: ["leisure", "food", "culture"] },
     { id: "passeio", type: "word", pos: "noun", target: "o passeio", gender: "m", plural: "os passeios", gloss: { es: "el paseo, la salida", en: "the outing / trip" }, distractors: ["a passeia", "o passaporte", "o paseio"], note: { es: "dar um passeio = dar una vuelta. En Portugal, «o passeio» también es la vereda.", en: "dar um passeio = to go for a stroll. In Portugal 'o passeio' is also the pavement." }, tags: ["leisure"] },
     { id: "sair", type: "word", pos: "verb", target: "sair", gloss: { es: "salir", en: "to go out / to leave" }, forms: { eu: "saio", "eu (pret.)": "saí", "ele (pret.)": "saiu" }, distractors: ["salir", "subir", "sai"], tags: ["leisure", "verbs"] },
-    { id: "encontrar", type: "word", pos: "verb", target: "encontrar", gloss: { es: "encontrar / quedar con alguien", en: "to meet (up with)" }, forms: { "eu (pret.)": "encontrei", "ele (pret.)": "encontrou" }, distractors: ["encontro", "conhecer", "contar"], tags: ["leisure", "verbs"] },
+    { id: "encontrar", type: "word", pos: "verb", target: "encontrar", gloss: { es: "encontrar / encontrarse con alguien", en: "to meet (up with)" }, forms: { "eu (pret.)": "encontrei", "ele (pret.)": "encontrou" }, distractors: ["encontro", "conhecer", "contar"], tags: ["leisure", "verbs"] },
     { id: "cansado", type: "word", pos: "adj", target: "cansado", gloss: { es: "cansado", en: "tired" }, accept: [{ text: "cansada" }], distractors: ["casado", "canseira", "cansaço"], tags: ["feelings"] },
     // ── Sentences ────────────────────────────────────────────
     {
       id: "o-que-voce-fez", type: "sentence", target: "O que você fez no fim de semana?", register: "informal",
       gloss: { es: "¿Qué hiciste el fin de semana?", en: "What did you do at the weekend? (informal)" },
+      accept: [{ text: "O que você fez no final de semana?" }],
       variants: [{ region: "PT", text: "O que fizeste no fim de semana?" }],
       errors: [{ text: "O que você fazeu no fim de semana?", feedback: { es: "fazer es irregular: eu fiz, você fez.", en: "fazer is irregular: eu fiz, você fez." }, ruleId: "pt-g-preterito-irregular" }],
       distractors: ["fiz", "faz", "na"],
@@ -57,7 +58,7 @@ export const unit: Unit = {
     {
       id: "nao-tive-tempo", type: "sentence", target: "Não tive tempo de ligar para você, desculpa!", register: "informal",
       gloss: { es: "No tuve tiempo de llamarte, ¡perdón!", en: "I didn't have time to call you, sorry!" },
-      accept: [{ text: "Não tive tempo de te ligar, desculpa!" }],
+      accept: [{ text: "Não tive tempo de te ligar, desculpa!" }, { text: "Não tive tempo de ligar pra você, desculpa!" }],
       distractors: ["teve", "a", "tenho"],
       note: { es: "ligar para alguien = llamar por teléfono a alguien.", en: "ligar para alguém = to phone someone." },
       tags: ["past"],
@@ -65,7 +66,7 @@ export const unit: Unit = {
     {
       id: "foi-otimo", type: "sentence", target: "Foi ótimo, mas eu estou morto de cansado.",
       gloss: { es: "Estuvo genial, pero estoy muerto de cansancio.", en: "It was great, but I'm dead tired." },
-      accept: [{ text: "Foi ótimo, mas eu estou morta de cansada." }, { text: "Foi ótimo, mas estou morto de cansado." }],
+      accept: [{ text: "Foi ótimo, mas eu estou morta de cansada." }, { text: "Foi ótimo, mas estou morto de cansado." }, { text: "Foi ótimo, mas estou morta de cansada." }],
       distractors: ["Era", "Esteve", "cansaço"],
       tags: ["past", "feelings"],
     },
