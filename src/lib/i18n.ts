@@ -1,6 +1,6 @@
 // UI strings. App language is global (es/en). Spanish is neutral Latin-American with tú.
 // Course content (glosses, notes) uses the per-course "explain in" language instead.
-import type { BaseLang } from "@/content/schema";
+import type { BaseLang, TargetLang } from "@/content/schema";
 
 const en = {
   appName: "Linguina",
@@ -573,7 +573,7 @@ const en = {
   courseAnswer: "Course answer",
   why: "Why?",
   // misc
-  langName: { it: "Italian", de: "German", en: "English", fr: "French" } as Record<string, string>,
+  langName: { it: "Italian", de: "German", en: "English", fr: "French", pt: "Portuguese" } as Record<TargetLang, string>,
   baseName: { es: "Español", en: "English" } as Record<string, string>,
 };
 
@@ -1137,7 +1137,7 @@ const es: Dict = {
   tutorRaised: "El tutor lo acepta como válido.",
   courseAnswer: "Respuesta del curso",
   why: "¿Por qué?",
-  langName: { it: "italiano", de: "alemán", en: "inglés", fr: "francés" },
+  langName: { it: "italiano", de: "alemán", en: "inglés", fr: "francés", pt: "portugués" },
   baseName: { es: "Español", en: "English" },
 };
 
