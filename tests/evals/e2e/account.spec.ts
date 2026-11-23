@@ -25,6 +25,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
   const essays: { id: string; uid: string; task_id: string; lang: string; text: string; result: unknown; created_at: string }[] = [];
   const authorize: URL[] = [];
   const idTokens: { provider: string; nonce: string }[] = [];
+  const events: { uid: string; name: string; props: Record<string, unknown> }[] = [];
   const reads: string[] = [];
   const bodies: string[] = [];
   let down = false;
@@ -104,6 +105,15 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
     if (p === "/auth/v1/logout") return route.fulfill({ status: 204, headers: cors });
     const uid = who(route);
     if (!uid) return json(route, 401, { message: "no auth" });
+    if (p === "/rest/v1/app_events") {
+      // Usage statistics: insert-only, each row must be the caller's (like the real RLS).
+      if (req.method() !== "POST") return json(route, 403, { message: "rls" });
+      for (const e of JSON.parse(body) as { user_id?: string; name: string; props: Record<string, unknown> }[]) {
+        if (e.user_id && e.user_id !== uid) return json(route, 403, { message: "rls" });
+        events.push({ uid, name: e.name, props: e.props });
+      }
+      return route.fulfill({ status: 201, headers: cors });
+    }
     if (p === "/rest/v1/user_state") {
       reads.push(url.search);
       // The app also filters by its own user id (defence in depth); a mismatch would be a bug.
@@ -200,6 +210,7 @@ function fakeSupabase(invited: string[], google: { as?: string; cancel?: boolean
     bodies,
     authorize,
     idTokens,
+    events,
     reads,
     setDown: (v: boolean) => void (down = v),
     /** `gsi: false`: Google's script can't load, so the app falls back to the redirect. */
@@ -448,6 +459,37 @@ test.describe("e2e-sync · with an account", () => {
       await phoneCtx.close();
       await laptopCtx.close();
     });
+
+  test("usage statistics: asked once after the first lesson; nothing is sent before yes, then screens and lessons are", async ({ page, context }) => {
+    const fake = fakeSupabase(["ana@example.com"]);
+    await fake.attach(context);
+    await learnABit(page);
+    await expect(page.getByText(t.statsAskTitle)).toBeVisible();
+    expect(fake.events).toEqual([]); // not asked yet = off
+    await page.getByRole("button", { name: t.statsYes }).click();
+    await expect(page.getByText(t.statsAskTitle)).toHaveCount(0);
+    // Move around the app like a learner (tabs), a few seconds on each screen (the lesson
+    // helpers froze the clock, so time is moved on by hand).
+    await page.clock.fastForward(5000);
+    await page.getByRole("link", { name: t.tabPath }).click();
+    await page.waitForURL(/\/path/);
+    await page.clock.fastForward(5000);
+    await page.getByRole("link", { name: t.tabToday }).click();
+    await page.waitForURL((u) => u.pathname === "/");
+    await expect.poll(() => fake.events.filter((e) => e.name === "screen_time").length, { timeout: 15_000 }).toBeGreaterThan(0);
+    // Never the email or typed text in an event.
+    expect(JSON.stringify(fake.events)).not.toContain("ana@example.com");
+    // Turned off in Settings: nothing more is sent.
+    await page.goto("/me/settings");
+    await page.getByText(t.sShareStats).click();
+    const n = fake.events.length;
+    await page.clock.fastForward(5000);
+    await page.getByRole("link", { name: t.tabPath }).click();
+    await page.clock.fastForward(5000);
+    await page.getByRole("link", { name: t.tabToday }).click();
+    await page.waitForTimeout(1500);
+    expect(fake.events.length).toBe(n);
+  });
 
   test("CUJ-18 open sign-up: a new email gets a code and its account is created", async ({ page, context }) => {
     const fake = fakeSupabase([]);

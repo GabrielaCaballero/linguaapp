@@ -271,6 +271,7 @@ export async function signOut(opts: { force?: boolean; forgetKey?: boolean } = {
     /* offline: the local session is removed below anyway */
   }
   localAdapter.remove(KEYS.auth);
+  localAdapter.remove(KEYS.events);
   setUser(null);
   resetDB();
   if (opts.forgetKey) {
@@ -278,6 +279,22 @@ export async function signOut(opts: { force?: boolean; forgetKey?: boolean } = {
     localAdapter.remove(KEYS.llmCache);
   }
   return "done";
+}
+
+/** The signed-in user's id, or null (sync off, or signed out). */
+export function currentUserId(): string | null {
+  startAccount();
+  return isSyncConfigured() ? (account.user?.id ?? null) : null;
+}
+
+/** Usage statistics: insert a batch into app_events (rows only the owner can read). */
+export async function uploadEvents(rows: { t: string; name: string; props: object; platform: string; app_version: string }[]): Promise<boolean> {
+  try {
+    const { error } = await getClient().from("app_events").insert(rows);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 /** Delete the whole account (server data goes with it). This device keeps its progress as a guest. */

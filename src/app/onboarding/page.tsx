@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/metrics";
 import Link from "next/link";
 import { InstallHint } from "@/components/InstallHint";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -138,6 +139,7 @@ function Flow({ signedIn, backFromAccount }: { signedIn: boolean; backFromAccoun
       if (!x) continue;
       if (mode !== "goalOnly") {
         setCourse(l, { explainIn: x.explainIn, addedAt: clock(), experience: x.exp, unit: x.outcome?.unit ?? 1 });
+        track("course_added", { lang: l, base: x.explainIn, start: x.known ? "known" : x.exp === "never" ? "never" : "test", cefr: x.outcome?.cefr ?? "A0", unit: x.outcome?.unit ?? 1, first: mode === "new" });
         if (x.outcome) {
           const s = x.outcome.state;
           applyPlacement(l, { theta: s.theta, se: s.se, cefr: x.outcome.cefr, at: clock(), items: s.responses.length, seeded: 0 }, x.outcome.unit, x.outcome.seedIds);

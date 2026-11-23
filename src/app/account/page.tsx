@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/metrics";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -47,6 +48,7 @@ function SignIn({ from }: { from: AccountFrom }) {
   const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine !== false, () => true);
 
   const afterSignIn = async (user: AccountUser) => {
+    track("signed_in", { from });
     try {
       const first = await getEngine()!.beginLogin(user.id);
       setBusy(false);

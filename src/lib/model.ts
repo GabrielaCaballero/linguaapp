@@ -62,6 +62,8 @@ export interface Settings {
   theme: "system" | "light" | "dark";
   /** Swiss forms on German words ("CH · In Switzerland: Grüezi"). Missing = on. */
   regionTips?: boolean;
+  /** Share usage statistics (app_events). Missing = not asked yet = off. */
+  shareStats?: boolean;
   /** How slow the 🐢 "listen slowly" button plays (playback rate). Missing = 0.6. */
   slowRate?: 0.75 | 0.6 | 0.5;
 }

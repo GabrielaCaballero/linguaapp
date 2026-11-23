@@ -121,6 +121,15 @@ describe("privacy · database access control (supabase/schema.sql)", () => {
     expect(cfg).toMatch(/connect-src 'self' \$\{SUPABASE\} https:\/\/accounts\.google\.com https:\/\/api\.anthropic\.com https:\/\/api\.openai\.com https:\/\/generativelanguage\.googleapis\.com`/);
     expect(cfg).toMatch(/frame-ancestors 'none'/);
   });
+  it("usage events: RLS on, learners can only add their own, nobody can read them from the app, capped per day", () => {
+    expect(sql).toContain("alter table public.app_events enable row level security");
+    expect(sql).toMatch(/revoke all on public\.app_events from anon, authenticated, public/);
+    expect(sql).toMatch(/grant insert on public\.app_events to authenticated;/);
+    expect(sql).not.toMatch(/grant[^;]*select[^;]*on public\.app_events/);
+    expect(sql).toMatch(/create policy "add own events" on public\.app_events for insert to authenticated with check \(user_id = \(select auth\.uid\(\)\)\)/);
+    expect(sql).toMatch(/create trigger app_events_quota before insert on public\.app_events/);
+    expect(sql).toMatch(/references auth\.users \(id\) on delete cascade,\s*t\s+timestamptz/);
+  });
   it("answers table: row-level security, read/insert own only, never update or delete", () => {
     expect(sql).toContain("alter table public.user_reviews enable row level security");
     expect(sql).toMatch(/revoke all on public\.user_reviews from anon, authenticated, public/);
