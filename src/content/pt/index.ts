@@ -40,8 +40,8 @@ import { lexicon } from "./lexicon";
 import { grammar } from "./grammar";
 
 // Portuguese (Brazil, pt-BR) for Spanish and English speakers, A0 → C2. European Portuguese forms
-// are accepted and shown as "PT" tips (item `variants` with region "PT"). Hidden from learners
-// until LANG_INFO.pt.available is true (src/content/languages.ts).
+// are accepted and shown as "PT" tips (item `variants` with region "PT"). Visible to learners
+// since 2026-11-23 (owner); native review still pending.
 // 36 units (A0 · A1.1 · A1.2 · A2 · B1 · B2 like French, then 6 C1 and 6 C2), 42 placement items,
 // grammar cards in grammar*.ts.
 export const course: CoursePack = {

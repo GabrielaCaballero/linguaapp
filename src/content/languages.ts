@@ -88,7 +88,7 @@ export const LANG_INFO: Record<TargetLang, LangInfo> = {
     },
   },
   pt: {
-    available: false,
+    available: true,
     bases: ["es", "en"],
     native: "Português",
     seal: "PT",

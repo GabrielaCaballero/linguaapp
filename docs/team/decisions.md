@@ -403,3 +403,4 @@ Format: date · who · decision · why
 - Owner: an English app still offers the English course (it's explained in Spanish; its card
   says so). Also: course picker is the same flag button on Today and the course map (the IT/DE/FR
   pills didn't fit 3+ languages); the "Path" tab is now "Course" / "Curso".
+- Owner: Portuguese visible to learners now (2026-11-23), before the native review.

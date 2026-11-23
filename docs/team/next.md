@@ -9,7 +9,7 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
 ## Waiting on the owner
 - Supabase → SQL Editor: run `supabase/schema.sql` again (creates `content_reports` for "Report a
   problem"). Read reports with `docs/team/metrics.sql` section 9.
-- Portuguese: native review, then `LANG_INFO.pt.available = true` (src/content/languages.ts).
+- Native review of the AI-written content: Portuguese (whole course), French C1–C2, English/German/Italian C2.
 - Recorded audio: enable Cloud Text-to-Speech, create a restricted API key, put it in
   `.env.tts.local`, then `npm run audio:samples` and pick voices (docs/team/audio.md).
 - Open and merge the PR `require-account` → `main`:
