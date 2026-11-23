@@ -1,10 +1,10 @@
 import type { PlacementItem } from "../schema";
 import { spreadAnswers } from "../build";
 
-// 36 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2) · per band: 2 vocab, 2 grammar,
+// 42 items · 6 per band (A0, A1.1, A1.2, A2, B1, B2, C1) · per band: 2 vocab, 2 grammar,
 // 1 listening, 1 reading. Options are authored with the key first; spreadAnswers()
 // rotates them deterministically so the key isn't always in the same slot.
-// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 (±0.4 within band).
+// b: A0 −2.5 · A1.1 −1.5 · A1.2 −0.5 · A2 +0.5 · B1 +1.5 · B2 +2.5 · C1 +3.3 (±0.4 within band).
 const bank: PlacementItem[] = [
   // ── A0 ─────────────────────────────────────────────────────
   {
@@ -425,6 +425,80 @@ const bank: PlacementItem[] = [
         { es: "El viernes, con el horario de siempre.", en: "On Friday, with its usual hours." },
         { es: "El sábado, con horario reducido.", en: "On Saturday, with shorter hours." },
         { es: "Todavía no se sabe.", en: "It isn't known yet." },
+      ],
+      answer: 0,
+    },
+  },
+  // ── C1 (added with units 25–30) ────────────────────────────
+  {
+    id: "de-p-37", lang: "de", cefr: "C1", b: 3.1, skill: "vocab", kind: "mcq", stem: "Wir nehmen die höheren Kosten in Kauf.",
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "Aceptamos los costos más altos.", en: "We accept the higher costs." },
+        { es: "Compramos a plazos para pagar menos.", en: "We buy in instalments to pay less." },
+        { es: "Pagamos los costos más altos al contado.", en: "We pay the higher costs in cash." },
+        { es: "Devolvemos la compra por ser demasiado cara.", en: "We return the purchase because it's too expensive." },
+      ],
+      answer: 0,
+    },
+    seeds: ["de-u25-in-kauf-nehmen"],
+  },
+  {
+    id: "de-p-38", lang: "de", cefr: "C1", b: 3.3, skill: "vocab", kind: "mcq", stem: "eine umstrittene Entscheidung",
+    mcq: {
+      prompt: { es: "¿Qué significa?", en: "What does it mean?" },
+      options: [
+        { es: "una decisión polémica", en: "a controversial decision" },
+        { es: "una decisión indiscutible", en: "an undisputed decision" },
+        { es: "una decisión aplazada", en: "a postponed decision" },
+        { es: "una decisión unánime", en: "a unanimous decision" },
+      ],
+      answer: 0,
+    },
+    seeds: ["de-u26-umstritten"],
+  },
+  {
+    id: "de-p-39", lang: "de", cefr: "C1", b: 3.4, skill: "grammar", kind: "cloze", stem: "Die Brücke hätte längst saniert werden ___.",
+    mcq: {
+      prompt: { es: "Completa la frase.", en: "Complete the sentence." },
+      options: ["müssen", "gemusst", "worden", "geworden"],
+      answer: 0,
+    },
+    seeds: ["de-u29-haette-verhindert-werden-koennen"],
+  },
+  {
+    id: "de-p-40", lang: "de", cefr: "C1", b: 3.0, skill: "grammar", kind: "cloze", stem: "Die Sprecher betonten, sie ___ von nichts gewusst.",
+    mcq: {
+      prompt: { es: "Completa (estilo indirecto, lengua escrita).", en: "Complete (reported speech, written style)." },
+      options: ["hätten", "habe", "hätte", "habest"],
+      answer: 0,
+    },
+    seeds: ["de-u26-sie-haetten-gewartet"],
+  },
+  {
+    id: "de-p-41", lang: "de", cefr: "C1", b: 3.3, skill: "listening", kind: "listen", spoken: "Das Projekt ist an sich gut, nur hätte man die Anwohner früher einbeziehen müssen.",
+    mcq: {
+      prompt: { es: "¿Qué critica quien habla?", en: "What is the speaker critical of?" },
+      options: [
+        { es: "Que no se consultó antes a los vecinos.", en: "That the residents weren't involved earlier." },
+        { es: "Que el proyecto en sí es malo.", en: "That the project itself is bad." },
+        { es: "Que se consultó a los vecinos demasiado pronto.", en: "That the residents were consulted too early." },
+        { es: "Que el proyecto es demasiado caro.", en: "That the project is too expensive." },
+      ],
+      answer: 0,
+    },
+  },
+  {
+    id: "de-p-42", lang: "de", cefr: "C1", b: 3.6, skill: "reading", kind: "mcq",
+    stem: "Die Maßnahme stößt bei Fachleuten auf breite Zustimmung, zumal sie kaum Kosten verursacht. Umweltverbände hingegen halten sie für unzureichend.",
+    mcq: {
+      prompt: { es: "¿Qué opinan las organizaciones ambientalistas?", en: "What do the environmental groups think?" },
+      options: [
+        { es: "Que la medida no alcanza.", en: "That the measure doesn't go far enough." },
+        { es: "Que la medida es demasiado cara.", en: "That the measure is too expensive." },
+        { es: "Que la apoyan ampliamente.", en: "That they broadly support it." },
+        { es: "Que la medida no cuesta nada.", en: "That the measure costs nothing." },
       ],
       answer: 0,
     },

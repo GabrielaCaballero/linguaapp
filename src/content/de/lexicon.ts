@@ -35,5 +35,7 @@ export const lexicon: Lexicon = {
     ["drucken", "drücken"], ["konnte", "könnte"], ["wurde", "würde"], ["Tier", "Tür"],
     ["den", "dem"], ["einen", "einem"], ["ihn", "ihm"], ["vier", "für"],
     ["Mann", "man"], ["Satz", "Sätze"], ["warm", "Wurm"], ["Bett", "Beet"],
+    // C1 (units 25–30): particles that a typo must not turn into another word
+    ["etwa", "etwas"], ["eh", "ehe"],
   ],
 };
