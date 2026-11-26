@@ -390,7 +390,9 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
   font-size: var(--t-body); font-weight: 500; display: flex; align-items: center; gap: var(--s3);
   transition: transform var(--d-fast) var(--ease-out), box-shadow var(--d-fast), border-color var(--d-fast), background var(--d-fast);
 }
-.opt:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+@media (hover: hover) and (pointer: fine) { .opt:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } }
+/* (hover only with a real mouse: on a phone a tap leaves :hover stuck where the finger was,
+   which looked like a hint on the next question — owner, 2026-11-26) */
 .opt:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
 .opt[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); background: var(--accent-soft); }
 .opt .key { font-size: var(--t-caption); color: var(--text-2); border: 1.5px solid var(--line); border-radius: 6px; width: 24px; height: 24px; display: grid; place-items: center; flex: none; }
@@ -411,6 +413,12 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .speaker.big { width: 96px; height: 96px; background: var(--accent); color: var(--on-accent); box-shadow: 0 5px 0 var(--accent-press); }
 .speaker.big:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--accent-press); }
 .speaker.slow { width: 56px; height: 56px; }
+/* The tortoise's speeds, shown beside it after the first tap (owner, 2026-11-26). */
+.listen-row { flex-wrap: wrap; }
+.speed-row { flex-basis: 100%; display: flex; justify-content: center; }
+.speed-pick { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface-2); border-radius: var(--r-pill); animation: fade var(--d-med) var(--ease-out); }
+.speed-pick button { min-height: 36px; padding: 0 10px; border: 0; background: transparent; border-radius: var(--r-pill); font-size: var(--t-caption); font-weight: 600; color: var(--text-2); }
+.speed-pick button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
 .listen-row { display: flex; align-items: center; justify-content: center; gap: var(--s5); padding: var(--s4) 0; }
 .bars { display: inline-flex; gap: 4px; height: 24px; align-items: center; }
 .bars i { width: 4px; height: 8px; border-radius: 2px; background: var(--accent); }
@@ -519,7 +527,7 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .step-dots i.on { width: 20px; background: var(--accent); }
 
 .choice-card { display: flex; align-items: center; gap: var(--s4); width: 100%; text-align: left; padding: var(--s4); border-radius: var(--r-lg); background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 1px 2px rgb(28 26 23 / 0.05); min-height: 72px; transition: transform var(--d-fast), border-color var(--d-fast), box-shadow var(--d-fast); }
-.choice-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+@media (hover: hover) and (pointer: fine) { .choice-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } }
 .choice-card:active { transform: scale(0.985); }
 .choice-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
 .choice-card .check { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: transparent; flex: none; }

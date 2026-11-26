@@ -412,3 +412,12 @@ Format: date · who · decision · why
   letter-aware word edges ("andén" no longer reads as English "and"). Native human review still
   recommended; open questions in the reviewers' reports (French B1 units with A2 content,
   "mustn't" in US English, crase consistency in Portuguese C1–C2).
+
+## 2026-11-26 · No hint from a stuck highlight; speed choice on the tortoise
+
+- Owner: an answer button sometimes had a highlighted border, often on the right answer. On
+  phones a tap leaves :hover stuck where the finger was (the Continue button's spot), so the
+  next question's option there looked chosen. Hover styles now apply only with a real mouse
+  (`@media (hover: hover) and (pointer: fine)`), and focus is cleared on each new question.
+- Owner: the tortoise lets you pick the speed right there. The first tap plays slowly and shows
+  Slow · Slower · Very slow under the buttons; a choice replays and is saved (same as Settings).
