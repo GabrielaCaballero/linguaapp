@@ -241,6 +241,8 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
   }, [task, item, canListen, shift, tries]);
 
   const next = useCallback(() => {
+    // Nothing from the last answer stays focused or highlighted on the next question.
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     setFb(null);
     setRevealed(false);
     setConf(undefined);

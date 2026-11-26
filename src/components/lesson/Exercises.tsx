@@ -6,7 +6,9 @@ import type { Confidence, Mode, Verdict } from "@/lib/model";
 import type { Dict } from "@/lib/i18n";
 import { check, type CheckResult } from "@/lib/check";
 import { gl } from "@/lib/content";
-import { speak } from "@/lib/speech";
+import { slowRate, speak } from "@/lib/speech";
+import { setSettings } from "@/lib/actions";
+import { track } from "@/lib/metrics";
 import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
 import { TableExercise } from "./Table";
@@ -46,10 +48,42 @@ export interface ExProps {
 
 const ACCENTS: Record<TargetLang, string[]> = { it: ["à", "è", "é", "ì", "ò", "ù"], de: ["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"] , en: [], fr: ["é", "è", "ê", "à", "â", "ç", "î", "ô", "ù", "û", "ë", "ï"], pt: ["ã", "õ", "á", "é", "í", "ó", "ú", "â", "ê", "ô", "à", "ç"] };
 
-export function Speaker({ text, lang, slow, big, label, auto }: { text: string; lang: TargetLang; slow?: boolean; big?: boolean; label: string; auto?: boolean }) {
+/**
+ * The tortoise (owner, 2026-11-26): tap it to hear the word slowly, and the three slow speeds
+ * appear right beside it; picking one replays at that speed and keeps it (same as Settings).
+ */
+export function SlowSpeaker({ text, lang, t }: { text: string; lang: TargetLang; t: Dict }) {
+  const [open, setOpen] = useState(false);
+  const [rate, setRate] = useState(slowRate);
+  const pick = (r: 0.75 | 0.6 | 0.5) => {
+    setRate(r);
+    setSettings({ slowRate: r });
+    track("slow_audio", { rate: r, from: "tortoise" });
+    speak(text, lang, true);
+  };
+  return (
+    <>
+      <Speaker text={text} lang={lang} slow label={t.listenSlow} onPlay={() => setOpen(true)} />
+      {open && (
+        <span className="speed-row">
+          <span className="speed-pick" role="group" aria-label={t.sSlowAudio}>
+            {([0.75, 0.6, 0.5] as const).map((r) => (
+              <button key={r} type="button" aria-pressed={rate === r} onClick={() => pick(r)}>
+                {t.slowRates[String(r)]}
+              </button>
+            ))}
+          </span>
+        </span>
+      )}
+    </>
+  );
+}
+
+export function Speaker({ text, lang, slow, big, label, auto, onPlay }: { text: string; lang: TargetLang; slow?: boolean; big?: boolean; label: string; auto?: boolean; onPlay?: () => void }) {
   const [on, setOn] = useState(false);
   const play = () => {
     speak(text, lang, slow);
+    onPlay?.();
     setOn(true);
     setTimeout(() => setOn(false), Math.min(4000, 600 + text.length * 70));
   };
@@ -237,7 +271,7 @@ function ChoiceExercise(p: ExProps) {
       <Prompt eyebrow={mode === "listen" ? t.whatHear : t.howSpelled}>
         <div className="listen-row">
           <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-          <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
+          <SlowSpeaker text={item.spoken} lang={item.lang} t={t} />
         </div>
         <NoAudio t={t} onNoAudio={p.onNoAudio} />
       </Prompt>
@@ -335,7 +369,7 @@ export function QuestionStem({ item, base, t, canListen, onNoAudio }: { item: It
       <>
         <div className="listen-row">
           <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-          <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
+          <SlowSpeaker text={item.spoken} lang={item.lang} t={t} />
         </div>
         <NoAudio t={t} onNoAudio={onNoAudio} />
       </>

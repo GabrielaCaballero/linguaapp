@@ -7,7 +7,7 @@ import { course, gl, units } from "@/lib/content";
 import { answer as answerP, band, beginner, nextItem, seeds, start, startUnit, type PlacementState } from "@/lib/placement";
 import { norm } from "@/lib/check";
 import { courseTop } from "@/lib/goals";
-import { Speaker } from "./lesson/Exercises";
+import { Speaker, SlowSpeaker } from "./lesson/Exercises";
 import { Icon } from "./icons";
 import { feel } from "@/lib/feel";
 import { getDB } from "@/lib/store";
@@ -125,7 +125,7 @@ function PlacementStem({ item, canListen, t }: { item: PlacementItem; canListen:
         {canListen ? (
           <>
             <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-            <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
+            <SlowSpeaker text={item.spoken} lang={item.lang} t={t} />
           </>
         ) : (
           <span className="title" lang={item.lang}>{item.spoken}</span>

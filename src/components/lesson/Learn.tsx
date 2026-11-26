@@ -11,7 +11,7 @@ import { markSeen } from "@/lib/actions";
 import { GrammarCard } from "./Grammar";
 import { RegionTips } from "./RegionTips";
 import { WordHints } from "./WordHints";
-import { NoAudio, Prompt, QuestionStem, Speaker, TargetWord, isCognate } from "./Exercises";
+import { NoAudio, Prompt, QuestionStem, Speaker, SlowSpeaker, TargetWord, isCognate } from "./Exercises";
 
 export function Learn({ item, base, t, canListen, onLearned, onDone, onNoAudio }: { item: Item; base: BaseLang; t: Dict; canListen: boolean; onLearned: () => void; onDone: () => void; onNoAudio?: () => void }) {
   const [translate, setTranslate] = useState(false);
@@ -74,7 +74,7 @@ export function Learn({ item, base, t, canListen, onLearned, onDone, onNoAudio }
           <>
             <div className="listen-row">
               <Speaker text={item.spoken} lang={item.lang} big label={t.listen} auto />
-              <Speaker text={item.spoken} lang={item.lang} slow label={t.listenSlow} />
+              <SlowSpeaker text={item.spoken} lang={item.lang} t={t} />
             </div>
             <NoAudio t={t} onNoAudio={onNoAudio} />
           </>
