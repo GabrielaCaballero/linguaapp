@@ -37,6 +37,14 @@ const core: GrammarPoint[] = [
         ["ihr", "kommt", "wohnt"],
         ["sie / Sie", "kommen", "wohnen"],
       ],
+      meanings: [
+        { es: "yo vengo · vivo", en: "I come · live" },
+        { es: "tú vienes · vives", en: "you come · live (du)" },
+        { es: "él, ella viene · vive", en: "he, she comes · lives" },
+        { es: "nosotros venimos · vivimos", en: "we come · live" },
+        { es: "ustedes vienen · viven (de confianza)", en: "you come · live (several friends)" },
+        { es: "ellos · usted: vienen · viven", en: "they · you (formal): come · live" },
+      ],
     },
     examples: [
       { target: "Ich komme aus Spanien.", gloss: { es: "Soy de España.", en: "I'm from Spain." } },
@@ -68,11 +76,16 @@ const core: GrammarPoint[] = [
       { es: "Plural en nominativo o acusativo: siempre meine (meine Brüder).", en: "Plural in the nominative or accusative: always meine (meine Brüder)." },
     ],
     table: {
-      head: ["", "m", "f", "n", "Plural"],
+      head: ["", "m", "f", "n", "plural"],
       rows: [
         ["Nominativ", "mein", "meine", "mein", "meine"],
         ["Akkusativ", "meinen", "meine", "mein", "meine"],
         ["Dativ", "meinem", "meiner", "meinem", "meinen"],
+      ],
+      meanings: [
+        { es: "sujeto (nominativo): mi … · mis …", en: "subject (nominative): my …" },
+        { es: "objeto directo (acusativo): mi … · mis …", en: "direct object (accusative): my …" },
+        { es: "tras mit, bei… (dativo): mi … · mis …", en: "after mit, bei… (dative): my …" },
       ],
     },
     examples: [

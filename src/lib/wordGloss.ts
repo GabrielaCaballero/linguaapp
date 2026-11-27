@@ -71,6 +71,19 @@ export function glossary(lang: TargetLang, base: BaseLang, items: Item[]): Gloss
       if (!g.has(p)) g.set(p, meaning);
     }
   }
+  // Conjugated forms point back to their verb: "fängt" → "empezar (anfangen)" (owner, 2026-11-27).
+  for (const i of items) {
+    if (i.type !== "word" || !i.forms) continue;
+    const meaning = i.gloss[base];
+    if (!meaning) continue;
+    for (const [k, f] of Object.entries(i.forms)) {
+      if (k === "aux") continue;
+      for (const part of f.split(/\s*[/,]\s*/)) {
+        const w = norm(part.replace(/^(ich|du|er|sie|es|wir|ihr|Sie|io|tu|lui|lei|noi|voi|loro)\s+/i, ""));
+        if (w && !w.includes(" ") && !g.has(w)) g.set(w, `${meaning} (${i.target})`);
+      }
+    }
+  }
   cache.set(key, g);
   return g;
 }

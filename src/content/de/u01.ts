@@ -164,18 +164,52 @@ export const unit: Unit = {
       tags: ["basic"],
     },
 
-    // ── Names ────────────────────────────────────────────────
+    // ── Who? ich, du, Sie ────────────────────────────────────
     {
-      id: "wie-heissen-sie", type: "phrase", pos: "phrase", target: "Wie heißen Sie?", register: "formal",
-      gloss: { es: "¿Cómo se llama (usted)?", en: "What's your name? (formal)" },
-      distractors: ["Wie heißt du?", "Wie geht es Ihnen?", "Woher kommen Sie?"],
-      tags: ["introductions", "register", "chunk"],
+      id: "ich", type: "word", pos: "pron", target: "ich",
+      gloss: { es: "yo", en: "I" },
+      distractors: ["mich", "dich", "euch"],
+      note: { es: "Con minúscula, salvo al empezar la frase: Ich heiße Anna.", en: "Lower case, except at the start of a sentence: Ich heiße Anna." },
+      tags: ["pronoun", "basic"],
     },
     {
-      id: "wie-heisst-du", type: "phrase", pos: "phrase", target: "Wie heißt du?", register: "informal",
-      gloss: { es: "¿Cómo te llamas?", en: "What's your name? (informal)" },
-      distractors: ["Wie heißen Sie?", "Wie geht's?", "Wo wohnst du?"],
-      tags: ["introductions", "register", "chunk"],
+      id: "du", type: "word", pos: "pron", target: "du", register: "informal",
+      gloss: { es: "tú", en: "you (informal, one person)" },
+      distractors: ["dir", "dich", "die"],
+      note: { es: "Con amigos, familia y niños.", en: "With friends, family and children." },
+      tags: ["pronoun", "basic", "register"],
+    },
+    {
+      id: "sie-formal", type: "word", pos: "pron", target: "Sie", register: "formal",
+      gloss: { es: "usted", en: "you (formal)" },
+      distractors: ["Ihnen", "Ihr", "Sich"],
+      note: { es: "Siempre con mayúscula. «sie» con minúscula es «ella» o «ellos».", en: "Always capitalised. Lower-case sie means 'she' or 'they'." },
+      tags: ["pronoun", "basic", "register"],
+    },
+
+    // ── Names: heißen ────────────────────────────────────────
+    {
+      id: "heissen", type: "word", pos: "verb", target: "heißen",
+      gloss: { es: "llamarse", en: "to be called" },
+      forms: { ich: "heiße", du: "heißt", er: "heißt", wir: "heißen", ihr: "heißt", sie: "heißen" },
+      distractors: ["heizen", "hassen", "heben"],
+      note: { es: "ich heiße = me llamo; du heißt = te llamas.", en: "ich heiße = my name is; du heißt = your name is." },
+      grammar: ["de-g-stamm-s"],
+      tags: ["verb", "introductions", "goethe-a1"],
+    },
+    {
+      id: "tab-heissen", type: "paradigm", target: "heißen — Präsens", spoken: "heißen",
+      gloss: { es: "heißen (llamarse) — presente", en: "heißen (to be called) — present" },
+      grammar: ["de-g-du-sie"],
+      paradigm: {
+        caption: { es: "Conjuga «heißen»: yo, tú y usted", en: "Conjugate heißen: I, you (du) and you (Sie)" },
+        cells: [
+          { label: "ich", answer: "heiße", ruleId: "de-g-du-sie" },
+          { label: "du", answer: "heißt", ruleId: "de-g-du-sie" },
+          { label: "Sie", answer: "heißen", ruleId: "de-g-du-sie" },
+        ],
+      },
+      tags: ["grammar", "present", "table"],
     },
     {
       id: "ich-heisse", legacyId: "de-heisse", type: "sentence", target: "Ich heiße Anna.",
@@ -192,6 +226,49 @@ export const unit: Unit = {
         en: "In Switzerland ß is written ss: 'Ich heisse Anna'.",
       },
       tags: ["introductions"],
+    },
+    {
+      id: "wie", type: "word", pos: "adv", target: "wie",
+      gloss: { es: "cómo", en: "how" },
+      distractors: ["wo", "wer", "was"],
+      note: { es: "Wie heißt du? = ¿Cómo te llamas? (literalmente «¿cómo te llamas tú?»)", en: "Wie heißt du? = What's your name? (literally 'how are you called?')" },
+      tags: ["question-word"],
+    },
+    {
+      id: "wie-heisst-du", type: "phrase", pos: "phrase", target: "Wie heißt du?", register: "informal",
+      gloss: { es: "¿Cómo te llamas?", en: "What's your name? (informal)" },
+      distractors: ["Wie heißen Sie?", "Wie geht's?", "Wo wohnst du?"],
+      tags: ["introductions", "register", "chunk"],
+    },
+    {
+      id: "wie-heissen-sie", type: "phrase", pos: "phrase", target: "Wie heißen Sie?", register: "formal",
+      gloss: { es: "¿Cómo se llama (usted)?", en: "What's your name? (formal)" },
+      distractors: ["Wie heißt du?", "Wie geht es Ihnen?", "Woher kommen Sie?"],
+      tags: ["introductions", "register", "chunk"],
+    },
+
+    // ── sein: ich bin, du bist, Sie sind ─────────────────────
+    {
+      id: "sein", type: "word", pos: "verb", target: "sein",
+      gloss: { es: "ser / estar", en: "to be" },
+      forms: { ich: "bin", du: "bist", er: "ist", wir: "sind", ihr: "seid", sie: "sind" },
+      distractors: ["seit", "sehen", "sagen"],
+      note: { es: "Un solo verbo para «ser» y «estar»: Ich bin Lena. Ich bin in Berlin.", en: "One verb for who you are and where you are: Ich bin Lena. Ich bin in Berlin." },
+      tags: ["verb", "sein", "goethe-a1"],
+    },
+    {
+      id: "tab-sein-1", type: "paradigm", target: "sein — Präsens (1)", spoken: "sein",
+      gloss: { es: "sein (ser / estar): yo, tú, usted", en: "sein (to be): I, you (du), you (Sie)" },
+      grammar: ["de-g-sein"],
+      paradigm: {
+        caption: { es: "Conjuga «sein»: yo, tú y usted", en: "Conjugate sein: I, you (du) and you (Sie)" },
+        cells: [
+          { label: "ich", answer: "bin", ruleId: "de-g-sein" },
+          { label: "du", answer: "bist", ruleId: "de-g-sein" },
+          { label: "Sie", answer: "sind", ruleId: "de-g-sein" },
+        ],
+      },
+      tags: ["grammar", "present", "table", "sein"],
     },
     {
       id: "ich-bin", type: "sentence", target: "Ich bin Lena.",
@@ -214,6 +291,7 @@ export const unit: Unit = {
         es: "Abreviatura de «Es freut mich» (me alegra). Respuesta: «Freut mich auch».",
         en: "Short for 'Es freut mich' (it pleases me). Reply: 'Freut mich auch.'",
       },
+      annot: { Freut: { es: "alegra (me alegra)", en: "pleases (it pleases me)" }, mich: { es: "me", en: "me" } },
       tags: ["introductions", "chunk"],
     },
 
@@ -224,6 +302,7 @@ export const unit: Unit = {
       accept: [{ text: "Wie geht es dir?" }, { text: "Wie gehts?" }],
       distractors: ["Wie heißt du?", "Wie bitte?", "Wo gehst du?"],
       note: { es: "Literalmente «¿cómo va?». Respuesta: «Gut, danke!».", en: "Literally 'how goes it?'. Answer: 'Gut, danke!'" },
+      annot: { "geht's": { es: "«va» (de gehen, ir): ¿cómo te va?", en: "'goes' (from gehen, to go): how's it going?" } },
       tags: ["introductions", "register", "chunk"],
     },
     {
@@ -231,7 +310,18 @@ export const unit: Unit = {
       gloss: { es: "¿Cómo está (usted)?", en: "How are you? (formal)" },
       distractors: ["Wie geht es dir?", "Wie heißen Sie?", "Wie gehen Sie?"],
       note: { es: "«Ihnen» con mayúscula = a usted.", en: "'Ihnen' with a capital I = to you (formal)." },
+      annot: {
+        geht: { es: "va (de gehen, ir)", en: "goes (from gehen, to go)" },
+        Ihnen: { es: "a usted", en: "(to) you, formal" },
+      },
       tags: ["introductions", "register", "chunk"],
+    },
+    {
+      id: "und", type: "word", pos: "other", target: "und",
+      gloss: { es: "y", en: "and" },
+      distractors: ["um", "uns", "unter"],
+      note: { es: "Und du? = ¿Y tú?", en: "Und du? = And you?" },
+      tags: ["basic", "connectors"],
     },
     {
       id: "gut-danke", type: "sentence", target: "Gut, danke. Und dir?", register: "informal",
@@ -239,6 +329,10 @@ export const unit: Unit = {
       accept: [{ text: "Gut danke, und dir?" }, { text: "Gut, danke, und dir?" }, { text: "Danke, gut. Und dir?" }, { text: "Gut danke und dir" }],
       distractors: ["Gut, bitte. Und dir?", "Gut, danke. Und ich?", "Gute, danke. Und du?"],
       note: { es: "Con «Sie»: «Gut, danke. Und Ihnen?».", en: "With Sie: 'Gut, danke. Und Ihnen?'" },
+      annot: {
+        Gut: { es: "bien", en: "fine / good" },
+        dir: { es: "a ti (¿y a ti?)", en: "(to) you, informal" },
+      },
       tags: ["introductions"],
     },
     {
@@ -247,6 +341,13 @@ export const unit: Unit = {
       distractors: ["Wo bitte?", "Wie bist du?", "Wer bitte?"],
       note: { es: "Literalmente «¿cómo, por favor?». Es la forma educada de pedir que repitan.", en: "Literally 'how, please?'. The polite way to ask someone to repeat." },
       tags: ["survival", "chunk"],
+    },
+    {
+      id: "nicht", type: "word", pos: "adv", target: "nicht",
+      gloss: { es: "no (para negar una frase)", en: "not" },
+      distractors: ["nichts", "nie", "nett"],
+      note: { es: "Para responder «no» se dice «nein»; «nicht» niega: Ich verstehe das nicht.", en: "To answer 'no', say 'nein'; 'nicht' negates: Ich verstehe das nicht." },
+      tags: ["basic", "negation"],
     },
     {
       id: "verstehe-nicht", legacyId: "de-verstehe", type: "sentence", target: "Ich verstehe das nicht.",
@@ -261,6 +362,7 @@ export const unit: Unit = {
         es: "«Ich verstehe nicht» es correcto pero suena brusco; con «das» suena natural.",
         en: "'Ich verstehe nicht' is correct but sounds abrupt; adding 'das' sounds natural.",
       },
+      annot: { verstehe: { es: "entiendo (de verstehen)", en: "understand (from verstehen)" }, das: { es: "eso", en: "that" } },
       tags: ["survival"],
     },
 
@@ -323,6 +425,12 @@ export const unit: Unit = {
           ["Wie geht's? / Wie geht es dir?", "Wie geht es Ihnen?"],
           ["Tschüss", "Auf Wiedersehen"],
         ],
+        meanings: [
+          { es: "tú · usted", en: "informal you · formal you" },
+          { es: "¿Cómo te llamas? · ¿Cómo se llama (usted)?", en: "What's your name? (informal · formal)" },
+          { es: "¿Qué tal? · ¿Cómo está (usted)?", en: "How are you? (informal · formal)" },
+          { es: "Adiós (informal · formal)", en: "Bye · Goodbye" },
+        ],
       },
       question: {
         prompt: { es: "En una tienda, le preguntas el nombre al vendedor:", en: "In a shop, you ask the shop assistant his name:" },
@@ -330,6 +438,13 @@ export const unit: Unit = {
         answer: 0,
       },
       exercises: ["question"], grammar: ["de-g-du-sie"], tags: ["grammar", "register"],
+    },
+    {
+      id: "auch", type: "word", pos: "adv", target: "auch",
+      gloss: { es: "también", en: "also / too" },
+      distractors: ["euch", "doch", "noch"],
+      note: { es: "Freut mich auch! = ¡Igualmente! (a mí también me alegra)", en: "Freut mich auch! = Nice to meet you too!" },
+      tags: ["basic"],
     },
     {
       id: "dlg-im-kurs", type: "dialogue", target: "Freut mich auch!", register: "informal",

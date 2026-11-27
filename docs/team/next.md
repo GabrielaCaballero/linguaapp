@@ -4,7 +4,16 @@ Written 2026-11-21 for the next session. Newest first; move items to decisions.m
 
 ## To do
 
-(Nothing open: the goal step and the "when do you practise?" step were done on 2026-11-22, see decisions.md.)
+- **Catch-up review for learners already past the reworked units** (owner, 2026-11-28). Learners
+  past German u12 never get the new u01–u12 items (new verbs, the 29 conjugation tables, split
+  patterns), because new items only come from the current unit on. Add a "catch up" (e.g. a
+  card on Today, or new early items mixed into their lessons) so they get them too.
+- **Apply the German A0–A2 rework to the whole German course, then to every language**
+  (owner, 2026-11-28). Same method: a beginner-student agent + a teaching-expert agent review,
+  then the author reworks following docs/team/german-a1-redesign.md (verb → table → sentences,
+  one rule per pattern, meanings in every table, nothing used before it's taught). Widen
+  tests/evals/content/introduced.eval.ts (SCOPE) as each course/level is done: German u13–u36,
+  then Italian, French, Portuguese, English.
 
 ## Waiting on the owner
 - Supabase → SQL Editor: run `supabase/schema.sql` again (creates `content_reports` for "Report a

@@ -41,7 +41,7 @@ import { grammar } from "./grammar";
 
 export const course: CoursePack = {
   lang: "de",
-  version: "2.6.0",
+  version: "2.7.0",
   units: [u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20, u21, u22, u23, u24, u25, u26, u27, u28, u29, u30, u31, u32, u33, u34, u35, u36],
   placement,
   lexicon,

@@ -38,6 +38,7 @@ export function Feedback({
   cells,
   choice,
   mode,
+  copied,
 }: {
   t: Dict;
   item: Item;
@@ -61,6 +62,8 @@ export function Feedback({
   choice?: { picked: string; answer: string };
   /** The exercise, sent with a content report. */
   mode?: string;
+  /** The learner said "I don't know" and typed the answer shown: say so kindly, not "Not quite". */
+  copied?: boolean;
 }) {
   const btn = useRef<HTMLButtonElement>(null);
   const [more, setMore] = useState(false);
@@ -86,16 +89,16 @@ export function Feedback({
 
   const v = overridden ? "correct" : verdict;
   const choiceAnswerDiffers = !!choice && choice.answer !== item.target && choice.answer !== gl(item.gloss, base);
-  const cls = v === "correct" ? "ok" : v === "almost" ? "almost" : "miss";
-  const head = v === "correct" ? t.correct : v === "almost" ? t.almost : t.notQuite;
-  const icon = v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
+  const cls = copied ? "almost" : v === "correct" ? "ok" : v === "almost" ? "almost" : "miss";
+  const head = copied ? t.copiedHead : v === "correct" ? t.correct : v === "almost" ? t.almost : t.notQuite;
+  const icon = copied ? "check" : v === "correct" ? "check" : v === "almost" ? "tilde" : "x";
   const noteArg = check?.reason === "umlaut" ? umlautPair(check.detail?.got ?? "", check.detail?.want ?? item.target) : check?.detail?.want ?? item.target;
   const reasonNote = check?.note && v === "correct" ? t.notes[check.note]?.(item.target) : check?.reason && t.notes[check.reason] ? t.notes[check.reason](noteArg) : undefined;
   // The grammar line is for real mistakes; a typo or missing accent ("almost") gets no rule text.
   // A table counts as a real mistake when any cell is wrong, even if the table as a whole is "almost".
-  const realMistake = !overridden && (v === "wrong" || !!check?.ruleId || (cells ?? []).some((c) => c.verdict === "wrong"));
+  const realMistake = !overridden && !copied && (v === "wrong" || !!check?.ruleId || (cells ?? []).some((c) => c.verdict === "wrong"));
   const ruleLine = grammar && realMistake ? gl(grammar.short, base) : undefined;
-  const line = overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) ?? ruleLine : undefined);
+  const line = copied ? t.copiedLine : overridden ? t.countedRight : check?.feedback ?? reasonNote ?? (v !== "correct" ? per(item.note, base) ?? ruleLine : undefined);
   const annots = v !== "correct" && item.annot ? Object.entries(item.annot) : [];
   const missed = (cells ?? []).filter((c) => c.verdict !== "correct");
   const full = per(item.note, base);
@@ -125,7 +128,7 @@ export function Feedback({
             {t.youPicked}: <span style={{ textDecoration: "line-through" }}>{choice.picked}</span>
           </div>
         )}
-        {text && v !== "correct" && (
+        {text && v !== "correct" && !copied && (
           <div className="caption" style={{ marginTop: 4 }}>
             {t.yourAnswer}: <span lang={item.lang} style={{ textDecoration: "line-through" }}>{text}</span>
           </div>

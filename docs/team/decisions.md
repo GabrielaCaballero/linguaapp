@@ -421,3 +421,22 @@ Format: date · who · decision · why
   (`@media (hover: hover) and (pointer: fine)`), and focus is cleared on each new question.
 - Owner: the tortoise lets you pick the speed right there. The first tap plays slowly and shows
   Slow · Slower · Very slow under the buttons; a choice replays and is saved (same as Settings).
+
+## 2026-11-27 · German A0–A2 slower; lessons follow the written order; kinder copy message
+
+- Owner tried German: explanations without meanings, words used before taught ("wann"), verbs
+  before their conjugation, almost no tables. A beginner-student agent and a teaching-expert agent
+  reviewed u01–u12; plan in docs/team/german-a1-redesign.md; the German author agent reworked
+  u01–u12 (117 new items incl. 29 conjugation tables, 78 rewritten, patterns split into one rule
+  each, meanings on every rule table, grammar-term headers per explanation language).
+- Engine: a unit's new items come in the order the author wrote them (replaces 2026-11-16
+  "grammar patterns/tables first" and the reshuffle). Content check
+  tests/evals/content/introduced.eval.ts: nothing a learner must read before it's taught (German
+  A0–A2 for now).
+- Rule tables: words tappable for their meaning (also conjugated forms: fängt → anfangen);
+  `pattern.meanings` / grammar-card `table.meanings` per row; `table.head` cells may be {es, en};
+  `lexicon.names`.
+- "I don't know" → typing the shown answer says "Typed it!", not "Not quite" (it still counts as
+  a miss for the schedule, so the word comes back soon).
+- The "sure / guessing" question is gone (owner): the schedule uses right/wrong and timing.
+- Me: language chips wrap; no screen scrolls sideways.

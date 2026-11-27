@@ -23,10 +23,14 @@ export const grammar2: GrammarPoint[] = [
       { es: "En plural, añade -n al sustantivo si no termina ya en -n o -s: mit den Freunden.", en: "In the plural, add -n to the noun unless it already ends in -n or -s: mit den Freunden." },
     ],
     table: {
-      head: ["", "m", "f", "n", "Plural"],
+      head: ["", "m", "f", "n", { es: "plural", en: "plural" }],
       rows: [
         ["Nominativ", "der / ein", "die / eine", "das / ein", "die"],
         ["Dativ", "dem / einem", "der / einer", "dem / einem", "den (+ -n)"],
+      ],
+      meanings: [
+        { es: "sujeto (nominativo): el / un …", en: "subject (nominative): the / a …" },
+        { es: "tras mit, zu, bei… (dativo): al / a un …", en: "after mit, zu, bei… (dative): (to) the / a …" },
       ],
     },
     examples: [
@@ -64,6 +68,11 @@ export const grammar2: GrammarPoint[] = [
         ["zu", "zum Bahnhof", "zur Post"],
         ["bei", "beim Arzt", "bei der Bank"],
         ["von", "vom Bahnhof", "von der Post"],
+      ],
+      meanings: [
+        { es: "a: a la estación · al correo", en: "to: to the station · to the post office" },
+        { es: "en: en el médico · en el banco", en: "at: at the doctor's · at the bank" },
+        { es: "de: de la estación · del correo", en: "from: from the station · from the post office" },
       ],
     },
     examples: [
@@ -103,6 +112,12 @@ export const grammar2: GrammarPoint[] = [
         ["nehmen", "Nehmen Sie!", "Nimm!", "Nehmt!"],
         ["fahren", "Fahren Sie!", "Fahr!", "Fahrt!"],
         ["sein", "Seien Sie!", "Sei!", "Seid!"],
+      ],
+      meanings: [
+        { es: "ir: ¡Vaya! · ¡Ve! · ¡Vayan!", en: "to go: Go! (Sie · du · ihr)" },
+        { es: "tomar: ¡Tome! · ¡Toma! · ¡Tomen!", en: "to take: Take! (Sie · du · ihr)" },
+        { es: "ir (en vehículo): ¡Vaya! · ¡Ve! · ¡Vayan!", en: "to go by vehicle: Go! (Sie · du · ihr)" },
+        { es: "ser / estar: ¡Sea! · ¡Sé! · ¡Sean!", en: "to be: Be! (Sie · du · ihr)" },
       ],
     },
     examples: [
@@ -146,6 +161,14 @@ export const grammar2: GrammarPoint[] = [
         ["ihr", "habt gemacht", "habt gegessen"],
         ["sie / Sie", "haben gemacht", "haben gegessen"],
       ],
+      meanings: [
+        { es: "yo hice · comí", en: "I did · ate" },
+        { es: "tú hiciste · comiste", en: "you did · ate (du)" },
+        { es: "él, ella hizo · comió", en: "he, she did · ate" },
+        { es: "nosotros hicimos · comimos", en: "we did · ate" },
+        { es: "ustedes hicieron · comieron (de confianza)", en: "you did · ate (several friends)" },
+        { es: "ellos · usted: hicieron · comieron", en: "they · you (formal): did · ate" },
+      ],
     },
     examples: [
       { target: "Was hast du am Wochenende gemacht?", gloss: { es: "¿Qué hiciste el fin de semana?", en: "What did you do at the weekend?" } },
@@ -186,6 +209,14 @@ export const grammar2: GrammarPoint[] = [
         ["ihr", "seid gefahren", "seid aufgestanden"],
         ["sie / Sie", "sind gefahren", "sind aufgestanden"],
       ],
+      meanings: [
+        { es: "yo fui · me levanté", en: "I went · got up" },
+        { es: "tú fuiste · te levantaste", en: "you went · got up (du)" },
+        { es: "él, ella fue · se levantó", en: "he, she went · got up" },
+        { es: "nosotros fuimos · nos levantamos", en: "we went · got up" },
+        { es: "ustedes fueron · se levantaron (de confianza)", en: "you went · got up (several friends)" },
+        { es: "ellos · usted: fueron · se levantaron", en: "they · you (formal): went · got up" },
+      ],
     },
     examples: [
       { target: "Wir sind nach Hamburg gefahren.", gloss: { es: "Fuimos a Hamburgo.", en: "We went to Hamburg." } },
@@ -217,15 +248,24 @@ export const grammar2: GrammarPoint[] = [
       { es: "Regular → -t al final; irregular → -en (apréndelo con el verbo).", en: "Regular → -t at the end; irregular → -en (learn it with the verb)." },
     ],
     table: {
-      head: ["Typ", "Infinitiv", "Partizip II"],
+      head: [{ es: "forma", en: "pattern" }, { es: "infinitivo", en: "infinitive" }, { es: "participio", en: "past participle" }],
       rows: [
-        ["regelmäßig", "machen", "gemacht"],
-        ["unregelmäßig", "essen", "gegessen"],
-        ["trennbar", "einkaufen", "eingekauft"],
-        ["trennbar", "aufstehen", "aufgestanden"],
+        ["ge- … -t", "machen", "gemacht"],
+        ["ge- … -en", "essen", "gegessen"],
+        ["… ge …", "einkaufen", "eingekauft"],
+        ["… ge …", "aufstehen", "aufgestanden"],
         ["be- / ver- / er-", "besuchen", "besucht"],
         ["be- / ver- / er-", "verstehen", "verstanden"],
         ["-ieren", "telefonieren", "telefoniert"],
+      ],
+      meanings: [
+        { es: "regular: hacer → hecho", en: "regular: to do → done" },
+        { es: "irregular: comer → comido", en: "irregular: to eat → eaten" },
+        { es: "separable: hacer las compras → (hecho) las compras", en: "separable: to do the shopping → shopped" },
+        { es: "separable: levantarse → levantado", en: "separable: to get up → got up" },
+        { es: "sin ge-: visitar → visitado", en: "no ge-: to visit → visited" },
+        { es: "sin ge-: entender → entendido", en: "no ge-: to understand → understood" },
+        { es: "sin ge-: hablar por teléfono → hablado", en: "no ge-: to phone → phoned" },
       ],
     },
     examples: [
@@ -266,6 +306,14 @@ export const grammar2: GrammarPoint[] = [
         ["ihr", "wart", "hattet"],
         ["sie / Sie", "waren", "hatten"],
       ],
+      meanings: [
+        { es: "yo era / estaba · tenía", en: "I was · had" },
+        { es: "tú eras / estabas · tenías", en: "you were · had (du)" },
+        { es: "él, ella era / estaba · tenía", en: "he, she was · had" },
+        { es: "nosotros éramos / estábamos · teníamos", en: "we were · had" },
+        { es: "ustedes eran / estaban · tenían (de confianza)", en: "you were · had (several friends)" },
+        { es: "ellos · usted: eran / estaban · tenían", en: "they · you (formal): were · had" },
+      ],
     },
     examples: [
       { target: "Gestern war ich sehr müde.", gloss: { es: "Ayer estaba muy cansado.", en: "Yesterday I was very tired." } },
@@ -300,12 +348,18 @@ export const grammar2: GrammarPoint[] = [
       { es: "Termina con el verbo conjugado: …, weil ich Fieber habe.", en: "Finish with the conjugated verb: …, weil ich Fieber habe." },
     ],
     table: {
-      head: ["Hauptsatz", "Nebensatz mit weil"],
+      head: [{ es: "oración principal", en: "main clause" }, { es: "con weil (porque)", en: "with weil (because)" }],
       rows: [
         ["Ich bin krank.", "…, weil ich krank bin."],
         ["Ich habe Fieber.", "…, weil ich Fieber habe."],
         ["Ich muss arbeiten.", "…, weil ich arbeiten muss."],
         ["Ich habe schlecht geschlafen.", "…, weil ich schlecht geschlafen habe."],
+      ],
+      meanings: [
+        { es: "Estoy enfermo/a. · …porque estoy enfermo/a.", en: "I'm ill. · …because I'm ill." },
+        { es: "Tengo fiebre. · …porque tengo fiebre.", en: "I have a fever. · …because I have a fever." },
+        { es: "Tengo que trabajar. · …porque tengo que trabajar.", en: "I have to work. · …because I have to work." },
+        { es: "Dormí mal. · …porque dormí mal.", en: "I slept badly. · …because I slept badly." },
       ],
     },
     examples: [
@@ -337,7 +391,7 @@ export const grammar2: GrammarPoint[] = [
       { es: "Orden: Mir + tut/tun + der Kopf / die Füße + weh.", en: "Order: Mir + tut/tun + der Kopf / die Füße + weh." },
     ],
     table: {
-      head: ["Person", "Dativ", "Beispiel"],
+      head: [{ es: "persona", en: "person" }, { es: "dativo", en: "dative" }, { es: "ejemplo", en: "example" }],
       rows: [
         ["ich", "mir", "Mir tut der Kopf weh."],
         ["du", "dir", "Tut dir der Bauch weh?"],
@@ -346,6 +400,15 @@ export const grammar2: GrammarPoint[] = [
         ["wir", "uns", "Uns tun die Beine weh."],
         ["ihr", "euch", "Tut euch der Hals weh?"],
         ["Sie", "Ihnen", "Was tut Ihnen weh?"],
+      ],
+      meanings: [
+        { es: "Me duele la cabeza.", en: "My head hurts." },
+        { es: "¿Te duele la barriga?", en: "Does your stomach hurt?" },
+        { es: "A él le duele la espalda.", en: "His back hurts." },
+        { es: "A ella le duelen los pies.", en: "Her feet hurt." },
+        { es: "Nos duelen las piernas.", en: "Our legs hurt." },
+        { es: "¿Les duele la garganta? (de confianza)", en: "Does your throat hurt? (several friends)" },
+        { es: "¿Qué le duele (a usted)?", en: "What hurts? (formal)" },
       ],
     },
     examples: [
@@ -387,6 +450,14 @@ export const grammar2: GrammarPoint[] = [
         ["ihr", "müsst", "dürft", "sollt"],
         ["sie / Sie", "müssen", "dürfen", "sollen"],
       ],
+      meanings: [
+        { es: "yo tengo que · puedo (me dejan) · debo (me lo piden)", en: "I must · may · am supposed to" },
+        { es: "tú tienes que · puedes · debes", en: "you must · may · are supposed to (du)" },
+        { es: "él, ella tiene que · puede · debe", en: "he, she must · may · is supposed to" },
+        { es: "nosotros tenemos que · podemos · debemos", en: "we must · may · are supposed to" },
+        { es: "ustedes tienen que · pueden · deben (de confianza)", en: "you must · may · are supposed to (several friends)" },
+        { es: "ellos · usted: tienen que · pueden · deben", en: "they · you (formal): must · may · are supposed to" },
+      ],
     },
     examples: [
       { target: "Hier darf man nicht rauchen.", gloss: { es: "Aquí no se puede fumar.", en: "You mustn't smoke here." } },
@@ -420,13 +491,20 @@ export const grammar2: GrammarPoint[] = [
       { es: "Contrae si se puede: in dem → im, an dem → am, in das → ins, auf das → aufs.", en: "Contract where possible: in dem → im, an dem → am, in das → ins, auf das → aufs." },
     ],
     table: {
-      head: ["", "Wo? (Dativ)", "Wohin? (Akkusativ)"],
+      head: ["", { es: "Wo? (¿dónde?, dativo)", en: "Wo? (where?, dative)" }, { es: "Wohin? (¿adónde?, acusativo)", en: "Wohin? (where to?, accusative)" }],
       rows: [
         ["der Park", "im Park", "in den Park"],
         ["die Stadt", "in der Stadt", "in die Stadt"],
         ["das Bett", "auf dem Bett", "aufs Bett"],
         ["das Meer", "am Meer", "ans Meer"],
         ["die Berge", "in den Bergen", "in die Berge"],
+      ],
+      meanings: [
+        { es: "el parque: en el parque · al parque", en: "the park: in the park · into the park" },
+        { es: "la ciudad: en la ciudad · a la ciudad", en: "the town: in town · into town" },
+        { es: "la cama: sobre la cama · (poner) sobre la cama", en: "the bed: on the bed · onto the bed" },
+        { es: "el mar: junto al mar · al mar", en: "the sea: by the sea · to the seaside" },
+        { es: "las montañas: en la montaña · a la montaña", en: "the mountains: in · to the mountains" },
       ],
     },
     examples: [
@@ -460,7 +538,7 @@ export const grammar2: GrammarPoint[] = [
       { es: "Superlativo: am …-sten; tras -t o -d, am …-esten (am ältesten).", en: "Superlative: am …-sten; after -t or -d, am …-esten (am ältesten)." },
     ],
     table: {
-      head: ["Grundform", "Komparativ", "Superlativ"],
+      head: [{ es: "forma base", en: "base form" }, { es: "comparativo", en: "comparative" }, { es: "superlativo", en: "superlative" }],
       rows: [
         ["schnell", "schneller", "am schnellsten"],
         ["warm", "wärmer", "am wärmsten"],
@@ -469,6 +547,15 @@ export const grammar2: GrammarPoint[] = [
         ["gut", "besser", "am besten"],
         ["viel", "mehr", "am meisten"],
         ["gern", "lieber", "am liebsten"],
+      ],
+      meanings: [
+        { es: "rápido · más rápido · lo más rápido", en: "fast · faster · fastest" },
+        { es: "cálido · más cálido · lo más cálido", en: "warm · warmer · warmest" },
+        { es: "viejo · mayor · el mayor", en: "old · older · oldest" },
+        { es: "grande · más grande · lo más grande", en: "big · bigger · biggest" },
+        { es: "bueno, bien · mejor · lo mejor", en: "good · better · best" },
+        { es: "mucho · más · lo más", en: "much · more · most" },
+        { es: "con gusto · preferir · lo que más me gusta", en: "gladly · rather · most of all" },
       ],
     },
     examples: [
@@ -500,11 +587,16 @@ export const grammar2: GrammarPoint[] = [
       { es: "Si empiezas con morgen, heute, im Norden…, el verbo va 2.º y es detrás: Morgen wird es kalt.", en: "If you start with morgen, heute, im Norden…, the verb comes 2nd and es after it: Morgen wird es kalt." },
     ],
     table: {
-      head: ["es + Verb", "es ist + Adjektiv", "es wird + Adjektiv"],
+      head: [{ es: "es + verbo", en: "es + verb" }, { es: "es ist + adjetivo", en: "es ist + adjective" }, { es: "es wird + adjetivo", en: "es wird + adjective" }],
       rows: [
         ["Es regnet.", "Es ist kalt.", "Es wird kalt."],
         ["Es schneit.", "Es ist warm.", "Es wird warm."],
         ["Es donnert.", "Es ist windig.", "Es wird wärmer."],
+      ],
+      meanings: [
+        { es: "Llueve. · Hace frío. · Empieza a hacer frío.", en: "It's raining. · It's cold. · It's getting cold." },
+        { es: "Nieva. · Hace calor. · Empieza a hacer calor.", en: "It's snowing. · It's warm. · It's getting warm." },
+        { es: "Truena. · Hay viento. · Hace más calor.", en: "It's thundering. · It's windy. · It's getting warmer." },
       ],
     },
     examples: [

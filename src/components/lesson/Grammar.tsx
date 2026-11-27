@@ -6,25 +6,48 @@
 //   intro     → before a new pattern's first exercise: one line, table, steps, the classic mistake
 //   mistake   → from the feedback sheet: the classic mistake first, then one line and table
 import type { ReactNode } from "react";
-import type { BaseLang, GrammarPoint } from "@/content/schema";
+import type { BaseLang, Glossed, GrammarPoint, TargetLang } from "@/content/schema";
+import { WordHints } from "./WordHints";
 import type { Dict } from "@/lib/i18n";
 import { gl } from "@/lib/content";
 
 //   learn     → the learn card before its first try: one line, table, one example; the rest one tap away
 type Mode = "overview" | "learn" | "intro" | "mistake";
 
-export function GrammarTable({ table, lang, label }: { table: { head: string[]; rows: string[][] }; lang: string; label: string }) {
+/** A grammar table: header cells in the learner's language when the content gives them, every
+ *  course word tappable for its meaning, and each row's meaning underneath when there is one. */
+export function GrammarTable({ table, lang, label, base }: { table: { head: (string | Glossed)[]; rows: string[][]; meanings?: (Glossed | null)[] }; lang: string; label: string; base: BaseLang }) {
+  const tl = lang as TargetLang;
+  const cell = (c: string) => (c ? <WordHints text={c} lang={tl} base={base} /> : null);
   return (
     // Focusable region so keyboard users can scroll a wide table; the shadows show there is more.
     <div className="gtable-wrap" tabIndex={0} role="region" aria-label={label}>
       <table className="gtable" lang={lang}>
         <thead>
-          <tr>{table.head.map((h, k) => (h === "" ? <td key={k} aria-hidden="true" /> : <th key={k} scope="col">{h}</th>))}</tr>
+          <tr>
+            {table.head.map((h, k) =>
+              h === "" ? <td key={k} aria-hidden="true" /> : typeof h === "string" ? <th key={k} scope="col">{h}</th> : <th key={k} scope="col" lang={base}>{gl(h, base)}</th>,
+            )}
+          </tr>
         </thead>
         <tbody>
-          {table.rows.map((r, k) => (
-            <tr key={k}>{r.map((c, j) => (j === 0 ? <th key={j} scope="row">{c}</th> : <td key={j}>{c}</td>))}</tr>
-          ))}
+          {table.rows.map((r, k) => {
+            const m = table.meanings?.[k];
+            return (
+              <tr key={k}>
+                {r.map((c, j) =>
+                  j === 0 ? (
+                    <th key={j} scope="row">{cell(c)}</th>
+                  ) : (
+                    <td key={j}>
+                      {cell(c)}
+                      {j === r.length - 1 && m ? <span className="ptable-mean" lang={base}>{gl(m, base)}</span> : null}
+                    </td>
+                  ),
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -33,7 +56,7 @@ export function GrammarTable({ table, lang, label }: { table: { head: string[]; 
 
 export function GrammarCard({ point, base, t, mode = "intro", onOpen }: { point: GrammarPoint; base: BaseLang; t: Dict; mode?: Mode; onOpen?: () => void }) {
   const rule = <p style={{ margin: 0 }}>{gl(point.rule, base)}</p>;
-  const table = point.table && <GrammarTable table={point.table} lang={point.lang} label={gl(point.title, base)} />;
+  const table = point.table && <GrammarTable table={point.table} lang={point.lang} label={gl(point.title, base)} base={base} />;
   const steps = point.steps && point.steps.length > 0 && (
     <div>
       <div className="label" style={{ fontWeight: 600 }}>{t.howToWorkOut}</div>

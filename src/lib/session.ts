@@ -105,16 +105,12 @@ export function buildSession(i: BuildInput): Built {
   let newN = welcomeBack || i.kind === "review" ? 0 : i.kind === "new" ? 8 : newBudget(shift);
   if (i.kind === "auto" && !welcomeBack && reviewIds.length < 4) newN += 1; // a quiet day: one more new word
   const fresh = i.items.filter((x) => !i.cards[x.id] && (i.unitIndexOf(x) === 0 || i.unitIndexOf(x) >= i.startUnit));
-  // Like a coursebook: within a unit, the grammar (patterns, tables) comes early — but the unit
-  // opens on its easiest thing, a word or phrase ("Ciao"), not on a grammar puzzle.
-  const opener = new Map<number, string>();
-  for (const x of i.items) {
-    const u = i.unitIndexOf(x);
-    if (u > 0 && !opener.has(u) && (x.type === "word" || x.type === "phrase")) opener.set(u, x.id);
-  }
-  const rank = (x: Item) => (opener.get(i.unitIndexOf(x)) === x.id ? 0 : x.type === "pattern" || x.type === "paradigm" ? 1 : 2);
-  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1) || rank(a) - rank(b));
-  const newIds = interleave(fresh.map((x) => x.id), byId, false).slice(0, newN);
+  // New items come in the order the unit's author wrote them (owner + teaching review,
+  // 2026-11-27, replacing 2026-11-16 "grammar first"): a unit introduces its words and verbs, then
+  // the table that conjugates them, then the sentences and the harder step. Never reshuffled, so
+  // nothing appears before what it needs. (The sort is stable: file order within a unit.)
+  fresh.sort((a, b) => (i.unitIndexOf(a) || -1) - (i.unitIndexOf(b) || -1));
+  const newIds = fresh.map((x) => x.id).slice(0, newN);
   // Start with meaning, not an audio-only spelling guess.
   if (newIds.length > 1 && byId.get(newIds[0])?.type === "sound") {
     const k = newIds.findIndex((id) => byId.get(id)?.type !== "sound");

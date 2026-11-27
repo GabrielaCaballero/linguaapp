@@ -45,8 +45,6 @@ export const unit: Unit = {
       distractors: ["der Bein", "das Bier", "die Biene"],
       tags: ["body", "goethe-a1"],
     },
-
-    // ── At the doctor's ──────────────────────────────────────
     {
       id: "fuss", type: "word", pos: "noun", target: "der Fuß", gender: "m", plural: "die Füße",
       gloss: { es: "el pie", en: "the foot" },
@@ -54,6 +52,67 @@ export const unit: Unit = {
       note: { es: "zu Fuß = a pie.", en: "zu Fuß = on foot." },
       tags: ["body", "goethe-a1"],
     },
+
+    // ── What hurts: Mir tut … weh ────────────────────────────
+    {
+      id: "wehtun", type: "word", pos: "verb", target: "wehtun",
+      gloss: { es: "doler", en: "to hurt" },
+      forms: { er: "tut weh", sie: "tun weh", pp: "wehgetan", aux: "haben" },
+      distractors: ["wenden", "wehen", "tun"],
+      note: { es: "Como «doler», con dativo: Mir tut der Kopf weh.", en: "Takes the dative: Mir tut der Kopf weh (my head hurts)." },
+      tags: ["health", "separable"],
+    },
+    {
+      id: "mir-tut-bauch-weh", type: "phrase", pos: "phrase", target: "Mir tut der Bauch weh.",
+      gloss: { es: "Me duele la barriga (la panza).", en: "My stomach hurts." },
+      annot: {
+        Mir: { es: "a mí (me)", en: "(to) me" },
+        tut: { es: "duele (con weh: wehtun)", en: "hurts (with weh: wehtun)" },
+      },
+      distractors: ["Mich tut der Bauch weh.", "Ich tue der Bauch weh.", "Mir tun der Bauch weh."],
+      note: { es: "Fíjate en el orden: Mir + tut + la parte del cuerpo + weh.", en: "Note the order: Mir + tut + body part + weh." },
+      tags: ["health", "chunk", "dative"],
+    },
+    {
+      id: "ruecken-tut-weh", type: "sentence", target: "Mir tut der Rücken weh.",
+      gloss: { es: "Me duele la espalda.", en: "My back hurts." },
+      accept: [{ text: "Der Rücken tut mir weh." }],
+      errors: [{ text: "Mich tut der Rücken weh.", feedback: { es: "wehtun va con dativo: mir (no mich).", en: "wehtun takes the dative: mir (not mich)." } }],
+      distractors: ["Mich", "den", "tun"],
+      tags: ["health", "dative"],
+    },
+    {
+      id: "pat-weh", type: "pattern", target: "Mir tut der Kopf weh. · Mir tun die Füße weh.",
+      gloss: { es: "doler: tut weh / tun weh", en: "hurting: tut weh / tun weh" },
+      pattern: {
+        rule: {
+          es: "Como «doler»: la persona en dativo (mir, dir, ihm, ihr) y el verbo concuerda con la parte del cuerpo: tut (singular), tun (plural).",
+          en: "The person is in the dative (mir, dir, ihm, ihr) and the verb agrees with the body part: tut (singular), tun (plural).",
+        },
+        table: [["der Kopf", "Mir tut der Kopf weh."], ["die Füße", "Mir tun die Füße weh."], ["der Bauch", "Tut dir der Bauch weh?"]],
+        meanings: [
+          { es: "la cabeza: Me duele la cabeza.", en: "the head: My head hurts." },
+          { es: "los pies: Me duelen los pies.", en: "the feet: My feet hurt." },
+          { es: "la barriga: ¿Te duele la barriga?", en: "the stomach: Does your stomach hurt?" },
+        ],
+      },
+      question: {
+        prompt: { es: "Completa: «Ihm ___ die Füße weh.»", en: "Complete: 'Ihm ___ die Füße weh.'" },
+        options: ["tun", "tut", "tue", "tust"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-weh"], tags: ["grammar", "dative"],
+    },
+    {
+      id: "kopfschmerzen", type: "sentence", target: "Ich habe Kopfschmerzen.",
+      gloss: { es: "Me duele la cabeza.", en: "I have a headache." },
+      accept: [{ text: "Mir tut der Kopf weh." }, { text: "Der Kopf tut mir weh." }],
+      distractors: ["bin", "Kopf", "hat"],
+      note: { es: "Casi siempre en plural: die Kopfschmerzen, die Bauchschmerzen.", en: "Usually plural: Kopfschmerzen, Bauchschmerzen." },
+      tags: ["health"],
+    },
+
+    // ── At the doctor's ──────────────────────────────────────
     {
       id: "arzt", type: "word", pos: "noun", target: "der Arzt", gender: "m", plural: "die Ärzte",
       gloss: { es: "el médico", en: "the doctor" },
@@ -102,57 +161,10 @@ export const unit: Unit = {
       tags: ["health", "goethe-a1"],
     },
     {
-      id: "wehtun", type: "word", pos: "verb", target: "wehtun",
-      gloss: { es: "doler", en: "to hurt" },
-      forms: { "3sg": "tut weh", "3pl": "tun weh" },
-      distractors: ["wenden", "wehen", "tun"],
-      note: { es: "Como «doler», con dativo: Mir tut der Kopf weh.", en: "Takes the dative: Mir tut der Kopf weh (my head hurts)." },
-      tags: ["health", "separable"],
-    },
-    {
-      id: "sollen", type: "word", pos: "verb", target: "sollen",
-      gloss: { es: "deber (porque otro lo dice)", en: "to be supposed to / should" },
-      forms: { ich: "soll", du: "sollst", er: "soll" },
-      distractors: ["holen", "wollen", "sorgen"],
-      tags: ["modals", "goethe-a2"],
-    },
-    {
-      id: "duerfen", type: "word", pos: "verb", target: "dürfen",
-      gloss: { es: "poder (tener permiso)", en: "to be allowed to / may" },
-      forms: { ich: "darf", du: "darfst", er: "darf" },
-      distractors: ["drücken", "dulden", "müssen"],
-      tags: ["modals", "goethe-a1"],
-    },
-    {
-      id: "weil", type: "word", pos: "other", target: "weil",
-      gloss: { es: "porque", en: "because" },
-      distractors: ["wenn", "dass", "weit"],
-      note: { es: "Manda el verbo al final: …, weil ich krank bin.", en: "Sends the verb to the end: …, weil ich krank bin." },
-      tags: ["connectors", "goethe-a2"],
-    },
-
-    // ── Phrases & sentences ──────────────────────────────────
-    {
       id: "gute-besserung", type: "phrase", pos: "phrase", target: "Gute Besserung!",
       gloss: { es: "¡Que te mejores!", en: "Get well soon!" },
       distractors: ["Guten Besserung!", "Gute Besser!", "Gute Bessern!"],
       tags: ["health", "chunk"],
-    },
-    {
-      id: "kopfschmerzen", type: "sentence", target: "Ich habe Kopfschmerzen.",
-      gloss: { es: "Me duele la cabeza.", en: "I have a headache." },
-      accept: [{ text: "Mir tut der Kopf weh." }, { text: "Der Kopf tut mir weh." }],
-      distractors: ["bin", "Kopf", "hat"],
-      note: { es: "Casi siempre en plural: die Kopfschmerzen, die Bauchschmerzen.", en: "Usually plural: Kopfschmerzen, Bauchschmerzen." },
-      tags: ["health"],
-    },
-    {
-      id: "ruecken-tut-weh", type: "sentence", target: "Mir tut der Rücken weh.",
-      gloss: { es: "Me duele la espalda.", en: "My back hurts." },
-      accept: [{ text: "Der Rücken tut mir weh." }],
-      errors: [{ text: "Mich tut der Rücken weh.", feedback: { es: "wehtun va con dativo: mir (no mich).", en: "wehtun takes the dative: mir (not mich)." } }],
-      distractors: ["Mich", "den", "tun"],
-      tags: ["health", "dative"],
     },
     {
       id: "termin-machen", type: "sentence", target: "Ich möchte einen Termin machen.",
@@ -160,6 +172,161 @@ export const unit: Unit = {
       accept: [{ text: "Ich möchte einen Termin vereinbaren." }, { text: "Ich hätte gern einen Termin." }],
       distractors: ["ein", "mache", "Termine"],
       tags: ["health"],
+    },
+    {
+      id: "bleiben", type: "word", pos: "verb", target: "bleiben",
+      gloss: { es: "quedarse", en: "to stay" },
+      forms: { ich: "bleibe", du: "bleibst", er: "bleibt", wir: "bleiben", ihr: "bleibt", sie: "bleiben", pp: "geblieben", aux: "sein" },
+      distractors: ["bleichen", "leiben", "bilden"],
+      note: { es: "zu Hause bleiben = quedarse en casa; Perfekt con sein: ich bin geblieben.", en: "zu Hause bleiben = to stay at home; Perfekt with sein: ich bin geblieben." },
+      tags: ["verb", "health", "goethe-a1"],
+    },
+    {
+      id: "rauchen", type: "word", pos: "verb", target: "rauchen",
+      gloss: { es: "fumar", en: "to smoke" },
+      forms: { ich: "rauche", du: "rauchst", er: "raucht", wir: "rauchen", ihr: "raucht", sie: "rauchen", pp: "geraucht", aux: "haben" },
+      distractors: ["brauchen", "tauchen", "rufen"],
+      tags: ["verb", "health", "goethe-a1"],
+    },
+
+    // ── sollen: someone else says so ─────────────────────────
+    {
+      id: "sollen", type: "word", pos: "verb", target: "sollen",
+      gloss: { es: "deber (porque otro lo dice)", en: "to be supposed to / should" },
+      forms: { ich: "soll", du: "sollst", er: "soll", wir: "sollen", ihr: "sollt", sie: "sollen", pp: "gesollt", aux: "haben" },
+      distractors: ["holen", "wollen", "sorgen"],
+      tags: ["modals", "goethe-a2"],
+    },
+    {
+      id: "tab-sollen", type: "paradigm", target: "sollen — Präsens", spoken: "sollen",
+      gloss: { es: "sollen (deber, porque otro lo pide) — presente", en: "sollen (to be supposed to) — present" },
+      grammar: ["de-g-sollen-duerfen"],
+      paradigm: {
+        caption: { es: "Conjuga «sollen» (ich y er: sin terminación)", en: "Conjugate sollen (ich and er: no ending)" },
+        cells: [
+          { label: "ich", answer: "soll", ruleId: "de-g-sollen-duerfen" },
+          { label: "du", answer: "sollst", ruleId: "de-g-sollen-duerfen" },
+          { label: "er / sie / es", answer: "soll", ruleId: "de-g-sollen-duerfen" },
+          { label: "wir", answer: "sollen", ruleId: "de-g-sollen-duerfen" },
+          { label: "ihr", answer: "sollt", ruleId: "de-g-sollen-duerfen" },
+          { label: "sie / Sie", answer: "sollen", ruleId: "de-g-sollen-duerfen" },
+        ],
+      },
+      tags: ["grammar", "present", "table"],
+    },
+    {
+      id: "pat-sollen", type: "pattern", target: "Sie sollen im Bett bleiben.",
+      gloss: { es: "sollen: otra persona dice que lo hagas", en: "sollen: someone else tells you to" },
+      pattern: {
+        rule: {
+          es: "sollen es «deber» cuando otra persona lo dice o lo pide (el médico, el jefe): Der Arzt sagt, ich soll viel Tee trinken.",
+          en: "sollen means you're supposed to because someone else says so (the doctor, the boss): Der Arzt sagt, ich soll viel Tee trinken.",
+        },
+        table: [["Ich", "soll", "viel Tee", "trinken."], ["Du", "sollst", "im Bett", "bleiben."], ["Sie", "sollen", "nicht", "rauchen."]],
+        meanings: [
+          { es: "Debo tomar mucho té (me lo dijo el médico).", en: "I'm supposed to drink lots of tea." },
+          { es: "Tienes que quedarte en cama (te lo piden).", en: "You're to stay in bed." },
+          { es: "Usted no debe fumar (se lo piden).", en: "You're not supposed to smoke." },
+        ],
+      },
+      question: {
+        prompt: { es: "El médico te dijo que tomes mucho té. Se lo cuentas a un amigo:", en: "The doctor told you to drink lots of tea. You tell a friend:" },
+        options: ["Ich soll viel Tee trinken.", "Ich darf viel Tee trinken.", "Ich will viel Tee trinken.", "Ich kann viel Tee trinken."],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-sollen-duerfen"], tags: ["grammar", "modals"],
+    },
+    {
+      id: "im-bett-bleiben", type: "sentence", register: "formal", target: "Sie sollen drei Tage im Bett bleiben.",
+      gloss: { es: "Debe quedarse tres días en cama (lo dice el médico).", en: "You should stay in bed for three days (doctor's orders)." },
+      distractors: ["sollt", "ins", "bleibt"],
+      tags: ["health", "modals"],
+    },
+
+    // ── dürfen: allowed / not allowed ────────────────────────
+    {
+      id: "duerfen", type: "word", pos: "verb", target: "dürfen",
+      gloss: { es: "poder (tener permiso)", en: "to be allowed to / may" },
+      forms: { ich: "darf", du: "darfst", er: "darf", wir: "dürfen", ihr: "dürft", sie: "dürfen", pp: "gedurft", aux: "haben" },
+      distractors: ["drücken", "dulden", "müssen"],
+      tags: ["modals", "goethe-a1"],
+    },
+    {
+      id: "tab-duerfen", type: "paradigm", target: "dürfen — Präsens", spoken: "dürfen",
+      gloss: { es: "dürfen (tener permiso) — presente", en: "dürfen (to be allowed to) — present" },
+      grammar: ["de-g-sollen-duerfen"],
+      paradigm: {
+        caption: { es: "Conjuga «dürfen» (ü → a en singular)", en: "Conjugate dürfen (ü → a in the singular)" },
+        cells: [
+          { label: "ich", answer: "darf", ruleId: "de-g-sollen-duerfen" },
+          { label: "du", answer: "darfst", ruleId: "de-g-sollen-duerfen" },
+          { label: "er / sie / es", answer: "darf", ruleId: "de-g-sollen-duerfen" },
+          { label: "wir", answer: "dürfen", ruleId: "de-g-sollen-duerfen" },
+          { label: "ihr", answer: "dürft", ruleId: "de-g-sollen-duerfen" },
+          { label: "sie / Sie", answer: "dürfen", ruleId: "de-g-sollen-duerfen" },
+        ],
+      },
+      tags: ["grammar", "present", "table"],
+    },
+    {
+      id: "nicht-rauchen", type: "sentence", target: "Hier darf man nicht rauchen.",
+      gloss: { es: "Aquí no se puede fumar.", en: "Smoking isn't allowed here." },
+      distractors: ["muss", "dürfen", "raucht"],
+      tags: ["modals"],
+    },
+    {
+      id: "pat-sollen-duerfen", type: "pattern", target: "nicht müssen · nicht dürfen",
+      gloss: { es: "nicht müssen (no hace falta) o nicht dürfen (prohibido)", en: "nicht müssen (no need) or nicht dürfen (not allowed)" },
+      pattern: {
+        rule: {
+          es: "Con nicht, müssen y dürfen dicen cosas muy distintas: nicht müssen = no hace falta; nicht dürfen = está prohibido.",
+          en: "With nicht, müssen and dürfen mean very different things: nicht müssen = there's no need; nicht dürfen = it's not allowed.",
+        },
+        table: [["Du musst kommen."], ["Du musst nicht kommen."], ["Du darfst kommen."], ["Du darfst nicht kommen."]],
+        meanings: [
+          { es: "Tienes que venir.", en: "You have to come." },
+          { es: "No hace falta que vengas.", en: "You don't need to come." },
+          { es: "Puedes venir (tienes permiso).", en: "You may come." },
+          { es: "No puedes venir (está prohibido).", en: "You mustn't come." },
+        ],
+      },
+      question: {
+        prompt: { es: "No hace falta que vengas. ¿Cómo se dice?", en: "You don't need to come. How do you say it?" },
+        options: ["Du musst nicht kommen.", "Du darfst nicht kommen.", "Du sollst kommen.", "Du kannst nicht kommen."],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-sollen-duerfen"], tags: ["grammar", "modals"],
+    },
+
+    // ── weil: the verb goes to the end ───────────────────────
+    {
+      id: "weil", type: "word", pos: "other", target: "weil",
+      gloss: { es: "porque", en: "because" },
+      distractors: ["wenn", "dass", "weit"],
+      note: { es: "Manda el verbo al final: …, weil ich krank bin.", en: "Sends the verb to the end: …, weil ich krank bin." },
+      tags: ["connectors", "goethe-a2"],
+    },
+    {
+      id: "pat-weil", type: "pattern", target: "…, weil ich krank bin.",
+      gloss: { es: "weil: el verbo al final", en: "weil: verb at the end" },
+      pattern: {
+        rule: {
+          es: "Tras weil (y dass, wenn) el verbo conjugado va al final de la oración: Ich bleibe zu Hause, weil ich Fieber habe.",
+          en: "After weil (and dass, wenn) the conjugated verb goes to the end: Ich bleibe zu Hause, weil ich Fieber habe.",
+        },
+        table: [["Ich bin krank.", "…, weil ich krank bin."], ["Ich habe Fieber.", "…, weil ich Fieber habe."], ["Ich muss arbeiten.", "…, weil ich arbeiten muss."]],
+        meanings: [
+          { es: "Estoy enfermo/a. → …porque estoy enfermo/a.", en: "I'm ill. → …because I'm ill." },
+          { es: "Tengo fiebre. → …porque tengo fiebre.", en: "I have a fever. → …because I have a fever." },
+          { es: "Tengo que trabajar. → …porque tengo que trabajar.", en: "I have to work. → …because I have to work." },
+        ],
+      },
+      question: {
+        prompt: { es: "Elige: «Ich bleibe zu Hause, weil …»", en: "Choose: 'Ich bleibe zu Hause, weil …'" },
+        options: ["ich krank bin.", "ich bin krank.", "bin ich krank.", "krank ich bin."],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-weil"], tags: ["grammar", "weil", "word-order"],
     },
     {
       id: "weil-ich-krank-bin", type: "sentence", target: "Ich kann nicht kommen, weil ich krank bin.",
@@ -171,71 +338,6 @@ export const unit: Unit = {
       errors: [{ text: "Ich kann nicht kommen, weil ich bin krank.", feedback: { es: "Después de weil, el verbo va al final: weil ich krank bin.", en: "After weil, the verb goes last: weil ich krank bin." } }],
       distractors: ["denn", "ist", "kranke"],
       tags: ["health", "weil", "word-order"],
-    },
-    {
-      id: "im-bett-bleiben", type: "sentence", register: "formal", target: "Sie sollen drei Tage im Bett bleiben.",
-      gloss: { es: "Debe quedarse tres días en cama (lo dice el médico).", en: "You should stay in bed for three days (doctor's orders)." },
-      distractors: ["sollt", "ins", "bleibt"],
-      tags: ["health", "modals"],
-    },
-    {
-      id: "nicht-rauchen", type: "sentence", target: "Hier darf man nicht rauchen.",
-      gloss: { es: "Aquí no se puede fumar.", en: "Smoking isn't allowed here." },
-      distractors: ["muss", "dürfen", "raucht"],
-      tags: ["modals"],
-    },
-
-    // ── Patterns ─────────────────────────────────────────────
-    {
-      id: "pat-weil", type: "pattern", target: "…, weil ich krank bin.",
-      gloss: { es: "weil: el verbo al final", en: "weil: verb at the end" },
-      pattern: {
-        rule: {
-          es: "Tras weil (y dass, wenn) el verbo conjugado va al final de la oración: Ich bleibe zu Hause, weil ich Fieber habe.",
-          en: "After weil (and dass, wenn) the conjugated verb goes to the end: Ich bleibe zu Hause, weil ich Fieber habe.",
-        },
-        table: [["Ich bin krank.", "…, weil ich krank bin."], ["Ich habe Fieber.", "…, weil ich Fieber habe."], ["Ich muss arbeiten.", "…, weil ich arbeiten muss."]],
-      },
-      question: {
-        prompt: { es: "Elige: «Ich bleibe zu Hause, weil …»", en: "Choose: 'Ich bleibe zu Hause, weil …'" },
-        options: ["ich krank bin.", "ich bin krank.", "bin ich krank.", "krank ich bin."],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-weil"], tags: ["grammar", "weil", "word-order"],
-    },
-    {
-      id: "pat-weh", type: "pattern", target: "Mir tut der Kopf weh. · Mir tun die Füße weh.",
-      gloss: { es: "doler: tut weh / tun weh", en: "hurting: tut weh / tun weh" },
-      pattern: {
-        rule: {
-          es: "Como «doler»: la persona en dativo (mir, dir, ihm, ihr) y el verbo concuerda con la parte del cuerpo: tut (singular), tun (plural).",
-          en: "The person is in the dative (mir, dir, ihm, ihr) and the verb agrees with the body part: tut (singular), tun (plural).",
-        },
-        table: [["der Kopf", "Mir tut der Kopf weh."], ["die Füße", "Mir tun die Füße weh."], ["der Bauch", "Tut dir der Bauch weh?"]],
-      },
-      question: {
-        prompt: { es: "Completa: «Mir ___ die Beine weh.»", en: "Complete: 'Mir ___ die Beine weh.'" },
-        options: ["tun", "tut", "tue", "tust"],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-weh"], tags: ["grammar", "dative"],
-    },
-    {
-      id: "pat-sollen-duerfen", type: "pattern", target: "müssen · nicht müssen · nicht dürfen · sollen",
-      gloss: { es: "obligación, permiso y prohibición", en: "obligation, permission and prohibition" },
-      pattern: {
-        rule: {
-          es: "Ojo: nicht müssen = no hace falta; nicht dürfen = está prohibido. sollen = otra persona dice que debes.",
-          en: "Careful: nicht müssen = don't need to; nicht dürfen = mustn't. sollen = someone else says you should.",
-        },
-        table: [["Du musst kommen.", "obligación / obligation"], ["Du musst nicht kommen.", "no hace falta / no need"], ["Du darfst nicht kommen.", "prohibido / not allowed"], ["Du sollst kommen.", "te lo piden / you're asked to"]],
-      },
-      question: {
-        prompt: { es: "«No hace falta que vengas» es…", en: "'You don't need to come' is…" },
-        options: ["Du musst nicht kommen.", "Du darfst nicht kommen.", "Du sollst kommen.", "Du kannst nicht kommen."],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-sollen-duerfen"], tags: ["grammar", "modals"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────
@@ -285,12 +387,12 @@ export const unit: Unit = {
       id: "br-rezept", type: "bridge", onlyFor: "en", target: "das Rezept",
       gloss: { es: "la receta", en: "the prescription / the recipe" },
       question: {
-        prompt: { es: "«Der Arzt gibt mir ein Rezept» significa…", en: "'Der Arzt gibt mir ein Rezept' means…" },
+        prompt: { es: "«Ich brauche ein Rezept» significa…", en: "'Ich brauche ein Rezept' means…" },
         options: [
-          { es: "El médico me da una receta.", en: "The doctor gives me a prescription." },
-          { es: "El médico me da un recibo.", en: "The doctor gives me a receipt." },
-          { es: "El médico me da una cita.", en: "The doctor gives me an appointment." },
-          { es: "El médico me da un descanso.", en: "The doctor gives me a break." },
+          { es: "Necesito una receta.", en: "I need a prescription." },
+          { es: "Necesito un recibo.", en: "I need a receipt." },
+          { es: "Necesito una cita.", en: "I need an appointment." },
+          { es: "Necesito un descanso.", en: "I need a break." },
         ],
         answer: 0,
       },

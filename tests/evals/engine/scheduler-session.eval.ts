@@ -290,19 +290,15 @@ describe("lesson re-entry (P0-1, unit level)", () => {
 });
 
 describe("coursebook order: a unit's grammar comes before its words", () => {
-  it("a unit's grammar patterns/tables are introduced before any of its words are", () => {
+  it("new items are introduced in the order the unit's author wrote them (words before the grammar that uses them)", () => {
     const lang = "de" as const;
     const items = itemsFor(lang, null, "en");
     const idx = new Map(courses[lang].units.map((u) => [u.id, u.index]));
     const b = buildSession({ lang, items, cards: {}, reviews: [], startUnit: 4, unitIndexOf: (x) => idx.get(x.unit) ?? 0, now: NOW, minutes: 5, kind: "new" } as BuildInput);
-    const intros = b.tasks.filter((x) => x.role === "intro").map((x) => items.find((i) => i.id === x.itemId)!);
-    const unit4 = intros.filter((i) => i.unit === "de-u04");
-    // the unit's grammar is chosen before any of its words (tasks are then interleaved for practice)
-    const grammarIds = courses[lang].units.find((u) => u.id === "de-u04")!.items.filter((i) => i.type === "pattern" || i.type === "paradigm").map((i) => i.id);
-    const chosen = new Set(unit4.map((i) => i.id));
-    const words = unit4.filter((i) => i.type !== "pattern" && i.type !== "paradigm");
-    if (words.length) for (const g of grammarIds) expect(chosen.has(g), g).toBe(true);
-    expect(unit4.length).toBeGreaterThan(0);
+    const intros = b.tasks.filter((x) => x.role === "intro").map((x) => x.itemId);
+    const fileOrder = courses[lang].units.find((u) => u.id === "de-u04")!.items.map((i) => i.id).filter((id) => items.some((i) => i.id === id));
+    expect(intros.length).toBeGreaterThan(0);
+    expect(intros).toEqual(fileOrder.slice(0, intros.length));
   });
 });
 

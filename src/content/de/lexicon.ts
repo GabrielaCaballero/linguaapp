@@ -38,4 +38,9 @@ export const lexicon: Lexicon = {
     // C1 (units 25–30): particles that a typo must not turn into another word
     ["etwa", "etwas"], ["eh", "ehe"],
   ],
+  // People and places in units 1–12 (never "untaught words").
+  names: [
+    "Anna", "Lena", "Luca", "Marco", "Weber",
+    "Berlin", "Wien", "Hamburg", "München", "Köln", "Italien", "Spanien", "Türkei", "USA",
+  ],
 };

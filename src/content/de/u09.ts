@@ -44,8 +44,6 @@ export const unit: Unit = {
       note: { es: "krank (enfermo) + das Haus. Compuesto: toma el género de la última palabra.", en: "krank (ill) + das Haus. A compound takes the gender of its last part." },
       tags: ["town", "compound", "goethe-a1"],
     },
-
-    // ── Transport ────────────────────────────────────────────
     {
       id: "supermarkt", type: "word", pos: "noun", target: "der Supermarkt", gender: "m", plural: "die Supermärkte",
       gloss: { es: "el supermercado", en: "the supermarket" },
@@ -53,6 +51,8 @@ export const unit: Unit = {
       note: { es: "der Markt → der Supermarkt; plural con umlaut: die Supermärkte.", en: "der Markt → der Supermarkt; plural with umlaut: die Supermärkte." },
       tags: ["town", "compound", "goethe-a1"],
     },
+
+    // ── Transport ────────────────────────────────────────────
     {
       id: "bus", type: "word", pos: "noun", target: "der Bus", gender: "m", plural: "die Busse",
       gloss: { es: "el autobús", en: "the bus" },
@@ -63,6 +63,12 @@ export const unit: Unit = {
       id: "u-bahn", type: "word", pos: "noun", target: "die U-Bahn", gender: "f", plural: "die U-Bahnen",
       gloss: { es: "el metro (subte)", en: "the underground (subway)" },
       distractors: ["der U-Bahn", "die S-Bahn", "die Bahnhof"],
+      tags: ["transport", "goethe-a1"],
+    },
+    {
+      id: "auto", type: "word", pos: "noun", target: "das Auto", gender: "n", plural: "die Autos",
+      gloss: { es: "el auto (el coche, el carro)", en: "the car" },
+      distractors: ["der Auto", "die Autos", "das Boot"],
       tags: ["transport", "goethe-a1"],
     },
     {
@@ -81,19 +87,80 @@ export const unit: Unit = {
       tags: ["transport", "goethe-a1"],
     },
     {
+      id: "gehen", type: "word", pos: "verb", target: "gehen",
+      gloss: { es: "ir (a pie), caminar", en: "to go (on foot) / to walk" },
+      forms: { ich: "gehe", du: "gehst", er: "geht", wir: "gehen", ihr: "geht", sie: "gehen", pp: "gegangen", aux: "sein" },
+      distractors: ["geben", "gehören", "sehen"],
+      tags: ["transport", "goethe-a1"],
+    },
+    {
       id: "fahren", type: "word", pos: "verb", target: "fahren",
       gloss: { es: "ir (en un vehículo), manejar (conducir)", en: "to go (by vehicle) / to drive" },
-      forms: { ich: "fahre", du: "fährst", er: "fährt", pp: "ist gefahren" },
+      forms: { ich: "fahre", du: "fährst", er: "fährt", wir: "fahren", ihr: "fahrt", sie: "fahren", pp: "gefahren", aux: "sein" },
       distractors: ["fallen", "fragen", "führen"],
       note: { es: "a → ä en du/er: du fährst. A pie se usa «gehen».", en: "a → ä in du/er: du fährst. On foot, use 'gehen'." },
       tags: ["transport", "goethe-a1"],
     },
     {
-      id: "gehen", type: "word", pos: "verb", target: "gehen",
-      gloss: { es: "ir (a pie), caminar", en: "to go (on foot) / to walk" },
-      forms: { ich: "gehe", er: "geht", pp: "ist gegangen" },
-      distractors: ["geben", "gehören", "sehen"],
-      tags: ["transport", "goethe-a1"],
+      id: "tab-fahren", type: "paradigm", target: "fahren — Präsens", spoken: "fahren",
+      gloss: { es: "fahren (ir en vehículo) — presente", en: "fahren (to go by vehicle) — present" },
+      grammar: ["de-g-vokalwechsel"],
+      paradigm: {
+        caption: { es: "Conjuga «fahren» (a → ä con du y er/sie/es)", en: "Conjugate fahren (a → ä with du and er/sie/es)" },
+        cells: [
+          { label: "ich", answer: "fahre", ruleId: "de-g-vokalwechsel" },
+          { label: "du", answer: "fährst", ruleId: "de-g-vokalwechsel" },
+          { label: "er / sie / es", answer: "fährt", ruleId: "de-g-vokalwechsel" },
+          { label: "wir", answer: "fahren", ruleId: "de-g-vokalwechsel" },
+          { label: "ihr", answer: "fahrt", ruleId: "de-g-vokalwechsel" },
+          { label: "sie / Sie", answer: "fahren", ruleId: "de-g-vokalwechsel" },
+        ],
+      },
+      tags: ["grammar", "present", "table", "vowel-change"],
+    },
+    {
+      id: "er-faehrt-nach-hamburg", type: "sentence", target: "Er fährt morgen nach Hamburg.",
+      gloss: { es: "Mañana él va a Hamburgo.", en: "He's going to Hamburg tomorrow." },
+      accept: [{ text: "Morgen fährt er nach Hamburg." }],
+      errors: [{ text: "Er fahrt morgen nach Hamburg.", feedback: { es: "a → ä con er: er fährt.", en: "a → ä with er: er fährt." }, ruleId: "de-g-vokalwechsel" }],
+      distractors: ["Er fahrt morgen nach Hamburg.", "Er fährst morgen nach Hamburg.", "Er fährt morgen in Hamburg."],
+      tags: ["transport", "vowel-change"],
+    },
+
+    // ── mit + dative ─────────────────────────────────────────
+    {
+      id: "pat-dativ", type: "pattern", target: "mit dem Bus · mit der U-Bahn · mit dem Auto",
+      gloss: { es: "mit + dativo: mit dem Bus", en: "mit + dative: mit dem Bus" },
+      pattern: {
+        rule: {
+          es: "Después de mit (con; en autobús, en tren…) el artículo cambia (dativo): der → dem, das → dem, die → der, y en plural die → den (+ -n en el sustantivo).",
+          en: "After mit (with; by bus, by train…) the article changes (dative): der → dem, das → dem, die → der, and in the plural die → den (+ -n on the noun).",
+        },
+        table: [["der Bus", "mit dem Bus"], ["das Auto", "mit dem Auto"], ["die Bahn", "mit der Bahn"], ["die Freunde", "mit den Freunden"]],
+        meanings: [
+          { es: "el autobús → en autobús", en: "the bus → by bus" },
+          { es: "el auto → en auto", en: "the car → by car" },
+          { es: "el tren → en tren", en: "the train → by train" },
+          { es: "los amigos → con los amigos", en: "the friends → with the friends" },
+        ],
+      },
+      question: {
+        prompt: { es: "Completa (die U-Bahn): «Ich fahre mit ___ U-Bahn.»", en: "Complete (die U-Bahn): 'Ich fahre mit ___ U-Bahn.'" },
+        options: ["der", "die", "dem", "den"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-dativ"], tags: ["grammar", "dative"],
+    },
+    {
+      id: "mit-dem-bus", type: "sentence", target: "Ich fahre mit dem Bus.",
+      gloss: { es: "Voy en autobús.", en: "I'm going by bus." },
+      accept: [{ text: "Ich nehme den Bus." }],
+      errors: [
+        { text: "Ich fahre mit der Bus.", feedback: { es: "mit + dativo; der Bus es masculino → mit dem Bus.", en: "mit takes the dative; der Bus is masculine → mit dem Bus." } },
+        { text: "Ich fahre mit Bus.", feedback: { es: "Falta el artículo: mit dem Bus.", en: "The article is missing: mit dem Bus." } },
+      ],
+      distractors: ["den", "der", "gehe"],
+      tags: ["transport", "dative"],
     },
 
     // ── Directions ───────────────────────────────────────────
@@ -135,36 +202,11 @@ export const unit: Unit = {
       note: { es: "«Ist es weit?» = ¿está lejos?; ojo: weiß = blanco.", en: "'Ist es weit?' = is it far?; careful: weiß = white." },
       tags: ["directions", "goethe-a1"],
     },
-
-    // ── Phrases & sentences ──────────────────────────────────
-    {
-      id: "wie-komme-ich", type: "phrase", pos: "phrase", target: "Wie komme ich zum Bahnhof?",
-      gloss: { es: "¿Cómo llego a la estación de tren?", en: "How do I get to the station?" },
-      distractors: ["Wie komme ich zu Bahnhof?", "Wie komme ich zur Bahnhof?", "Wo komme ich zum Bahnhof?"],
-      tags: ["directions", "chunk"],
-    },
     {
       id: "wo-ist-die-post", type: "sentence", register: "formal", target: "Entschuldigung, wo ist die Post?",
       gloss: { es: "Disculpe, ¿dónde está el correo?", en: "Excuse me, where's the post office?" },
       distractors: ["wer", "der", "sind"],
       tags: ["directions"],
-    },
-    {
-      id: "gehen-sie-geradeaus", type: "sentence", register: "formal", target: "Gehen Sie geradeaus und dann links.",
-      gloss: { es: "Siga derecho y luego doble a la izquierda.", en: "Go straight ahead and then turn left." },
-      distractors: ["Geh", "rechts", "nach"],
-      tags: ["directions", "imperative"],
-    },
-    {
-      id: "mit-dem-bus", type: "sentence", target: "Ich fahre mit dem Bus.",
-      gloss: { es: "Voy en autobús.", en: "I'm going by bus." },
-      accept: [{ text: "Ich nehme den Bus." }],
-      errors: [
-        { text: "Ich fahre mit der Bus.", feedback: { es: "mit + dativo; der Bus es masculino → mit dem Bus.", en: "mit takes the dative; der Bus is masculine → mit dem Bus." } },
-        { text: "Ich fahre mit Bus.", feedback: { es: "Falta el artículo: mit dem Bus.", en: "The article is missing: mit dem Bus." } },
-      ],
-      distractors: ["den", "der", "gehe"],
-      tags: ["transport", "dative"],
     },
     {
       id: "neben-der-bank", type: "sentence", target: "Die Apotheke ist neben der Bank.",
@@ -179,31 +221,8 @@ export const unit: Unit = {
       distractors: ["nächster", "nah", "wann"],
       tags: ["transport"],
     },
-    {
-      id: "nehmen-sie-u-bahn", type: "sentence", register: "formal", target: "Nehmen Sie die U-Bahn.",
-      gloss: { es: "Tome el metro.", en: "Take the underground (formal)." },
-      distractors: ["Nimm", "der", "fahren"],
-      tags: ["transport", "imperative"],
-    },
 
-    // ── Patterns ─────────────────────────────────────────────
-    {
-      id: "pat-dativ", type: "pattern", target: "mit dem Bus · mit der U-Bahn · mit dem Auto",
-      gloss: { es: "el dativo después de mit, zu, bei, von, aus, nach", en: "the dative after mit, zu, bei, von, aus, nach" },
-      pattern: {
-        rule: {
-          es: "mit, zu, bei, von, aus, nach, seit siempre llevan dativo: der → dem, die → der, das → dem, plural → den (+ -n).",
-          en: "mit, zu, bei, von, aus, nach, seit always take the dative: der → dem, die → der, das → dem, plural → den (+ -n).",
-        },
-        table: [["", "Nominativ", "Dativ"], ["m", "der Bus", "mit dem Bus"], ["f", "die Bahn", "mit der Bahn"], ["n", "das Auto", "mit dem Auto"], ["pl", "die Freunde", "mit den Freunden"]],
-      },
-      question: {
-        prompt: { es: "Completa: «Ich fahre mit ___ Zug.» (der Zug)", en: "Complete: 'Ich fahre mit ___ Zug.' (der Zug)" },
-        options: ["dem", "den", "der", "das"],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-dativ"], tags: ["grammar", "dative"],
-    },
+    // ── zum, zur ─────────────────────────────────────────────
     {
       id: "pat-zum-zur", type: "pattern", target: "zum Bahnhof · zur Post",
       gloss: { es: "zum y zur", en: "zum and zur" },
@@ -213,6 +232,11 @@ export const unit: Unit = {
           en: "zu + dem = zum (masculine and neuter); zu + der = zur (feminine). Likewise bei + dem = beim, von + dem = vom.",
         },
         table: [["der Bahnhof", "zum Bahnhof"], ["das Kino", "zum Kino"], ["die Post", "zur Post"]],
+        meanings: [
+          { es: "a la estación", en: "to the station" },
+          { es: "al cine", en: "to the cinema" },
+          { es: "al correo", en: "to the post office" },
+        ],
       },
       question: {
         prompt: { es: "Completa: «Wie komme ich ___ Apotheke?» (die Apotheke)", en: "Complete: 'Wie komme ich ___ Apotheke?' (die Apotheke)" },
@@ -222,21 +246,75 @@ export const unit: Unit = {
       exercises: ["question"], grammar: ["de-g-zum-zur"], tags: ["grammar", "dative", "prepositions"],
     },
     {
-      id: "pat-imperativ", type: "pattern", target: "Gehen Sie! · Geh! · Nehmen Sie! · Nimm!",
-      gloss: { es: "el imperativo (Sie y du)", en: "the imperative (Sie and du)" },
+      id: "wie-komme-ich", type: "phrase", pos: "phrase", target: "Wie komme ich zum Bahnhof?",
+      gloss: { es: "¿Cómo llego a la estación de tren?", en: "How do I get to the station?" },
+      distractors: ["Wie komme ich zu Bahnhof?", "Wie komme ich zur Bahnhof?", "Wo komme ich zum Bahnhof?"],
+      tags: ["directions", "chunk"],
+    },
+
+    // ── The imperative: Sie, then du ─────────────────────────
+    {
+      id: "pat-imperativ-sie", type: "pattern", target: "Gehen Sie links! · Nehmen Sie die U-Bahn!",
+      gloss: { es: "el imperativo de usted: verbo + Sie", en: "the formal imperative: verb + Sie" },
       pattern: {
         rule: {
-          es: "Sie: verbo + Sie al principio (Gehen Sie links). du: raíz del verbo sin -st ni «du» (Geh!, Nimm!).",
-          en: "Sie: verb + Sie at the start (Gehen Sie links). du: the verb stem, without -st or 'du' (Geh!, Nimm!).",
+          es: "Para pedir o indicar algo a alguien de usted, pon el verbo (en infinitivo) al principio y luego Sie: Sie gehen links → Gehen Sie links!",
+          en: "To tell someone you call Sie what to do, put the verb (infinitive) first and then Sie: Sie gehen links → Gehen Sie links!",
         },
-        table: [["", "Sie", "du"], ["gehen", "Gehen Sie!", "Geh!"], ["nehmen", "Nehmen Sie!", "Nimm!"], ["fahren", "Fahren Sie!", "Fahr!"]],
+        table: [["Sie gehen links.", "Gehen Sie links!"], ["Sie nehmen die U-Bahn.", "Nehmen Sie die U-Bahn!"], ["Sie fahren mit dem Bus.", "Fahren Sie mit dem Bus!"]],
+        meanings: [
+          { es: "Usted va a la izquierda. → ¡Vaya a la izquierda!", en: "You go left. → Go left!" },
+          { es: "Usted toma el metro. → ¡Tome el metro!", en: "You take the underground. → Take the underground!" },
+          { es: "Usted va en autobús. → ¡Vaya en autobús!", en: "You go by bus. → Go by bus!" },
+        ],
       },
       question: {
-        prompt: { es: "«Tome el autobús» (formal) es…", en: "'Take the bus' (formal) is…" },
+        prompt: { es: "Tome el autobús (de usted). ¿Cómo se dice?", en: "Take the bus (formal). How do you say it?" },
         options: ["Nehmen Sie den Bus.", "Sie nehmen den Bus?", "Nimm Sie den Bus.", "Nehmen den Bus Sie."],
         answer: 0,
       },
       exercises: ["question"], grammar: ["de-g-imperativ"], tags: ["grammar", "imperative"],
+    },
+    {
+      id: "gehen-sie-geradeaus", type: "sentence", register: "formal", target: "Gehen Sie geradeaus und dann links.",
+      gloss: { es: "Siga derecho y luego doble a la izquierda.", en: "Go straight ahead and then turn left." },
+      distractors: ["Geh", "rechts", "nach"],
+      tags: ["directions", "imperative"],
+    },
+    {
+      id: "nehmen-sie-u-bahn", type: "sentence", register: "formal", target: "Nehmen Sie die U-Bahn.",
+      gloss: { es: "Tome el metro.", en: "Take the underground (formal)." },
+      distractors: ["Nimm", "der", "fahren"],
+      tags: ["transport", "imperative"],
+    },
+    {
+      id: "pat-imperativ", type: "pattern", target: "Geh! · Nimm! · Fahr!",
+      gloss: { es: "el imperativo de tú (du)", en: "the informal imperative (du)" },
+      pattern: {
+        rule: {
+          es: "Con du: toma la forma de du y quítale «du» y la terminación -st: du gehst → Geh!, du nimmst → Nimm! Solo la diéresis a → ä desaparece: du fährst → Fahr!",
+          en: "With du: take the du form and drop 'du' and the -st ending: du gehst → Geh!, du nimmst → Nimm! Only the a → ä umlaut disappears: du fährst → Fahr!",
+        },
+        table: [["du gehst", "Geh!"], ["du nimmst", "Nimm!"], ["du fährst", "Fahr!"]],
+        meanings: [
+          { es: "vas → ¡Ve!", en: "you go → Go!" },
+          { es: "tomas → ¡Toma!", en: "you take → Take!" },
+          { es: "vas (en vehículo) → ¡Ve! (sin ä)", en: "you go (by vehicle) → Go! (no ä)" },
+        ],
+      },
+      question: {
+        prompt: { es: "A un amigo: toma el autobús. ¿Cómo se dice?", en: "To a friend: take the bus. How do you say it?" },
+        options: ["Nimm den Bus!", "Nimmst den Bus!", "Nehmen den Bus!", "Nimm du den Bus!"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-imperativ"], tags: ["grammar", "imperative"],
+    },
+    {
+      id: "nimm-den-bus", type: "sentence", register: "informal", target: "Nimm den Bus!",
+      gloss: { es: "¡Toma el autobús!", en: "Take the bus!" },
+      errors: [{ text: "Nimmst den Bus!", feedback: { es: "En el imperativo de du se quita -st: Nimm!", en: "The du imperative drops -st: Nimm!" }, ruleId: "de-g-imperativ" }],
+      distractors: ["Nimmst den Bus!", "Nehm den Bus!", "Nimm du den Bus!"],
+      tags: ["transport", "imperative"],
     },
 
     // ── Listening & dialogue ─────────────────────────────────
