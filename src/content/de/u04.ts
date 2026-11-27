@@ -141,6 +141,134 @@ export const unit: Unit = {
       },
       tags: ["family", "gender", "goethe-a1"],
     },
+
+    // ── der, die, das · mein, meine ──────────────────────────
+    {
+      id: "pat-der-die-das", type: "pattern", target: "der · die · das",
+      gloss: { es: "los tres géneros", en: "the three genders" },
+      pattern: {
+        rule: {
+          es: "Cada sustantivo tiene género: der (masculino), die (femenino), das (neutro). Muchas veces no es lógico (das Mädchen), así que aprende siempre el artículo con la palabra. Pistas: -chen = das; -ung, -heit = die.",
+          en: "Every noun has a gender: der (masculine), die (feminine), das (neuter). It's often not logical (das Mädchen), so always learn the article with the noun. Hints: -chen = das; -ung, -heit = die.",
+        },
+        table: [["der", "die", "das"], ["der Vater", "die Mutter", "das Kind"], ["der Sohn", "die Tochter", "das Mädchen"]],
+        meanings: [
+          { es: "masculino · femenino · neutro", en: "masculine · feminine · neuter" },
+          { es: "el padre · la madre · el niño", en: "the father · the mother · the child" },
+          { es: "el hijo · la hija · la niña", en: "the son · the daughter · the girl" },
+        ],
+      },
+      question: {
+        prompt: { es: "¿Qué artículo? «___ Kind»", en: "Which article? '___ Kind'" },
+        options: ["das", "der", "die"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-der-die-das"], tags: ["grammar", "gender"],
+    },
+    {
+      id: "pat-mein-meine", type: "pattern", target: "mein · meine",
+      gloss: { es: "mi / mis", en: "my" },
+      pattern: {
+        rule: {
+          es: "«mein» con palabras der y das (mein Vater, mein Kind); «meine» con palabras die y en plural (meine Mutter, meine Eltern). «dein/deine» (tu) funciona igual.",
+          en: "'mein' with der and das nouns (mein Vater, mein Kind); 'meine' with die nouns and plurals (meine Mutter, meine Eltern). 'dein/deine' (your) works the same way.",
+        },
+        table: [["der", "mein Vater"], ["das", "mein Kind"], ["die", "meine Mutter"], ["die (pl.)", "meine Eltern"]],
+        meanings: [
+          { es: "mi padre", en: "my father" },
+          { es: "mi hijo / mi niño", en: "my child" },
+          { es: "mi madre", en: "my mother" },
+          { es: "plural: mis padres", en: "plural: my parents" },
+        ],
+      },
+      question: {
+        prompt: { es: "Completa: «Das ist ___ Schwester.»", en: "Complete: 'Das ist ___ Schwester.'" },
+        options: ["meine", "mein", "meinen", "meiner"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-possessiv"], tags: ["grammar", "possessive"],
+    },
+    {
+      id: "das-ist-meine-mutter", type: "sentence", target: "Das ist meine Mutter.",
+      gloss: { es: "Esta es mi madre.", en: "This is my mother." },
+      errors: [{
+        text: "Das ist mein Mutter.",
+        feedback: { es: "Mutter es femenino (die), así que «meine»: meine Mutter.", en: "Mutter is feminine (die), so it's 'meine': meine Mutter." },
+      }],
+      distractors: ["Das ist mein Mutter.", "Das sind meine Mutter.", "Das meine Mutter ist."],
+      tags: ["family"],
+    },
+
+    // ── haben ────────────────────────────────────────────────
+    {
+      id: "haben", type: "word", pos: "verb", target: "haben",
+      gloss: { es: "tener", en: "to have" },
+      forms: { ich: "habe", du: "hast", er: "hat", wir: "haben", ihr: "habt", sie: "haben" },
+      distractors: ["heben", "halten", "holen"],
+      note: { es: "Sin -b- con du y er/sie/es: du hast, er hat.", en: "No -b- with du and er/sie/es: du hast, er hat." },
+      grammar: ["de-g-haben"],
+      tags: ["verb", "haben", "goethe-a1"],
+    },
+    {
+      id: "pat-haben", type: "pattern", target: "ich habe, du hast, er hat",
+      gloss: { es: "haben (tener)", en: "haben (to have)" },
+      forms: { ich: "habe", du: "hast", "er/sie/es": "hat", Sie: "haben" },
+      pattern: {
+        rule: {
+          es: "haben (tener) es irregular: ich habe, du hast, er/sie/es hat, Sie haben.",
+          en: "haben (to have) is irregular: ich habe, du hast, er/sie/es hat, Sie haben.",
+        },
+        table: [["ich", "habe"], ["du", "hast"], ["er / sie / es", "hat"], ["Sie", "haben"]],
+        meanings: [
+          { es: "yo tengo", en: "I have" },
+          { es: "tú tienes", en: "you have (du)" },
+          { es: "él, ella tiene", en: "he, she has" },
+          { es: "usted tiene", en: "you have (formal)" },
+        ],
+      },
+      question: {
+        prompt: { es: "Completa: «Lena ___ eine Schwester.»", en: "Complete: 'Lena ___ eine Schwester.'" },
+        options: ["hat", "hast", "habt", "haben"],
+        answer: 0,
+      },
+      exercises: ["question"], grammar: ["de-g-haben"], tags: ["grammar", "haben"],
+    },
+    {
+      id: "tab-haben", type: "paradigm", target: "haben — Präsens", spoken: "haben",
+      gloss: { es: "haben (tener) — presente", en: "haben (to have) — present" },
+      grammar: ["de-g-haben"],
+      paradigm: {
+        caption: { es: "Conjuga «haben» en presente", en: "Conjugate haben in the present tense" },
+        cells: [
+          { label: "ich", answer: "habe", ruleId: "de-g-haben" },
+          { label: "du", answer: "hast", ruleId: "de-g-haben" },
+          { label: "er / sie / es", answer: "hat", ruleId: "de-g-haben" },
+          { label: "wir", answer: "haben", ruleId: "de-g-haben" },
+          { label: "ihr", answer: "habt", ruleId: "de-g-haben" },
+          { label: "sie / Sie", answer: "haben", ruleId: "de-g-haben" },
+        ],
+      },
+      tags: ["grammar", "present", "table", "haben"],
+    },
+    {
+      id: "ich-habe-schwester", type: "sentence", target: "Ich habe eine Schwester und zwei Brüder.",
+      gloss: { es: "Tengo una hermana y dos hermanos.", en: "I have a sister and two brothers." },
+      errors: [{
+        text: "Ich habe eine Schwester und zwei Bruder.",
+        feedback: { es: "El plural de Bruder lleva diéresis: die Brüder.", en: "The plural of Bruder has an umlaut: die Brüder." },
+      }],
+      distractors: ["Ich habe ein Schwester und zwei Brüder.", "Ich bin eine Schwester und zwei Brüder.", "Ich habe eine Schwester und zwei Bruders."],
+      tags: ["family", "haben"],
+    },
+    {
+      id: "hast-du-geschwister", type: "phrase", pos: "phrase", target: "Hast du Geschwister?", register: "informal",
+      gloss: { es: "¿Tienes hermanos?", en: "Do you have any brothers or sisters?" },
+      distractors: ["Hat du Geschwister?", "Bist du Geschwister?", "Hast du Schwester?"],
+      note: { es: "Con «Sie»: «Haben Sie Geschwister?».", en: "With Sie: 'Haben Sie Geschwister?'" },
+      tags: ["family", "register", "chunk"],
+    },
+
+    // ── More about people ────────────────────────────────────
     {
       id: "verheiratet", type: "word", pos: "adj", target: "verheiratet",
       gloss: { es: "casado/a", en: "married" },
@@ -163,89 +291,6 @@ export const unit: Unit = {
         en: "False friend: Chef = boss. A cook is 'der Koch'.",
       },
       tags: ["work", "false-friend"],
-    },
-
-    // ── Sentences ────────────────────────────────────────────
-    {
-      id: "das-ist-meine-mutter", type: "sentence", target: "Das ist meine Mutter.",
-      gloss: { es: "Esta es mi madre.", en: "This is my mother." },
-      errors: [{
-        text: "Das ist mein Mutter.",
-        feedback: { es: "Mutter es femenino (die), así que «meine»: meine Mutter.", en: "Mutter is feminine (die), so it's 'meine': meine Mutter." },
-      }],
-      distractors: ["Das ist mein Mutter.", "Das sind meine Mutter.", "Das meine Mutter ist."],
-      tags: ["family"],
-    },
-    {
-      id: "hast-du-geschwister", type: "phrase", pos: "phrase", target: "Hast du Geschwister?", register: "informal",
-      gloss: { es: "¿Tienes hermanos?", en: "Do you have any brothers or sisters?" },
-      distractors: ["Hat du Geschwister?", "Bist du Geschwister?", "Hast du Schwester?"],
-      note: { es: "Con «Sie»: «Haben Sie Geschwister?».", en: "With Sie: 'Haben Sie Geschwister?'" },
-      tags: ["family", "register", "chunk"],
-    },
-    {
-      id: "ich-habe-schwester", type: "sentence", target: "Ich habe eine Schwester und zwei Brüder.",
-      gloss: { es: "Tengo una hermana y dos hermanos.", en: "I have a sister and two brothers." },
-      errors: [{
-        text: "Ich habe eine Schwester und zwei Bruder.",
-        feedback: { es: "El plural de Bruder lleva diéresis: die Brüder.", en: "The plural of Bruder has an umlaut: die Brüder." },
-      }],
-      distractors: ["Ich habe ein Schwester und zwei Brüder.", "Ich bin eine Schwester und zwei Brüder.", "Ich habe eine Schwester und zwei Bruders."],
-      tags: ["family", "haben"],
-    },
-
-    // ── Patterns ─────────────────────────────────────────────
-    {
-      id: "pat-der-die-das", type: "pattern", target: "der · die · das",
-      gloss: { es: "los tres géneros", en: "the three genders" },
-      pattern: {
-        rule: {
-          es: "Cada sustantivo tiene género: der (masculino), die (femenino), das (neutro). Muchas veces no es lógico (das Mädchen), así que aprende siempre el artículo con la palabra. Pistas: -chen = das; -ung, -heit = die.",
-          en: "Every noun has a gender: der (masculine), die (feminine), das (neuter). It's often not logical (das Mädchen), so always learn the article with the noun. Hints: -chen = das; -ung, -heit = die.",
-        },
-        table: [["der", "die", "das"], ["der Vater", "die Mutter", "das Kind"], ["der Sohn", "die Tochter", "das Mädchen"]],
-      },
-      question: {
-        prompt: { es: "¿Qué artículo? «___ Kind»", en: "Which article? '___ Kind'" },
-        options: ["das", "der", "die"],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-der-die-das"], tags: ["grammar", "gender"],
-    },
-    {
-      id: "pat-mein-meine", type: "pattern", target: "mein · meine",
-      gloss: { es: "mi / mis", en: "my" },
-      pattern: {
-        rule: {
-          es: "«mein» con palabras der y das (mein Vater, mein Kind); «meine» con palabras die y en plural (meine Mutter, meine Eltern). «dein/deine» (tu) funciona igual.",
-          en: "'mein' with der and das nouns (mein Vater, mein Kind); 'meine' with die nouns and plurals (meine Mutter, meine Eltern). 'dein/deine' (your) works the same way.",
-        },
-        table: [["der", "mein Vater"], ["das", "mein Kind"], ["die", "meine Mutter"], ["plural", "meine Eltern"]],
-      },
-      question: {
-        prompt: { es: "Completa: «Das ist ___ Schwester.»", en: "Complete: 'Das ist ___ Schwester.'" },
-        options: ["meine", "mein", "meinen", "meiner"],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-possessiv"], tags: ["grammar", "possessive"],
-    },
-    {
-      id: "pat-haben", type: "pattern", target: "ich habe, du hast, er hat",
-      gloss: { es: "haben (tener)", en: "haben (to have)" },
-      forms: { ich: "habe", du: "hast", "er/sie/es": "hat", Sie: "haben" },
-      pattern: {
-        rule: {
-          es: "haben (tener) es irregular: ich habe, du hast, er/sie/es hat, Sie haben.",
-          en: "haben (to have) is irregular: ich habe, du hast, er/sie/es hat, Sie haben.",
-        },
-        table: [["ich", "habe"], ["du", "hast"], ["er / sie / es", "hat"], ["Sie", "haben"]],
-      },
-      question: {
-        prompt: { es: "Completa: «Lena ___ zwei Kinder.»", en: "Complete: 'Lena ___ zwei Kinder.'" },
-        options: ["hat", "hast", "habt", "haben"],
-        answer: 0,
-      },
-      exercises: ["question"], grammar: ["de-g-haben"], tags: ["grammar", "haben"],
     },
 
     // ── Sound ────────────────────────────────────────────────

@@ -56,7 +56,9 @@ export interface GrammarPoint {
   short: Glossed;             // one line, shown on the feedback sheet (≤ 120 chars)
   rule: Glossed;              // the rule card body (≤ 3 sentences)
   steps?: Glossed[];          // "how to work it out", in order (≤ 4)
-  table?: { head: string[]; rows: string[][] };
+  /** `head` cells may be written per explanation language (grammar terms: "Kompositum" → "palabra
+   *  compuesta"); `meanings`, aligned with `rows`, gives each row's meaning (owner, 2026-11-27). */
+  table?: { head: (string | Glossed)[]; rows: string[][]; meanings?: (Glossed | null)[] };
   examples: { target: string; gloss: Glossed }[];
   pitfalls?: Glossed;         // typical mistake for Spanish/English speakers
   /** native-level human review; cards without it are AI drafts (decisions.md 2026-11-16) */
@@ -94,7 +96,10 @@ export interface Item {
   note?: PerBase;             // ≤2 sentences, one rule + one example, written per base language
   onlyFor?: BaseLang;         // bridge items: show only for this explain-in language
   example?: { target: string; spoken?: string; gloss: Glossed };
-  pattern?: { rule: Glossed; table?: string[][] };
+  /** A rule card. `meanings`, aligned with `table` rows, says what each row means in the learner's
+   *  language (shown small under the row; null for a header row) — a beginner can't read a table of
+   *  words they don't know (owner, 2026-11-27). */
+  pattern?: { rule: Glossed; table?: string[][]; meanings?: (Glossed | null)[] };
   turns?: { who: "A" | "B"; target: string; spoken?: string; gloss: Glossed }[];
   question?: Mcq;             // listening / dialogue / pattern comprehension
   pair?: [string, string];    // minimal pair for sound items, e.g. ["nono","nonno"]
@@ -138,6 +143,8 @@ export interface PlacementItem {
 export interface Lexicon {
   closedClass: string[];          // articles, prepositions (+contractions), pronouns, auxiliaries: exact-match tokens
   minimalPairs: [string, string][]; // pairs a typo must NEVER bridge (nono/nonno, schon/schön, Staat/Stadt)
+  /** People and place names used in the course (Lena, Berlin): never "untaught words". */
+  names?: string[];
 }
 
 export interface CoursePack {

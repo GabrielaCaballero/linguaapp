@@ -31,6 +31,12 @@ export const grammar1: GrammarPoint[] = [
         ["dir / Ihnen", "Wie geht es dir?", "Wie geht es Ihnen?"],
         ["Gruß", "Tschüss!", "Auf Wiedersehen!"],
       ],
+      meanings: [
+        { es: "llamarse: ¿Cómo te llamas? · ¿Cómo se llama usted?", en: "to be called: What's your name? (du · Sie)" },
+        { es: "ser: ¿Eres Lena? · ¿Es usted la señora Weber?", en: "to be: Are you Lena? · Are you Mrs Weber?" },
+        { es: "a ti · a usted: ¿Cómo estás? · ¿Cómo está?", en: "(to) you: How are you? (du · Sie)" },
+        { es: "saludo: ¡Adiós! (informal · formal)", en: "greeting: Bye! · Goodbye!" },
+      ],
     },
     examples: [
       { target: "Guten Tag! Wie heißen Sie?", gloss: { es: "¡Buenos días! ¿Cómo se llama usted?", en: "Good day! What's your name? (formal)" } },
@@ -43,7 +49,144 @@ export const grammar1: GrammarPoint[] = [
     },
   },
 
+  {
+    id: "de-g-sein",
+    lang: "de",
+    cefr: "A0",
+    title: { es: "El verbo sein (ser / estar)", en: "The verb sein (to be)" },
+    short: {
+      es: "sein es irregular: ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie/Sie sind.",
+      en: "sein is irregular: ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie/Sie sind.",
+    },
+    rule: {
+      es: "sein significa a la vez «ser» y «estar»: Ich bin Lena (soy Lena), Ich bin in Berlin (estoy en Berlín). Es irregular, así que sus formas se aprenden de memoria. wir, sie (ellos) y Sie (usted) comparten la misma forma: sind.",
+      en: "sein means 'to be': Ich bin Lena, Ich bin in Berlin. It is irregular, so its forms are learned by heart. wir, sie (they) and Sie (formal you) share the same form: sind.",
+    },
+    steps: [
+      { es: "Empieza por las tres que más usarás: ich bin, du bist, Sie sind.", en: "Start with the three you'll use most: ich bin, du bist, Sie sind." },
+      { es: "Luego er/sie/es ist (él, ella es) y wir sind.", en: "Then er/sie/es ist (he, she is) and wir sind." },
+      { es: "ihr seid se usa poco al principio: es «ustedes» entre amigos.", en: "ihr seid is rarer at first: it's 'you' to several friends." },
+    ],
+    table: {
+      head: ["", "sein"],
+      rows: [
+        ["ich", "bin"],
+        ["du", "bist"],
+        ["er / sie / es", "ist"],
+        ["wir", "sind"],
+        ["ihr", "seid"],
+        ["sie / Sie", "sind"],
+      ],
+      meanings: [
+        { es: "yo soy / estoy", en: "I am" },
+        { es: "tú eres / estás", en: "you are (du)" },
+        { es: "él, ella es / está", en: "he, she, it is" },
+        { es: "nosotros somos / estamos", en: "we are" },
+        { es: "ustedes son / están (de confianza)", en: "you are (several friends)" },
+        { es: "ellos son · usted es", en: "they are · you are (formal)" },
+      ],
+    },
+    examples: [
+      { target: "Ich bin Lena.", gloss: { es: "Soy Lena.", en: "I'm Lena." } },
+      { target: "Bist du Luca?", gloss: { es: "¿Eres Luca?", en: "Are you Luca?" } },
+      { target: "Wir sind in Berlin.", gloss: { es: "Estamos en Berlín.", en: "We're in Berlin." } },
+    ],
+    pitfalls: {
+      es: "«ich ist» usa la forma de er/sie/es. Con ich siempre va bin: Ich bin Anna. Y con Sie (usted) va sind, no ist: Sind Sie Frau Weber?",
+      en: "'ich ist' uses the er/sie/es form. With ich it's always bin: Ich bin Anna. And with Sie it's sind, not ist: Sind Sie Frau Weber?",
+    },
+  },
+  {
+    id: "de-g-stamm-s",
+    lang: "de",
+    cefr: "A1.1",
+    title: { es: "du heißt: raíz en -s, -ß o -z", en: "du heißt: stems ending in -s, -ß or -z" },
+    short: {
+      es: "Si la raíz termina en -s, -ß o -z, con du solo se añade -t: du heißt, du reist, du tanzt.",
+      en: "If the stem ends in -s, -ß or -z, du only adds -t: du heißt, du reist, du tanzt.",
+    },
+    rule: {
+      es: "La terminación de du es -st, pero si la raíz ya termina en un sonido «s» (-s, -ß, -z), la s no se repite: heiß- + st → du heißt. Por eso las formas de du y de er/sie/es son iguales.",
+      en: "The du ending is -st, but if the stem already ends in an 's' sound (-s, -ß, -z), the s isn't doubled: heiß- + st → du heißt. So the du and er/sie/es forms are the same.",
+    },
+    steps: [
+      { es: "Busca la raíz: heißen → heiß-.", en: "Find the stem: heißen → heiß-." },
+      { es: "¿Termina en -s, -ß o -z? Con du añade solo -t: du heißt.", en: "Does it end in -s, -ß or -z? With du add just -t: du heißt." },
+      { es: "Las demás personas son normales: ich heiße, wir heißen.", en: "The other persons are regular: ich heiße, wir heißen." },
+    ],
+    table: {
+      head: ["", "heißen", "reisen", "tanzen"],
+      rows: [
+        ["ich", "heiße", "reise", "tanze"],
+        ["du", "heißt", "reist", "tanzt"],
+        ["er / sie / es", "heißt", "reist", "tanzt"],
+        ["wir", "heißen", "reisen", "tanzen"],
+      ],
+      meanings: [
+        { es: "yo me llamo · viajo · bailo", en: "I am called · travel · dance" },
+        { es: "tú te llamas · viajas · bailas", en: "you are called · travel · dance (du)" },
+        { es: "él, ella se llama · viaja · baila", en: "he, she is called · travels · dances" },
+        { es: "nosotros nos llamamos · viajamos · bailamos", en: "we are called · travel · dance" },
+      ],
+    },
+    examples: [
+      { target: "Wie heißt du?", gloss: { es: "¿Cómo te llamas?", en: "What's your name?" } },
+      { target: "Du reist gern.", gloss: { es: "Te gusta viajar.", en: "You like travelling." } },
+    ],
+    pitfalls: {
+      es: "«du heißst» o «du reisst» repiten la s. Basta con -t: du heißt, du reist.",
+      en: "'du heißst' or 'du reisst' double the s. Just add -t: du heißt, du reist.",
+    },
+  },
+
   // ── u02 ──────────────────────────────────────────────────
+  {
+    id: "de-g-vokalwechsel",
+    lang: "de",
+    cefr: "A1.1",
+    title: { es: "Verbos con cambio de vocal (du, er/sie/es)", en: "Verbs with a vowel change (du, er/sie/es)" },
+    short: {
+      es: "Algunos verbos cambian la vocal solo con du y er/sie/es: e → i (sprichst), e → ie (liest), a → ä (fährst).",
+      en: "Some verbs change their vowel only with du and er/sie/es: e → i (sprichst), e → ie (liest), a → ä (fährst).",
+    },
+    rule: {
+      es: "Unos cuantos verbos muy frecuentes cambian la vocal de la raíz, pero solo con du y con er/sie/es. Las terminaciones son las normales, y ich, wir, ihr y sie/Sie no cambian: ich spreche, du sprichst, wir sprechen.",
+      en: "A few very common verbs change the vowel of their stem, but only with du and er/sie/es. The endings are the normal ones, and ich, wir, ihr and sie/Sie don't change: ich spreche, du sprichst, wir sprechen.",
+    },
+    steps: [
+      { es: "¿La persona es du o er/sie/es? Si no, el verbo es regular.", en: "Is the person du or er/sie/es? If not, the verb is regular." },
+      { es: "Aprende qué cambio tiene el verbo: sprechen e → i, lesen e → ie, fahren a → ä.", en: "Learn which change the verb has: sprechen e → i, lesen e → ie, fahren a → ä." },
+      { es: "Cambia la vocal y pon la terminación normal: du sprich-st, er sprich-t.", en: "Change the vowel and add the normal ending: du sprich-st, er sprich-t." },
+    ],
+    table: {
+      head: ["", { es: "cambio", en: "change" }, "ich", "du", "er / sie / es"],
+      rows: [
+        ["sprechen", "e → i", "spreche", "sprichst", "spricht"],
+        ["nehmen", "e → i", "nehme", "nimmst", "nimmt"],
+        ["essen", "e → i", "esse", "isst", "isst"],
+        ["lesen", "e → ie", "lese", "liest", "liest"],
+        ["schlafen", "a → ä", "schlafe", "schläfst", "schläft"],
+        ["fahren", "a → ä", "fahre", "fährst", "fährt"],
+      ],
+      meanings: [
+        { es: "hablar", en: "to speak" },
+        { es: "tomar", en: "to take" },
+        { es: "comer", en: "to eat" },
+        { es: "leer", en: "to read" },
+        { es: "dormir", en: "to sleep" },
+        { es: "ir (en un vehículo)", en: "to go (by vehicle)" },
+      ],
+    },
+    examples: [
+      { target: "Sprichst du Deutsch?", gloss: { es: "¿Hablas alemán?", en: "Do you speak German?" } },
+      { target: "Lena liest gern.", gloss: { es: "A Lena le gusta leer.", en: "Lena likes reading." } },
+      { target: "Er fährt nach Berlin.", gloss: { es: "Él va a Berlín.", en: "He's going to Berlin." } },
+    ],
+    pitfalls: {
+      es: "«du sprechst» o «er fahrt» olvidan el cambio de vocal. Y al revés: con wir no cambia nada, «wir sprichen» está mal: wir sprechen.",
+      en: "'du sprechst' or 'er fahrt' forget the vowel change. And the other way round: nothing changes with wir, so 'wir sprichen' is wrong: wir sprechen.",
+    },
+  },
   {
     id: "de-g-verb-zwei",
     lang: "de",
@@ -64,13 +207,20 @@ export const grammar1: GrammarPoint[] = [
       { es: "Si el sujeto no está en el 1.er lugar, ponlo justo después del verbo.", en: "If the subject isn't in place 1, put it right after the verb." },
     ],
     table: {
-      head: ["1", "2 (Verb)", "…"],
+      head: ["1", { es: "2 (verbo)", en: "2 (verb)" }, "…"],
       rows: [
         ["Ich", "wohne", "in Berlin."],
         ["In Berlin", "wohne", "ich."],
         ["Jetzt", "wohne", "ich in Wien."],
         ["Marco", "kommt", "aus Italien."],
         ["Woher", "kommst", "du?"],
+      ],
+      meanings: [
+        { es: "Vivo en Berlín.", en: "I live in Berlin." },
+        { es: "En Berlín vivo yo.", en: "In Berlin is where I live." },
+        { es: "Ahora vivo en Viena.", en: "Now I live in Vienna." },
+        { es: "Marco es de Italia.", en: "Marco is from Italy." },
+        { es: "¿De dónde eres?", en: "Where are you from?" },
       ],
     },
     examples: [
@@ -103,13 +253,20 @@ export const grammar1: GrammarPoint[] = [
       { es: "Con «in» (dónde vives) pasa lo mismo: in der Schweiz, in den USA.", en: "The same happens with in (where you live): in der Schweiz, in den USA." },
     ],
     table: {
-      head: ["Land", "aus …", "in …"],
+      head: [{ es: "país", en: "country" }, "aus …", "in …"],
       rows: [
         ["Spanien", "aus Spanien", "in Spanien"],
         ["Österreich", "aus Österreich", "in Österreich"],
         ["die Schweiz", "aus der Schweiz", "in der Schweiz"],
         ["die Türkei", "aus der Türkei", "in der Türkei"],
         ["die USA", "aus den USA", "in den USA"],
+      ],
+      meanings: [
+        { es: "España: de España · en España", en: "Spain: from Spain · in Spain" },
+        { es: "Austria: de Austria · en Austria", en: "Austria: from Austria · in Austria" },
+        { es: "Suiza: de Suiza · en Suiza", en: "Switzerland: from · in Switzerland" },
+        { es: "Turquía: de Turquía · en Turquía", en: "Turkey: from Turkey · in Turkey" },
+        { es: "Estados Unidos: de · en Estados Unidos", en: "the USA: from · in the USA" },
       ],
     },
     examples: [
@@ -143,7 +300,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Revisa el 16 y el 17: sechzehn, siebzehn.", en: "Check 16 and 17: sechzehn, siebzehn." },
     ],
     table: {
-      head: ["", "Einer", "+ zehn"],
+      head: ["", { es: "unidad", en: "unit" }, "+ zehn"],
       rows: [
         ["13", "drei", "dreizehn"],
         ["14", "vier", "vierzehn"],
@@ -152,6 +309,15 @@ export const grammar1: GrammarPoint[] = [
         ["17", "sieben", "siebzehn"],
         ["18", "acht", "achtzehn"],
         ["19", "neun", "neunzehn"],
+      ],
+      meanings: [
+        { es: "tres → trece", en: "three → thirteen" },
+        { es: "cuatro → catorce", en: "four → fourteen" },
+        { es: "cinco → quince", en: "five → fifteen" },
+        { es: "seis → dieciséis", en: "six → sixteen" },
+        { es: "siete → diecisiete", en: "seven → seventeen" },
+        { es: "ocho → dieciocho", en: "eight → eighteen" },
+        { es: "nueve → diecinueve", en: "nine → nineteen" },
       ],
     },
     examples: [
@@ -184,7 +350,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Escríbelo junto; si la unidad es 1, usa ein: einunddreißig.", en: "Write it as one word; if the unit is 1, use ein: einunddreißig." },
     ],
     table: {
-      head: ["", "Zehner", "Beispiel"],
+      head: ["", { es: "decena", en: "tens" }, { es: "ejemplo", en: "example" }],
       rows: [
         ["20", "zwanzig", "einundzwanzig (21)"],
         ["30", "dreißig", "zweiunddreißig (32)"],
@@ -193,6 +359,15 @@ export const grammar1: GrammarPoint[] = [
         ["60", "sechzig", "sechsundsechzig (66)"],
         ["70", "siebzig", "siebenundsiebzig (77)"],
         ["80 · 90", "achtzig · neunzig", "neunundneunzig (99)"],
+      ],
+      meanings: [
+        { es: "veinte · veintiuno", en: "twenty · twenty-one" },
+        { es: "treinta · treinta y dos", en: "thirty · thirty-two" },
+        { es: "cuarenta · cuarenta y tres", en: "forty · forty-three" },
+        { es: "cincuenta · cincuenta y cinco", en: "fifty · fifty-five" },
+        { es: "sesenta · sesenta y seis", en: "sixty · sixty-six" },
+        { es: "setenta · setenta y siete", en: "seventy · seventy-seven" },
+        { es: "ochenta · noventa · noventa y nueve", en: "eighty · ninety · ninety-nine" },
       ],
     },
     examples: [
@@ -225,12 +400,18 @@ export const grammar1: GrammarPoint[] = [
       { es: "Responde con Ja o Nein.", en: "Answer with Ja or Nein." },
     ],
     table: {
-      head: ["Aussage", "Frage"],
+      head: [{ es: "afirmación", en: "statement" }, { es: "pregunta", en: "question" }],
       rows: [
         ["Du wohnst in Wien.", "Wohnst du in Wien?"],
         ["Sie sprechen Deutsch.", "Sprechen Sie Deutsch?"],
         ["Er ist zwanzig.", "Ist er zwanzig?"],
         ["Du hast ein Handy.", "Hast du ein Handy?"],
+      ],
+      meanings: [
+        { es: "Vives en Viena. · ¿Vives en Viena?", en: "You live in Vienna. · Do you live in Vienna?" },
+        { es: "Usted habla alemán. · ¿Habla usted alemán?", en: "You speak German. · Do you speak German?" },
+        { es: "Tiene veinte años. · ¿Tiene veinte años?", en: "He's twenty. · Is he twenty?" },
+        { es: "Tienes celular. · ¿Tienes celular?", en: "You have a mobile. · Do you have a mobile?" },
       ],
     },
     examples: [
@@ -271,6 +452,12 @@ export const grammar1: GrammarPoint[] = [
         ["der Bruder", "die Schwester", "das Handy"],
         ["der Mann", "die Frau", "das Land"],
       ],
+      meanings: [
+        { es: "el padre · la madre · el niño", en: "the father · the mother · the child" },
+        { es: "el hijo · la hija · la niña", en: "the son · the daughter · the girl" },
+        { es: "el hermano · la hermana · el celular", en: "the brother · the sister · the mobile" },
+        { es: "el hombre · la mujer · el país", en: "the man · the woman · the country" },
+      ],
     },
     examples: [
       { target: "Der Vater heißt Marco.", gloss: { es: "El padre se llama Marco.", en: "The father is called Marco." } },
@@ -309,6 +496,14 @@ export const grammar1: GrammarPoint[] = [
         ["wir", "haben"],
         ["ihr", "habt"],
         ["sie / Sie", "haben"],
+      ],
+      meanings: [
+        { es: "yo tengo", en: "I have" },
+        { es: "tú tienes", en: "you have (du)" },
+        { es: "él, ella tiene", en: "he, she, it has" },
+        { es: "nosotros tenemos", en: "we have" },
+        { es: "ustedes tienen (de confianza)", en: "you have (several friends)" },
+        { es: "ellos tienen · usted tiene", en: "they have · you have (formal)" },
       ],
     },
     examples: [
@@ -350,6 +545,12 @@ export const grammar1: GrammarPoint[] = [
         ["Nom. (der)", "der Kaffee", "die Milch", "das Wasser"],
         ["Akk. (der)", "den Kaffee", "die Milch", "das Wasser"],
       ],
+      meanings: [
+        { es: "sujeto: un café · una leche · un agua", en: "subject: a coffee · a milk · a water" },
+        { es: "objeto directo: un café · una leche · un agua", en: "direct object: a coffee · a milk · a water" },
+        { es: "sujeto: el café · la leche · el agua", en: "subject: the coffee · the milk · the water" },
+        { es: "objeto directo: el café · la leche · el agua", en: "direct object: the coffee · the milk · the water" },
+      ],
     },
     examples: [
       { target: "Ich möchte einen Kaffee, bitte.", gloss: { es: "Quisiera un café, por favor.", en: "I'd like a coffee, please." } },
@@ -381,11 +582,16 @@ export const grammar1: GrammarPoint[] = [
       { es: "¿Niegas un verbo o un adjetivo? → nicht.", en: "Negating a verb or an adjective? → nicht." },
     ],
     table: {
-      head: ["", "m", "f", "n", "Plural"],
+      head: ["", "m", "f", "n", "plural"],
       rows: [
         ["Nominativ", "kein", "keine", "kein", "keine"],
         ["Akkusativ", "keinen", "keine", "kein", "keine"],
         ["Beispiel", "keinen Saft", "keine Milch", "kein Brot", "keine Eier"],
+      ],
+      meanings: [
+        { es: "sujeto (nominativo): ningún · ninguna", en: "subject (nominative): no" },
+        { es: "objeto directo (acusativo): ningún · ninguna", en: "direct object (accusative): no" },
+        { es: "ejemplo: nada de jugo · leche · pan · huevos", en: "example: no juice · milk · bread · eggs" },
       ],
     },
     examples: [
@@ -396,6 +602,52 @@ export const grammar1: GrammarPoint[] = [
     pitfalls: {
       es: "«Ich trinke nicht Bier» copia «no tomo cerveza». Si el sustantivo va sin artículo o con ein, el alemán niega con kein: Ich trinke kein Bier.",
       en: "'Ich trinke nicht Bier' copies 'I don't drink beer'. When the noun has no article or has ein, German negates it with kein: Ich trinke kein Bier.",
+    },
+  },
+
+  {
+    id: "de-g-moechten",
+    lang: "de",
+    cefr: "A1.1",
+    title: { es: "möchte: pedir con amabilidad", en: "möchte: asking politely" },
+    short: {
+      es: "möchte = quisiera. ich y er/sie/es: möchte (sin -t); du möchtest, wir möchten.",
+      en: "möchte = would like. ich and er/sie/es: möchte (no -t); du möchtest, wir möchten.",
+    },
+    rule: {
+      es: "möchte es la forma amable de «querer»: Ich möchte einen Tee. Con ich y con er/sie/es la forma es la misma y no lleva -t: er möchte. Lo que pides es el objeto directo (acusativo): einen Kaffee.",
+      en: "möchte is the polite way to say what you want: Ich möchte einen Tee. ich and er/sie/es share the same form, with no -t: er möchte. What you ask for is the direct object (accusative): einen Kaffee.",
+    },
+    steps: [
+      { es: "Elige la persona: ich möchte, du möchtest, er möchte…", en: "Pick the person: ich möchte, du möchtest, er möchte…" },
+      { es: "Pon detrás lo que quieres, en acusativo: einen Kaffee, eine Milch.", en: "Put what you want after it, in the accusative: einen Kaffee, eine Milch." },
+    ],
+    table: {
+      head: ["", "möchten"],
+      rows: [
+        ["ich", "möchte"],
+        ["du", "möchtest"],
+        ["er / sie / es", "möchte"],
+        ["wir", "möchten"],
+        ["ihr", "möchtet"],
+        ["sie / Sie", "möchten"],
+      ],
+      meanings: [
+        { es: "yo quisiera", en: "I'd like" },
+        { es: "tú quisieras", en: "you'd like (du)" },
+        { es: "él, ella quisiera", en: "he, she would like" },
+        { es: "nosotros quisiéramos", en: "we'd like" },
+        { es: "ustedes quisieran (de confianza)", en: "you'd like (several friends)" },
+        { es: "ellos quisieran · usted quisiera", en: "they'd like · you'd like (formal)" },
+      ],
+    },
+    examples: [
+      { target: "Ich möchte einen Tee, bitte.", gloss: { es: "Quisiera un té, por favor.", en: "I'd like a tea, please." } },
+      { target: "Was möchten Sie?", gloss: { es: "¿Qué desea?", en: "What would you like?" } },
+    ],
+    pitfalls: {
+      es: "«er möchtet» añade la -t de los verbos normales, pero con er va sin -t: er möchte. Y «Ich will einen Kaffee» es correcto, pero suena brusco: mejor möchte.",
+      en: "'er möchtet' adds the usual -t, but er has no -t here: er möchte. And 'Ich will einen Kaffee' is correct but sounds pushy: use möchte.",
     },
   },
 
@@ -420,7 +672,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Cambia el artículo a die: der Stuhl → die Stühle.", en: "Change the article to die: der Stuhl → die Stühle." },
     ],
     table: {
-      head: ["", "Singular", "Plural"],
+      head: ["", { es: "singular", en: "singular" }, { es: "plural", en: "plural" }],
       rows: [
         ["-e", "der Tisch", "die Tische"],
         ["¨-e", "der Stuhl", "die Stühle"],
@@ -429,6 +681,15 @@ export const grammar1: GrammarPoint[] = [
         ["¨-er", "das Bad", "die Bäder"],
         ["–", "das Zimmer", "die Zimmer"],
         ["-s", "das Sofa", "die Sofas"],
+      ],
+      meanings: [
+        { es: "la mesa → las mesas", en: "the table → the tables" },
+        { es: "la silla → las sillas", en: "the chair → the chairs" },
+        { es: "el apartamento → los apartamentos", en: "the flat → the flats" },
+        { es: "la cama → las camas", en: "the bed → the beds" },
+        { es: "el baño → los baños", en: "the bathroom → the bathrooms" },
+        { es: "la habitación → las habitaciones", en: "the room → the rooms" },
+        { es: "el sofá → los sofás", en: "the sofa → the sofas" },
       ],
     },
     examples: [
@@ -469,6 +730,13 @@ export const grammar1: GrammarPoint[] = [
         ["Verb", "Ich wohne hier.", "Ich wohne nicht hier."],
         ["der / die / das", "Das ist das Bad.", "Das ist nicht das Bad."],
       ],
+      meanings: [
+        { es: "ein + sustantivo: Es una mesa. · No es una mesa.", en: "ein + noun: It's a table. · It's not a table." },
+        { es: "sin artículo: Tengo tiempo. · No tengo tiempo.", en: "no article: I have time. · I have no time." },
+        { es: "adjetivo: La cocina es grande. · No es grande.", en: "adjective: The kitchen is big. · It isn't big." },
+        { es: "verbo: Vivo aquí. · No vivo aquí.", en: "verb: I live here. · I don't live here." },
+        { es: "der / die / das: Es el baño. · No es el baño.", en: "der / die / das: It's the bathroom. · It isn't." },
+      ],
     },
     examples: [
       { target: "Die Wohnung hat keinen Balkon.", gloss: { es: "El departamento no tiene balcón.", en: "The flat has no balcony." } },
@@ -500,7 +768,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "En plural solo cambia la última parte: die Küchentische.", en: "In the plural only the last part changes: die Küchentische." },
     ],
     table: {
-      head: ["Kompositum", "1. Teil", "Grundwort"],
+      head: [{ es: "palabra compuesta", en: "compound" }, { es: "1.ª parte", en: "1st part" }, { es: "palabra base", en: "base word" }],
       rows: [
         ["das Wohnzimmer", "wohnen", "das Zimmer"],
         ["das Schlafzimmer", "schlafen", "das Zimmer"],
@@ -508,6 +776,14 @@ export const grammar1: GrammarPoint[] = [
         ["der Küchenstuhl", "die Küche", "der Stuhl"],
         ["die Haustür", "das Haus", "die Tür"],
         ["der Bahnhof", "die Bahn", "der Hof"],
+      ],
+      meanings: [
+        { es: "la sala = vivir + la habitación", en: "the living room = to live + the room" },
+        { es: "el dormitorio = dormir + la habitación", en: "the bedroom = to sleep + the room" },
+        { es: "la mesa de cocina = la cocina + la mesa", en: "the kitchen table = the kitchen + the table" },
+        { es: "la silla de cocina = la cocina + la silla", en: "the kitchen chair = the kitchen + the chair" },
+        { es: "la puerta de la casa = la casa + la puerta", en: "the front door = the house + the door" },
+        { es: "la estación = el tren + el patio", en: "the station = the railway + the yard" },
       ],
     },
     examples: [
@@ -542,7 +818,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Deja el prefijo al final de todo: Ich stehe um sieben auf.", en: "Put the prefix at the very end: Ich stehe um sieben auf." },
     ],
     table: {
-      head: ["1", "2", "…", "Ende"],
+      head: ["1", "2", "…", { es: "final", en: "end" }],
       rows: [
         ["Ich", "stehe", "um sieben", "auf."],
         ["Der Kurs", "fängt", "um neun", "an."],
@@ -550,6 +826,14 @@ export const grammar1: GrammarPoint[] = [
         ["Am Abend", "sehe", "ich", "fern."],
         ["Ich", "rufe", "dich morgen", "an."],
         ["Wann", "stehst", "du", "auf?"],
+      ],
+      meanings: [
+        { es: "Me levanto a las siete.", en: "I get up at seven." },
+        { es: "El curso empieza a las nueve.", en: "The course starts at nine." },
+        { es: "Hacemos las compras el sábado.", en: "We do the shopping on Saturday." },
+        { es: "Por la noche veo televisión.", en: "In the evening I watch TV." },
+        { es: "Te llamo mañana.", en: "I'll call you tomorrow." },
+        { es: "¿A qué hora te levantas?", en: "When do you get up?" },
       ],
     },
     examples: [
@@ -582,7 +866,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Cerca de la media se cuenta desde halb: fünf vor halb acht (7:25).", en: "Around half past, count from halb: fünf vor halb acht (7:25)." },
     ],
     table: {
-      head: ["", "informell", "offiziell"],
+      head: ["", { es: "coloquial", en: "everyday" }, { es: "oficial", en: "official" }],
       rows: [
         ["7:00", "sieben Uhr", "sieben Uhr"],
         ["7:10", "zehn nach sieben", "sieben Uhr zehn"],
@@ -591,6 +875,15 @@ export const grammar1: GrammarPoint[] = [
         ["7:30", "halb acht", "sieben Uhr dreißig"],
         ["7:45", "Viertel vor acht", "sieben Uhr fünfundvierzig"],
         ["19:30", "halb acht", "neunzehn Uhr dreißig"],
+      ],
+      meanings: [
+        { es: "las siete", en: "seven o'clock" },
+        { es: "las siete y diez", en: "ten past seven" },
+        { es: "las siete y cuarto", en: "quarter past seven" },
+        { es: "las siete y veinticinco", en: "twenty-five past seven" },
+        { es: "las siete y media", en: "half past seven" },
+        { es: "las ocho menos cuarto", en: "quarter to eight" },
+        { es: "las siete y media de la tarde", en: "half past seven in the evening" },
       ],
     },
     examples: [
@@ -623,13 +916,20 @@ export const grammar1: GrammarPoint[] = [
       { es: "¿La noche? → in der Nacht.", en: "Night? → in der Nacht." },
     ],
     table: {
-      head: ["", "Beispiele"],
+      head: ["", { es: "ejemplos", en: "examples" }],
       rows: [
         ["um + Uhrzeit", "um acht Uhr · um halb neun"],
         ["am + Tag", "am Montag · am Wochenende"],
         ["am + Tageszeit", "am Morgen · am Nachmittag · am Abend"],
         ["im + Monat / Jahreszeit", "im Mai · im Sommer"],
         ["Ausnahme", "in der Nacht"],
+      ],
+      meanings: [
+        { es: "um + hora: a las ocho · a las ocho y media", en: "um + clock time: at eight · at half past eight" },
+        { es: "am + día: el lunes · el fin de semana", en: "am + day: on Monday · at the weekend" },
+        { es: "am + parte del día: por la mañana · por la tarde · por la noche", en: "am + part of the day: in the morning · afternoon · evening" },
+        { es: "im + mes o estación: en mayo · en verano", en: "im + month or season: in May · in summer" },
+        { es: "excepción: de noche", en: "exception: at night" },
       ],
     },
     examples: [
@@ -673,6 +973,14 @@ export const grammar1: GrammarPoint[] = [
         ["ihr", "könnt", "wollt", "müsst"],
         ["sie / Sie", "können", "wollen", "müssen"],
       ],
+      meanings: [
+        { es: "yo puedo · quiero · tengo que", en: "I can · want · have to" },
+        { es: "tú puedes · quieres · tienes que", en: "you can · want · have to (du)" },
+        { es: "él, ella puede · quiere · tiene que", en: "he, she can · wants · has to" },
+        { es: "nosotros podemos · queremos · tenemos que", en: "we can · want · have to" },
+        { es: "ustedes pueden · quieren · tienen que (de confianza)", en: "you can · want · have to (several friends)" },
+        { es: "ellos · usted: pueden · quieren · tienen que", en: "they · you (formal): can · want · have to" },
+      ],
     },
     examples: [
       { target: "Ich kann heute nicht kommen.", gloss: { es: "Hoy no puedo venir.", en: "I can't come today." } },
@@ -705,12 +1013,18 @@ export const grammar1: GrammarPoint[] = [
       { es: "Lo favorito: am liebsten. Si empieza la frase, el verbo sigue en 2.º lugar: Am liebsten lese ich.", en: "Your favourite: am liebsten. If it starts the sentence, the verb stays in place 2: Am liebsten lese ich." },
     ],
     table: {
-      head: ["", "Beispiel"],
+      head: ["", { es: "ejemplo", en: "example" }],
       rows: [
         ["gern", "Ich lese gern."],
         ["lieber", "Ich lese lieber Romane."],
         ["am liebsten", "Am liebsten lese ich Krimis."],
         ["nicht gern", "Ich koche nicht gern."],
+      ],
+      meanings: [
+        { es: "Me gusta leer.", en: "I like reading." },
+        { es: "Prefiero leer novelas.", en: "I prefer reading novels." },
+        { es: "Lo que más me gusta leer son las novelas policiales.", en: "Most of all I like reading crime novels." },
+        { es: "No me gusta cocinar.", en: "I don't like cooking." },
       ],
     },
     examples: [
@@ -743,7 +1057,7 @@ export const grammar1: GrammarPoint[] = [
       { es: "Con hora: primero el día, luego la hora: am Montag um acht.", en: "With a time: day first, then the time: am Montag um acht." },
     ],
     table: {
-      head: ["", "am …", "jede Woche"],
+      head: ["", "am …", { es: "cada semana", en: "every week" }],
       rows: [
         ["Mo", "am Montag", "montags"],
         ["Di", "am Dienstag", "dienstags"],
@@ -752,6 +1066,15 @@ export const grammar1: GrammarPoint[] = [
         ["Fr", "am Freitag", "freitags"],
         ["Sa", "am Samstag", "samstags"],
         ["So", "am Sonntag", "sonntags"],
+      ],
+      meanings: [
+        { es: "el lunes · los lunes", en: "on Monday · on Mondays" },
+        { es: "el martes · los martes", en: "on Tuesday · on Tuesdays" },
+        { es: "el miércoles · los miércoles", en: "on Wednesday · on Wednesdays" },
+        { es: "el jueves · los jueves", en: "on Thursday · on Thursdays" },
+        { es: "el viernes · los viernes", en: "on Friday · on Fridays" },
+        { es: "el sábado · los sábados", en: "on Saturday · on Saturdays" },
+        { es: "el domingo · los domingos", en: "on Sunday · on Sundays" },
       ],
     },
     examples: [

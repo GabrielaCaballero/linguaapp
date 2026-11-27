@@ -60,7 +60,7 @@ export default function MePage() {
           <Icon name="settings" />
         </Link>
       </header>
-      <div className="row" style={{ marginTop: 8, gap: 10 }}>
+      <div className="row" style={{ marginTop: 8, gap: 10, flexWrap: "wrap" }}>
         {langs.map((l) => (
           <button key={l} className="chip" aria-pressed={l === lang} onClick={() => setActiveLang(l)} style={{ paddingLeft: 6 }}>
             <Seal lang={l} size={30} /> {LANG_NAME[l]}

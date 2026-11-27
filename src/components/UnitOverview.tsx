@@ -5,6 +5,7 @@
 import { useState } from "react";
 import type { BaseLang, Item, Unit } from "@/content/schema";
 import type { Dict } from "@/lib/i18n";
+import { PatternTable } from "./lesson/PatternTable";
 import { gl, grammarPoint, visible } from "@/lib/content";
 import { markSeen } from "@/lib/actions";
 import { GrammarCard, GrammarTable } from "./lesson/Grammar";
@@ -188,22 +189,10 @@ function GrammarBlock({ item, base, t }: { item: Item; base: BaseLang; t: Dict }
     <div className="card stack" style={{ gap: 10 }}>
       <b lang={item.lang} className="display">{item.target}</b>
       {item.pattern && <p style={{ margin: 0 }}>{gl(item.pattern.rule, base)}</p>}
-      {table && table.length > 1 && table[0][0] === "" && <GrammarTable table={{ head: table[0], rows: table.slice(1) }} lang={item.lang} label={item.target} />}
+      {table && table.length > 1 && table[0][0] === "" && <GrammarTable table={{ head: table[0], rows: table.slice(1), meanings: item.pattern?.meanings?.slice(1) }} lang={item.lang} label={item.target} base={base} />}
       {table && table.length > 1 && table[0][0] !== "" && (
         <div className="gtable-wrap" tabIndex={0} role="region" aria-label={item.target}>
-          <table className="gtable" lang={item.lang}>
-            {/* Content tables have a header row only when its first cell is empty (["", "kommen", "wohnen"]). */}
-            {table[0][0] === "" && (
-              <thead>
-                <tr>{table[0].map((h, k) => <th key={k} scope="col">{h}</th>)}</tr>
-              </thead>
-            )}
-            <tbody>
-              {(table[0][0] === "" ? table.slice(1) : table).map((r, k) => (
-                <tr key={k}>{r.map((c, j) => (j === 0 ? <th key={j} scope="row">{c}</th> : <td key={j}>{c}</td>))}</tr>
-              ))}
-            </tbody>
-          </table>
+          <PatternTable table={table} meanings={item.pattern?.meanings} lang={item.lang} base={base} />
         </div>
       )}
       {item.example && (

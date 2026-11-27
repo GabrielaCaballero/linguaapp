@@ -158,6 +158,7 @@ a { color: inherit; }
 .screen {
   max-width: 480px;
   margin-inline: auto;
+  overflow-x: clip; /* nothing wide (a row of languages) may scroll the page sideways */
   min-height: 100dvh;
   padding: calc(env(safe-area-inset-top) + var(--s4)) var(--gutter) calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s6));
   display: flex;
@@ -400,6 +401,11 @@ button.cell:active, a.cell:active { background: var(--surface-2); }
 .opt.is-miss { border-color: var(--miss); background: var(--miss-soft); box-shadow: none; animation: nudge 300ms var(--ease-out); }
 .opt.is-dim { opacity: 0.5; }
 .opt .mark { margin-left: auto; font-weight: 700; }
+/* Rule-card tables (PatternTable): tappable words, each row's meaning underneath. */
+.ptable { border-collapse: collapse; font-size: 0.9375rem; }
+.ptable td { padding: 4px 10px 4px 0; vertical-align: top; }
+.ptable td.strong { font-weight: 600; }
+.ptable-mean { display: block; font-weight: 400; font-size: var(--t-caption); color: var(--text-2); }
 .opt-tl { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
 
 @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.05); } 100% { transform: scale(1); } }

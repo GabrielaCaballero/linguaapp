@@ -18,7 +18,7 @@ export const unit: Unit = {
   ],
   icon: "🔢",
   items: build("de", 3, "A1.1", [
-    // ── Numbers ──────────────────────────────────────────────
+    // ── Numbers 0–12 ─────────────────────────────────────────
     num("null", "null", "cero (0)", "zero (0)", ["nur", "voll", "neun"], {
       note: { es: "Los números de teléfono se dicen cifra por cifra: null eins sieben…", en: "Phone numbers are read digit by digit: null eins sieben…" },
     }),
@@ -49,6 +49,8 @@ export const unit: Unit = {
     num("zehn", "zehn", "diez (10)", "ten (10)", ["zehnte", "zwanzig", "sehen"]),
     num("elf", "elf", "once (11)", "eleven (11)", ["eins", "zwölf", "elfte"]),
     num("zwoelf", "zwölf", "doce (12)", "twelve (12)", ["zwanzig", "zwei", "zwölfte"]),
+
+    // ── 13–19 ────────────────────────────────────────────────
     {
       id: "pat-zehn", type: "pattern", target: "dreizehn, sechzehn, siebzehn",
       gloss: { es: "13–19: unidad + zehn", en: "13–19: unit + zehn" },
@@ -58,6 +60,13 @@ export const unit: Unit = {
           en: "13–19 = unit + zehn: dreizehn, vierzehn. Watch out: sechzehn (no -s) and siebzehn (no -en).",
         },
         table: [["13", "dreizehn"], ["14", "vierzehn"], ["16", "sechzehn"], ["17", "siebzehn"], ["19", "neunzehn"]],
+        meanings: [
+          { es: "trece (drei + zehn)", en: "thirteen (drei + zehn)" },
+          { es: "catorce (vier + zehn)", en: "fourteen (vier + zehn)" },
+          { es: "dieciséis (sechs sin -s)", en: "sixteen (sechs without -s)" },
+          { es: "diecisiete (sieben sin -en)", en: "seventeen (sieben without -en)" },
+          { es: "diecinueve (neun + zehn)", en: "nineteen (neun + zehn)" },
+        ],
       },
       question: {
         prompt: { es: "¿Cómo se dice 16?", en: "How do you say 16?" },
@@ -66,7 +75,24 @@ export const unit: Unit = {
       },
       exercises: ["question"], grammar: ["de-g-zehn"], tags: ["grammar", "numbers"],
     },
+
+    // ── The tens, then 21–99 ─────────────────────────────────
     num("zwanzig", "zwanzig", "veinte (20)", "twenty (20)", ["zwölf", "zweizig", "zwanzigste"]),
+    num("dreissig", "dreißig", "treinta (30)", "thirty (30)", ["dreizig", "dreizehn", "dreißigste"], {
+      note: { es: "Es la única decena con ß; las demás terminan en -zig: vierzig.", en: "The only tens word with ß; the others end in -zig: vierzig." },
+    }),
+    num("vierzig", "vierzig", "cuarenta (40)", "forty (40)", ["vierzehn", "vierte", "fünfzig"]),
+    num("fuenfzig", "fünfzig", "cincuenta (50)", "fifty (50)", ["fünfzehn", "fünfte", "sechzig"], {
+      note: { es: "Ojo: sechzig (sin -s) y siebzig (sin -en), como en sechzehn y siebzehn.", en: "Watch out: sechzig (no -s) and siebzig (no -en), as in sechzehn and siebzehn." },
+    }),
+    num("sechzig", "sechzig", "sesenta (60)", "sixty (60)", ["sechzehn", "sechste", "siebzig"], {
+      note: { es: "Sin -s: sechzig (como sechzehn).", en: "No -s: sechzig (like sechzehn)." },
+    }),
+    num("siebzig", "siebzig", "setenta (70)", "seventy (70)", ["siebzehn", "sieben", "sechzig"], {
+      note: { es: "Sin -en: siebzig (como siebzehn).", en: "No -en: siebzig (like siebzehn)." },
+    }),
+    num("achtzig", "achtzig", "ochenta (80)", "eighty (80)", ["achtzehn", "achtel", "neunzig"]),
+    num("neunzig", "neunzig", "noventa (90)", "ninety (90)", ["neunzehn", "neunte", "achtzig"]),
     {
       id: "pat-einundzwanzig", type: "pattern", target: "einundzwanzig",
       gloss: { es: "21: «uno y veinte»", en: "21: 'one-and-twenty'" },
@@ -76,6 +102,12 @@ export const unit: Unit = {
           en: "From 21 on, say the unit first: einundzwanzig ('one-and-twenty'), dreiundvierzig (43). It's written as one word.",
         },
         table: [["21", "einundzwanzig"], ["35", "fünfunddreißig"], ["48", "achtundvierzig"], ["99", "neunundneunzig"]],
+        meanings: [
+          { es: "uno y veinte", en: "one-and-twenty" },
+          { es: "cinco y treinta", en: "five-and-thirty" },
+          { es: "ocho y cuarenta", en: "eight-and-forty" },
+          { es: "nueve y noventa", en: "nine-and-ninety" },
+        ],
       },
       question: {
         prompt: { es: "¿Cómo se dice 32?", en: "How do you say 32?" },
@@ -84,13 +116,6 @@ export const unit: Unit = {
       },
       exercises: ["question"], grammar: ["de-g-einundzwanzig"], tags: ["grammar", "numbers"],
     },
-    num("dreissig", "dreißig", "treinta (30)", "thirty (30)", ["dreizig", "dreizehn", "dreißigste"], {
-      note: { es: "Es la única decena con ß; las demás terminan en -zig: vierzig.", en: "The only tens word with ß; the others end in -zig: vierzig." },
-    }),
-    num("vierzig", "vierzig", "cuarenta (40)", "forty (40)", ["vierzehn", "vierte", "fünfzig"]),
-    num("fuenfzig", "fünfzig", "cincuenta (50)", "fifty (50)", ["fünfzehn", "fünfte", "sechzig"], {
-      note: { es: "Ojo: sechzig (sin -s) y siebzig (sin -en), como en sechzehn y siebzehn.", en: "Watch out: sechzig (no -s) and siebzig (no -en), as in sechzehn and siebzehn." },
-    }),
     num("hundert", "hundert", "cien (100)", "a hundred (100)", ["tausend", "hundertste", "hunderte"], {
       accept: [{ text: "einhundert" }],
     }),
@@ -105,6 +130,7 @@ export const unit: Unit = {
       }],
       distractors: ["Wie alt hast du?", "Wie viel bist du?", "Wie alt sind du?"],
       note: { es: "Con «Sie»: «Wie alt sind Sie?».", en: "Formal: 'Wie alt sind Sie?'" },
+      annot: { alt: { es: "viejo, de edad (¿qué edad tienes?)", en: "old" } },
       tags: ["age", "register", "chunk"],
     },
     {
@@ -116,6 +142,7 @@ export const unit: Unit = {
         feedback: { es: "La edad va con «sein»: Ich bin dreißig (Jahre alt).", en: "Age uses 'sein': Ich bin dreißig (Jahre alt)." },
       }],
       distractors: ["Ich habe dreißig Jahre.", "Ich bin dreißig Jahr alt.", "Ich bin alt dreißig Jahre."],
+      annot: { Jahre: { es: "años", en: "years" }, alt: { es: "de edad (literalmente «viejo»)", en: "old" } },
       tags: ["age"],
     },
 
@@ -139,6 +166,7 @@ export const unit: Unit = {
       }],
       distractors: ["Wie ist deine Telefonnummer?", "Wie ist Ihr Telefonnummer?", "Wie viel ist Ihre Telefonnummer?"],
       note: { es: "Con «du»: «Wie ist deine Telefonnummer?».", en: "With du: 'Wie ist deine Telefonnummer?'" },
+      annot: { Ihre: { es: "su (de usted)", en: "your (formal)" } },
       tags: ["contact", "register", "chunk"],
     },
     {
@@ -157,6 +185,7 @@ export const unit: Unit = {
     {
       id: "buchstabieren", type: "word", pos: "verb", target: "buchstabieren",
       gloss: { es: "deletrear", en: "to spell (out)" },
+      forms: { ich: "buchstabiere", du: "buchstabierst", er: "buchstabiert", wir: "buchstabieren", ihr: "buchstabiert", sie: "buchstabieren" },
       distractors: ["buchstäblich", "bestellen", "studieren"],
       example: {
         target: "Können Sie das bitte buchstabieren?",
@@ -173,10 +202,15 @@ export const unit: Unit = {
           en: "In yes/no questions the verb goes first: Du wohnst in Wien. → Wohnst du in Wien?",
         },
         table: [["Du wohnst in Wien.", "Wohnst du in Wien?"], ["Sie sprechen Deutsch.", "Sprechen Sie Deutsch?"], ["Er ist zwanzig.", "Ist er zwanzig?"]],
+        meanings: [
+          { es: "Vives en Viena. → ¿Vives en Viena?", en: "You live in Vienna. → Do you live in Vienna?" },
+          { es: "Usted habla alemán. → ¿Habla usted alemán?", en: "You speak German. → Do you speak German?" },
+          { es: "Tiene veinte años. → ¿Tiene veinte años?", en: "He's twenty. → Is he twenty?" },
+        ],
       },
       question: {
-        prompt: { es: "Haz la pregunta: «Du hast ein Handy.»", en: "Make it a question: 'Du hast ein Handy.'" },
-        options: ["Hast du ein Handy?", "Hast ein Handy du?", "Du ein Handy hast?"],
+        prompt: { es: "Haz la pregunta: «Du lernst Deutsch.»", en: "Make it a question: 'Du lernst Deutsch.'" },
+        options: ["Lernst du Deutsch?", "Lernst Deutsch du?", "Du Deutsch lernst?"],
         answer: 0,
       },
       exercises: ["question"], grammar: ["de-g-ja-nein"], tags: ["grammar", "word-order"],

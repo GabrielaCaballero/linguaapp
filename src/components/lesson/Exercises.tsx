@@ -13,6 +13,7 @@ import { Icon } from "../icons";
 import { articleOptions, meaningOptions, seeded, shuffleWith, targetOptions, tileSet } from "./options";
 import { TableExercise } from "./Table";
 import { WordHints } from "./WordHints";
+import { PatternTable } from "./PatternTable";
 import { AudioHelp, SilentTip } from "./AudioHelp";
 
 export type Submit = (r: { verdict: Verdict; check?: CheckResult; text?: string; picked?: number; hinted?: boolean; dontKnow?: boolean; cells?: CellResult[]; choice?: { picked: string; answer: string } }) => void;
@@ -380,15 +381,7 @@ export function QuestionStem({ item, base, t, canListen, onNoAudio }: { item: It
     return (
       <div className="card stack" style={{ padding: 16 }}>
         <div className="label">{gl(item.pattern.rule, base)}</div>
-        {item.pattern.table && (
-          <table style={{ borderCollapse: "collapse", fontSize: "0.9375rem" }} lang={item.lang}>
-            <tbody>
-              {item.pattern.table.map((row, k) => (
-                <tr key={k}>{row.map((c, j) => <td key={j} style={{ padding: "4px 10px 4px 0", fontWeight: j === 0 ? 400 : 600 }}>{c}</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        {item.pattern.table && <PatternTable table={item.pattern.table} meanings={item.pattern.meanings} lang={item.lang} base={base} />}
       </div>
     );
   return <TargetWord item={item} canListen={canListen} t={t} size="title" />;

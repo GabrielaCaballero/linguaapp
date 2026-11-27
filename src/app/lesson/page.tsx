@@ -44,6 +44,8 @@ interface FB {
   overridden: boolean;
   typed: boolean;
   tutor?: TutorView;
+  /** "I don't know" → typed the shown answer: not a mistake to correct, the word just comes back soon. */
+  copied?: boolean;
 }
 
 const SPEED_SECONDS = 60;
@@ -363,7 +365,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
       setFb({ verdict: r.verdict, overridden: false, typed: false });
       return;
     }
-    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed, cells: r.cells, choice: r.choice };
+    const view: FB = { verdict: r.verdict, check: r.check, text: r.text, prevCard, confidence: conf, overridden: false, typed, cells: r.cells, choice: r.choice, copied: r.dontKnow };
     // AI tutor: only typed answers the checker didn't accept exactly
     if (typed && r.verdict !== "correct" && r.text && tutorAvailable()) {
       view.tutor = { status: "checking" };
@@ -417,7 +419,9 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
 
   const progress = speed && settings.speedTimer ? 1 - speedLeft / SPEED_SECONDS : idx / Math.max(1, tasks.length);
   // "How sure?" costs a row: ask on about one review in four, never on a try.
-  const showConf = !speed && task.role !== "intro" && task.role !== "try" && mode !== "guess" && mode !== "question" && idx % 4 === 2;
+  // No "sure / guessing" question any more (owner, 2026-11-27): the schedule learns from right and
+  // wrong answers and response time; asking the learner added a step without helping them.
+  const showConf = false;
 
   return (
     <main className={`lesson${speed ? " speed" : ""}`} data-lesson>
@@ -548,6 +552,7 @@ function Player({ kind, unit, canListen: deviceCanListen, t }: { kind: SessionKi
           cells={fb.cells}
           choice={fb.choice}
           mode={mode ?? undefined}
+          copied={fb.copied}
         />
       )}
 
